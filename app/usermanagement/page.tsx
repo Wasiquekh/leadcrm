@@ -128,7 +128,7 @@ export default function Home() {
     }
   };
   useEffect(() => {
-    fetchData(page);
+    //  fetchData(page);
   }, [shouldRefetch, page]);
 
   const handlePageChange = (newPage: number) => {

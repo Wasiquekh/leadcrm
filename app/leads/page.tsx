@@ -17,7 +17,7 @@ import { RiAccountCircleLine } from "react-icons/ri";
 import { RxCross2 } from "react-icons/rx";
 import StorageManager from "../../provider/StorageManager";
 import { AppContext } from "../AppContext";
-import CustomerViewDetails from "../component/CustomerViewDetails";
+//import CustomerViewDetails from "../component/CustomerViewDetails";
 import LeftSideBar from "../component/LeftSideBar";
 import { HiChevronDoubleLeft } from "react-icons/hi";
 import { HiChevronDoubleRight } from "react-icons/hi";
@@ -171,9 +171,9 @@ export default function Home() {
     }
   };
 
-  useEffect(() => {
-    fetchData(page);
-  }, [page]);
+  // useEffect(() => {
+  //   fetchData(page);
+  // }, [page]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage > 0 && newPage <= totalPages) {

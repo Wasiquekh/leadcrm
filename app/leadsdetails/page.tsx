@@ -26,7 +26,7 @@ import { PiMapPinLight, PiNotepadLight } from "react-icons/pi";
 import { HiOutlineEnvelope } from "react-icons/hi2";
 import { useSearchParams } from "next/navigation";
 import AxiosProvider from "../../provider/AxiosProvider";
-import CustomerViewDetails from "../component/CustomerViewDetails";
+//import CustomerViewDetails from "../component/CustomerViewDetails";
 import ReactPlayer from "react-player";
 import DesktopHeader from "../component/DesktopHeader";
 import { Tooltip } from "react-tooltip";
@@ -45,48 +45,13 @@ import { LuSquareActivity } from "react-icons/lu";
 import { IoCloseOutline } from "react-icons/io5";
 import AppCalendar from "../component/AppCalendar";
 
-interface Customer {
-  id: string;
-  firstname: string;
-  lastname: string;
-  birthdate: string;
-  gender: string;
-  mobilephonenumber: string;
-  email: string; // Added email field
-  streetaddress: string;
-  countryofbirth: string;
-  countryofresidence: string;
-  updated_at: string;
-  // Optional fields
-  city?: string | null;
-  created_at?: string | null;
-  fcmtoken?: string | null;
-  idcardrecto?: string | null;
-  idcardverso?: string | null;
-  iddoctype?: string | null;
-  mobilephonenumber_verified?: boolean | null;
-  password?: string | null;
-  shortintrovideo?: string | null;
-  usersignature?: string | null;
-  face_id_url?: string | null;
-  liveness_score?: number | null;
-  face_match_score?: number | null;
-  mainStatus?: string;
-  [key: string]: any; // To allow additional unknown fields
-}
-interface CustomerHistoryItem {
-  id: string;
-  verification_type: string;
-  reason_reject: string | null;
-  created_at: string;
-  status: string;
-  system_user_id: string;
-}
+
+
 
 export default function Home() {
   const [isFlyoutFilterOpen, setFlyoutFilterOpen] = useState<boolean>(false);
   const isChecking = useAuthRedirect();
-  const [customer, setCustomer] = useState<Customer | null>(null); // Initial state as null
+
   //console.log("@@@@@@@@@@@@@@@@@@@@", customer);
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
@@ -94,34 +59,9 @@ export default function Home() {
 
   const [isCustomerViewDetailOpen, setIsCustomerViewDetailOpen] =
     useState<boolean>(false);
-  const [liveDetection, setLiveDetection] = useState<string | null>(null);
-  const [identityMatching, setIdentityMatching] = useState<string | null>(null);
-  const [userDetailsVerification, setUserDetailsVerification] = useState<
-    string | null
-  >(null);
-  const [scannedIdCardVerification, setScannedIdCardVerification] = useState<
-    string | null
-  >(null);
-  const [fiveSecondVideoVerification, setFiveSecondVideoVerification] =
-    useState<string | null>(null);
-  const [signatureVerification, setSignatureVerification] = useState<
-    string | null
-  >(null);
-  const [selectedButton, setSelectedButton] = useState<string | null>(null);
-  const [faceImageFromChild, setFaceImageFromChild] = useState<string | null>(
-    null
-  );
-  const [idEctoFromChild, setIdEctoFromChild] = useState<string | null>(null);
-  const [idVersoFromChild, setIdVersoFromChild] = useState<string | null>(null);
-  const [userSignatureFromChild, setUserSignatureFromChild] = useState<
-    string | null
-  >(null);
-  const [userVideoFromChild, setUserVideoFromChild] = useState<string | null>(
-    null
-  );
-  const [customerHistory, setCustomerHistory] = useState<CustomerHistoryItem[]>(
-    []
-  );
+
+
+
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isModalOpenVideo, setIsModalOpenVideo] = useState<boolean>(false);
   const [faceImage, setFaceImage] = useState<string | null>(null);
@@ -129,7 +69,7 @@ export default function Home() {
   //console.log('BBBBBBBBBBBBB',isModalOpenVideo)
   const [modalImage, setModalImage] = useState<string>("");
   //const [isLoading, setIsLoading] = useState<boolean>(false);
-  const isLoading = !customer;
+
   const [imageKey, setImageKey] = useState(Date.now());
   const [editInfo, setEditInfo] = useState<boolean>(true);
   const [secretKey, setSecretKey] = useState<string | null>(
@@ -139,230 +79,18 @@ export default function Home() {
   const [totp, setTotp] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [isTotpPopupOpen, setIsTotpPopupOpen] = useState<boolean>(false);
-  const [userEditedData, setUserEditedData] = useState<Customer | null>(null);
-  console.log("USER EDITED DATA", userEditedData);
+  
+
   const toggleFilterFlyout = () => setFlyoutFilterOpen(!isFlyoutFilterOpen);
 
   const handleChange = (value: string) => {
     setTotp(value);
   };
 
-  const context = useContext(AppContext);
-  if (!context) {
-    throw new Error(
-      "FetchCustomerComponent must be used within an AppProvider"
-    );
-  }
-  const { setCustomerFullName } = context;
-  // Function to open modal with specific image
-  const openModal = (imageSrc: SetStateAction<string>) => {
-    setModalImage(imageSrc);
-    setIsModalOpen(true);
-  };
-  //console.log('CUSTOMER HISTORY',customerHistory)
-  //console.log('SELECTED BUTTON',selectedButton)
 
-  const axiosProvider = new AxiosProvider();
 
-  const handleButtonClick = (button: string) => {
-    setSelectedButton(button);
-    setIsCustomerViewDetailOpen(!isCustomerViewDetailOpen);
-  };
 
-  useEffect(() => {
-    const fetchCustomerData = async () => {
-      if (!id) return;
-      // setIsLoading(true);
-      try {
-        const res = await axiosProvider.post("/viewcustomer", { id });
 
-        if (res?.data?.data?.customer) {
-          const customerData = res.data.data.customer;
-          setCustomer(customerData);
-          console.log("customerDataLLLLLL", customerData);
-          const { firstname, lastname } = customerData;
-          if (firstname && lastname) {
-            setCustomerFullName(`${firstname} ${lastname}`);
-          }
-        } else {
-          console.log("Customer data not found");
-        }
-      } catch (error) {
-        console.log("Error occurred while fetching customer:", error);
-      } finally {
-        // setIsLoading(false);
-      }
-    };
-
-    fetchCustomerData();
-  }, [id, hitApi]);
-
-  useEffect(() => {
-    const fetchFaceImage = async () => {
-      if (!customer?.face_id_url) return;
-
-      try {
-        const lastPart = customer.face_id_url.split("/").pop();
-
-        const response = await axiosProvider.post("/getfaceid", {
-          filename: lastPart,
-        });
-
-        const imageUrl = response.data.data.url;
-        setFaceImage(imageUrl);
-
-        // Force <img> to re-render by changing key
-        setImageKey(Date.now());
-      } catch (error) {
-        console.log("Error fetching face image:", error);
-      }
-    };
-
-    fetchFaceImage();
-  }, [customer?.face_id_url, hitApi]);
-
-  const fetchUserStatus = async () => {
-    // console.log('USE EFFECT CUS ID',id);
-    try {
-      // console.log("USE EFFECT CUS ID", id);
-      const response = await axiosProvider.post("/getuserstatus", {
-        customer_id: id,
-      });
-      //setFaceImage(response.data.data.url);
-      //setFaceImage(response.data.data.url);
-      //console.log("CUSTOMER STATUS", response);
-      // console.log(
-      //   "CUSTOMER STATUS",
-      //   response.data.data.verificationStatuses[3].status
-      // );
-      setLiveDetection(response.data.data.verificationStatuses[0].status);
-      setIdentityMatching(response.data.data.verificationStatuses[1].status);
-      setUserDetailsVerification(
-        response.data.data.verificationStatuses[2].status
-      );
-      setScannedIdCardVerification(
-        response.data.data.verificationStatuses[3].status
-      );
-      setFiveSecondVideoVerification(
-        response.data.data.verificationStatuses[4].status
-      );
-      setSignatureVerification(
-        response.data.data.verificationStatuses[5].status
-      );
-      // toast.success("Successfully get");
-    } catch (error) {
-      console.error("Error deleting user:", error);
-      // toast.error("Failed to get Image");
-    }
-  };
-  const getUserHistory = async () => {
-    if (id !== null) {
-      try {
-        const response = await axiosProvider.post("/getuserhistory", {
-          customer_id: id,
-        });
-        setCustomerHistory(response.data.data.history);
-      } catch (error) {
-        console.error("Customer is not Approved:", error);
-        // toast.error("Customer history is not fetched");
-      }
-    }
-  };
-  const handleSubmittest = () => {
-    console.log("test submit");
-  };
-  useEffect(() => {
-    fetchUserStatus();
-    getUserHistory();
-  }, [hitApi]);
-
-  const callNotificationApi = async (verification: string) => {
-    // console.log("CALLED NOTIFICATION", verification);
-    try {
-      const response = await axiosProvider.post("/sendnotification", {
-        customerId: id,
-        verification_type: verification,
-      });
-      toast.success("Notification is sent");
-    } catch (error) {
-      console.error("Send notification failed:", error);
-      toast.error("Notification is not sent");
-    }
-  };
-
-  // Determine background color based on liveDetection value
-  const getBgColor = (status: string | null) => {
-    if (status === "Approved") return "bg-approveBtn";
-    if (status === "On Progress") return "bg-progressBtn";
-    if (status === "Rejected") return "bg-rejectBtn";
-    if (status === "Under Review") return "bg-underreviewbtn";
-    return ""; // Default background color
-  };
-  const liveDetectionBg = getBgColor(liveDetection);
-  const identityMatchingBg = getBgColor(identityMatching);
-  const userDetailsVerificationBg = getBgColor(userDetailsVerification);
-  const scannedIdCardVerificationBg = getBgColor(scannedIdCardVerification);
-  const fiveSecondVideoVerificationBg = getBgColor(fiveSecondVideoVerification);
-  const signatureVerificationBg = getBgColor(signatureVerification);
-  const [currentUserData, setCurrentUserData] = useState<Customer | null>(null);
-  const editUserData = (customer: Customer) => {
-    setCurrentUserData(customer);
-    setEditInfo(false);
-  };
-  const totpVerification = (values: Customer) => {
-    setTotp("");
-    setIsTotpPopupOpen(true);
-    setUserEditedData(values);
-    //console.log("totp data", values);
-    // totpSubmit(e);
-  };
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-
-    if (totp.length !== 6) {
-      toast.error("Please enter a valid 6-digit code.");
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const res = await axiosProvider.post("/verifytotp", {
-        token: totp,
-        secretKey: secretKey,
-        userId: userId,
-      });
-      setIsTotpPopupOpen(false);
-      readyToCall();
-      //setAccessToken(res.data.data.token);
-      // storage.saveAccessToken(res.data.data.token);
-      //  expiryTokenafter24Hour();
-      //router.push("/dashboard");
-
-      //const activityLogger = new UserActivityLogger();
-      //  await activityLogger.userLogin();
-    } catch (error) {
-      //  window.location.reload();
-      console.error("Network error:", error);
-      toast.error("Invalid Code. Please try again.");
-      setTotp("");
-    } finally {
-      setLoading(false);
-    }
-  };
-  const readyToCall = async () => {
-    try {
-      const res = await axiosProvider.post("/updatecustomer", {
-        ...userEditedData, // spread user data
-        fcmtoken: customer.fcmtoken, // add the token
-      });
-      setHitApi(!hitApi);
-      toast.success("Customer data updated successfully");
-    } catch (error) {
-      console.error("Network error:", error);
-      toast.error("Edit customer data failed");
-    }
-  };
 
   const tabs = [
     {
@@ -618,7 +346,9 @@ export default function Home() {
       </div>
     );
   }
+const handleSubmit = async ()=>{
 
+}
   return (
     <>
       {/* TOPT POPUP */}
@@ -865,7 +595,7 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <CustomerViewDetails
+      {/* <CustomerViewDetails
         isCustomerViewDetailOpen={isCustomerViewDetailOpen}
         setIsEditFlyoutOpen={setIsCustomerViewDetailOpen}
         customer={customer}
@@ -877,7 +607,7 @@ export default function Home() {
         setUserVideoFromChild={setUserVideoFromChild}
         hitApi={hitApi}
         setHitApi={setHitApi}
-      />
+      /> */}
       {/* FITLER FLYOUT */}
       {isFlyoutFilterOpen && (
         <div
@@ -902,7 +632,7 @@ export default function Home() {
           </div>
           <div className=" w-full border-b border-[#E7E7E7] mb-4"></div>
           {/* FORM */}
-          <form onSubmit={handleSubmittest}>
+          <form onSubmit={handleSubmit()}>
             <div className=" w-full">
               <div className=" w-full flex gap-4 mb-4">
                 <div className=" w-full">
