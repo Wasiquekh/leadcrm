@@ -51,7 +51,7 @@ export default function LoginHome() {
       // storage.saveUserSecretKey(res.data.data.secretKey);
       // storage.saveUserName(res.data.data.name);
       // await storage.saveUserPermissions(res.data.data.permissions);
-      localStorage.setItem("userEmail", values.email);
+     storage.saveUserEmail(values.email);
       toast.success("OTP Send on mail");
       router.push("/otp");
     } catch (error) {

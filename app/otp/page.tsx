@@ -10,11 +10,13 @@ import UserActivityLogger from "../../provider/UserActivityLogger";
 import OtpInput from "react-otp-input";
 
 const axiosProvider = new AxiosProvider();
-const userEmail = localStorage.getItem("userEmail");
+//
 
 export default function OtpHome() {
   const storage = new StorageManager();
   const router = useRouter();
+const userEmail = storage.getUserEmail();
+  
 
   const [loading, setLoading] = useState<boolean>(false);
   const [qrCode, setQrCode] = useState<string | undefined>();
