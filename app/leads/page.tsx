@@ -37,36 +37,55 @@ interface FilterData {
   birthdate?: string;
 }
 
-interface Customer {
-  customer_id: string; // Updated to string as per the API response
-  firstname: string;
-  lastname: string;
-  mobilephonenumber?: string | null; // Changed to optional with possible null value
-  mobilephonenumber_verified?: boolean | null;
-  birthdate: string;
-  countryofbirth?: string;
-  gender?: string;
-  countryofresidence?: string;
-  city?: string;
-  streetaddress?: string;
-  iddoctype?: string;
-  idcardrecto?: string | null;
-  idcardverso?: string | null;
-  password?: string;
-  shortintrovideo?: string | null;
-  fcmtoken?: string;
-  usersignature?: string | null;
-  created_at?: string;
-  updated_at?: string;
-  mainStatus?: string;
+// types/lead.ts
+ interface Lead {
+  id: string;
+  lead_number: string;
+  owner_name: string | null;
+  account_manager: string | null;
+  best_time_to_call: string | null;
+
+  lead_source: string | null;
+  debt_consolidation_status: string | null;
+  consolidated_credit_status: string | null;
+  whatsapp_status: string | null;
+  loan_application_status: string | null;
+
+  full_name: string;
+  email: string | null;
+  phone: string | null;
+
+  address: {
+    line1: string | null;
+    line2: string | null;
+    city: string | null;
+    state: string | null;
+    postal_code: string | null;
+    country: string | null;
+  };
+
+  lead_score: number | null;
+  lead_quality: string | null;
+
+  agent: {
+    id: string;
+    name: string;
+  } | null;
+
+  created_at: string;
+  updated_at: string;
+
+  lead_age_days: number;
+  lead_age_label: string;
 }
 
+
 export default function Home() {
-  const isChecking = useAuthRedirect();
+ // const isChecking = useAuthRedirect();
   const [isFlyoutOpen, setFlyoutOpen] = useState<boolean>(false);
   const [isFlyoutFilterOpen, setFlyoutFilterOpen] = useState<boolean>(false);
-  const [data, setData] = useState<Customer[]>([]);
-  //console.log("DATAAAAA", data);
+  const [data, setData] = useState<Lead[]>([]);
+  console.log("DATAAAAA", data);
   const [page, setPage] = useState<number>(1);
   const [filterPage, setFilterPage] = useState<number>(1);
   const [limit] = useState<number>(10);
@@ -80,20 +99,22 @@ export default function Home() {
   const [isError, setIsError] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [appliedFilters, setAppliedFilters] = useState<string[]>([]);
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
+  const [selectedCustomer, setSelectedCustomer] = useState<Lead | null>(
     null
   );
   const [isFilter, setIsFilter] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [selectedData, setSelectedData] = useState<Customer | null>(null);
+  const [selectedData, setSelectedData] = useState<Lead | null>(null);
   //console.log("SELECTED DATA", selectedData);
   const storage = new StorageManager();
+  const accessToken = storage.getAccessToken();
+ 
   //console.log("Get all user Data", data);
   const router = useRouter();
 
-  const handleClick = async (customer: Customer) => {
+  const handleClick = async (customer: Lead) => {
     // console.log('Object customer data',customer.id)
-    router.push(`/customerdetails?id=${customer.customer_id}`);
+    router.push(`/leadsdetails?id=${customer.id}`);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -117,19 +138,19 @@ export default function Home() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    filterDataValue();
-    setIsFilter(true);
-    toggleFilterFlyout();
-    const filteredData = Object.fromEntries(
-      Object.entries(filterData).filter(([_, value]) => value !== "")
-    );
-    if (Object.keys(filteredData).length === 0) {
-      setPage(1);
-      fetchData(page);
-    } else {
-      userFilterData(filteredData, filterPage);
-    }
+    // e.preventDefault();
+    // filterDataValue();
+    // setIsFilter(true);
+    // toggleFilterFlyout();
+    // const filteredData = Object.fromEntries(
+    //   Object.entries(filterData).filter(([_, value]) => value !== "")
+    // );
+    // if (Object.keys(filteredData).length === 0) {
+    //   setPage(1);
+    //   fetchData(page);
+    // } else {
+    //   userFilterData(filteredData, filterPage);
+    // }
   };
   const userFilterData = async (data: any, page: number) => {
     setIsFilter(true);
@@ -152,17 +173,17 @@ export default function Home() {
   const toggleFlyout = () => setFlyoutOpen(!isFlyoutOpen);
   const toggleFilterFlyout = () => setFlyoutFilterOpen(!isFlyoutFilterOpen);
 
-  const fetchData = async (currentPage: number) => {
+  const fetchData = async () => {
     setIsLoading(true);
-    setIsFilter(false);
+   // setIsFilter(false);
     try {
       const response = await axiosProvider.get(
-        `/getallcrmuser?page=${currentPage}&limit=${limit}`
+        `/alleads?page=${page}&pageSize=${limit}`
       );
-      console.log("PEGINATION", response);
-      setTotalPages(response.data.data.pagination.totalPages);
-      const result = response.data.data.customers;
-      console.log("ALL CRM USER", result);
+     // console.log("KKKKKKKKKKKKKKKKK", response.data.data.data);
+      //setTotalPages(response.data.data.pagination.totalPages);
+      const result = response.data.data.data;
+     // console.log("ALL CRM USER", result);
       setData(result);
     } catch (error: any) {
       setIsError(true);
@@ -171,9 +192,9 @@ export default function Home() {
     }
   };
 
-  // useEffect(() => {
-  //   fetchData(page);
-  // }, [page]);
+  useEffect(() => {
+    fetchData();
+  }, [page]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage > 0 && newPage <= totalPages) {
@@ -181,23 +202,6 @@ export default function Home() {
     }
   };
 
-  const removeFilter = async (filter: string) => {
-    setAppliedFilters((prevFilters) => prevFilters.filter((f) => f !== filter));
-
-    if (filter.startsWith("Name")) {
-      filterData.name = "";
-    }
-    if (filter.startsWith("Phone")) {
-      filterData.mobilephonenumber = "";
-    }
-
-    if (appliedFilters.length === 0) {
-      userFilterData(filterData, filterPage);
-    } else {
-      setPage(1);
-      fetchData(page);
-    }
-  };
   const hadleClear = () => {
     setFilterData({ ...filterData, name: "", mobilephonenumber: "" });
   };
@@ -207,27 +211,23 @@ export default function Home() {
       userFilterData(newPage, filterPage);
     }
   };
-  const clearAllFilteredData = () => {
-    setAppliedFilters([]);
-    setPage(1);
-    fetchData(page);
-  };
+
   const test = () => {
     router.push("/leadsdetails");
   };
-  if (isChecking) {
-    return (
-      <div className="h-screen flex flex-col gap-5 justify-center items-center bg-white">
-        <Image
-          src="/images/orizonIcon.svg"
-          alt="Loading"
-          width={150}
-          height={150}
-          className="animate-pulse rounded"
-        />
-      </div>
-    );
-  }
+  // if (isChecking) {
+  //   return (
+  //     <div className="h-screen flex flex-col gap-5 justify-center items-center bg-white">
+  //       <Image
+  //         src="/images/orizonIcon.svg"
+  //         alt="Loading"
+  //         width={150}
+  //         height={150}
+  //         className="animate-pulse rounded"
+  //       />
+  //     </div>
+  //   );
+  // }
   if (isLoading) {
     return (
       <div className="h-screen flex flex-col gap-5 justify-center items-center">
@@ -270,38 +270,7 @@ export default function Home() {
             </div>
             {/* End search and filter row */}
             {/* Show Applied Filters */}
-            <div className="w-[99%] mx-auto mb-3">
-              {appliedFilters.length > 0 && (
-                <div className="flex gap-3">
-                  <ul>
-                    {" "}
-                    {/* Add gap for spacing between items */}
-                    {appliedFilters.map((filter, index) => (
-                      <li
-                        className=" items-center text-black bg-primary-100 inline-flex  p-2 rounded gap-1 text-xs ml-2 mb-2"
-                        key={index}
-                      >
-                        <RiAccountCircleLine className="text-black" />
-                        {filter}
-                        <RxCross2
-                          onClick={() => {
-                            removeFilter(filter);
-                          }}
-                          className="text-black cursor-pointer"
-                        />
-                      </li>
-                    ))}
-                    <li className="items-center text-black bg-primary-100 inline-flex  p-2 rounded gap-1 text-xs ml-2 mb-2 relative top-[-2px]">
-                      Clear All
-                      <RxCross2
-                        className="text-black cursor-pointer"
-                        onClick={clearAllFilteredData}
-                      ></RxCross2>
-                    </li>
-                  </ul>
-                </div>
-              )}
-            </div>
+          
             {/* ---------------- Table--------------------------- */}
             <div className="w-full overflow-x-auto custom-scrollbar">
               <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 whitespace-nowrap">
@@ -391,726 +360,89 @@ export default function Home() {
                 </thead>
 
                 <tbody>
-                  {/* Row 1 */}
-                  <tr className="border border-tableBorder bg-white hover:bg-primary-100">
-                    <td className="px-1 py-2 md:px-3 md:py-2 border-tableBorder flex items-center gap-2">
-                      <div className="flex gap-2">
-                        <div className="md:hidden">
-                          <FaEllipsisVertical
-                            data-tooltip-id="my-tooltip"
-                            data-tooltip-html={`<div>
-                <strong>Name:</strong> <span style="text-transform: capitalize;">Aarav Sharma</span><br/>
-                <strong>Date of birth:</strong> 1998-03-12<br/>
-                <strong>Country of birth:</strong> India<br/>
-                <strong>Gender:</strong> male<br/>
-                <strong>Country of residence:</strong> India<br/>
-                <strong>Mobile number:</strong> +91 98201 12345<br/>
-              </div>`}
-                            className="text-black leading-normal relative top-[5.3px] capitalize"
-                          />
-                          <Tooltip
-                            id="my-tooltip"
-                            place="right"
-                            float
-                            className="box"
-                          />
-                        </div>
-                        <div>
-                          <p className="text-[#232323] text-sm sm:text-base font-medium leading-normal capitalize">
-                            Aarav Sharma
-                          </p>
-                          <p className="text-[#232323] text-xs sm:text-sm leading-normal">
-                            1998-03-12
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base">
-                        India
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base capitalize">
-                        male
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base">
-                        India
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base">
-                        +91 98201 12345
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-white text-xs sm:text-sm flex justify-center items-center p-1 rounded-[4px] bg-progressBtn">
-                        On Progress
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder md:table-cell">
-                      <button
-                        // onClick={() => handleClick?.("Aarav Sharma")}
-                        onClick={() => test()}
-                        className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-[4px]"
-                      >
-                        <MdRemoveRedEye className="text-white w-4 h-4 hover:text-white" />
-                        <span className="text-xs sm:text-sm text-white hover:text-white">
-                          View Details
-                        </span>
-                      </button>
-                    </td>
-                  </tr>
+{(!data || data.length === 0 || isError) ? (
+  <tr>
+    <td colSpan={8} className="text-center text-xl mt-5">
+      <div className="mt-5">Data not found</div>
+    </td>
+  </tr>
+) : (
+  data.map((item: any, index: number) => (
+    <tr
+      key={item?.id ?? index}
+      className="border border-tableBorder bg-white hover:bg-primary-100"
+    >
+      {/* Full name */}
+      <td className="px-1 py-2 md:px-3 md:py-2 border-tableBorder flex items-center gap-2">
+        <div className="flex gap-2">
+          <div className="md:hidden">
+            <FaEllipsisVertical
+              data-tooltip-id="my-tooltip"
+              data-tooltip-html={`<div>
+                  <strong>Name:</strong> <span style="text-transform: capitalize;">${item?.full_name ?? "-"}</span><br/>
+                  <strong>Email:</strong> ${item?.email ?? "-"}<br/>
+                  <strong>Phone:</strong> ${item?.phone ?? "-"}<br/>
+                  <strong>Owner:</strong> ${item?.owner_name ?? "-"}<br/>
+                  <strong>Account Manager:</strong> ${item?.account_manager ?? "-"}
+                </div>`}
+              className="text-black leading-normal relative top-[5.3px] capitalize"
+            />
+            <Tooltip id="my-tooltip" place="right" float className="box" />
+          </div>
+          <div>
+            <p className="text-[#232323] text-sm sm:text-base font-medium leading-normal capitalize">
+              {item?.full_name ?? "-"}
+            </p>
+          </div>
+        </div>
+      </td>
 
-                  {/* Row 2 */}
-                  <tr className="border border-tableBorder bg-white hover:bg-primary-100">
-                    <td className="px-1 py-2 md:px-3 md:py-2 border-tableBorder flex items-center gap-2">
-                      <div className="flex gap-2">
-                        <div className="md:hidden">
-                          <FaEllipsisVertical
-                            data-tooltip-id="my-tooltip"
-                            data-tooltip-html={`<div>
-                <strong>Name:</strong> <span style="text-transform: capitalize;">Priya Mehta</span><br/>
-                <strong>Date of birth:</strong> 1995-07-21<br/>
-                <strong>Country of birth:</strong> India<br/>
-                <strong>Gender:</strong> female<br/>
-                <strong>Country of residence:</strong> India<br/>
-                <strong>Mobile number:</strong> +91 98670 54321<br/>
-              </div>`}
-                            className="text-black leading-normal relative top-[5.3px] capitalize"
-                          />
-                          <Tooltip
-                            id="my-tooltip"
-                            place="right"
-                            float
-                            className="box"
-                          />
-                        </div>
-                        <div>
-                          <p className="text-[#232323] text-sm sm:text-base font-medium leading-normal capitalize">
-                            Priya Mehta
-                          </p>
-                          <p className="text-[#232323] text-xs sm:text-sm leading-normal">
-                            1995-07-21
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base">
-                        India
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base capitalize">
-                        female
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base">
-                        India
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base">
-                        +91 98670 54321
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-white text-xs sm:text-sm flex justify-center items-center p-1 rounded-[4px] bg-approveBtn">
-                        Approved
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder md:table-cell">
-                      <button
-                        // onClick={() => handleClick?.("Priya Mehta")}
-                        className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-[4px]"
-                      >
-                        <MdRemoveRedEye className="text-white w-4 h-4 hover:text-white" />
-                        <span className="text-xs sm:text-sm text-white hover:text-white">
-                          View Details
-                        </span>
-                      </button>
-                    </td>
-                  </tr>
+      {/* Email */}
+      <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+        <span className="text-[#232323] text-sm sm:text-base">
+          {item?.email ?? "-"}
+        </span>
+      </td>
 
-                  {/* Row 3 */}
-                  <tr className="border border-tableBorder bg-white hover:bg-primary-100">
-                    <td className="px-1 py-2 md:px-3 md:py-2 border-tableBorder flex items-center gap-2">
-                      <div className="flex gap-2">
-                        <div className="md:hidden">
-                          <FaEllipsisVertical
-                            data-tooltip-id="my-tooltip"
-                            data-tooltip-html={`<div>
-                <strong>Name:</strong> <span style="text-transform: capitalize;">Rohan Kapoor</span><br/>
-                <strong>Date of birth:</strong> 1992-11-03<br/>
-                <strong>Country of birth:</strong> India<br/>
-                <strong>Gender:</strong> male<br/>
-                <strong>Country of residence:</strong> United Arab Emirates<br/>
-                <strong>Mobile number:</strong> +971 50 123 7789<br/>
-              </div>`}
-                            className="text-black leading-normal relative top-[5.3px] capitalize"
-                          />
-                          <Tooltip
-                            id="my-tooltip"
-                            place="right"
-                            float
-                            className="box"
-                          />
-                        </div>
-                        <div>
-                          <p className="text-[#232323] text-sm sm:text-base font-medium leading-normal capitalize">
-                            Rohan Kapoor
-                          </p>
-                          <p className="text-[#232323] text-xs sm:text-sm leading-normal">
-                            1992-11-03
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base">
-                        India
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base capitalize">
-                        male
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base">
-                        United Arab Emirates
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base">
-                        +971 50 123 7789
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-white text-xs sm:text-sm flex justify-center items-center p-1 rounded-[4px] bg-underreviewbtn">
-                        Under Review
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder md:table-cell">
-                      <button
-                        // onClick={() => handleClick?.("Rohan Kapoor")}
-                        className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-[4px]"
-                      >
-                        <MdRemoveRedEye className="text-white w-4 h-4 hover:text-white" />
-                        <span className="text-xs sm:text-sm text-white hover:text-white">
-                          View Details
-                        </span>
-                      </button>
-                    </td>
-                  </tr>
+      {/* Phone */}
+      <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+        <span className="text-[#232323] text-sm sm:text-base">
+          {item?.phone ?? "-"}
+        </span>
+      </td>
 
-                  {/* Row 4 */}
-                  <tr className="border border-tableBorder bg-white hover:bg-primary-100">
-                    <td className="px-1 py-2 md:px-3 md:py-2 border-tableBorder flex items-center gap-2">
-                      <div className="flex gap-2">
-                        <div className="md:hidden">
-                          <FaEllipsisVertical
-                            data-tooltip-id="my-tooltip"
-                            data-tooltip-html={`<div>
-                <strong>Name:</strong> <span style="text-transform: capitalize;">Sara Khan</span><br/>
-                <strong>Date of birth:</strong> 1999-01-16<br/>
-                <strong>Country of birth:</strong> Pakistan<br/>
-                <strong>Gender:</strong> female<br/>
-                <strong>Country of residence:</strong> India<br/>
-                <strong>Mobile number:</strong> +91 90040 11122<br/>
-              </div>`}
-                            className="text-black leading-normal relative top-[5.3px] capitalize"
-                          />
-                          <Tooltip
-                            id="my-tooltip"
-                            place="right"
-                            float
-                            className="box"
-                          />
-                        </div>
-                        <div>
-                          <p className="text-[#232323] text-sm sm:text-base font-medium leading-normal capitalize">
-                            Sara Khan
-                          </p>
-                          <p className="text-[#232323] text-xs sm:text-sm leading-normal">
-                            1999-01-16
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base">
-                        Pakistan
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base capitalize">
-                        female
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base">
-                        India
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base">
-                        +91 90040 11122
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-white text-xs sm:text-sm flex justify-center items-center p-1 rounded-[4px] bg-progressBtn">
-                        On Progress
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder md:table-cell">
-                      <button
-                        // onClick={() => handleClick?.("Sara Khan")}
-                        className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-[4px]"
-                      >
-                        <MdRemoveRedEye className="text-white w-4 h-4 hover:text-white" />
-                        <span className="text-xs sm:text-sm text-white hover:text-white">
-                          View Details
-                        </span>
-                      </button>
-                    </td>
-                  </tr>
+      {/* Owner */}
+      <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+        <span className="text-[#232323] text-sm sm:text-base capitalize">
+          {item?.owner_name ?? "-"}
+        </span>
+      </td>
 
-                  {/* Row 5 */}
-                  <tr className="border border-tableBorder bg-white hover:bg-primary-100">
-                    <td className="px-1 py-2 md:px-3 md:py-2 border-tableBorder flex items-center gap-2">
-                      <div className="flex gap-2">
-                        <div className="md:hidden">
-                          <FaEllipsisVertical
-                            data-tooltip-id="my-tooltip"
-                            data-tooltip-html={`<div>
-                <strong>Name:</strong> <span style="text-transform: capitalize;">Liam Oconnor</span><br/>
-                <strong>Date of birth:</strong> 1988-05-09<br/>
-                <strong>Country of birth:</strong> Ireland<br/>
-                <strong>Gender:</strong> male<br/>
-                <strong>Country of residence:</strong> United Kingdom<br/>
-                <strong>Mobile number:</strong> +44 7700 900123<br/>
-              </div>`}
-                            className="text-black leading-normal relative top-[5.3px] capitalize"
-                          />
-                          <Tooltip
-                            id="my-tooltip"
-                            place="right"
-                            float
-                            className="box"
-                          />
-                        </div>
-                        <div>
-                          <p className="text-[#232323] text-sm sm:text-base font-medium leading-normal capitalize">
-                            Liam Oconnor
-                          </p>
-                          <p className="text-[#232323] text-xs sm:text-sm leading-normal">
-                            1988-05-09
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base">
-                        Ireland
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base capitalize">
-                        male
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base">
-                        United Kingdom
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base">
-                        +44 7700 900123
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-white text-xs sm:text-sm flex justify-center items-center p-1 rounded-[4px] bg-rejectBtn">
-                        Rejected
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder md:table-cell">
-                      <button
-                        // onClick={() => handleClick?.("Liam Oconnor")}
-                        className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-[4px]"
-                      >
-                        <MdRemoveRedEye className="text-white w-4 h-4 hover:text-white" />
-                        <span className="text-xs sm:text-sm text-white hover:text-white">
-                          View Details
-                        </span>
-                      </button>
-                    </td>
-                  </tr>
+      {/* Account Manager */}
+      <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+        <span className="text-[#232323] text-sm sm:text-base capitalize">
+          {item?.account_manager ?? "-"}
+        </span>
+      </td>
 
-                  {/* Row 6 */}
-                  <tr className="border border-tableBorder bg-white hover:bg-primary-100">
-                    <td className="px-1 py-2 md:px-3 md:py-2 border-tableBorder flex items-center gap-2">
-                      <div className="flex gap-2">
-                        <div className="md:hidden">
-                          <FaEllipsisVertical
-                            data-tooltip-id="my-tooltip"
-                            data-tooltip-html={`<div>
-                <strong>Name:</strong> <span style="text-transform: capitalize;">Mei Lin</span><br/>
-                <strong>Date of birth:</strong> 1996-12-30<br/>
-                <strong>Country of birth:</strong> China<br/>
-                <strong>Gender:</strong> female<br/>
-                <strong>Country of residence:</strong> Singapore<br/>
-                <strong>Mobile number:</strong> +65 8123 4567<br/>
-              </div>`}
-                            className="text-black leading-normal relative top-[5.3px] capitalize"
-                          />
-                          <Tooltip
-                            id="my-tooltip"
-                            place="right"
-                            float
-                            className="box"
-                          />
-                        </div>
-                        <div>
-                          <p className="text-[#232323] text-sm sm:text-base font-medium leading-normal capitalize">
-                            Mei Lin
-                          </p>
-                          <p className="text-[#232323] text-xs sm:text-sm leading-normal">
-                            1996-12-30
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base">
-                        China
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base capitalize">
-                        female
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base">
-                        Singapore
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base">
-                        +65 8123 4567
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-white text-xs sm:text-sm flex justify-center items-center p-1 rounded-[4px] bg-approveBtn">
-                        Approved
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder md:table-cell">
-                      <button
-                        // onClick={() => handleClick?.("Mei Lin")}
-                        className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-[4px]"
-                      >
-                        <MdRemoveRedEye className="text-white w-4 h-4 hover:text-white" />
-                        <span className="text-xs sm:text-sm text-white hover:text-white">
-                          View Details
-                        </span>
-                      </button>
-                    </td>
-                  </tr>
+      {/* Action */}
+      <td className="px-3 py-2 border border-tableBorder md:table-cell">
+        <button
+         // onClick={() => test(item)}
+          className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-[4px]"
+        >
+          <MdRemoveRedEye className="text-white w-4 h-4 hover:text-white" />
+          <span className="text-xs sm:text-sm text-white hover:text-white">
+            View Details
+          </span>
+        </button>
+      </td>
+    </tr>
+  ))
+)}
 
-                  {/* Row 7 */}
-                  <tr className="border border-tableBorder bg-white hover:bg-primary-100">
-                    <td className="px-1 py-2 md:px-3 md:py-2 border-tableBorder flex items-center gap-2">
-                      <div className="flex gap-2">
-                        <div className="md:hidden">
-                          <FaEllipsisVertical
-                            data-tooltip-id="my-tooltip"
-                            data-tooltip-html={`<div>
-                <strong>Name:</strong> <span style="text-transform: capitalize;">Carlos Ruiz</span><br/>
-                <strong>Date of birth:</strong> 1990-04-02<br/>
-                <strong>Country of birth:</strong> Mexico<br/>
-                <strong>Gender:</strong> male<br/>
-                <strong>Country of residence:</strong> United States<br/>
-                <strong>Mobile number:</strong> +1 415 555 0198<br/>
-              </div>`}
-                            className="text-black leading-normal relative top-[5.3px] capitalize"
-                          />
-                          <Tooltip
-                            id="my-tooltip"
-                            place="right"
-                            float
-                            className="box"
-                          />
-                        </div>
-                        <div>
-                          <p className="text-[#232323] text-sm sm:text-base font-medium leading-normal capitalize">
-                            Carlos Ruiz
-                          </p>
-                          <p className="text-[#232323] text-xs sm:text-sm leading-normal">
-                            1990-04-02
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base">
-                        Mexico
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base capitalize">
-                        male
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base">
-                        United States
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base">
-                        +1 415 555 0198
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-white text-xs sm:text-sm flex justify-center items-center p-1 rounded-[4px] bg-underreviewbtn">
-                        Under Review
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder md:table-cell">
-                      <button
-                        //onClick={() => handleClick?.("Carlos Ruiz")}
-                        className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-[4px]"
-                      >
-                        <MdRemoveRedEye className="text-white w-4 h-4 hover:text-white" />
-                        <span className="text-xs sm:text-sm text-white hover:text-white">
-                          View Details
-                        </span>
-                      </button>
-                    </td>
-                  </tr>
+                 
 
-                  {/* Row 8 */}
-                  <tr className="border border-tableBorder bg-white hover:bg-primary-100">
-                    <td className="px-1 py-2 md:px-3 md:py-2 border-tableBorder flex items-center gap-2">
-                      <div className="flex gap-2">
-                        <div className="md:hidden">
-                          <FaEllipsisVertical
-                            data-tooltip-id="my-tooltip"
-                            data-tooltip-html={`<div>
-                <strong>Name:</strong> <span style="text-transform: capitalize;">Fatima Zahra</span><br/>
-                <strong>Date of birth:</strong> 1997-06-18<br/>
-                <strong>Country of birth:</strong> Morocco<br/>
-                <strong>Gender:</strong> female<br/>
-                <strong>Country of residence:</strong> France<br/>
-                <strong>Mobile number:</strong> +33 6 12 34 56 78<br/>
-              </div>`}
-                            className="text-black leading-normal relative top-[5.3px] capitalize"
-                          />
-                          <Tooltip
-                            id="my-tooltip"
-                            place="right"
-                            float
-                            className="box"
-                          />
-                        </div>
-                        <div>
-                          <p className="text-[#232323] text-sm sm:text-base font-medium leading-normal capitalize">
-                            Fatima Zahra
-                          </p>
-                          <p className="text-[#232323] text-xs sm:text-sm leading-normal">
-                            1997-06-18
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base">
-                        Morocco
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base capitalize">
-                        female
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base">
-                        France
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base">
-                        +33 6 12 34 56 78
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-white text-xs sm:text-sm flex justify-center items-center p-1 rounded-[4px] bg-progressBtn">
-                        On Progress
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder md:table-cell">
-                      <button
-                        //onClick={() => handleClick?.("Fatima Zahra")}
-                        className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-[4px]"
-                      >
-                        <MdRemoveRedEye className="text-white w-4 h-4 hover:text-white" />
-                        <span className="text-xs sm:text-sm text-white hover:text-white">
-                          View Details
-                        </span>
-                      </button>
-                    </td>
-                  </tr>
-
-                  {/* Row 9 */}
-                  <tr className="border border-tableBorder bg-white hover:bg-primary-100">
-                    <td className="px-1 py-2 md:px-3 md:py-2 border-tableBorder flex items-center gap-2">
-                      <div className="flex gap-2">
-                        <div className="md:hidden">
-                          <FaEllipsisVertical
-                            data-tooltip-id="my-tooltip"
-                            data-tooltip-html={`<div>
-                <strong>Name:</strong> <span style="text-transform: capitalize;">David Kim</span><br/>
-                <strong>Date of birth:</strong> 1989-09-27<br/>
-                <strong>Country of birth:</strong> South Korea<br/>
-                <strong>Gender:</strong> male<br/>
-                <strong>Country of residence:</strong> Canada<br/>
-                <strong>Mobile number:</strong> +1 647 555 0144<br/>
-              </div>`}
-                            className="text-black leading-normal relative top-[5.3px] capitalize"
-                          />
-                          <Tooltip
-                            id="my-tooltip"
-                            place="right"
-                            float
-                            className="box"
-                          />
-                        </div>
-                        <div>
-                          <p className="text-[#232323] text-sm sm:text-base font-medium leading-normal capitalize">
-                            David Kim
-                          </p>
-                          <p className="text-[#232323] text-xs sm:text-sm leading-normal">
-                            1989-09-27
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base">
-                        South Korea
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base capitalize">
-                        male
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base">
-                        Canada
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base">
-                        +1 647 555 0144
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-white text-xs sm:text-sm flex justify-center items-center p-1 rounded-[4px] bg-approveBtn">
-                        Approved
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder md:table-cell">
-                      <button
-                        // onClick={() => handleClick?.("David Kim")}
-                        className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-[4px]"
-                      >
-                        <MdRemoveRedEye className="text-white w-4 h-4 hover:text-white" />
-                        <span className="text-xs sm:text-sm text-white hover:text-white">
-                          View Details
-                        </span>
-                      </button>
-                    </td>
-                  </tr>
-
-                  {/* Row 10 */}
-                  <tr className="border border-tableBorder bg-white hover:bg-primary-100">
-                    <td className="px-1 py-2 md:px-3 md:py-2 border-tableBorder flex items-center gap-2">
-                      <div className="flex gap-2">
-                        <div className="md:hidden">
-                          <FaEllipsisVertical
-                            data-tooltip-id="my-tooltip"
-                            data-tooltip-html={`<div>
-                <strong>Name:</strong> <span style="text-transform: capitalize;">Elena Petrova</span><br/>
-                <strong>Date of birth:</strong> 1993-02-14<br/>
-                <strong>Country of birth:</strong> Russia<br/>
-                <strong>Gender:</strong> female<br/>
-                <strong>Country of residence:</strong> Germany<br/>
-                <strong>Mobile number:</strong> +49 1512 3456789<br/>
-              </div>`}
-                            className="text-black leading-normal relative top-[5.3px] capitalize"
-                          />
-                          <Tooltip
-                            id="my-tooltip"
-                            place="right"
-                            float
-                            className="box"
-                          />
-                        </div>
-                        <div>
-                          <p className="text-[#232323] text-sm sm:text-base font-medium leading-normal capitalize">
-                            Elena Petrova
-                          </p>
-                          <p className="text-[#232323] text-xs sm:text-sm leading-normal">
-                            1993-02-14
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base">
-                        Russia
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base capitalize">
-                        female
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base">
-                        Germany
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-[#232323] text-sm sm:text-base">
-                        +49 1512 3456789
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <span className="text-white text-xs sm:text-sm flex justify-center items-center p-1 rounded-[4px] bg-rejectBtn">
-                        Rejected
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border border-tableBorder md:table-cell">
-                      <button
-                        //  onClick={() => handleClick?.("Elena Petrova")}
-                        className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-[4px]"
-                      >
-                        <MdRemoveRedEye className="text-white w-4 h-4 hover:text-white" />
-                        <span className="text-xs sm:text-sm text-white hover:text-white">
-                          View Details
-                        </span>
-                      </button>
-                    </td>
-                  </tr>
                 </tbody>
               </table>
             </div>
