@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { useContext, useEffect, useState } from "react";
+import { FormEvent, useContext, useEffect, useState } from "react";
 import { CiSettings } from "react-icons/ci";
 import { IoIosNotificationsOutline } from "react-icons/io";
 import { FaGreaterThan } from "react-icons/fa6";
@@ -140,20 +140,20 @@ export default function Home() {
     }));
   };
 
-  const getAllUserName = async () => {
-    // setIsLoading(true);
-    try {
-      const response = await axiosProvider.get("/getallusername"); //for name drop down
-      setDataUserName(response.data.data.users);
-      // console.log('GET USER DATA',response.data.data.users)
-    } catch (error: any) {
-      setIsError(true);
-      console.error("Error fetching data:", error);
-    }
-  };
-  useEffect(() => {
-    getAllUserName();
-  }, []);
+  // const getAllUserName = async () => {
+  //   // setIsLoading(true);
+  //   try {
+  //     const response = await axiosProvider.get("/getallusername"); //for name drop down
+  //     setDataUserName(response.data.data.users);
+  //     // console.log('GET USER DATA',response.data.data.users)
+  //   } catch (error: any) {
+  //     setIsError(true);
+  //     console.error("Error fetching data:", error);
+  //   }
+  // };
+  // useEffect(() => {
+  //   getAllUserName();
+  // }, []);
 
   const filterDataValue = () => {
     const filters: string[] = [];
@@ -168,67 +168,66 @@ export default function Home() {
     setAppliedFilters(filters);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    setIsFilter(true);
-    e.preventDefault();
-    filterDataValue();
-    toggleFilterFlyout();
-    const filteredData = Object.fromEntries(
-      Object.entries(filterData).filter(([_, value]) => value !== "")
-    );
-    console.log("FILTERED DATA", filteredData);
-    if (Object.keys(filteredData).length === 0) {
-      setIsFilter(false);
-      setPage(1);
-      fetchData(page);
-    } else {
-      setIsFilter(true);
-      setFilterPage(1);
-      fetchFilteredUserActivities(filteredData, filterPage);
-    }
-  };
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   setIsFilter(true);
+  //   e.preventDefault();
+  //   filterDataValue();
+  //   toggleFilterFlyout();
+  //   const filteredData = Object.fromEntries(
+  //     Object.entries(filterData).filter(([_, value]) => value !== "")
+  //   );
+  //   console.log("FILTERED DATA", filteredData);
+  //   if (Object.keys(filteredData).length === 0) {
+  //     setIsFilter(false);
+  //     setPage(1);
+  //     fetchData(page);
+  //   } else {
+  //     setIsFilter(true);
+  //     setFilterPage(1);
+  //     fetchFilteredUserActivities(filteredData, filterPage);
+  //   }
+  // };
 
-  const fetchFilteredUserActivities = async (data: any, page: number) => {
-    setIsLoading(true);
-    try {
-      const response = await axiosProvider.post(
-        `/filteruseractivites?page=${page}&limit=${limit}`, // Use passed page value
-        data
-      );
-      const result = response.data.data.filteredActivities;
-      setData(result);
-      setTotalPagesFilter(response.data.data.totalPages);
-    } catch (error: any) {
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // const fetchFilteredUserActivities = async (data: any, page: number) => {
+  //   setIsLoading(true);
+  //   try {
+  //     const response = await axiosProvider.post(
+  //       `/filteruseractivites?page=${page}&limit=${limit}`, // Use passed page value
+  //       data
+  //     );
+  //     const result = response.data.data.filteredActivities;
+  //     setData(result);
+  //     setTotalPagesFilter(response.data.data.totalPages);
+  //   } catch (error: any) {
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
   const toggleFlyout = () => setFlyoutOpen(!isFlyoutOpen);
   const toggleFilterFlyout = () => setFlyoutFilterOpen(!isFlyoutFilterOpen);
 
-  const fetchData = async (currentPage: number) => {
-    console.log("fetch data call hua");
-    setIsFilter(false);
-    setIsLoading(true);
-    try {
-      const response = await axiosProvider.get(
-        `/user-activity?page=${currentPage}&limit=${limit}`
-      );
-      console.log("888888888888888888", response);
-      const result = response.data.data.rows;
-      setData(result);
-      setTotalPages(response.data.data.totalPages);
-      setIsError(false);
-    } catch (error: any) {
-      setIsError(true);
-      console.error("Error fetching data:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
   useEffect(() => {
-    fetchData(page);
-  }, [page]);
+    const fetchData = async () => {
+      console.log("fetch data call hua");
+      setIsFilter(false);
+      setIsLoading(true);
+      try {
+        const response = await axiosProvider.get(`/user-activity?page=${page}`);
+        console.log("888888888888888888", response);
+        const result = response.data.data.rows;
+        setData(result);
+        setTotalPages(response.data.data.totalPages);
+        setIsError(false);
+      } catch (error: any) {
+        setIsError(true);
+        console.error("Error fetching data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [page]); // 👈 depends on `page`
 
   const handlePageChange = (newPage: number) => {
     if (newPage > 0 && newPage <= totalPages) {
@@ -241,7 +240,7 @@ export default function Home() {
       const filteredData = Object.fromEntries(
         Object.entries(filterData).filter(([_, value]) => value !== "")
       );
-      fetchFilteredUserActivities(filteredData, newPage);
+      // fetchFilteredUserActivities(filteredData, newPage);
     }
   };
 
@@ -275,19 +274,21 @@ export default function Home() {
     if (filter.startsWith("Type")) {
       filterData.type = "";
     }
+  }; // <-- Add this closing brace for removeFilter
 
-    if (appliedFilters.length === 0) {
-      fetchFilteredUserActivities(filterData, filterPage);
-    } else {
-      setPage(1);
-      fetchData(page);
-    }
-  };
-  const clearAllFilteredData = () => {
-    setAppliedFilters([]);
-    setPage(1);
-    fetchData(page);
-  };
+  //   if (appliedFilters.length === 0) {
+  //     fetchFilteredUserActivities(filterData, filterPage);
+  //   } else {
+  //     setPage(1);
+  //     fetchData(page);
+  //   }
+  // };
+  // const clearAllFilteredData = () => {
+  //   setAppliedFilters([]);
+  //   setPage(1);
+  //   fetchData(page);
+  // }
+
   if (isChecking) {
     return (
       <div className="h-screen flex flex-col gap-5 justify-center items-center bg-white">
@@ -314,6 +315,10 @@ export default function Home() {
         />
       </div>
     );
+  }
+
+  function handleSubmit(e: FormEvent<HTMLFormElement>): void {
+    throw new Error("Function not implemented.");
   }
 
   return (
@@ -363,7 +368,7 @@ export default function Home() {
                         </li>
                       ))}
                       <li
-                        onClick={clearAllFilteredData}
+                        //  onClick={clearAllFilteredData}
                         className="flex items-center text-black bg-primary-100 px-3 py-2 rounded-md text-xs cursor-pointer"
                       >
                         Clear All

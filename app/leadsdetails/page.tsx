@@ -632,7 +632,7 @@ const handleSubmit = async ()=>{
           </div>
           <div className=" w-full border-b border-[#E7E7E7] mb-4"></div>
           {/* FORM */}
-          <form onSubmit={handleSubmit()}>
+          <form onSubmit={handleSubmit}>
             <div className=" w-full">
               <div className=" w-full flex gap-4 mb-4">
                 <div className=" w-full">
