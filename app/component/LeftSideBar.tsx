@@ -76,7 +76,7 @@ const LeftSideBar: React.FC = () => {
         <Link href="/leads">
           <div
             className={`mb-4 flex items-center gap-4 group px-3 py-2 rounded-[4px] relative cursor-pointer text-base leading-normal font-medium text-firstBlack hover:bg-sideBarHoverbg active:bg-sideBarHoverbgPressed hover:text-primary-600 ${
-              pathname === "/customer" || pathname === "/customerdetails"
+              pathname === "/leads" || pathname === "/leadsdetails"
                 ? "bg-primary-600 text-white hover:!bg-primary-600 hover:!text-white"
                 : ""
             }`}
