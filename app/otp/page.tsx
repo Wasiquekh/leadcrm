@@ -45,16 +45,17 @@ const userEmail = storage.getUserEmail();
         email: userEmail,
         otp: otp,
       });
-      console.log("LOGIN SUCCESS", res.data.data.token);
+      //  console.log("LOGIN SUCCESS", res.data.data.system_user_id);
       // setAccessToken(res.data.data.token);
       // storage.saveAccessToken(res.data.data.token);
       //  expiryTokenafter24Hour();
       //localStorage.setItem("authToken", res.data.data.token);
       await storage.saveAccessToken(res.data.data.token);
+      await storage.saveUserId(res.data.data.system_user_id);
       toast.success("Login Successful");
       router.push("/leads");
-      // const activityLogger = new UserActivityLogger();
-      // await activityLogger.userLogin();
+      const activityLogger = new UserActivityLogger();
+      await activityLogger.userLogin();
     } catch (error) {
       console.error("Network error:", error);
       toast.error("Invalid Code. Please try again.");

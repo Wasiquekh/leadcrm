@@ -12,6 +12,7 @@ import { FaRegEye } from "react-icons/fa";
 import { FaRegEyeSlash } from "react-icons/fa";
 import { constrainedMemory } from "process";
 import Link from "next/link";
+import UserActivityLogger from "../provider/UserActivityLogger";
 
 const storage = new StorageManager();
 
@@ -51,7 +52,9 @@ export default function LoginHome() {
       // storage.saveUserSecretKey(res.data.data.secretKey);
       // storage.saveUserName(res.data.data.name);
       // await storage.saveUserPermissions(res.data.data.permissions);
-     storage.saveUserEmail(values.email);
+      storage.saveUserEmail(values.email);
+      // const activityLogger = new UserActivityLogger();
+      //  await activityLogger.userLogin();
       toast.success("OTP Send on mail");
       router.push("/otp");
     } catch (error) {

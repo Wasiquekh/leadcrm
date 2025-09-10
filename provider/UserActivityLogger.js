@@ -12,7 +12,6 @@ class UserActivityLogger {
   //     this.axiosProvider = axiosProvider;
   //     this.userId = storage.getUserId();
   //     this.userName = storage.getUserName();
-  //   }
 
   async log(activity, module, type) {
     try {
@@ -30,7 +29,7 @@ class UserActivityLogger {
   }
 
   async userLogin() {
-    await this.log("Login", "System", "Login");
+    await this.log("Login", "Crm", "Login");
   }
   async crmAdd(userId, activity, module, type) {
     await this.log(`${activity} #${userId}`, module, type);
