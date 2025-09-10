@@ -5,7 +5,7 @@ const storage = new StorageManager();
 const axiosProvider = new AxiosProvider();
 
 const userId = storage.getUserId();
-const userName = storage.getUserName();
+
 
 class UserActivityLogger {
   // constructor(axiosProvider, storage) {
@@ -14,8 +14,16 @@ class UserActivityLogger {
   //     this.userName = storage.getUserName();
 
   async log(activity, module, type) {
+    console.log("--------------------");
+    const userId = storage.getUserId();
+    console.log("+++++++++", userId);
+    console.log(userId);
+    console.log(activity);
+    console.log(module);
+    console.log(type);
+    return;
     try {
-      await axiosProvider.post("/loguseractivity", {
+      await axiosProvider.post("/log", {
         userId: userId,
         userActivity: `#${userId} ${activity}`,
         module: module,

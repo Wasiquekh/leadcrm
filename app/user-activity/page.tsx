@@ -30,6 +30,7 @@ import { Tooltip } from "react-tooltip";
 import { FaEllipsisVertical } from "react-icons/fa6";
 import { useAuthRedirect } from "../component/hooks/useAuthRedirect";
 
+
 const axiosProvider = new AxiosProvider();
 
 interface FilterData {
@@ -83,7 +84,7 @@ const typeOptions: OptionType[] = [
 ];
 
 export default function Home() {
-  const isChecking = useAuthRedirect();
+  //const isChecking = useAuthRedirect();
   const [isFlyoutOpen, setFlyoutOpen] = useState<boolean>(false);
   const [isFlyoutFilterOpen, setFlyoutFilterOpen] = useState<boolean>(false);
   const [data, setData] = useState<UserActivity[]>([]);
@@ -110,7 +111,8 @@ export default function Home() {
   const [isFilter, setIsFilter] = useState<boolean>(false);
   const [appliedFilters, setAppliedFilters] = useState<string[]>([]);
   const storage = new StorageManager();
-  //console.log("Get all user Data", data);
+  const userId = storage.getUserId();
+
   const router = useRouter();
 
   // Assuming `dataUserName` is an array of users
@@ -212,7 +214,7 @@ export default function Home() {
       setIsFilter(false);
       setIsLoading(true);
       try {
-        const response = await axiosProvider.get(`/user-activity?page=${page}`);
+        const response = await axiosProvider.get(`/user-activity`);
         console.log("888888888888888888", response);
         const result = response.data.data.rows;
         setData(result);
@@ -289,19 +291,19 @@ export default function Home() {
   //   fetchData(page);
   // }
 
-  if (isChecking) {
-    return (
-      <div className="h-screen flex flex-col gap-5 justify-center items-center bg-white">
-        <Image
-          src="/images/orizonIcon.svg"
-          alt="Loading"
-          width={150}
-          height={150}
-          className="animate-pulse rounded"
-        />
-      </div>
-    );
-  }
+  // if (isChecking) {
+  //   return (
+  //     <div className="h-screen flex flex-col gap-5 justify-center items-center bg-white">
+  //       <Image
+  //         src="/images/orizonIcon.svg"
+  //         alt="Loading"
+  //         width={150}
+  //         height={150}
+  //         className="animate-pulse rounded"
+  //       />
+  //     </div>
+  //   );
+  // }
   if (isLoading) {
     return (
       <div className="h-screen flex flex-col gap-5 justify-center items-center">
@@ -509,7 +511,7 @@ export default function Home() {
 
                         <td className="px-2 py-2 border border-tableBorder hidden sm:table-cell">
                           <p className="text-[#232323] text-base leading-normal">
-                            {item.uuid}
+                            {item.user.id}
                           </p>
                         </td>
 
