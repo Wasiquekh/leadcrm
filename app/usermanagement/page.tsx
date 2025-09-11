@@ -28,13 +28,17 @@ import { Tooltip } from "react-tooltip";
 import { FaEllipsisVertical } from "react-icons/fa6";
 import { useAuthRedirect } from "../component/hooks/useAuthRedirect";
 
-interface User {
+export interface User {
   id: string;
   name: string;
-  mobile_number: string;
   email: string;
-  role: string; // Add the role property
+  mobile_number: string;
+  created_at: string; // could be Date if you parse it
+  updated_at: string; // same here
+  role_name: string;
+  role_level: number;
 }
+
 interface CurrentUserData {
   id: string;
   name: string;
@@ -50,7 +54,7 @@ export default function Home() {
   //  const isChecking = useAuthRedirect();
   const [data, setData] = useState<User[] | null>(null);
   const [page, setPage] = useState<number>(1);
-  const [limit] = useState<number>(10);
+  const [pageSize] = useState<number>(10);
   const [totalPages, setTotalPages] = useState<number>(1);
 
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState<boolean>(false);
@@ -109,16 +113,17 @@ export default function Home() {
     toggleEditFlyout();
   };
 
-  const fetchData = async (currentPage: number) => {
+  const fetchData = async () => {
     setIsLoading(true);
     try {
       const response = await axiosProvider.get(
-        `/getalluser?page=${currentPage}&limit=${limit}`
+        `/allusers?page=${page}&pageSize=${pageSize}`
       );
       // console.log('get all user',response.data.data.users);
-      const result = response.data.data.users;
-      // console.log('BBBBBBBBBBBBBBBB',result)
-      setTotalPages(response.data.data.totalPages);
+      const result = response.data.data.data;
+      //console.log("BBBBBBBBBBBBBBBB", result);
+      // console.log("###########", response.data.data.pagination.totalPages);
+      setTotalPages(response.data.data.pagination.totalPages);
       setData(result);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -128,7 +133,7 @@ export default function Home() {
     }
   };
   useEffect(() => {
-    //  fetchData(page);
+    fetchData();
   }, [shouldRefetch, page]);
 
   const handlePageChange = (newPage: number) => {
@@ -200,6 +205,17 @@ export default function Home() {
                         <RxAvatar className="w-5 h-5" />
                         <div className="font-semibold text-firstBlack text-base leading-normal">
                           Name - Mail
+                        </div>
+                      </div>
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-2 py-1 border border-tableBorder hidden md:table-cell"
+                    >
+                      <div className="flex items-center gap-2">
+                        <MdOutlineCall className="w-5 h-5" />
+                        <div className="font-semibold text-firstBlack text-base leading-normal">
+                          Email
                         </div>
                       </div>
                     </th>
@@ -337,118 +353,61 @@ export default function Home() {
                 </tbody> */}
                 <tbody>
                   {/* Row 1 */}
-                  <tr className="border border-tableBorder bg-white hover:bg-primary-100">
-                    <td className="px-1 md:p-3 py-2 flex md:flex-row gap-2">
-                      <div>
-                        <p className="text-[#232323] text-sm font-semibold leading-normal mb-1 truncate">
-                          John Doe
-                        </p>
-                        <p className="text-[#232323] text-xs md:text-sm leading-normal truncate">
-                          john.doe@example.com
-                        </p>
-                      </div>
-                    </td>
-                    <td className="px-2 py-1 border border-tableBorder hidden md:table-cell">
-                      <p className="text-[#232323] text-sm leading-normal truncate">
-                        +91 9876543210
-                      </p>
-                    </td>
-                    <td className="px-2 py-1 border border-tableBorder hidden md:table-cell">
-                      <button className="py-[4px] px-6 bg-primary-400 rounded-xl w-auto text-xs md:text-sm sm:w-4/6">
-                        <p className="text-white">Admin</p>
-                      </button>
-                    </td>
-                    <td className="px-2 py-1 border border-tableBorder">
-                      <div className="flex gap-1 md:gap-2 justify-center md:justify-start">
-                        <button className="py-[4px] px-3 bg-primary-600 hover:bg-primary-800 active:bg-primary-900 group flex gap-1 items-center rounded-xl text-xs md:text-sm ">
-                          <MdRemoveRedEye className="text-white w-4 h-4 group-hover:text-white" />
-                          <p className="text-white hidden md:block group-hover:text-white">
-                            View
+                  {!data || data.length === 0 || isError ? (
+                    <tr>
+                      <td colSpan={8} className="text-center text-xl mt-5">
+                        <div className="mt-5">Data not found</div>
+                      </td>
+                    </tr>
+                  ) : (
+                    data.map((item: any, index: number) => (
+                      <tr
+                        key={item?.id ?? index}
+                        className="border border-tableBorder bg-white hover:bg-primary-100"
+                      >
+                        <td className="px-1 md:p-3 py-2 flex md:flex-row gap-2">
+                          <div>
+                            <p className="text-[#232323] text-sm sm:text-base font-medium leading-normal capitalize truncate">
+                              {item?.name ?? "-"}
+                            </p>
+                          </div>
+                        </td>
+                        <td className="px-2 py-1 border border-tableBorder hidden md:table-cell">
+                          <p className="text-[#232323] text-sm sm:text-base font-medium leading-normal  truncate">
+                            {item?.email ?? "-"}
                           </p>
-                        </button>
-                        <button className="py-[4px] px-3 bg-black flex gap-1 items-center rounded-full text-xs md:text-sm group hover:bg-primary-600">
-                          <RiDeleteBin6Line className="text-white w-4 h-4" />
-                          <p className="text-white hidden md:block">Delete</p>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-
-                  {/* Row 2 */}
-                  <tr className="border border-tableBorder bg-white hover:bg-primary-100">
-                    <td className="px-1 md:p-3 py-2 flex md:flex-row gap-2">
-                      <div>
-                        <p className="text-[#232323] text-sm font-semibold leading-normal mb-1 truncate">
-                          Jane Smith
-                        </p>
-                        <p className="text-[#232323] text-xs md:text-sm leading-normal truncate">
-                          jane.smith@example.com
-                        </p>
-                      </div>
-                    </td>
-                    <td className="px-2 py-1 border border-tableBorder hidden md:table-cell">
-                      <p className="text-[#232323] text-sm leading-normal truncate">
-                        +91 9123456780
-                      </p>
-                    </td>
-                    <td className="px-2 py-1 border border-tableBorder hidden md:table-cell">
-                      <button className="py-[4px] px-6 bg-primary-400 rounded-xl w-auto text-xs md:text-sm sm:w-4/6">
-                        <p className="text-white">Editor</p>
-                      </button>
-                    </td>
-                    <td className="px-2 py-1 border border-tableBorder">
-                      <div className="flex gap-1 md:gap-2 justify-center md:justify-start">
-                        <button className="py-[4px] px-3 bg-primary-600 hover:bg-primary-800 active:bg-primary-900 group flex gap-1 items-center rounded-xl text-xs md:text-sm ">
-                          <MdRemoveRedEye className="text-white w-4 h-4 group-hover:text-white" />
-                          <p className="text-white hidden md:block group-hover:text-white">
-                            View
+                        </td>
+                        <td className="px-2 py-1 border border-tableBorder hidden md:table-cell">
+                          <p className="text-[#232323] text-sm sm:text-base font-medium leading-normal capitalize truncate">
+                            {item?.mobile ?? "-"}
                           </p>
-                        </button>
-                        <button className="py-[4px] px-3 bg-black flex gap-1 items-center rounded-full text-xs md:text-sm group hover:bg-primary-600">
-                          <RiDeleteBin6Line className="text-white w-4 h-4" />
-                          <p className="text-white hidden md:block">Delete</p>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-
-                  {/* Row 3 */}
-                  <tr className="border border-tableBorder bg-white hover:bg-primary-100">
-                    <td className="px-1 md:p-3 py-2 flex md:flex-row gap-2">
-                      <div>
-                        <p className="text-[#232323] text-sm font-semibold leading-normal mb-1 truncate">
-                          Alex Johnson
-                        </p>
-                        <p className="text-[#232323] text-xs md:text-sm leading-normal truncate">
-                          alex.johnson@example.com
-                        </p>
-                      </div>
-                    </td>
-                    <td className="px-2 py-1 border border-tableBorder hidden md:table-cell">
-                      <p className="text-[#232323] text-sm leading-normal truncate">
-                        +91 9988776655
-                      </p>
-                    </td>
-                    <td className="px-2 py-1 border border-tableBorder hidden md:table-cell">
-                      <button className="py-[4px] px-6 bg-primary-400 rounded-xl w-auto text-xs md:text-sm sm:w-4/6">
-                        <p className="text-white">Viewer</p>
-                      </button>
-                    </td>
-                    <td className="px-2 py-1 border border-tableBorder">
-                      <div className="flex gap-1 md:gap-2 justify-center md:justify-start">
-                        <button className="py-[4px] px-3 bg-primary-600 hover:bg-primary-800 active:bg-primary-900 group flex gap-1 items-center rounded-xl text-xs md:text-sm ">
-                          <MdRemoveRedEye className="text-white w-4 h-4 group-hover:text-white" />
-                          <p className="text-white hidden md:block group-hover:text-white">
-                            View
-                          </p>
-                        </button>
-                        <button className="py-[4px] px-3 bg-black flex gap-1 items-center rounded-full text-xs md:text-sm group hover:bg-primary-600">
-                          <RiDeleteBin6Line className="text-white w-4 h-4" />
-                          <p className="text-white hidden md:block">Delete</p>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+                        </td>
+                        <td className="px-2 py-1 border border-tableBorder hidden md:table-cell">
+                          <button className="py-[4px] px-6 bg-primary-400 rounded-xl w-auto text-xs md:text-sm sm:w-4/6">
+                            <p className="text-white">
+                              {item?.role_name ?? "-"}
+                            </p>
+                          </button>
+                        </td>
+                        <td className="px-2 py-1 border border-tableBorder">
+                          <div className="flex gap-1 md:gap-2 justify-center md:justify-start">
+                            <button className="py-[4px] px-3 bg-primary-600 hover:bg-primary-800 active:bg-primary-900 group flex gap-1 items-center rounded-xl text-xs md:text-sm ">
+                              <MdRemoveRedEye className="text-white w-4 h-4 group-hover:text-white" />
+                              <p className="text-white hidden md:block group-hover:text-white">
+                                View
+                              </p>
+                            </button>
+                            <button className="py-[4px] px-3 bg-black flex gap-1 items-center rounded-full text-xs md:text-sm group hover:bg-primary-600">
+                              <RiDeleteBin6Line className="text-white w-4 h-4" />
+                              <p className="text-white hidden md:block">
+                                Delete
+                              </p>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -478,12 +437,12 @@ export default function Home() {
         </div>
       </div>
 
-      <SidebarUserUpdateForm
+      {/* <SidebarUserUpdateForm
         isEditFlyoutOpen={isEditFlyoutOpen}
         setIsEditFlyoutOpen={setIsEditFlyoutOpen}
-        currentUserData={currentUserData}
+         currentUserData={currentUserData}
         setShouldRefetch={setShouldRefetch}
-      />
+      /> */}
     </>
   );
 }

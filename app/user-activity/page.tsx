@@ -91,8 +91,9 @@ export default function Home() {
   console.log("user activity dara", data);
   const [dataUserName, setDataUserName] = useState<AllUserName[]>([]);
   const [page, setPage] = useState<number>(1);
+  const [pageSize] = useState<number>(10);
   const [filterPage, setFilterPage] = useState<number>(1);
-  const [limit] = useState<number>(10);
+
   const [totalPages, setTotalPages] = useState<number>(1);
   const [totalPagesFilter, setTotalPagesFilter] = useState<number>(1);
   const [filterData, setFilterData] = useState<FilterData>({
@@ -210,15 +211,21 @@ export default function Home() {
 
   useEffect(() => {
     const fetchData = async () => {
-      console.log("fetch data call hua");
       setIsFilter(false);
       setIsLoading(true);
       try {
-        const response = await axiosProvider.get(`/user-activity`);
-        console.log("888888888888888888", response);
-        const result = response.data.data.rows;
+        const response = await axiosProvider.get(
+          `/user-activity?page=${page}&pageSize=${pageSize}`
+        );
+
+        const result = response.data.data.data;
+        // console.log("888888888888888888", response.data.data.pagination.total);
         setData(result);
-        setTotalPages(response.data.data.totalPages);
+        // console.log(
+        //   "888888888888888888",
+        //   response.data.data.pagination.totalPages
+        // );
+        setTotalPages(response.data.data.pagination.totalPages);
         setIsError(false);
       } catch (error: any) {
         setIsError(true);
@@ -456,7 +463,7 @@ export default function Home() {
                 </thead>
 
                 <tbody>
-                  {data.length === 0 ? (
+                  {!data || data.length === 0 || isError ? (
                     <tr>
                       <td colSpan={8} className="text-center text-xl mt-5">
                         <div className="mt-5">Data not found</div>

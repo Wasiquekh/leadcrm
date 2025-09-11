@@ -14,18 +14,17 @@ class UserActivityLogger {
   //     this.userName = storage.getUserName();
 
   async log(activity, module, type) {
-    console.log("--------------------");
+    // console.log("--------------------");
     const userId = storage.getUserId();
-    console.log("+++++++++", userId);
-    console.log(userId);
-    console.log(activity);
-    console.log(module);
-    console.log(type);
-    return;
+    // console.log("+++++++++", userId);
+    // console.log(userId);
+    // console.log(activity);
+    // console.log(module);
+    // console.log(type);
     try {
-      await axiosProvider.post("/log", {
+      await axiosProvider.post("/user-activity/log", {
         userId: userId,
-        userActivity: `#${userId} ${activity}`,
+        userActivity: activity,
         module: module,
         type: type,
       });

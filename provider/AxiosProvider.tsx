@@ -10,6 +10,7 @@ const defaultBaseURL =
 
 export default class AxiosProvider {
   private instance: AxiosInstance;
+  defaults: any;
 
   constructor(
     baseURL: string = process.env.NEXT_PUBLIC_API_URL || defaultBaseURL
