@@ -152,8 +152,11 @@ export default function Home() {
       .required("Email is required"),
     phone: Yup.string()
       .trim()
-      .required("Phone number is required") // ✅ make phone required
-      .matches(/^[0-9]{10}$/, "Enter a valid 10-digit phone number"),
+      .required("Phone number is required")
+      .matches(
+        /^(\+91)?[6-9][0-9]{9}$/,
+        "Enter a valid phone number (with or without +91)"
+      ),
     address_line1: Yup.string().optional(),
     address_line2: Yup.string().optional(),
     city: Yup.string().optional(),
@@ -175,11 +178,26 @@ export default function Home() {
     setFlyoutOpen(false);
 
     try {
-      await axiosProvider.post("/leads", value);
+      await AxiosProvider.post("/leads", value);
       toast.success("Lead is Creatted");
       setHitApi(!hitApi);
     } catch (error: any) {
       toast.error("Lead is not Creatted");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const handleUpdateLead = async (value: CreateLead) => {
+    setIsLoading(true);
+    // setIsFilter(false);
+    setFlyoutOpen(false);
+
+    try {
+      await AxiosProvider.post("/leads/update", value);
+      toast.success("Lead is Updated");
+      setHitApi(!hitApi);
+    } catch (error: any) {
+      toast.error("Lead is not Updated");
     } finally {
       setIsLoading(false);
     }
@@ -309,7 +327,7 @@ export default function Home() {
     setIsLoading(true);
     // setIsFilter(false);
     try {
-      const response = await axiosProvider.get(
+      const response = await AxiosProvider.get(
         `/alleads?page=${page}&pageSize=${pageSize}`
       );
       // console.log(
@@ -1171,72 +1189,364 @@ export default function Home() {
               </div>
               <div className=" w-full border-b border-[#E7E7E7] mb-4"></div>
               {/* FORM */}
-              <form onSubmit={handleSubmit}>
-                <div className=" w-full">
-                  <div className=" w-full flex gap-4 mb-4">
-                    <div className=" w-full">
-                      <p className=" text-secondBlack font-medium text-base leading-6 mb-2">
-                        First Name
-                      </p>
-                      <input
-                        type="text"
-                        value={filterData.name}
-                        name="name"
-                        onChange={handleChange}
-                        placeholder="Alexandre"
-                        className=" hover:shadow-hoverInputShadow focus-border-primary w-full  border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
-                      />
-                    </div>
-                  </div>
 
-                  <div className=" w-full flex flex-col md:flex-row gap-4 mb-4">
-                    <div className=" w-full">
-                      <p className=" text-secondBlack font-medium text-base leading-6 mb-2">
-                        Phone
-                      </p>
-                      <input
-                        type="number"
-                        value={filterData.mobilephonenumber}
-                        onChange={handleChange}
-                        name="mobilephonenumber"
-                        placeholder="1 (800) 667-6389"
-                        className=" hover:shadow-hoverInputShadow focus-border-primary w-full  border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4"
-                      />
-                    </div>
-                    <div className=" w-full">
-                      <p className=" text-secondBlack font-medium text-base leading-6 mb-2">
-                        Birth Date
-                      </p>
-                      <input
-                        type="date"
-                        value={filterData.birthdate}
-                        onChange={handleChange}
-                        disabled
-                        name="birthdate"
-                        placeholder=""
-                        className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 cursor-not-allowed bg-[#F5F5F5] text-[#A0A0A0] focus:outline-none"
-                      />
-                    </div>
-                  </div>
-                </div>
+              <Formik
+                initialValues={{
+                  id: editLeadData?.id || "",
+                  first_name: editLeadData?.first_name || "",
+                  last_name: editLeadData?.last_name || "",
+                  full_name: editLeadData?.full_name || "",
+                  email: editLeadData?.email || "",
+                  phone: editLeadData?.phone || "",
+                  address_line1: editLeadData?.address_line1 || "",
+                  address_line2: editLeadData?.address_line2 || "",
+                  city: editLeadData?.city || "",
+                  state: editLeadData?.state || "",
+                  postal_code: editLeadData?.postal_code || "",
+                  country: editLeadData?.country || "",
+                  lead_score:
+                    typeof editLeadData?.lead_score === "number"
+                      ? editLeadData.lead_score
+                      : undefined,
+                  lead_quality: editLeadData?.lead_quality || "",
+                  best_time_to_call: editLeadData?.best_time_to_call || "",
+                  lead_source_id: editLeadData?.lead_source_id || "",
+                  debt_consolidation_status_id:
+                    editLeadData?.debt_consolidation_status_id || "",
+                }}
+                validationSchema={LeadSchema}
+                onSubmit={(values, { setSubmitting, resetForm }) => {
+                  const value: CreateLead = {
+                    id: values.id,
+                    first_name: values.first_name,
+                    last_name: values.last_name,
+                    full_name: values.full_name,
+                    email: values.email,
+                    phone: values.phone || undefined,
+                    address_line1: values.address_line1 || undefined,
+                    address_line2: values.address_line2 || undefined,
+                    city: values.city || undefined,
+                    state: values.state || undefined,
+                    postal_code: values.postal_code || undefined,
+                    country: values.country || undefined,
+                    lead_score: values.lead_score ?? undefined,
+                    lead_quality: values.lead_quality || undefined,
+                    best_time_to_call: values.best_time_to_call || undefined,
+                    lead_source_id: values.lead_source_id || undefined,
+                    debt_consolidation_status_id:
+                      values.debt_consolidation_status_id || undefined,
+                  };
 
-                {/* END FORM */}
+                  handleUpdateLead(value);
+                  setSubmitting(false);
+                  resetForm(); // ✅ clears after submit
+                }}
+              >
+                {({ handleSubmit, isSubmitting }) => (
+                  <form onSubmit={handleSubmit}>
+                    <div className="w-full">
+                      <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        {/* First Name */}
+                        <div className="w-full">
+                          <p className="text-secondBlack  text-base leading-6 mb-2">
+                            First Name
+                          </p>
+                          <Field
+                            type="text"
+                            name="first_name"
+                            placeholder="Alexandre"
+                            className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                          />
+                          <ErrorMessage
+                            name="first_name"
+                            component="div"
+                            className="text-red-500 text-xs mt-1"
+                          />
+                        </div>
 
-                <div className="mt-10 w-full flex flex-col gap-y-4 md:flex-row justify-between items-center ">
-                  <div
-                    onClick={hadleClear}
-                    className=" py-[13px] px-[26px] bg-primary-700 rounded-[4px] text-base font-medium leading-6  cursor-pointer w-full md:w-[49%] text-center text-white hover:bg-primary-500 hover:text-white "
-                  >
-                    Clear Data
-                  </div>
-                  <button
-                    type="submit"
-                    className=" py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full md:w-[49%] text-center hover:bg-primary-700 hover:text-white "
-                  >
-                    Filter Now
-                  </button>
-                </div>
-              </form>
+                        {/* Last Name */}
+                        <div className="w-full">
+                          <p className="text-secondBlack  text-base leading-6 mb-2">
+                            Last Name
+                          </p>
+                          <Field
+                            type="text"
+                            name="last_name"
+                            placeholder="Dumas"
+                            className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                          />
+                          <ErrorMessage
+                            name="last_name"
+                            component="div"
+                            className="text-red-500 text-xs mt-1"
+                          />
+                        </div>
+
+                        {/* Full Name */}
+                        <div className="w-full">
+                          <p className="text-secondBlack  text-base leading-6 mb-2">
+                            Full Name
+                          </p>
+                          <Field
+                            type="text"
+                            name="full_name"
+                            placeholder="Alexandre Dumas"
+                            className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                          />
+                          <ErrorMessage
+                            name="full_name"
+                            component="div"
+                            className="text-red-500 text-xs mt-1"
+                          />
+                        </div>
+
+                        {/* Email */}
+                        <div className="w-full">
+                          <p className="text-secondBlack  text-base leading-6 mb-2">
+                            Email
+                          </p>
+                          <Field
+                            type="email"
+                            name="email"
+                            placeholder="alexandre@example.com"
+                            className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                          />
+                          <ErrorMessage
+                            name="email"
+                            component="div"
+                            className="text-red-500 text-xs mt-1"
+                          />
+                        </div>
+
+                        {/* Phone */}
+                        <div className="w-full">
+                          <p className="text-secondBlack  text-base leading-6 mb-2">
+                            Phone
+                          </p>
+                          <Field
+                            type="text"
+                            name="phone"
+                            placeholder="+91 9XXXXXXXXX"
+                            className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                          />
+                          <ErrorMessage
+                            name="phone"
+                            component="div"
+                            className="text-red-500 text-xs mt-1"
+                          />
+                        </div>
+
+                        {/* Address Line 1 */}
+                        <div className="w-full">
+                          <p className="text-secondBlack text-base leading-6 mb-2">
+                            Address Line 1
+                          </p>
+                          <Field
+                            type="text"
+                            name="address_line1"
+                            placeholder="Street, House no."
+                            className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                          />
+                          <ErrorMessage
+                            name="address_line1"
+                            component="div"
+                            className="text-red-500 text-xs mt-1"
+                          />
+                        </div>
+
+                        {/* Address Line 2 */}
+                        <div className="w-full">
+                          <p className="text-secondBlack  text-base leading-6 mb-2">
+                            Address Line 2
+                          </p>
+                          <Field
+                            type="text"
+                            name="address_line2"
+                            placeholder="Apartment, Suite, etc."
+                            className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                          />
+                          <ErrorMessage
+                            name="address_line2"
+                            component="div"
+                            className="text-red-500 text-xs mt-1"
+                          />
+                        </div>
+
+                        {/* City */}
+                        <div className="w-full">
+                          <p className="text-secondBlack  text-base leading-6 mb-2">
+                            City
+                          </p>
+                          <Field
+                            type="text"
+                            name="city"
+                            placeholder="Mumbai"
+                            className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                          />
+                          <ErrorMessage
+                            name="city"
+                            component="div"
+                            className="text-red-500 text-xs mt-1"
+                          />
+                        </div>
+
+                        {/* State */}
+                        <div className="w-full">
+                          <p className="text-secondBlack  text-base leading-6 mb-2">
+                            State
+                          </p>
+                          <Field
+                            type="text"
+                            name="state"
+                            placeholder="Maharashtra"
+                            className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                          />
+                          <ErrorMessage
+                            name="state"
+                            component="div"
+                            className="text-red-500 text-xs mt-1"
+                          />
+                        </div>
+
+                        {/* Postal Code */}
+                        <div className="w-full">
+                          <p className="text-secondBlack  text-base leading-6 mb-2">
+                            Postal Code
+                          </p>
+                          <Field
+                            type="text"
+                            name="postal_code"
+                            placeholder="400071"
+                            className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                          />
+                          <ErrorMessage
+                            name="postal_code"
+                            component="div"
+                            className="text-red-500 text-xs mt-1"
+                          />
+                        </div>
+
+                        {/* Country */}
+                        <div className="w-full">
+                          <p className="text-secondBlack  text-base leading-6 mb-2">
+                            Country
+                          </p>
+                          <Field
+                            type="text"
+                            name="country"
+                            placeholder="India"
+                            className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                          />
+                          <ErrorMessage
+                            name="country"
+                            component="div"
+                            className="text-red-500 text-xs mt-1"
+                          />
+                        </div>
+
+                        {/* Lead Score */}
+                        <div className="w-full">
+                          <p className="text-secondBlack  text-base leading-6 mb-2">
+                            Lead Score
+                          </p>
+                          <Field
+                            type="number"
+                            name="lead_score"
+                            placeholder="e.g., 75"
+                            className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                          />
+                          <ErrorMessage
+                            name="lead_score"
+                            component="div"
+                            className="text-red-500 text-xs mt-1"
+                          />
+                        </div>
+
+                        {/* Lead Quality */}
+                        <div className="w-full">
+                          <p className="text-secondBlack  text-base leading-6 mb-2">
+                            Lead Quality
+                          </p>
+                          <Field
+                            type="text"
+                            name="lead_quality"
+                            placeholder="Hot / Warm / Cold"
+                            className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                          />
+                          <ErrorMessage
+                            name="lead_quality"
+                            component="div"
+                            className="text-red-500 text-xs mt-1"
+                          />
+                        </div>
+
+                        {/* Best Time to Call */}
+                        <div className="w-full">
+                          <p className="text-secondBlack text-base leading-6 mb-2">
+                            Best Time to Call
+                          </p>
+                          <Field
+                            type="text"
+                            name="best_time_to_call"
+                            placeholder="e.g., 3–5 PM"
+                            className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                          />
+                          <ErrorMessage
+                            name="best_time_to_call"
+                            component="div"
+                            className="text-red-500 text-xs mt-1"
+                          />
+                        </div>
+
+                        {/* Lead Source Id */}
+                        <div className="w-full">
+                          <p className="text-secondBlack text-base leading-6 mb-2">
+                            Lead Source Id
+                          </p>
+                          <Field
+                            type="text"
+                            name="lead_source_id"
+                            placeholder="uuid-or-text"
+                            className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                          />
+                          <ErrorMessage
+                            name="lead_source_id"
+                            component="div"
+                            className="text-red-500 text-xs mt-1"
+                          />
+                        </div>
+
+                        {/* Debt Consolidation Status Id */}
+                        <div className="w-full">
+                          <p className="text-secondBlack  text-base leading-6 mb-2">
+                            Debt Consolidation Status Id
+                          </p>
+                          <Field
+                            type="text"
+                            name="debt_consolidation_status_id"
+                            placeholder="optional"
+                            className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                          />
+                          <ErrorMessage
+                            name="debt_consolidation_status_id"
+                            component="div"
+                            className="text-red-500 text-xs mt-1"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* END FORM */}
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
+                    >
+                      Create Leads
+                    </button>
+                  </form>
+                )}
+              </Formik>
             </div>
           )}
         </div>

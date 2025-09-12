@@ -1,31 +1,28 @@
 import axios, {
   AxiosInstance,
+  AxiosHeaders,
+  AxiosRequestConfig,
   InternalAxiosRequestConfig,
-  AxiosHeaders, // ✅ use the class
 } from "axios";
 import StorageManager from "./StorageManager";
 
 const defaultBaseURL =
   "https://manageleadcrmbackend.dynsimulation.com/api/v1/managelead";
 
-export default class AxiosProvider {
-  private instance: AxiosInstance;
-  defaults: any;
+class AxiosProvider {
+  private static instance: AxiosInstance = axios.create({
+    baseURL: process.env.NEXT_PUBLIC_API_URL || defaultBaseURL,
+  });
 
-  constructor(
-    baseURL: string = process.env.NEXT_PUBLIC_API_URL || defaultBaseURL
-  ) {
-    this.instance = axios.create({ baseURL });
-
-    this.instance.interceptors.request.use(
+  // --- configure interceptors only once ---
+  static {
+    AxiosProvider.instance.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
-        // Ensure we have an AxiosHeaders instance
         const headers =
           config.headers instanceof AxiosHeaders
             ? config.headers
             : new AxiosHeaders(config.headers);
 
-        // Add token
         if (typeof window !== "undefined") {
           const storage = new StorageManager();
           let token = storage.getAccessToken?.() || "";
@@ -33,32 +30,37 @@ export default class AxiosProvider {
           if (token) headers.set("Authorization", `Bearer ${token}`);
         }
 
-        // Defaults (only if not already set)
         if (!headers.has("Accept")) headers.set("Accept", "application/json");
         if (!headers.has("Content-Type"))
           headers.set("Content-Type", "application/json");
 
-        config.headers = headers; // ✅ typed: AxiosHeaders satisfies AxiosRequestHeaders
+        config.headers = headers;
         return config;
       }
     );
 
-    this.instance.interceptors.response.use(
+    AxiosProvider.instance.interceptors.response.use(
       (res) => res,
       (err) => Promise.reject(err)
     );
   }
 
-  get<T = any>(url: string, config?: InternalAxiosRequestConfig) {
-    return this.instance.get<T>(url, config);
+  // --- static methods ---
+  static get<T = any>(url: string, config?: AxiosRequestConfig) {
+    return AxiosProvider.instance.get<T>(url, config);
   }
-  post<T = any>(url: string, data?: any, config?: InternalAxiosRequestConfig) {
-    return this.instance.post<T>(url, data, config);
+
+  static post<T = any>(url: string, data?: any, config?: AxiosRequestConfig) {
+    return AxiosProvider.instance.post<T>(url, data, config);
   }
-  put<T = any>(url: string, data?: any, config?: InternalAxiosRequestConfig) {
-    return this.instance.put<T>(url, data, config);
+
+  static put<T = any>(url: string, data?: any, config?: AxiosRequestConfig) {
+    return AxiosProvider.instance.put<T>(url, data, config);
   }
-  delete<T = any>(url: string, config?: InternalAxiosRequestConfig) {
-    return this.instance.delete<T>(url, config);
+
+  static delete<T = any>(url: string, config?: AxiosRequestConfig) {
+    return AxiosProvider.instance.delete<T>(url, config);
   }
 }
+
+export default AxiosProvider;

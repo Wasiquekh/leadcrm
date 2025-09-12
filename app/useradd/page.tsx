@@ -75,7 +75,7 @@ export default function Home() {
     console.log("admin values", values);
 
     try {
-      const res = await axiosProvider.post("/register", values);
+      const res = await AxiosProvider.post("/register", values);
       toast.success("Form submitted successfully!");
       resetForm();
       //console.log('user register',res.data.data.userId)

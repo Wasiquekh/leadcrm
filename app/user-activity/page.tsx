@@ -214,7 +214,7 @@ export default function Home() {
       setIsFilter(false);
       setIsLoading(true);
       try {
-        const response = await axiosProvider.get(
+        const response = await AxiosProvider.get(
           `/user-activity?page=${page}&pageSize=${pageSize}`
         );
 

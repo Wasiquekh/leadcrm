@@ -95,7 +95,7 @@ export default function Home() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axiosProvider.post("/deleteuser", { id: userID });
+          await AxiosProvider.post("/deleteuser", { id: userID });
 
           toast.success("Successfully Deleted");
           setShouldRefetch((prev) => !prev);
@@ -116,7 +116,7 @@ export default function Home() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const response = await axiosProvider.get(
+      const response = await AxiosProvider.get(
         `/allusers?page=${page}&pageSize=${pageSize}`
       );
       // console.log('get all user',response.data.data.users);
