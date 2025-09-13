@@ -57,7 +57,7 @@ const LeftSideBarMobile: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      const response = await axiosProvider.post("/logout", {});
+      const response = await AxiosProvider.post("/logout", {});
       localStorage.clear();
       window.location.href = "/";
     } catch (error) {
