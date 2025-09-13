@@ -51,7 +51,7 @@ const SidebarUserUpdateForm: React.FC<SidebarUserUpdateFormProps> = ({
         // Check if currentUserData and currentUserData.id are valid
         if (currentUserData && currentUserData.id) {
           // Send user ID along with other data to the API
-          const res = await axiosProvider.post("/fetchsecret", {
+          const res = await AxiosProvider.post("/fetchsecret", {
             userId: currentUserData.id, // Send currentUserData.id to the API
           });
           setUserDescription(res.data.data.description);
@@ -82,7 +82,7 @@ const SidebarUserUpdateForm: React.FC<SidebarUserUpdateFormProps> = ({
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const res = await axiosProvider.post("/deletesecert", {
+          const res = await AxiosProvider.post("/deletesecert", {
             userId: currentUserData.id, // Send currentUserData.id to the API
           });
           //console.log("%%%%%%%%%%%%%%%%%%%%%%%% ssucess api", res);
@@ -166,7 +166,7 @@ const SidebarUserUpdateForm: React.FC<SidebarUserUpdateFormProps> = ({
             })}
             onSubmit={async (values, { setSubmitting }) => {
               try {
-                const res = await axiosProvider.post("/updateuser", values);
+                const res = await AxiosProvider.post("/updateuser", values);
                 if (res.status === 200) {
                   toast.success("User updated successfully!");
                   setIsEditFlyoutOpen(false);
