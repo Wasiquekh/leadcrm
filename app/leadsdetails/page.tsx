@@ -23,7 +23,8 @@ import UserActivityLogger from "../../provider/UserActivityLogger";
 import { MdLocationPin, MdVerified } from "react-icons/md";
 import { TbActivity, TbTopologyStarRing2 } from "react-icons/tb";
 import { PiMapPinLight, PiNotepadLight } from "react-icons/pi";
-import { HiOutlineEnvelope } from "react-icons/hi2";
+import { HiChevronDoubleLeft } from "react-icons/hi";
+import { HiChevronDoubleRight } from "react-icons/hi";
 import AxiosProvider from "../../provider/AxiosProvider";
 //import CustomerViewDetails from "../component/CustomerViewDetails";
 import ReactPlayer from "react-player";
@@ -116,6 +117,16 @@ interface CreateLeadsActivityForm {
   disposition: string; // id
   agent: string; // optional id
 }
+export interface LeadActivityData {
+  id: string;
+  disposition: string;
+  disposition_id: string;
+  conversation: string;
+  occurred_at: string; // ISO date string
+  created_at: string; // ISO date string
+  agent_name: string;
+  agent_id: string;
+}
 export default function Home() {
   const [isFlyoutFilterOpen, setFlyoutFilterOpen] = useState<boolean>(false);
   const isChecking = useAuthRedirect();
@@ -149,10 +160,14 @@ export default function Home() {
   const [agent, setAgent] = useState<Agent[]>([]);
   const [activity, setActivity] = useState<boolean>(false);
   const toggleFilterFlyout = () => setFlyoutFilterOpen(!isFlyoutFilterOpen);
+  const [page, setPage] = useState<number>(1);
+  const [pageSize] = useState<number>(10);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [fetchLeadActivityData, setFetchLeadaActivityData] = useState<
+    LeadActivityData[]
+  >([]);
 
-  const handleChange = (value: string) => {
-    setTotp(value);
-  };
+  // console.log("lead activity",fetchLeadActivityData)
   //  FOR CREATE ACTIVITY LEAD
   // ✅ Validation
   const CreateLeadsActivitySchema = Yup.object({
@@ -161,19 +176,28 @@ export default function Home() {
       .max(500, "Max 500 characters")
       .required("Conversation is required"),
     createdAt: Yup.string().nullable(), // optional
-    disposition: Yup.string().required("Disposition is required"),
+    disposition_id: Yup.string().required("Disposition is required"),
     agent: Yup.string().nullable(), // optional
   });
   // ✅ Initial Values
   const INITIAL_VALUES = {
+    lead_id: leadId,
     conversation: "",
-    createdAt: "",
-    disposition: "",
-    agent: "",
+    occurred_at: "",
+    disposition_id: "",
+    agent_id: "",
   };
   // ✅ Submit handler
   const CreateLeadsActivity = async (n: typeof INITIAL_VALUES) => {
-    console.log("Submitted values:", n);
+    // console.log("Submitted values:", n);
+
+    try {
+      await AxiosProvider.post("/leads/activities/create", n);
+      toast.success("Lead activity is created");
+      setHitApi(!hitApi);
+    } catch (error: any) {
+      toast.error("Lead activity is created");
+    }
     // 👉 Replace with your API call
     // await AxiosProvider.post("/leads/activity/create", n);
   };
@@ -185,7 +209,7 @@ export default function Home() {
         lead_id: leadId,
       });
 
-      //  console.log("ALL CRM USER", res.data.data);
+      //console.log("lead data", res.data.data);
       setData(res.data.data); // <-- if you want to store in state
     } catch (error: any) {
       console.error("Error fetching lead:", error);
@@ -199,19 +223,27 @@ export default function Home() {
   const fetchLeadActivity = async () => {
     if (!leadId) return;
     try {
-      const res = await AxiosProvider.post("/leads/activities/list", {
-        lead_id: leadId,
-      });
+      const res = await AxiosProvider.post(
+        `/leads/activities/list?page=${page}&pageSize=${pageSize}`,
+        {
+          lead_id: leadId,
+        }
+      );
 
-      // console.log("ALL CRM USER", res);
-      //  setData(res.data.data); // <-- if you want to store in state
+      // console.log("Lead Activity", res.data.data.activities);
+      console.log(
+        "Lead Activity pagination",
+        res.data.data.pagination.totalPages
+      );
+      setFetchLeadaActivityData(res.data.data.activities);
+      setTotalPages(res.data.data.pagination.totalPages);
     } catch (error: any) {
       console.error("Error fetching lead:", error);
     }
   };
   useEffect(() => {
     fetchLeadActivity();
-  }, [leadId]);
+  }, [page, leadId]);
 
   // FETCH DISPOSITION
   const fetchDisposition = async () => {
@@ -250,6 +282,11 @@ export default function Home() {
     setActivity(false);
     setFlyoutFilterOpen(false);
   };
+  const handleChangepagination = (newPage: number) => {
+    if (newPage > 0 && newPage <= totalPages) {
+      setPage(newPage);
+    }
+  };
   const tabs = [
     {
       label: "Activity History",
@@ -260,26 +297,109 @@ export default function Home() {
             <h2 className="text-base  font-semibold mb-4 text-secondBlack">
               Today
             </h2>
-            <div className="w-full flex gap-8 hover:bg-primary-100 py-2 px-2 text-base rounded">
-              <div className=" flex gap-2 ">
-                <div>
-                  <TbActivity className=" bg-primary-500 text-white p-1 text-2xl rounded-full " />
+            {fetchLeadActivityData && fetchLeadActivityData.length > 0 ? (
+              fetchLeadActivityData.map((activity) => (
+                <div
+                  key={activity.id}
+                  className="w-full flex gap-8 hover:bg-primary-100 py-2 px-2 text-base rounded"
+                >
+                  {/* Left side date & time from occurred_at */}
+                  <div className="flex gap-2">
+                    <div>
+                      <TbActivity className=" bg-primary-500 text-white p-1 text-2xl rounded-full " />
+                    </div>
+                    <div>
+                      <p>
+                        {activity.occurred_at
+                          ? new Date(activity.occurred_at).toLocaleDateString(
+                              "en-GB",
+                              {
+                                day: "2-digit",
+                                month: "short",
+                                timeZone: "Asia/Kolkata",
+                              }
+                            )
+                          : "--"}
+                      </p>
+                      <p>
+                        {activity.occurred_at
+                          ? new Date(activity.occurred_at).toLocaleTimeString(
+                              "en-US",
+                              {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: true,
+                                timeZone: "Asia/Kolkata",
+                              }
+                            )
+                          : "--"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Right side details */}
+                  <div>
+                    <div>
+                      <p>
+                        <span className="text-primary-600">
+                          {activity.disposition}:
+                        </span>{" "}
+                        {activity.conversation}
+                      </p>
+                      <p>
+                        Added by {activity.agent_name} on{" "}
+                        {activity.created_at
+                          ? new Date(activity.created_at).toLocaleDateString(
+                              "en-GB",
+                              {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                                timeZone: "Asia/Kolkata",
+                              }
+                            )
+                          : "--"}{" "}
+                        {activity.created_at
+                          ? new Date(activity.created_at).toLocaleTimeString(
+                              "en-US",
+                              {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: true,
+                                timeZone: "Asia/Kolkata",
+                              }
+                            )
+                          : "--"}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <p>08 Aug</p>
-                  <p>13:38 AM</p>
-                </div>
-              </div>
-              <div>
-                <div>
-                  <p>
-                    <span className="text-primary-600">Others:</span>
-                    Cant response sms portal down
-                  </p>
-                  <p>Added by Zaid khab on 08 Aug 2025 11:38 AM</p>
-                </div>
-              </div>
+              ))
+            ) : (
+              <p className="text-center text-gray-500 py-4">No data found</p>
+            )}
+
+            {/* PAGINATION */}
+            <div className="flex justify-center items-center my-10 relative">
+              <button
+                onClick={() => handleChangepagination(page - 1)}
+                disabled={page === 1}
+                className="px-2 py-2 mx-2 border rounded bg-primary-500 hover:bg-primary-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <HiChevronDoubleLeft className=" w-6 h-auto" />
+              </button>
+              <span className="text-[#717171] text-sm">
+                Page {page} of {totalPages}
+              </span>
+              <button
+                onClick={() => handleChangepagination(page + 1)}
+                disabled={page === totalPages}
+                className="px-2 py-2 mx-2 border rounded bg-primary-500 hover:bg-primary-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <HiChevronDoubleRight className=" w-6 h-auto" />
+              </button>
             </div>
+            {/* PAGINATION */}
           </div>
 
           {/* End Tab content 3 */}
@@ -478,7 +598,7 @@ export default function Home() {
                     >
                       <FaNotesMedical className="w-5 h-5 text-white group-hover:text-white" />
                       <p className="text-white text-base font-medium group-hover:text-white">
-                        Note
+                        Task
                       </p>
                     </div>
                   </div>
@@ -489,7 +609,7 @@ export default function Home() {
                     >
                       <FaTasks className="w-5 h-5 text-white group-hover:text-white" />
                       <p className="text-white text-base font-medium group-hover:text-white">
-                        Task
+                        Document
                       </p>
                     </div>
                   </div>
@@ -595,7 +715,7 @@ export default function Home() {
                           </tr>
                           <tr className="border border-tableBorder bg-white hover:bg-primary-100 transition-colors">
                             <td className="text-sm text-[#78829D] py-4 px-4">
-                              Lead Source
+                              Lead Score
                             </td>
                             <td className="text-sm font-medium text-[#252F4A]  py-4 px-4">
                               {data?.lead_score || "-"}
@@ -689,7 +809,7 @@ export default function Home() {
                   {/* GRID: 2 inputs per row */}
                   <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 md:justify-between mb-4 sm:mb-6">
                     {/* Conversation (required) */}
-                    <div className="w-full">
+                    <div className="w-full relative">
                       <p className="text-secondBlack font-medium text-base leading-6 mb-2">
                         Conversation
                       </p>
@@ -702,30 +822,32 @@ export default function Home() {
                         placeholder="Enter conversation"
                         className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
                       />
-                      {touched.conversation && errors.conversation ? (
-                        <p className="text-[#A3000E] text-sm mt-1">
-                          {errors.conversation}
+                      {touched.conversation && (errors as any).conversation ? (
+                        <p className="text-red-500 absolute top-[85px] text-xs">
+                          {(errors as any).conversation}
                         </p>
                       ) : null}
                     </div>
 
-                    {/* Created At (optional) */}
-                    <div className="w-full">
+                    {/* Occurred At (optional) */}
+                    <div className="w-full relative">
                       <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
                         Created At
                       </p>
                       <DatePicker
                         selected={
-                          values.createdAt ? new Date(values.createdAt) : null
+                          values.occurred_at
+                            ? new Date(values.occurred_at)
+                            : null
                         }
                         onChange={(date: Date | null) =>
                           setFieldValue(
-                            "createdAt",
+                            "occurred_at",
                             date ? date.toISOString() : ""
                           )
                         }
-                        onBlur={() => setFieldTouched("createdAt", true)}
-                        name="createdAt"
+                        onBlur={() => setFieldTouched("occurred_at", true)}
+                        name="occurred_at"
                         dateFormat="yyyy-MM-dd"
                         placeholderText="yyyy-mm-dd"
                         className="hover:shadow-hoverInputShadow focus-border-primary 
@@ -734,8 +856,8 @@ export default function Home() {
                         popperClassName="custom-datepicker"
                         dayClassName={(date) => {
                           const today = new Date().toDateString();
-                          const selectedDate = values.createdAt
-                            ? new Date(values.createdAt).toDateString()
+                          const selectedDate = values.occurred_at
+                            ? new Date(values.occurred_at).toDateString()
                             : null;
                           if (today === date.toDateString())
                             return "bg-[#FFF0F1] text-[#A3000E]";
@@ -744,31 +866,31 @@ export default function Home() {
                           return "hover:bg-[#FFCCD0] hover:text-[#A3000E]";
                         }}
                       />
-                      {touched.createdAt && errors.createdAt ? (
-                        <p className="text-[#A3000E] text-sm mt-1">
-                          {errors.createdAt}
+                      {touched.occurred_at && (errors as any).occurred_at ? (
+                        <p className="text-red-500 absolute top-[85px] text-xs">
+                          {(errors as any).occurred_at}
                         </p>
                       ) : null}
                     </div>
 
                     {/* Disposition (required) */}
-                    <div className="w-full">
+                    <div className="w-full relative">
                       <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
                         Disposition
                       </p>
                       <Select
                         value={
-                          disposition.find(
-                            (opt) => opt.id === values.disposition
+                          (disposition || []).find(
+                            (opt: any) => opt.id === values.disposition_id
                           ) || null
                         }
                         onChange={(selectedOption: any) =>
                           setFieldValue(
-                            "disposition",
+                            "disposition_id",
                             selectedOption ? selectedOption.id : ""
                           )
                         }
-                        onBlur={() => setFieldTouched("disposition", true)}
+                        onBlur={() => setFieldTouched("disposition_id", true)}
                         getOptionLabel={(opt: any) => opt.name}
                         getOptionValue={(opt: any) => opt.id}
                         options={disposition}
@@ -801,9 +923,10 @@ export default function Home() {
                           }),
                         }}
                       />
-                      {touched.disposition && errors.disposition ? (
-                        <p className="text-[#A3000E] text-sm mt-1">
-                          {errors.disposition}
+                      {touched.disposition_id &&
+                      (errors as any).disposition_id ? (
+                        <p className="text-red-500 absolute top-[85px] text-xs">
+                          {(errors as any).disposition_id}
                         </p>
                       ) : null}
                     </div>
@@ -815,15 +938,17 @@ export default function Home() {
                       </p>
                       <Select
                         value={
-                          agent.find((opt) => opt.id === values.agent) || null
+                          (agent || []).find(
+                            (opt: any) => opt.id === values.agent_id
+                          ) || null
                         }
                         onChange={(selectedOption: any) =>
                           setFieldValue(
-                            "agent",
+                            "agent_id",
                             selectedOption ? selectedOption.id : ""
                           )
                         }
-                        onBlur={() => setFieldTouched("agent", true)}
+                        onBlur={() => setFieldTouched("agent_id", true)}
                         getOptionLabel={(opt: any) => opt.name}
                         getOptionValue={(opt: any) => opt.id}
                         options={agent}
@@ -856,9 +981,9 @@ export default function Home() {
                           }),
                         }}
                       />
-                      {touched.agent && errors.agent ? (
+                      {touched.agent_id && (errors as any).agent_id ? (
                         <p className="text-[#A3000E] text-sm mt-1">
-                          {errors.agent}
+                          {(errors as any).agent_id}
                         </p>
                       ) : null}
                     </div>

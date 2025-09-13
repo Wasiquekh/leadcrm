@@ -22,7 +22,7 @@ class UserActivityLogger {
     // console.log(module);
     // console.log(type);
     try {
-      await axiosProvider.post("/user-activity/log", {
+      await AxiosProvider.post("/user-activity/log", {
         userId: userId,
         userActivity: activity,
         module: module,

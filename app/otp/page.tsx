@@ -41,7 +41,7 @@ const userEmail = storage.getUserEmail();
     }
 
     try {
-      const res = await axiosProvider.post("/login", {
+      const res = await AxiosProvider.post("/login", {
         email: userEmail,
         otp: otp,
       });

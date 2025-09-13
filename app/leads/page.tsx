@@ -31,6 +31,7 @@ import { useAuthRedirect } from "../component/hooks/useAuthRedirect";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
+import Select from "react-select";
 
 const axiosProvider = new AxiosProvider();
 
@@ -101,6 +102,19 @@ type CreateLead = {
   lead_source_id: string; // UUID
   debt_consolidation_status_id?: string;
 };
+export interface LeadSource {
+  id: string;
+  name: string;
+  created_at: string; // ISO datetime
+  updated_at: string; // ISO datetime
+}
+export interface Consolidation {
+  id: string;
+  name: string;
+  is_active: boolean;
+  created_at: string; // ISO datetime
+  updated_at: string; // ISO datetime
+}
 
 export default function Home() {
   // const isChecking = useAuthRedirect();
@@ -129,8 +143,13 @@ export default function Home() {
   const [selectedData, setSelectedData] = useState<Lead | null>(null);
   const [hitApi, setHitApi] = useState<boolean>(false);
   const [excelFile, setExcelFile] = useState<File | null>(null);
-  const [editLeadData, setEditLeadData] = useState<CreateLead | null>(null);
-  console.log("EEEEEEEEEEDITTTTTT", editLeadData);
+  const [editLeadData, setEditLeadData] = useState(null);
+  console.log("555555555555555555555", editLeadData);
+  const [leadSourceData, setLeadSourceData] = useState<LeadSource[]>([]);
+  const [consolidationData, setConsolidationData] = useState<Consolidation[]>(
+    []
+  );
+  //  console.log("EEEEEEEEEEDITTTTTT", leadSourceData);
   //console.log("SELECTED DATA", selectedData);
   const storage = new StorageManager();
   const accessToken = storage.getAccessToken();
@@ -157,19 +176,26 @@ export default function Home() {
         /^(\+91)?[6-9][0-9]{9}$/,
         "Enter a valid phone number (with or without +91)"
       ),
-    address_line1: Yup.string().optional(),
-    address_line2: Yup.string().optional(),
-    city: Yup.string().optional(),
-    state: Yup.string().optional(),
-    postal_code: Yup.string().optional(),
-    country: Yup.string().optional(),
+
+    address_line1: Yup.string().nullable().notRequired(),
+    address_line2: Yup.string().nullable().notRequired(),
+    city: Yup.string().nullable().notRequired(),
+    state: Yup.string().nullable().notRequired(),
+    postal_code: Yup.string().nullable().notRequired(),
+    country: Yup.string().nullable().notRequired(),
+
     lead_score: Yup.number()
       .transform((v, o) => (o === "" ? undefined : v))
-      .optional(),
-    lead_quality: Yup.string().optional(),
-    best_time_to_call: Yup.string().optional(),
-    lead_source_id: Yup.string().optional(),
-    debt_consolidation_status_id: Yup.string().optional(),
+      .typeError("Lead score must be a number")
+      .nullable()
+      .notRequired(),
+
+    lead_quality: Yup.string().nullable().notRequired(),
+    best_time_to_call: Yup.string().nullable().notRequired(),
+
+    // Optional dropdown: show name, store id (can be empty)
+    lead_source_id: Yup.string().nullable().notRequired(),
+    debt_consolidation_status_id: Yup.string().nullable().notRequired(),
   });
 
   const handleCreateLead = async (value: CreateLead) => {
@@ -191,6 +217,7 @@ export default function Home() {
     setIsLoading(true);
     // setIsFilter(false);
     setFlyoutOpen(false);
+    console.log("@@@@@@@@@@@@@", value);
 
     try {
       await AxiosProvider.post("/leads/update", value);
@@ -336,7 +363,7 @@ export default function Home() {
       // );
       setTotalPages(response.data.data.pagination.totalPages);
       const result = response.data.data.data;
-      // console.log("ALL CRM USER", result);
+      console.log("ALL CRM USER", result);
       setData(result);
     } catch (error: any) {
       setIsError(true);
@@ -354,6 +381,37 @@ export default function Home() {
       setPage(newPage);
     }
   };
+  const leadSource = async () => {
+    try {
+      const response = await AxiosProvider.get("/leadsources");
+      // console.log("KKKKKKKKMMMMMMM", response.data.data.data);
+      setLeadSourceData(response.data.data.data);
+
+      // const result = response.data.data.data;
+      // console.log("ALL CRM USER", result);
+    } catch (error: any) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    leadSource();
+  }, []);
+
+  const consolidationStatus = async () => {
+    try {
+      const response = await AxiosProvider.get("/getconsolidation");
+      //  console.log("KKKKKKKKMMMMMMM", response.data.data.data);
+      setConsolidationData(response.data.data.data);
+
+      // const result = response.data.data.data;
+      // console.log("ALL CRM USER", result);
+    } catch (error: any) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    consolidationStatus();
+  }, []);
 
   const hadleClear = () => {
     setFilterData({ ...filterData, name: "", mobilephonenumber: "" });
@@ -396,6 +454,10 @@ export default function Home() {
         />
       </div>
     );
+  }
+
+  function setFieldValue(arg0: string, arg1: any) {
+    throw new Error("Function not implemented.");
   }
 
   // Removed duplicate setExcelFile function to fix identifier conflict.
@@ -743,7 +805,13 @@ export default function Home() {
                   resetForm(); // ✅ clears after submit
                 }}
               >
-                {({ handleSubmit, isSubmitting }) => (
+                {({
+                  handleSubmit,
+                  isSubmitting,
+                  values,
+                  setFieldValue,
+                  setFieldTouched,
+                }) => (
                   <form onSubmit={handleSubmit}>
                     <div className="w-full">
                       <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -1000,39 +1068,119 @@ export default function Home() {
                         </div>
 
                         {/* Lead Source Id */}
+                        {/* Lead Source (Dropdown) */}
                         <div className="w-full">
                           <p className="text-secondBlack text-base leading-6 mb-2">
-                            Lead Source Id
+                            Lead Source
                           </p>
-                          <Field
-                            type="text"
-                            name="lead_source_id"
-                            placeholder="uuid-or-text"
-                            className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                          <Select
+                            value={
+                              (leadSourceData || []).find(
+                                (opt) => opt.id === values.lead_source_id
+                              ) || null
+                            }
+                            onChange={(selected: any) =>
+                              setFieldValue(
+                                "lead_source_id",
+                                selected ? selected.id : ""
+                              )
+                            }
+                            onBlur={() =>
+                              setFieldTouched("lead_source_id", true)
+                            }
+                            getOptionLabel={(opt: any) => opt.name} // show name in dropdown
+                            getOptionValue={(opt: any) => opt.id} // store id as value
+                            options={leadSourceData}
+                            placeholder="Select Lead Source"
+                            isClearable
+                            classNames={{
+                              control: ({ isFocused }) =>
+                                `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+                                  isFocused
+                                    ? "!border-primary-500"
+                                    : "!border-[#DFEAF2]"
+                                }`,
+                            }}
+                            styles={{
+                              menu: (base) => ({
+                                ...base,
+                                borderRadius: "4px",
+                                boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+                                backgroundColor: "#fff",
+                              }),
+                              option: (base, { isFocused, isSelected }) => ({
+                                ...base,
+                                backgroundColor: isSelected
+                                  ? "var(--primary-500)"
+                                  : isFocused
+                                  ? "var(--primary-100)"
+                                  : "#fff",
+                                color: isSelected ? "#fff" : "#333",
+                                cursor: "pointer",
+                              }),
+                            }}
                           />
-                          <ErrorMessage
-                            name="lead_source_id"
-                            component="div"
-                            className="text-red-500 text-xs mt-1"
-                          />
+                          {/* Optional → no validation message needed */}
                         </div>
 
                         {/* Debt Consolidation Status Id */}
+                        {/* Debt Consolidation Status (Dropdown) */}
                         <div className="w-full">
-                          <p className="text-secondBlack  text-base leading-6 mb-2">
-                            Debt Consolidation Status Id
+                          <p className="text-secondBlack text-base leading-6 mb-2">
+                            Debt Consolidation Status
                           </p>
-                          <Field
-                            type="text"
-                            name="debt_consolidation_status_id"
-                            placeholder="optional"
-                            className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                          <Select
+                            value={
+                              (consolidationData || []).find(
+                                (opt) =>
+                                  opt.id === values.debt_consolidation_status_id
+                              ) || null
+                            }
+                            onChange={(selected: any) =>
+                              setFieldValue(
+                                "debt_consolidation_status_id",
+                                selected ? selected.id : ""
+                              )
+                            }
+                            onBlur={() =>
+                              setFieldTouched(
+                                "debt_consolidation_status_id",
+                                true
+                              )
+                            }
+                            getOptionLabel={(opt: any) => opt.name} // show name
+                            getOptionValue={(opt: any) => opt.id} // store id
+                            options={consolidationData}
+                            placeholder="Select Consolidation Status"
+                            isClearable
+                            classNames={{
+                              control: ({ isFocused }) =>
+                                `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+                                  isFocused
+                                    ? "!border-primary-500"
+                                    : "!border-[#DFEAF2]"
+                                }`,
+                            }}
+                            styles={{
+                              menu: (base) => ({
+                                ...base,
+                                borderRadius: "4px",
+                                boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+                                backgroundColor: "#fff",
+                              }),
+                              option: (base, { isFocused, isSelected }) => ({
+                                ...base,
+                                backgroundColor: isSelected
+                                  ? "var(--primary-500)"
+                                  : isFocused
+                                  ? "var(--primary-100)"
+                                  : "#fff",
+                                color: isSelected ? "#fff" : "#333",
+                                cursor: "pointer",
+                              }),
+                            }}
                           />
-                          <ErrorMessage
-                            name="debt_consolidation_status_id"
-                            component="div"
-                            className="text-red-500 text-xs mt-1"
-                          />
+                          {/* Optional → no error message needed */}
                         </div>
                       </div>
                     </div>
@@ -1192,27 +1340,31 @@ export default function Home() {
 
               <Formik
                 initialValues={{
-                  id: editLeadData?.id || "",
-                  first_name: editLeadData?.first_name || "",
-                  last_name: editLeadData?.last_name || "",
-                  full_name: editLeadData?.full_name || "",
-                  email: editLeadData?.email || "",
-                  phone: editLeadData?.phone || "",
-                  address_line1: editLeadData?.address_line1 || "",
-                  address_line2: editLeadData?.address_line2 || "",
-                  city: editLeadData?.city || "",
-                  state: editLeadData?.state || "",
-                  postal_code: editLeadData?.postal_code || "",
-                  country: editLeadData?.country || "",
+                  id: editLeadData?.id ?? "",
+                  first_name: editLeadData?.first_name ?? "",
+                  last_name: editLeadData?.last_name ?? "",
+                  full_name: editLeadData?.full_name ?? "",
+                  email: editLeadData?.email ?? "",
+                  phone: editLeadData?.phone ?? "",
+
+                  // 🧭 map from nested address.*
+                  address_line1: editLeadData?.address?.line1 ?? "",
+                  address_line2: editLeadData?.address?.line2 ?? "",
+                  city: editLeadData?.address?.city ?? "",
+                  state: editLeadData?.address?.state ?? "",
+                  postal_code: editLeadData?.address?.postal_code ?? "",
+                  country: editLeadData?.address?.country ?? "",
+
                   lead_score:
                     typeof editLeadData?.lead_score === "number"
                       ? editLeadData.lead_score
                       : undefined,
-                  lead_quality: editLeadData?.lead_quality || "",
-                  best_time_to_call: editLeadData?.best_time_to_call || "",
-                  lead_source_id: editLeadData?.lead_source_id || "",
+
+                  lead_quality: editLeadData?.lead_quality ?? "",
+                  best_time_to_call: editLeadData?.best_time_to_call ?? "",
+                  lead_source_id: editLeadData?.lead_source ?? "",
                   debt_consolidation_status_id:
-                    editLeadData?.debt_consolidation_status_id || "",
+                    editLeadData?.debt_consolidation_status ?? "",
                 }}
                 validationSchema={LeadSchema}
                 onSubmit={(values, { setSubmitting, resetForm }) => {
@@ -1242,7 +1394,13 @@ export default function Home() {
                   resetForm(); // ✅ clears after submit
                 }}
               >
-                {({ handleSubmit, isSubmitting }) => (
+                {({
+                  handleSubmit,
+                  isSubmitting,
+                  values,
+                  setFieldValue,
+                  setFieldTouched,
+                }) => (
                   <form onSubmit={handleSubmit}>
                     <div className="w-full">
                       <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -1498,39 +1656,136 @@ export default function Home() {
                           />
                         </div>
 
-                        {/* Lead Source Id */}
+                        {/* Lead Source */}
                         <div className="w-full">
                           <p className="text-secondBlack text-base leading-6 mb-2">
-                            Lead Source Id
+                            Lead Source
                           </p>
-                          <Field
-                            type="text"
-                            name="lead_source_id"
-                            placeholder="uuid-or-text"
-                            className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
-                          />
-                          <ErrorMessage
-                            name="lead_source_id"
-                            component="div"
-                            className="text-red-500 text-xs mt-1"
+                          <Select
+                            value={
+                              (leadSourceData || []).find((opt) => {
+                                const target: any = values.lead_source_id; // can be id | name | {id,name}
+                                const targetIdOrText = target?.id ?? target; // prefer id if object
+                                const norm = (v: any) =>
+                                  String(v ?? "").toLowerCase();
+
+                                return (
+                                  norm(opt.id) === norm(targetIdOrText) || // match by id
+                                  norm(opt.name) === norm(targetIdOrText) // OR match by name
+                                );
+                              }) || null
+                            }
+                            onChange={(selected: any) =>
+                              setFieldValue(
+                                "lead_source_id",
+                                selected ? selected.id : ""
+                              )
+                            }
+                            onBlur={() =>
+                              setFieldTouched("lead_source_id", true)
+                            }
+                            getOptionLabel={(opt: any) => opt.name}
+                            getOptionValue={(opt: any) => String(opt.id)}
+                            options={leadSourceData}
+                            placeholder="Select Lead Source"
+                            isClearable
+                            classNames={{
+                              control: ({ isFocused }: any) =>
+                                `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+                                  isFocused
+                                    ? "!border-primary-500"
+                                    : "!border-[#DFEAF2]"
+                                }`,
+                            }}
+                            styles={{
+                              menu: (base: any) => ({
+                                ...base,
+                                borderRadius: "4px",
+                                boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+                                backgroundColor: "#fff",
+                              }),
+                              option: (
+                                base: any,
+                                { isFocused, isSelected }: any
+                              ) => ({
+                                ...base,
+                                backgroundColor: isSelected
+                                  ? "var(--primary-500)"
+                                  : isFocused
+                                  ? "var(--primary-100)"
+                                  : "#fff",
+                                color: isSelected ? "#fff" : "#333",
+                                cursor: "pointer",
+                              }),
+                            }}
                           />
                         </div>
 
-                        {/* Debt Consolidation Status Id */}
+                        {/* Debt Consolidation Status */}
                         <div className="w-full">
-                          <p className="text-secondBlack  text-base leading-6 mb-2">
-                            Debt Consolidation Status Id
+                          <p className="text-secondBlack text-base leading-6 mb-2">
+                            Debt Consolidation Status
                           </p>
-                          <Field
-                            type="text"
-                            name="debt_consolidation_status_id"
-                            placeholder="optional"
-                            className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
-                          />
-                          <ErrorMessage
-                            name="debt_consolidation_status_id"
-                            component="div"
-                            className="text-red-500 text-xs mt-1"
+                          <Select
+                            value={
+                              (consolidationData || []).find((opt) => {
+                                const target: any =
+                                  values.debt_consolidation_status_id; // id | name | {id,name}
+                                const targetIdOrText = target?.id ?? target;
+                                const norm = (v: any) =>
+                                  String(v ?? "").toLowerCase();
+                                return (
+                                  norm(opt.id) === norm(targetIdOrText) ||
+                                  norm(opt.name) === norm(targetIdOrText)
+                                );
+                              }) || null
+                            }
+                            onChange={(selected: any) =>
+                              setFieldValue(
+                                "debt_consolidation_status_id",
+                                selected ? selected.id : ""
+                              )
+                            }
+                            onBlur={() =>
+                              setFieldTouched(
+                                "debt_consolidation_status_id",
+                                true
+                              )
+                            }
+                            getOptionLabel={(opt: any) => opt.name}
+                            getOptionValue={(opt: any) => String(opt.id)}
+                            options={consolidationData}
+                            placeholder="Select Consolidation Status"
+                            isClearable
+                            classNames={{
+                              control: ({ isFocused }: any) =>
+                                `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+                                  isFocused
+                                    ? "!border-primary-500"
+                                    : "!border-[#DFEAF2]"
+                                }`,
+                            }}
+                            styles={{
+                              menu: (base: any) => ({
+                                ...base,
+                                borderRadius: "4px",
+                                boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+                                backgroundColor: "#fff",
+                              }),
+                              option: (
+                                base: any,
+                                { isFocused, isSelected }: any
+                              ) => ({
+                                ...base,
+                                backgroundColor: isSelected
+                                  ? "var(--primary-500)"
+                                  : isFocused
+                                  ? "var(--primary-100)"
+                                  : "#fff",
+                                color: isSelected ? "#fff" : "#333",
+                                cursor: "pointer",
+                              }),
+                            }}
                           />
                         </div>
                       </div>

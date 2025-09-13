@@ -42,7 +42,7 @@ export default function LoginHome() {
   const handleSubmitLogin = async (values: FormValues) => {
     setLoading(true);
     try {
-      const res = await axiosProvider.post("/sendotp", {
+      const res = await AxiosProvider.post("/sendotp", {
         email: values.email,
         password: values.password,
       });
