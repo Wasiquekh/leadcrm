@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@fullcalendar/common": "^5.11.5",
     "@fullcalendar/core": "^6.1.19",
     "@fullcalendar/daygrid": "^6.1.19",
     "@fullcalendar/interaction": "^6.1.19",
@@ -24,6 +25,7 @@
     "jwt-decode": "^4.0.0",
     "next": "14.2.6",
     "react": "^18",
+    "react-big-calendar": "^1.19.4",
     "react-countup": "^6.5.3",
     "react-datepicker": "^8.0.0",
     "react-dom": "^18",

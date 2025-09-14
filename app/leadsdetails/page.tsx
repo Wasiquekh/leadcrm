@@ -46,6 +46,8 @@ import { IoCloseOutline } from "react-icons/io5";
 import AppCalendar from "../component/AppCalendar";
 import { useSearchParams } from "next/navigation";
 import { AiOutlineSearch } from "react-icons/ai";
+import { tasks } from "firebase-functions/v2";
+import { format, parse, isValid as isValidDate } from "date-fns";
 
 interface Lead {
   id: string;
@@ -117,7 +119,7 @@ interface CreateLeadsActivityForm {
   disposition: string; // id
   agent: string; // optional id
 }
-export interface LeadActivityData {
+interface LeadActivityData {
   id: string;
   disposition: string;
   disposition_id: string;
@@ -126,6 +128,15 @@ export interface LeadActivityData {
   created_at: string; // ISO date string
   agent_name: string;
   agent_id: string;
+}
+export interface LeadDocument {
+  id: string;
+  file_name: string;
+  mime_type: string;
+  file_size: number; // bytes
+  storage_path: string; // e.g. "/uploads/doc/xxxx.png"
+  is_image: boolean;
+  created_at: string; // ISO datetime
 }
 export default function Home() {
   const [isFlyoutFilterOpen, setFlyoutFilterOpen] = useState<boolean>(false);
@@ -159,6 +170,8 @@ export default function Home() {
   const [disposition, setDisposition] = useState<Disposition[]>([]);
   const [agent, setAgent] = useState<Agent[]>([]);
   const [activity, setActivity] = useState<boolean>(false);
+  const [task, setTask] = useState<boolean>(false);
+  const [document, setDocument] = useState<boolean>(false);
   const toggleFilterFlyout = () => setFlyoutFilterOpen(!isFlyoutFilterOpen);
   const [page, setPage] = useState<number>(1);
   const [pageSize] = useState<number>(10);
@@ -166,10 +179,20 @@ export default function Home() {
   const [fetchLeadActivityData, setFetchLeadaActivityData] = useState<
     LeadActivityData[]
   >([]);
-
+  const [reloadKey, setReloadKey] = useState(0);
+  const [docs, setDocs] = useState<LeadDocument[]>([]); // start empty
   // console.log("lead activity",fetchLeadActivityData)
   //  FOR CREATE ACTIVITY LEAD
   // ✅ Validation
+  const CreateTaskSchema = Yup.object({
+    lead_id: Yup.string().trim().required("Lead is required."),
+    assigned_agent_id: Yup.string().trim().required("Agent is required."),
+    details: Yup.string()
+      .trim()
+      .min(3, "Details must be at least 3 characters.")
+      .required("Details are required."),
+    due_at_text: Yup.string().trim().required("Due date is required."),
+  });
   const CreateLeadsActivitySchema = Yup.object({
     conversation: Yup.string()
       .trim()
@@ -177,7 +200,7 @@ export default function Home() {
       .required("Conversation is required"),
     createdAt: Yup.string().nullable(), // optional
     disposition_id: Yup.string().required("Disposition is required"),
-    agent: Yup.string().nullable(), // optional
+    agent_id: Yup.string().required("Agent is required"), // optional
   });
   // ✅ Initial Values
   const INITIAL_VALUES = {
@@ -187,6 +210,23 @@ export default function Home() {
     disposition_id: "",
     agent_id: "",
   };
+  const InitialValuesForCreateTask = {
+    lead_id: leadId,
+    assigned_agent_id: "",
+    details: "",
+    due_at_text: "",
+  };
+  const CreateTaskActivity = async (n: typeof InitialValuesForCreateTask) => {
+    // console.log("Submitted task values:", n);
+    try {
+      await AxiosProvider.post("/leads/tasks/create", n);
+      toast.success("Lead task is created");
+      setHitApi(!hitApi);
+    } catch (error: any) {
+      toast.error("Lead task is not created");
+    }
+  };
+
   // ✅ Submit handler
   const CreateLeadsActivity = async (n: typeof INITIAL_VALUES) => {
     // console.log("Submitted values:", n);
@@ -278,15 +318,86 @@ export default function Home() {
     setFlyoutFilterOpen(true);
     setActivity(true);
   };
+  const openTaskFlyout = () => {
+    setFlyoutFilterOpen(true);
+    setTask(true);
+  };
+  const openDocumentFlyout = () => {
+    setFlyoutFilterOpen(true);
+    setDocument(true);
+  };
   const closeFlyOut = () => {
     setActivity(false);
+    setTask(false);
     setFlyoutFilterOpen(false);
+    setDocument(false);
   };
   const handleChangepagination = (newPage: number) => {
     if (newPage > 0 && newPage <= totalPages) {
       setPage(newPage);
     }
   };
+  const UPLOAD_URL = "/leads/documents/upload"; // 👈 your final endpoint
+
+  const handleSubmitDocument = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!leadId) return;
+    const userID = storage.getUserId();
+    if (!userID) return;
+
+    const form = e.currentTarget;
+    const fileInput = form.elements.namedItem("file") as HTMLInputElement; // 👈 'file'
+    const file = fileInput?.files?.[0];
+    if (!file) return;
+
+    const fd = new FormData();
+    fd.set("lead_id", String(leadId));
+    fd.set("uploaded_by", String(userID));
+    fd.set("file", file); // 👈 actual file blob
+
+    try {
+      await AxiosProvider.post(UPLOAD_URL, fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      toast.success("Document uploaded successfully");
+      form.reset();
+    } catch (err) {
+      console.error(err);
+      toast.error("Upload failed. Please try again.");
+    }
+  };
+  const fetchLeadDocumentData = async () => {
+    if (!leadId) return;
+    try {
+      const res = await AxiosProvider.post("/leads/documents/list", {
+        lead_id: leadId,
+      });
+
+      //console.log("lead document data", res.data.data.data);
+      setDocs(res.data.data.data); // <-- if you want to store in state
+    } catch (error: any) {
+      console.error("Error fetching lead:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchLeadDocumentData();
+  }, [leadId]);
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? ""; // if storage_path is relative
+  const url = (p: string) => (p?.startsWith("http") ? p : `${baseUrl}${p}`);
+  const fmtSize = (b: number) => {
+    const units = ["B", "KB", "MB", "GB"];
+    let i = 0,
+      n = b;
+    while (n >= 1024 && i < units.length - 1) {
+      n /= 1024;
+      i++;
+    }
+    return `${n.toFixed(1)} ${units[i]}`;
+  };
+  const fileExt = (name: string) =>
+    (name?.split(".").pop() || "").toUpperCase();
   const tabs = [
     {
       label: "Activity History",
@@ -412,7 +523,9 @@ export default function Home() {
       content: (
         <>
           {/* Tab content 3 */}
-          <AppCalendar />;{/* End Tab content 3 */}
+
+          <AppCalendar leadId={leadId} reloadKey={reloadKey} />
+          {/* End Tab content 3 */}
         </>
       ),
     },
@@ -421,129 +534,56 @@ export default function Home() {
       content: (
         <>
           {/* Tab content 4 */}
-          <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 whitespace-nowrap">
-            <thead className="text-xs text-[#999999] bg-white">
-              <tr className="border border-tableBorder">
-                <th className="px-3 py-3 md:p-3 border border-tableBorder font-semibold text-secondBlack">
-                  Document
-                </th>
-                <th className="px-3 py-3 md:p-3 border border-tableBorder font-semibold text-secondBlack">
-                  Type
-                </th>
-                <th className="px-3 py-3 md:p-3 border border-tableBorder font-semibold text-secondBlack">
-                  Uploaded On
-                </th>
-                <th className="px-3 py-3 md:p-3 border border-tableBorder font-semibold text-secondBlack">
-                  Status
-                </th>
-                <th className="px-3 py-3 md:p-3 border border-tableBorder font-semibold text-secondBlack">
-                  Owner
-                </th>
-              </tr>
-            </thead>
+          <div className="space-y-3">
+            {docs.length === 0 ? (
+              <p className="text-sm text-gray-500">No documents found</p>
+            ) : (
+              docs.map((d) => (
+                <div
+                  key={d.id}
+                  className="flex items-center gap-3 border border-[#DFEAF2] rounded-[6px] p-3"
+                >
+                  {d.is_image ? (
+                    <img
+                      src={url(d.storage_path)}
+                      alt={d.file_name}
+                      className="h-14 w-14 object-cover rounded"
+                    />
+                  ) : (
+                    <div className="h-14 w-14 flex items-center justify-center rounded bg-gray-100 text-gray-600 text-xs">
+                      {fileExt(d.file_name)}
+                    </div>
+                  )}
 
-            <tbody>
-              <tr className="border border-tableBorder bg-white hover:bg-primary-100 transition-colors">
-                <td className="px-3 py-2 border border-tableBorder text-[#232323]">
-                  Company Profile.pdf
-                </td>
-                <td className="px-3 py-2 border border-tableBorder text-[#232323]">
-                  PDF
-                </td>
-                <td className="px-3 py-2 border border-tableBorder text-[#232323]">
-                  2025-09-06
-                </td>
-                <td className="px-3 py-2 border border-tableBorder">
-                  <span className="inline-flex px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-700">
-                    Verified
-                  </span>
-                </td>
-                <td className="px-3 py-2 border border-tableBorder text-[#232323]">
-                  Naafis
-                </td>
-              </tr>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-firstBlack truncate">
+                      {d.file_name}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {d.mime_type} · {fmtSize(d.file_size)} ·{" "}
+                      {new Date(d.created_at).toLocaleString()}
+                    </p>
+                  </div>
 
-              <tr className="border border-tableBorder bg-white hover:bg-primary-100 transition-colors">
-                <td className="px-3 py-2 border border-tableBorder text-[#232323]">
-                  GST Certificate.pdf
-                </td>
-                <td className="px-3 py-2 border border-tableBorder text-[#232323]">
-                  PDF
-                </td>
-                <td className="px-3 py-2 border border-tableBorder text-[#232323]">
-                  2025-09-07
-                </td>
-                <td className="px-3 py-2 border border-tableBorder">
-                  <span className="inline-flex px-2 py-1 text-xs font-medium rounded bg-indigo-100 text-indigo-700">
-                    Under Review
-                  </span>
-                </td>
-                <td className="px-3 py-2 border border-tableBorder text-[#232323]">
-                  Aamir
-                </td>
-              </tr>
-
-              <tr className="border border-tableBorder bg-white hover:bg-primary-100 transition-colors">
-                <td className="px-3 py-2 border border-tableBorder text-[#232323]">
-                  PAN Card.png
-                </td>
-                <td className="px-3 py-2 border border-tableBorder text-[#232323]">
-                  Image
-                </td>
-                <td className="px-3 py-2 border border-tableBorder text-[#232323]">
-                  2025-09-05
-                </td>
-                <td className="px-3 py-2 border border-tableBorder">
-                  <span className="inline-flex px-2 py-1 text-xs font-medium rounded bg-yellow-100 text-yellow-700">
-                    Pending
-                  </span>
-                </td>
-                <td className="px-3 py-2 border border-tableBorder text-[#232323]">
-                  Sarim
-                </td>
-              </tr>
-
-              <tr className="border border-tableBorder bg-white hover:bg-primary-100 transition-colors">
-                <td className="px-3 py-2 border border-tableBorder text-[#232323]">
-                  Proposal_v2.docx
-                </td>
-                <td className="px-3 py-2 border border-tableBorder text-[#232323]">
-                  DOCX
-                </td>
-                <td className="px-3 py-2 border border-tableBorder text-[#232323]">
-                  2025-09-04
-                </td>
-                <td className="px-3 py-2 border border-tableBorder">
-                  <span className="inline-flex px-2 py-1 text-xs font-medium rounded bg-rose-100 text-rose-700">
-                    Rejected
-                  </span>
-                </td>
-                <td className="px-3 py-2 border border-tableBorder text-[#232323]">
-                  Danish
-                </td>
-              </tr>
-
-              <tr className="border border-tableBorder bg-white hover:bg-primary-100 transition-colors">
-                <td className="px-3 py-2 border border-tableBorder text-[#232323]">
-                  PO_#2025-0911.pdf
-                </td>
-                <td className="px-3 py-2 border border-tableBorder text-[#232323]">
-                  PDF
-                </td>
-                <td className="px-3 py-2 border border-tableBorder text-[#232323]">
-                  2025-09-08
-                </td>
-                <td className="px-3 py-2 border border-tableBorder">
-                  <span className="inline-flex px-2 py-1 text-xs font-medium rounded bg-blue-100 text-blue-700">
-                    In Review
-                  </span>
-                </td>
-                <td className="px-3 py-2 border border-tableBorder text-[#232323]">
-                  Ismail
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                  <a
+                    href={url(d.storage_path)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="py-2 px-3 bg-primary-500 text-white rounded text-sm"
+                  >
+                    View
+                  </a>
+                  <a
+                    href={url(d.storage_path)}
+                    download
+                    className="py-2 px-3 border border-[#DFEAF2] rounded text-sm"
+                  >
+                    Download
+                  </a>
+                </div>
+              ))
+            )}
+          </div>
 
           {/* End Tab content 4 */}
         </>
@@ -594,7 +634,7 @@ export default function Home() {
                   <div className="flex justify-center items-center gap-4">
                     <div
                       className="flex gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 group min-w-32"
-                      onClick={toggleFilterFlyout}
+                      onClick={() => openTaskFlyout()}
                     >
                       <FaNotesMedical className="w-5 h-5 text-white group-hover:text-white" />
                       <p className="text-white text-base font-medium group-hover:text-white">
@@ -605,7 +645,7 @@ export default function Home() {
                   <div className="flex justify-center items-center gap-4">
                     <div
                       className="flex gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 group min-w-32"
-                      onClick={toggleFilterFlyout}
+                      onClick={() => openDocumentFlyout()}
                     >
                       <FaTasks className="w-5 h-5 text-white group-hover:text-white" />
                       <p className="text-white text-base font-medium group-hover:text-white">
@@ -791,6 +831,7 @@ export default function Home() {
               onSubmit={async (values, { setSubmitting }) => {
                 const n = values;
                 await CreateLeadsActivity(n);
+                setReloadKey((k) => k + 1);
                 setSubmitting(false);
               }}
             >
@@ -931,8 +972,8 @@ export default function Home() {
                       ) : null}
                     </div>
 
-                    {/* Agent (optional) */}
-                    <div className="w-full">
+                    {/* Agent  */}
+                    <div className="w-full relative">
                       <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
                         Agent
                       </p>
@@ -982,7 +1023,7 @@ export default function Home() {
                         }}
                       />
                       {touched.agent_id && (errors as any).agent_id ? (
-                        <p className="text-[#A3000E] text-sm mt-1">
+                        <p className="text-red-500 absolute top-[85px] text-xs">
                           {(errors as any).agent_id}
                         </p>
                       ) : null}
@@ -1004,6 +1045,242 @@ export default function Home() {
             </Formik>
 
             {/* {END FORM} */}
+          </div>
+        )}
+        {task && (
+          <div className=" w-full min-h-auto">
+            {/* Flyout content here */}
+            <div className=" flex justify-between mb-4">
+              <p className=" text-primary-600 text-[26px] font-bold leading-9">
+                Create Lead Task
+              </p>
+              <IoCloseOutline
+                onClick={toggleFilterFlyout}
+                className=" h-8 w-8 border border-[#E7E7E7] text-secondBlack rounded cursor-pointer"
+              />
+            </div>
+            <div className=" w-full border-b border-[#E7E7E7] mb-4"></div>
+
+            {/* FORM */}
+            <Formik
+              initialValues={InitialValuesForCreateTask}
+              validationSchema={CreateTaskSchema}
+              onSubmit={async (values, { setSubmitting }) => {
+                await CreateTaskActivity(values); // { lead_id, assigned_agent_id, details, due_at_text }
+                setSubmitting(false);
+              }}
+            >
+              {({
+                values,
+                errors,
+                touched,
+                handleChange,
+                handleSubmit,
+                setFieldValue,
+                setFieldTouched,
+                isSubmitting,
+                isValid,
+              }) => (
+                <form onSubmit={handleSubmit} noValidate>
+                  <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 md:justify-between mb-4 sm:mb-6">
+                    {/* Agent (react-select) */}
+                    <div className="w-full relative">
+                      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+                        Agent
+                      </p>
+                      <Select
+                        value={
+                          (agent || []).find(
+                            (opt: any) =>
+                              String(opt.id) ===
+                              String(values.assigned_agent_id)
+                          ) || null
+                        }
+                        onChange={(selectedOption: any) =>
+                          setFieldValue(
+                            "assigned_agent_id",
+                            selectedOption ? selectedOption.id : ""
+                          )
+                        }
+                        onBlur={() =>
+                          setFieldTouched("assigned_agent_id", true)
+                        }
+                        getOptionLabel={(opt: any) => opt.name}
+                        getOptionValue={(opt: any) => String(opt.id)}
+                        options={agent}
+                        placeholder="Select Agent"
+                        isClearable
+                        classNames={{
+                          control: ({ isFocused }: any) =>
+                            `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+                              isFocused
+                                ? "!border-primary-500"
+                                : "!border-[#DFEAF2]"
+                            }`,
+                        }}
+                        styles={{
+                          menu: (base: any) => ({
+                            ...base,
+                            borderRadius: "4px",
+                            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+                            backgroundColor: "#fff",
+                          }),
+                          option: (
+                            base: any,
+                            { isFocused, isSelected }: any
+                          ) => ({
+                            ...base,
+                            backgroundColor: isSelected
+                              ? "var(--primary-500)"
+                              : isFocused
+                              ? "var(--primary-100)"
+                              : "#fff",
+                            color: isSelected ? "#fff" : "#333",
+                            cursor: "pointer",
+                          }),
+                        }}
+                      />
+                      {touched.assigned_agent_id &&
+                      (errors as any).assigned_agent_id ? (
+                        <p className="text-red-500 absolute top-[85px] text-xs">
+                          {(errors as any).assigned_agent_id}
+                        </p>
+                      ) : null}
+                    </div>
+
+                    {/* Detail */}
+                    <div className="w-full relative">
+                      <p className="text-secondBlack font-medium text-base leading-6 mb-2">
+                        Detail
+                      </p>
+                      <input
+                        type="text"
+                        name="details"
+                        value={values.details}
+                        onChange={handleChange}
+                        onBlur={() => setFieldTouched("details", true)}
+                        placeholder="Enter details"
+                        className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                      />
+                      {touched.details && (errors as any).details ? (
+                        <p className="text-red-500 absolute top-[85px] text-xs">
+                          {(errors as any).details}
+                        </p>
+                      ) : null}
+                    </div>
+
+                    {/* Due At (DatePicker) */}
+                    {/* Due At (DatePicker) */}
+                    <div className="w-full relative">
+                      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+                        Due At
+                      </p>
+                      <DatePicker
+                        selected={
+                          values.due_at_text
+                            ? (() => {
+                                const d = parse(
+                                  values.due_at_text,
+                                  "yyyy-MM-dd h:mmaaa",
+                                  new Date()
+                                );
+                                return isValidDate(d) ? d : null; // ✅ now it's the date-fns function
+                              })()
+                            : null
+                        }
+                        onChange={(date: Date | null) => {
+                          const formatted = date
+                            ? format(date, "yyyy-MM-dd h:mmaaa").toLowerCase()
+                            : "";
+                          setFieldValue("due_at_text", formatted);
+                        }}
+                        onBlur={() => setFieldTouched("due_at_text", true)}
+                        name="due_at_text"
+                        dateFormat="yyyy-MM-dd"
+                        placeholderText="yyyy-mm-dd"
+                        className="hover:shadow-hoverInputShadow focus-border-primary 
+      !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 
+      font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
+                        popperClassName="custom-datepicker"
+                        dayClassName={(date) => {
+                          const today = new Date().toDateString();
+                          const selectedDate = values.due_at_text
+                            ? parse(
+                                values.due_at_text,
+                                "yyyy-MM-dd h:mmaaa",
+                                new Date()
+                              ).toDateString()
+                            : null;
+                          if (today === date.toDateString())
+                            return "bg-[#FFF0F1] text-[#A3000E]";
+                          if (selectedDate === date.toDateString())
+                            return "bg-[#A3000E] text-white";
+                          return "hover:bg-[#FFCCD0] hover:text-[#A3000E]";
+                        }}
+                      />
+                      {touched.due_at_text && (errors as any).due_at_text ? (
+                        <p className="text-red-500 absolute top-[85px] text-xs">
+                          {(errors as any).due_at_text}
+                        </p>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  {/* Buttons */}
+                  <div className="mt-10 w-full flex flex-col gap-y-4 md:flex-row justify-between items-center ">
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className=" py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full  text-center hover:bg-primary-700 hover:text-white "
+                    >
+                      Create Task Activity
+                    </button>
+                  </div>
+                </form>
+              )}
+            </Formik>
+
+            {/* {END FORM} */}
+          </div>
+        )}
+        {document && (
+          <div className="w-full min-h-auto">
+            <div className="flex justify-between mb-4">
+              <p className="text-primary-600 text-[26px] font-bold leading-9">
+                Create Document
+              </p>
+              <IoCloseOutline
+                onClick={toggleFilterFlyout}
+                className="h-8 w-8 border border-[#E7E7E7] text-secondBlack rounded cursor-pointer"
+              />
+            </div>
+            <div className="w-full border-b border-[#E7E7E7] mb-4"></div>
+
+            <form onSubmit={handleSubmitDocument} encType="multipart/form-data">
+              <div className="w-full">
+                <div className="w-full relative">
+                  <p className="text-secondBlack font-medium text-base leading-6 mb-2">
+                    Document
+                  </p>
+                  <input
+                    type="file"
+                    name="file" // 👈 matches backend ("file")
+                    required
+                    accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.pdf,.doc,.docx"
+                    className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack bg-white"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-10 w-full flex flex-col gap-y-4 md:flex-row justify-between items-center ">
+                <button
+                  type="submit"
+                  className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
+                >
+                  Submit Document
+                </button>
+              </div>
+            </form>
           </div>
         )}
       </div>
