@@ -138,6 +138,27 @@ export interface LeadDocument {
   is_image: boolean;
   created_at: string; // ISO datetime
 }
+export interface ActivityHistory {
+  id: string;
+  agent_id: string;
+  agent_name: string;
+  disposition_id: string;
+  disposition: string;
+  conversation: string;
+  occurred_at: string; // ISO datetime (e.g. "2025-09-13T18:30:00.000Z")
+  created_at: string; // ISO datetime
+}
+const UPDATE_ACTIVITY_URL = "/leads/update/activity"; // <-- set your real update endpoint
+
+type UpdateActivityPayload = {
+  id: string;
+  lead_id?: string;
+  conversation?: string;
+  occurred_at?: string;
+  disposition_id?: string;
+  agent_id?: string;
+};
+
 export default function Home() {
   const [isFlyoutFilterOpen, setFlyoutFilterOpen] = useState<boolean>(false);
   const isChecking = useAuthRedirect();
@@ -172,6 +193,8 @@ export default function Home() {
   const [activity, setActivity] = useState<boolean>(false);
   const [task, setTask] = useState<boolean>(false);
   const [document, setDocument] = useState<boolean>(false);
+  const [updateAcitivityHistory, setUpdateActivityHistory] =
+    useState<boolean>(false);
   const toggleFilterFlyout = () => setFlyoutFilterOpen(!isFlyoutFilterOpen);
   const [page, setPage] = useState<number>(1);
   const [pageSize] = useState<number>(10);
@@ -179,8 +202,12 @@ export default function Home() {
   const [fetchLeadActivityData, setFetchLeadaActivityData] = useState<
     LeadActivityData[]
   >([]);
+  //console.log("INTERFACE", fetchLeadActivityData);
   const [reloadKey, setReloadKey] = useState(0);
   const [docs, setDocs] = useState<LeadDocument[]>([]); // start empty
+  const [activityHistoryData, setActivityHistoryData] =
+    useState<ActivityHistory>(null);
+  console.log("lead activity edit data", activityHistoryData);
   // console.log("lead activity",fetchLeadActivityData)
   //  FOR CREATE ACTIVITY LEAD
   // ✅ Validation
@@ -202,6 +229,14 @@ export default function Home() {
     disposition_id: Yup.string().required("Disposition is required"),
     agent_id: Yup.string().required("Agent is required"), // optional
   });
+  async function UpdateLeadsActivity(payload: UpdateActivityPayload) {
+    console.log("UpdateLeadsActivity → payload:", payload);
+    const res = await AxiosProvider.post(UPDATE_ACTIVITY_URL, payload, {
+      headers: { "Content-Type": "application/json" },
+    });
+    console.log("UpdateLeadsActivity → response:", res.data);
+    return res.data;
+  }
   // ✅ Initial Values
   const INITIAL_VALUES = {
     lead_id: leadId,
@@ -210,6 +245,16 @@ export default function Home() {
     disposition_id: "",
     agent_id: "",
   };
+  const formInitialValues = activityHistoryData
+    ? {
+        id: activityHistoryData.id,
+        lead_id: leadId,
+        conversation: activityHistoryData.conversation ?? "",
+        occurred_at: activityHistoryData.occurred_at ?? "",
+        disposition_id: activityHistoryData.disposition_id ?? "",
+        agent_id: activityHistoryData.agent_id ?? "",
+      }
+    : { id: "", ...INITIAL_VALUES };
   const InitialValuesForCreateTask = {
     lead_id: leadId,
     assigned_agent_id: "",
@@ -326,11 +371,17 @@ export default function Home() {
     setFlyoutFilterOpen(true);
     setDocument(true);
   };
+  const openActivityHistoryFlyout = (activity: ActivityHistory) => {
+    setFlyoutFilterOpen(true);
+    setUpdateActivityHistory(true);
+    setActivityHistoryData(activity);
+  };
   const closeFlyOut = () => {
     setActivity(false);
     setTask(false);
     setFlyoutFilterOpen(false);
     setDocument(false);
+    setUpdateActivityHistory(false);
   };
   const handleChangepagination = (newPage: number) => {
     if (newPage > 0 && newPage <= totalPages) {
@@ -409,83 +460,82 @@ export default function Home() {
               Today
             </h2>
             {fetchLeadActivityData && fetchLeadActivityData.length > 0 ? (
-              fetchLeadActivityData.map((activity) => (
-                <div
-                  key={activity.id}
-                  className="w-full flex gap-8 hover:bg-primary-100 py-2 px-2 text-base rounded"
-                >
-                  {/* Left side date & time from occurred_at */}
-                  <div className="flex gap-2">
-                    <div>
-                      <TbActivity className=" bg-primary-500 text-white p-1 text-2xl rounded-full " />
-                    </div>
-                    <div>
-                      <p>
-                        {activity.occurred_at
-                          ? new Date(activity.occurred_at).toLocaleDateString(
-                              "en-GB",
-                              {
-                                day: "2-digit",
-                                month: "short",
-                                timeZone: "Asia/Kolkata",
-                              }
-                            )
-                          : "--"}
-                      </p>
-                      <p>
-                        {activity.occurred_at
-                          ? new Date(activity.occurred_at).toLocaleTimeString(
-                              "en-US",
-                              {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                hour12: true,
-                                timeZone: "Asia/Kolkata",
-                              }
-                            )
-                          : "--"}
-                      </p>
-                    </div>
-                  </div>
+              fetchLeadActivityData.map((activity) => {
+                const occurred = activity.occurred_at
+                  ? new Date(activity.occurred_at)
+                  : null;
+                const created = activity.created_at
+                  ? new Date(activity.created_at)
+                  : null;
 
-                  {/* Right side details */}
-                  <div>
-                    <div>
-                      <p>
+                const occurredDate =
+                  occurred?.toLocaleDateString("en-GB", {
+                    day: "2-digit",
+                    month: "short",
+                    timeZone: "Asia/Kolkata",
+                  }) ?? "--";
+                const occurredTime =
+                  occurred?.toLocaleTimeString("en-US", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true,
+                    timeZone: "Asia/Kolkata",
+                  }) ?? "--";
+
+                const createdDate =
+                  created?.toLocaleDateString("en-GB", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                    timeZone: "Asia/Kolkata",
+                  }) ?? "--";
+                const createdTime =
+                  created?.toLocaleTimeString("en-US", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true,
+                    timeZone: "Asia/Kolkata",
+                  }) ?? "--";
+
+                return (
+                  <div
+                    key={activity.id}
+                    className="w-full flex items-center justify-between gap-4 hover:bg-primary-100 py-2 px-2 rounded"
+                  >
+                    {/* Left: icon + occurred date/time */}
+                    <div className="flex items-center gap-2 shrink-0">
+                      <TbActivity className="bg-primary-500 text-white p-1 text-2xl rounded-full" />
+                      <div className="leading-5 text-sm">
+                        <p>{occurredDate}</p>
+                        <p>{occurredTime}</p>
+                      </div>
+                    </div>
+
+                    {/* Middle: details */}
+                    <div className="flex-1 min-w-0">
+                      <p className="truncate">
                         <span className="text-primary-600">
                           {activity.disposition}:
                         </span>{" "}
                         {activity.conversation}
                       </p>
-                      <p>
-                        Added by {activity.agent_name} on{" "}
-                        {activity.created_at
-                          ? new Date(activity.created_at).toLocaleDateString(
-                              "en-GB",
-                              {
-                                day: "2-digit",
-                                month: "short",
-                                year: "numeric",
-                                timeZone: "Asia/Kolkata",
-                              }
-                            )
-                          : "--"}{" "}
-                        {activity.created_at
-                          ? new Date(activity.created_at).toLocaleTimeString(
-                              "en-US",
-                              {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                hour12: true,
-                                timeZone: "Asia/Kolkata",
-                              }
-                            )
-                          : "--"}
+                      <p className="text-xs text-gray-500">
+                        Added by {activity.agent_name} on {createdDate}{" "}
+                        {createdTime}
                       </p>
                     </div>
+
+                    {/* Right: Edit button */}
+                    <button
+                      type="button"
+                      onClick={() => openActivityHistoryFlyout(activity)}
+                      className="shrink-0 py-1.5 px-3 bg-primary-500 text-white rounded text-sm hover:bg-primary-600"
+                    >
+                      Edit
+                    </button>
                   </div>
-                </div>
-              ))
+                );
+              })
             ) : (
               <p className="text-center text-gray-500 py-4">No data found</p>
             )}
@@ -688,10 +738,17 @@ export default function Home() {
                           {data?.address.state || "-"}
                         </p>
                       </div>
+
                       <div className=" flex text-white items-center  gap-2 mb-3">
                         <AiOutlineSearch />
                         <p className=" text-sm font-medium leading-none">
                           {data?.address.postal_code || "-"}
+                        </p>
+                      </div>
+                      <div className=" flex text-white items-center  gap-2 mb-3">
+                        <AiOutlineSearch />
+                        <p className=" text-sm font-medium leading-none">
+                          {data?.address.state || "-"}
                         </p>
                       </div>
                     </div>
@@ -1281,6 +1338,260 @@ export default function Home() {
                 </button>
               </div>
             </form>
+          </div>
+        )}
+        {updateAcitivityHistory && (
+          <div className=" w-full min-h-auto">
+            {/* Flyout content here */}
+            <div className=" flex justify-between mb-4">
+              <p className=" text-primary-600 text-[26px] font-bold leading-9">
+                Update Lead Activity
+              </p>
+              <IoCloseOutline
+                onClick={toggleFilterFlyout}
+                className=" h-8 w-8 border border-[#E7E7E7] text-secondBlack rounded cursor-pointer"
+              />
+            </div>
+            <div className=" w-full border-b border-[#E7E7E7] mb-4"></div>
+
+            {/* FORM */}
+
+            <Formik
+              enableReinitialize
+              initialValues={formInitialValues}
+              validationSchema={CreateLeadsActivitySchema}
+              onSubmit={async (values, { setSubmitting }) => {
+                console.log("Formik values (raw):", values);
+                const payload: UpdateActivityPayload = {
+                  id: values.id, // required for update
+                  lead_id: values.lead_id,
+                  conversation: values.conversation,
+                  occurred_at: values.occurred_at || undefined,
+                  disposition_id: values.disposition_id || undefined,
+                  agent_id: values.agent_id || undefined,
+                };
+                console.log("Update payload:", payload);
+                try {
+                  await UpdateLeadsActivity(payload);
+                  setReloadKey((k) => k + 1);
+                } catch (e) {
+                  console.error("API error:", e);
+                } finally {
+                  setSubmitting(false);
+                }
+              }}
+            >
+              {({
+                values,
+                errors,
+                touched,
+                handleChange,
+                handleSubmit,
+                setFieldValue,
+                setFieldTouched,
+                isSubmitting,
+              }) => (
+                <form onSubmit={handleSubmit} noValidate>
+                  {/* GRID: 2 inputs per row */}
+                  <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 md:justify-between mb-4 sm:mb-6">
+                    {/* Conversation (required) */}
+                    <div className="w-full relative">
+                      <p className="text-secondBlack font-medium text-base leading-6 mb-2">
+                        Conversation
+                      </p>
+                      <input
+                        type="text"
+                        name="conversation"
+                        value={values.conversation}
+                        onChange={handleChange}
+                        onBlur={() => setFieldTouched("conversation", true)}
+                        placeholder="Enter conversation"
+                        className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                      />
+                      {touched.conversation && (errors as any).conversation ? (
+                        <p className="text-red-500 absolute top-[85px] text-xs">
+                          {(errors as any).conversation}
+                        </p>
+                      ) : null}
+                    </div>
+
+                    {/* Occurred At (optional) */}
+                    <div className="w-full relative">
+                      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+                        Created At
+                      </p>
+                      <DatePicker
+                        selected={
+                          values.occurred_at
+                            ? new Date(values.occurred_at)
+                            : null
+                        }
+                        onChange={(date: Date | null) =>
+                          setFieldValue(
+                            "occurred_at",
+                            date ? date.toISOString() : ""
+                          )
+                        }
+                        onBlur={() => setFieldTouched("occurred_at", true)}
+                        name="occurred_at"
+                        dateFormat="yyyy-MM-dd"
+                        placeholderText="yyyy-mm-dd"
+                        className="hover:shadow-hoverInputShadow focus-border-primary 
+              !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 
+              font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
+                        popperClassName="custom-datepicker"
+                        dayClassName={(date) => {
+                          const today = new Date().toDateString();
+                          const selectedDate = values.occurred_at
+                            ? new Date(values.occurred_at).toDateString()
+                            : null;
+                          if (today === date.toDateString())
+                            return "bg-[#FFF0F1] text-[#A3000E]";
+                          if (selectedDate === date.toDateString())
+                            return "bg-[#A3000E] text-white";
+                          return "hover:bg-[#FFCCD0] hover:text-[#A3000E]";
+                        }}
+                      />
+                      {touched.occurred_at && (errors as any).occurred_at ? (
+                        <p className="text-red-500 absolute top-[85px] text-xs">
+                          {(errors as any).occurred_at}
+                        </p>
+                      ) : null}
+                    </div>
+
+                    {/* Disposition (required) */}
+                    <div className="w-full relative">
+                      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+                        Disposition
+                      </p>
+                      <Select
+                        value={
+                          (disposition || []).find(
+                            (opt: any) =>
+                              String(opt.id) === String(values.disposition_id)
+                          ) || null
+                        }
+                        onChange={(selectedOption: any) =>
+                          setFieldValue(
+                            "disposition_id",
+                            selectedOption ? String(selectedOption.id) : ""
+                          )
+                        }
+                        onBlur={() => setFieldTouched("disposition_id", true)}
+                        getOptionLabel={(opt: any) => opt.name}
+                        getOptionValue={(opt: any) => String(opt.id)}
+                        options={disposition}
+                        placeholder="Select Disposition"
+                        isClearable
+                        classNames={{
+                          control: ({ isFocused }) =>
+                            `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+                              isFocused
+                                ? "!border-primary-500"
+                                : "!border-[#DFEAF2]"
+                            }`,
+                        }}
+                        styles={{
+                          menu: (base) => ({
+                            ...base,
+                            borderRadius: "4px",
+                            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+                            backgroundColor: "#fff",
+                          }),
+                          option: (base, { isFocused, isSelected }) => ({
+                            ...base,
+                            backgroundColor: isSelected
+                              ? "var(--primary-500)"
+                              : isFocused
+                              ? "var(--primary-100)"
+                              : "#fff",
+                            color: isSelected ? "#fff" : "#333",
+                            cursor: "pointer",
+                          }),
+                        }}
+                      />
+                      {touched.disposition_id &&
+                      (errors as any).disposition_id ? (
+                        <p className="text-red-500 absolute top-[85px] text-xs">
+                          {(errors as any).disposition_id}
+                        </p>
+                      ) : null}
+                    </div>
+
+                    {/* Agent */}
+                    <div className="w-full relative">
+                      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+                        Agent
+                      </p>
+                      <Select
+                        value={
+                          (agent || []).find(
+                            (opt: any) =>
+                              String(opt.id) === String(values.agent_id)
+                          ) || null
+                        }
+                        onChange={(selectedOption: any) =>
+                          setFieldValue(
+                            "agent_id",
+                            selectedOption ? String(selectedOption.id) : ""
+                          )
+                        }
+                        onBlur={() => setFieldTouched("agent_id", true)}
+                        getOptionLabel={(opt: any) => opt.name}
+                        getOptionValue={(opt: any) => String(opt.id)}
+                        options={agent}
+                        placeholder="Select Agent"
+                        isClearable
+                        classNames={{
+                          control: ({ isFocused }) =>
+                            `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+                              isFocused
+                                ? "!border-primary-500"
+                                : "!border-[#DFEAF2]"
+                            }`,
+                        }}
+                        styles={{
+                          menu: (base) => ({
+                            ...base,
+                            borderRadius: "4px",
+                            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+                            backgroundColor: "#fff",
+                          }),
+                          option: (base, { isFocused, isSelected }) => ({
+                            ...base,
+                            backgroundColor: isSelected
+                              ? "var(--primary-500)"
+                              : isFocused
+                              ? "var(--primary-100)"
+                              : "#fff",
+                            color: isSelected ? "#fff" : "#333",
+                            cursor: "pointer",
+                          }),
+                        }}
+                      />
+                      {touched.agent_id && (errors as any).agent_id ? (
+                        <p className="text-red-500 absolute top-[85px] text-xs">
+                          {(errors as any).agent_id}
+                        </p>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  {/* Buttons */}
+                  <div className="mt-10 w-full flex flex-col gap-y-4 md:flex-row justify-between items-center ">
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className=" py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full  text-center hover:bg-primary-700 hover:text-white "
+                    >
+                      Update Lead Activity
+                    </button>
+                  </div>
+                </form>
+              )}
+            </Formik>
+
+            {/* {END FORM} */}
           </div>
         )}
       </div>
