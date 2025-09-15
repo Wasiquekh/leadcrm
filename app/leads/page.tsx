@@ -1465,6 +1465,584 @@ export default function Home() {
               </div>
               <div className=" w-full border-b border-[#E7E7E7] mb-4"></div>
               {/* FORM */}
+              <Formik
+                enableReinitialize
+                initialValues={{
+                  id: editLeadData?.id ?? "",
+                  first_name: editLeadData?.first_name ?? "",
+                  last_name: editLeadData?.last_name ?? "",
+                  full_name: editLeadData?.full_name ?? "",
+                  email: editLeadData?.email ?? "",
+                  phone: editLeadData?.phone ?? "",
+                  whatsapp_number: editLeadData?.whatsapp_number ?? "", // same as create
+                  address_line1: editLeadData?.address?.line1 ?? "",
+                  address_line2: editLeadData?.address?.line2 ?? "",
+                  city: editLeadData?.address?.city ?? "",
+                  state: editLeadData?.address?.state ?? "",
+                  postal_code: editLeadData?.address?.postal_code ?? "",
+                  country: editLeadData?.address?.country ?? "",
+                  lead_score:
+                    typeof editLeadData?.lead_score === "number"
+                      ? editLeadData.lead_score
+                      : undefined,
+                  lead_quality: editLeadData?.lead_quality ?? "",
+                  best_time_to_call: editLeadData?.best_time_to_call ?? "",
+
+                  // keep these EMPTY so submitting without change won't update:
+                  lead_source_id: "",
+                  debt_consolidation_status_id: "",
+                  consolidated_credit_status_id: "",
+                }}
+                validationSchema={LeadSchema}
+                onSubmit={(values, { setSubmitting, resetForm }) => {
+                  const value: CreateLead = {
+                    id: values.id,
+                    first_name: values.first_name,
+                    last_name: values.last_name,
+                    full_name: values.full_name,
+                    email: values.email,
+                    phone: values.phone || undefined,
+                    whatsapp_number: values.whatsapp_number || undefined,
+                    address_line1: values.address_line1 || undefined,
+                    address_line2: values.address_line2 || undefined,
+                    city: values.city || undefined,
+                    state: values.state || undefined,
+                    postal_code: values.postal_code || undefined,
+                    country: values.country || undefined,
+                    lead_score: values.lead_score ?? undefined,
+                    lead_quality: values.lead_quality || undefined,
+                    best_time_to_call: values.best_time_to_call || undefined,
+                    lead_source_id: values.lead_source_id || undefined,
+                    debt_consolidation_status_id:
+                      values.debt_consolidation_status_id || undefined,
+                    consolidated_credit_status_id:
+                      values.consolidated_credit_status_id || undefined,
+                  };
+
+                  handleUpdateLead(value);
+                  setSubmitting(false);
+                  resetForm();
+                }}
+              >
+                {({
+                  handleSubmit,
+                  values,
+                  setFieldValue,
+                  setFieldTouched,
+                  isSubmitting,
+                }) =>
+                  (() => {
+                    const norm = (v: any) => String(v ?? "").toLowerCase();
+
+                    // Prefill displays (show existing value until user picks something new)
+                    const leadSourcePrefill = editLeadData?.lead_source; // id | name | {id,name}
+                    const leadSourceDisplay = values.lead_source_id
+                      ? (leadSourceData || []).find(
+                          (o: any) => norm(o.id) === norm(values.lead_source_id)
+                        ) || null
+                      : (leadSourceData || []).find(
+                          (o: any) =>
+                            norm(o.id) ===
+                              norm(
+                                (leadSourcePrefill as any)?.id ??
+                                  leadSourcePrefill
+                              ) ||
+                            norm(o.name) ===
+                              norm(
+                                (leadSourcePrefill as any)?.name ??
+                                  leadSourcePrefill
+                              )
+                        ) || null;
+
+                    const debtPrefill = editLeadData?.debt_consolidation_status; // id | name | {id,name}
+                    const debtDisplay = values.debt_consolidation_status_id
+                      ? (debtConsolidation || []).find(
+                          (o: any) =>
+                            norm(o.id) ===
+                            norm(values.debt_consolidation_status_id)
+                        ) || null
+                      : (debtConsolidation || []).find(
+                          (o: any) =>
+                            norm(o.id) ===
+                              norm((debtPrefill as any)?.id ?? debtPrefill) ||
+                            norm(o.name) ===
+                              norm((debtPrefill as any)?.name ?? debtPrefill)
+                        ) || null;
+
+                    const creditPrefill =
+                      editLeadData?.consolidated_credit_status; // id | name | {id,name}
+                    const creditDisplay = values.consolidated_credit_status_id
+                      ? (consolidationData || []).find(
+                          (o: any) =>
+                            norm(o.id) ===
+                            norm(values.consolidated_credit_status_id)
+                        ) || null
+                      : (consolidationData || []).find(
+                          (o: any) =>
+                            norm(o.id) ===
+                              norm(
+                                (creditPrefill as any)?.id ?? creditPrefill
+                              ) ||
+                            norm(o.name) ===
+                              norm(
+                                (creditPrefill as any)?.name ?? creditPrefill
+                              )
+                        ) || null;
+
+                    return (
+                      <form onSubmit={handleSubmit}>
+                        <div className="w-full">
+                          <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            {/* First Name */}
+                            <div className="w-full">
+                              <p className="text-secondBlack  text-base leading-6 mb-2">
+                                First Name
+                              </p>
+                              <Field
+                                type="text"
+                                name="first_name"
+                                placeholder="Alexandre"
+                                className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                              />
+                              <ErrorMessage
+                                name="first_name"
+                                component="div"
+                                className="text-red-500 text-xs mt-1"
+                              />
+                            </div>
+
+                            {/* Last Name */}
+                            <div className="w-full">
+                              <p className="text-secondBlack  text-base leading-6 mb-2">
+                                Last Name
+                              </p>
+                              <Field
+                                type="text"
+                                name="last_name"
+                                placeholder="Dumas"
+                                className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                              />
+                              <ErrorMessage
+                                name="last_name"
+                                component="div"
+                                className="text-red-500 text-xs mt-1"
+                              />
+                            </div>
+
+                            {/* Full Name */}
+                            <div className="w-full">
+                              <p className="text-secondBlack  text-base leading-6 mb-2">
+                                Full Name
+                              </p>
+                              <Field
+                                type="text"
+                                name="full_name"
+                                placeholder="Alexandre Dumas"
+                                className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                              />
+                              <ErrorMessage
+                                name="full_name"
+                                component="div"
+                                className="text-red-500 text-xs mt-1"
+                              />
+                            </div>
+
+                            {/* Email */}
+                            <div className="w-full">
+                              <p className="text-secondBlack  text-base leading-6 mb-2">
+                                Email
+                              </p>
+                              <Field
+                                type="email"
+                                name="email"
+                                placeholder="alexandre@example.com"
+                                className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                              />
+                              <ErrorMessage
+                                name="email"
+                                component="div"
+                                className="text-red-500 text-xs mt-1"
+                              />
+                            </div>
+
+                            {/* Phone */}
+                            <div className="w-full">
+                              <p className="text-secondBlack  text-base leading-6 mb-2">
+                                Phone
+                              </p>
+                              <Field
+                                type="text"
+                                name="phone"
+                                placeholder="+91 9XXXXXXXXX"
+                                className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                              />
+                              <ErrorMessage
+                                name="phone"
+                                component="div"
+                                className="text-red-500 text-xs mt-1"
+                              />
+                            </div>
+
+                            {/* WhatsApp Number */}
+                            <div className="w-full">
+                              <p className="text-secondBlack text-base leading-6 mb-2">
+                                WhatsApp Number
+                              </p>
+                              <Field
+                                type="text"
+                                name="whatsapp_number"
+                                placeholder="+91 9XXXXXXXXX"
+                                className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                              />
+                              <ErrorMessage
+                                name="whatsapp_number"
+                                component="div"
+                                className="text-red-500 text-xs mt-1"
+                              />
+                            </div>
+
+                            {/* Address Line 1 */}
+                            <div className="w-full">
+                              <p className="text-secondBlack text-base leading-6 mb-2">
+                                Address Line 1
+                              </p>
+                              <Field
+                                type="text"
+                                name="address_line1"
+                                placeholder="Street, House no."
+                                className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                              />
+                              <ErrorMessage
+                                name="address_line1"
+                                component="div"
+                                className="text-red-500 text-xs mt-1"
+                              />
+                            </div>
+
+                            {/* Address Line 2 */}
+                            <div className="w-full">
+                              <p className="text-secondBlack  text-base leading-6 mb-2">
+                                Address Line 2
+                              </p>
+                              <Field
+                                type="text"
+                                name="address_line2"
+                                placeholder="Apartment, Suite, etc."
+                                className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                              />
+                              <ErrorMessage
+                                name="address_line2"
+                                component="div"
+                                className="text-red-500 text-xs mt-1"
+                              />
+                            </div>
+
+                            {/* City */}
+                            <div className="w-full">
+                              <p className="text-secondBlack  text-base leading-6 mb-2">
+                                City
+                              </p>
+                              <Field
+                                type="text"
+                                name="city"
+                                placeholder="Mumbai"
+                                className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                              />
+                              <ErrorMessage
+                                name="city"
+                                component="div"
+                                className="text-red-500 text-xs mt-1"
+                              />
+                            </div>
+
+                            {/* State */}
+                            <div className="w-full">
+                              <p className="text-secondBlack  text-base leading-6 mb-2">
+                                State
+                              </p>
+                              <Field
+                                type="text"
+                                name="state"
+                                placeholder="Maharashtra"
+                                className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                              />
+                              <ErrorMessage
+                                name="state"
+                                component="div"
+                                className="text-red-500 text-xs mt-1"
+                              />
+                            </div>
+
+                            {/* Postal Code */}
+                            <div className="w-full">
+                              <p className="text-secondBlack  text-base leading-6 mb-2">
+                                Postal Code
+                              </p>
+                              <Field
+                                type="text"
+                                name="postal_code"
+                                placeholder="400071"
+                                className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                              />
+                              <ErrorMessage
+                                name="postal_code"
+                                component="div"
+                                className="text-red-500 text-xs mt-1"
+                              />
+                            </div>
+
+                            {/* Country */}
+                            <div className="w-full">
+                              <p className="text-secondBlack  text-base leading-6 mb-2">
+                                Country
+                              </p>
+                              <Field
+                                type="text"
+                                name="country"
+                                placeholder="India"
+                                className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                              />
+                              <ErrorMessage
+                                name="country"
+                                component="div"
+                                className="text-red-500 text-xs mt-1"
+                              />
+                            </div>
+
+                            {/* Lead Score */}
+                            <div className="w-full">
+                              <p className="text-secondBlack  text-base leading-6 mb-2">
+                                Lead Score
+                              </p>
+                              <Field
+                                type="number"
+                                name="lead_score"
+                                placeholder="e.g., 75"
+                                className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                              />
+                              <ErrorMessage
+                                name="lead_score"
+                                component="div"
+                                className="text-red-500 text-xs mt-1"
+                              />
+                            </div>
+
+                            {/* Lead Quality */}
+                            <div className="w-full">
+                              <p className="text-secondBlack  text-base leading-6 mb-2">
+                                Lead Quality
+                              </p>
+                              <Field
+                                type="text"
+                                name="lead_quality"
+                                placeholder="Hot / Warm / Cold"
+                                className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                              />
+                              <ErrorMessage
+                                name="lead_quality"
+                                component="div"
+                                className="text-red-500 text-xs mt-1"
+                              />
+                            </div>
+
+                            {/* Best Time to Call */}
+                            <div className="w-full">
+                              <p className="text-secondBlack text-base leading-6 mb-2">
+                                Best Time to Call
+                              </p>
+                              <Field
+                                type="text"
+                                name="best_time_to_call"
+                                placeholder="e.g., 3–5 PM"
+                                className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                              />
+                              <ErrorMessage
+                                name="best_time_to_call"
+                                component="div"
+                                className="text-red-500 text-xs mt-1"
+                              />
+                            </div>
+
+                            {/* Lead Source */}
+                            <div className="w-full">
+                              <p className="text-secondBlack text-base leading-6 mb-2">
+                                Lead Source
+                              </p>
+                              <Select
+                                value={leadSourceDisplay}
+                                onChange={(selected: any) =>
+                                  setFieldValue(
+                                    "lead_source_id",
+                                    selected ? selected.id : ""
+                                  )
+                                }
+                                onBlur={() =>
+                                  setFieldTouched("lead_source_id", true)
+                                }
+                                getOptionLabel={(opt: any) => opt.name}
+                                getOptionValue={(opt: any) => String(opt.id)}
+                                options={leadSourceData}
+                                placeholder="Select Lead Source"
+                                isClearable
+                                classNames={{
+                                  control: ({ isFocused }: any) =>
+                                    `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+                                      isFocused
+                                        ? "!border-primary-500"
+                                        : "!border-[#DFEAF2]"
+                                    }`,
+                                }}
+                                styles={{
+                                  menu: (base: any) => ({
+                                    ...base,
+                                    borderRadius: "4px",
+                                    boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+                                    backgroundColor: "#fff",
+                                  }),
+                                  option: (
+                                    base: any,
+                                    { isFocused, isSelected }: any
+                                  ) => ({
+                                    ...base,
+                                    backgroundColor: isSelected
+                                      ? "var(--primary-500)"
+                                      : isFocused
+                                      ? "var(--primary-100)"
+                                      : "#fff",
+                                    color: isSelected ? "#fff" : "#333",
+                                    cursor: "pointer",
+                                  }),
+                                }}
+                              />
+                            </div>
+
+                            {/* Debt Consolidation Status */}
+                            <div className="w-full">
+                              <p className="text-secondBlack text-base leading-6 mb-2">
+                                Debt Consolidation Status
+                              </p>
+                              <Select
+                                value={debtDisplay}
+                                onChange={(selected: any) =>
+                                  setFieldValue(
+                                    "debt_consolidation_status_id",
+                                    selected ? selected.id : ""
+                                  )
+                                }
+                                onBlur={() =>
+                                  setFieldTouched(
+                                    "debt_consolidation_status_id",
+                                    true
+                                  )
+                                }
+                                getOptionLabel={(opt: any) => opt.name}
+                                getOptionValue={(opt: any) => String(opt.id)}
+                                options={debtConsolidation} // same as create
+                                placeholder="Select Debt Consolidation Status"
+                                isClearable
+                                classNames={{
+                                  control: ({ isFocused }: any) =>
+                                    `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+                                      isFocused
+                                        ? "!border-primary-500"
+                                        : "!border-[#DFEAF2]"
+                                    }`,
+                                }}
+                                styles={{
+                                  menu: (base: any) => ({
+                                    ...base,
+                                    borderRadius: "4px",
+                                    boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+                                    backgroundColor: "#fff",
+                                  }),
+                                  option: (
+                                    base: any,
+                                    { isFocused, isSelected }: any
+                                  ) => ({
+                                    ...base,
+                                    backgroundColor: isSelected
+                                      ? "var(--primary-500)"
+                                      : isFocused
+                                      ? "var(--primary-100)"
+                                      : "#fff",
+                                    color: isSelected ? "#fff" : "#333",
+                                    cursor: "pointer",
+                                  }),
+                                }}
+                              />
+                            </div>
+
+                            {/* Consolidated Credit Status */}
+                            <div className="w-full">
+                              <p className="text-secondBlack text-base leading-6 mb-2">
+                                Consolidated Credit Status
+                              </p>
+                              <Select
+                                value={creditDisplay}
+                                onChange={(selected: any) =>
+                                  setFieldValue(
+                                    "consolidated_credit_status_id",
+                                    selected ? selected.id : ""
+                                  )
+                                }
+                                onBlur={() =>
+                                  setFieldTouched(
+                                    "consolidated_credit_status_id",
+                                    true
+                                  )
+                                }
+                                getOptionLabel={(opt: any) => opt.name}
+                                getOptionValue={(opt: any) => String(opt.id)}
+                                options={consolidationData} // same as create
+                                placeholder="Select Consolidated Credit Status"
+                                isClearable
+                                classNames={{
+                                  control: ({ isFocused }: any) =>
+                                    `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+                                      isFocused
+                                        ? "!border-primary-500"
+                                        : "!border-[#DFEAF2]"
+                                    }`,
+                                }}
+                                styles={{
+                                  menu: (base: any) => ({
+                                    ...base,
+                                    borderRadius: "4px",
+                                    boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+                                    backgroundColor: "#fff",
+                                  }),
+                                  option: (
+                                    base: any,
+                                    { isFocused, isSelected }: any
+                                  ) => ({
+                                    ...base,
+                                    backgroundColor: isSelected
+                                      ? "var(--primary-500)"
+                                      : isFocused
+                                      ? "var(--primary-100)"
+                                      : "#fff",
+                                    color: isSelected ? "#fff" : "#333",
+                                    cursor: "pointer",
+                                  }),
+                                }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* END FORM */}
+                        <button
+                          type="submit"
+                          disabled={isSubmitting}
+                          className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
+                        >
+                          Update Leads
+                        </button>
+                      </form>
+                    );
+                  })()
+                }
+              </Formik>
 
               {/* END FORM */}
             </div>
