@@ -53,7 +53,20 @@ import AppCalendar from "../component/AppCalendar";
 import { useSearchParams } from "next/navigation";
 import { AiOutlineSearch } from "react-icons/ai";
 import { tasks } from "firebase-functions/v2";
-import { format, parse, isValid as isValidDate } from "date-fns";
+import {
+  format,
+  parse,
+  startOfWeek,
+  getDay,
+  addMinutes,
+  isValid as isValidDate,
+  startOfToday,
+  isToday,
+  startOfDay,
+  endOfDay,
+  setHours,
+  setMinutes,
+} from "date-fns";
 
 interface Lead {
   id: string;
@@ -193,6 +206,7 @@ export default function Home() {
   const [lead, setLead] = useState<Lead | null>(null);
   const [isTotpPopupOpen, setIsTotpPopupOpen] = useState<boolean>(false);
   const [data, setData] = useState<any>(null);
+  console.log("LEAD SINGLE DATA", data);
   const [leadActivityData, setLeadActivityData] = useState<LeadActivity>();
   const [disposition, setDisposition] = useState<Disposition[]>([]);
   const [agent, setAgent] = useState<Agent[]>([]);
@@ -667,6 +681,27 @@ export default function Home() {
     );
   }
   const handleSubmit = async () => {};
+  // Round a date up to the next 5-minute tick
+  const roundUpToNext5 = (d: Date) => {
+    const remainder = d.getMinutes() % 5;
+    return remainder === 0 ? d : addMinutes(d, 5 - remainder);
+  };
+
+  // Build min/max time for react-datepicker depending on the selected date
+  const getMinTimeFor = (selected: Date | null) => {
+    if (selected && isToday(selected)) {
+      const nowRounded = roundUpToNext5(new Date());
+      return setMinutes(
+        setHours(new Date(), nowRounded.getHours()),
+        nowRounded.getMinutes()
+      );
+    }
+    // For future days, allow from 00:00
+    return setMinutes(setHours(new Date(), 0), 0);
+  };
+
+  const getMaxTimeFor = () => setMinutes(setHours(new Date(), 23), 59);
+
   return (
     <>
       <div className=" flex justify-end  min-h-screen">
@@ -792,10 +827,10 @@ export default function Home() {
 
                           <tr className="border border-tableBorder bg-white hover:bg-primary-100 transition-colors">
                             <td className="text-sm text-[#78829D] py-4 px-4">
-                              Owner Name
+                              Agent Name
                             </td>
                             <td className="text-sm font-medium text-[#252F4A]  py-4 px-4">
-                              {data?.owner_name || "-"}
+                              {data?.agent.name || "-"}
                             </td>
                           </tr>
                           <tr className="border border-tableBorder bg-white hover:bg-primary-100 transition-colors">
@@ -1254,7 +1289,7 @@ export default function Home() {
                                   "yyyy-MM-dd h:mmaaa",
                                   new Date()
                                 );
-                                return isValidDate(d) ? d : null; // ✅ now it's the date-fns function
+                                return isValidDate(d) ? d : null;
                               })()
                             : null
                         }
@@ -1266,12 +1301,52 @@ export default function Home() {
                         }}
                         onBlur={() => setFieldTouched("due_at_text", true)}
                         name="due_at_text"
-                        dateFormat="yyyy-MM-dd"
+                        /** show date + time with 5-min steps */
+                        showTimeSelect
+                        timeIntervals={5}
+                        timeCaption="Time"
+                        /** keep your visual format; includes hours and minutes */
+                        dateFormat="yyyy-MM-dd h:mmaaa"
                         placeholderText="yyyy-mm-dd"
                         className="hover:shadow-hoverInputShadow focus-border-primary 
-      !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 
-      font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
+!w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 
+font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
                         popperClassName="custom-datepicker"
+                        /** ✅ block past calendar days */
+                        minDate={startOfToday()}
+                        filterDate={(date: Date) => date >= startOfToday()}
+                        /** ✅ if today is selected, only allow future times (rounded to next 5-min) */
+                        minTime={getMinTimeFor(
+                          values.due_at_text
+                            ? parse(
+                                values.due_at_text,
+                                "yyyy-MM-dd h:mmaaa",
+                                new Date()
+                              )
+                            : null
+                        )}
+                        maxTime={getMaxTimeFor()}
+                        /** Extra guard: disable past times in the time list for today */
+                        filterTime={(time: Date) => {
+                          const selected = values.due_at_text
+                            ? parse(
+                                values.due_at_text,
+                                "yyyy-MM-dd h:mmaaa",
+                                new Date()
+                              )
+                            : null;
+                          if (selected && isToday(selected)) {
+                            const min = getMinTimeFor(selected);
+                            return (
+                              time.getHours() > min.getHours() ||
+                              (time.getHours() === min.getHours() &&
+                                time.getMinutes() >= min.getMinutes())
+                            );
+                          }
+                          return true; // future dates: all times allowed
+                        }}
+                        /** optional: stop manual typing so users can’t type a past datetime */
+                        onKeyDown={(e) => e.preventDefault()}
                         dayClassName={(date) => {
                           const today = new Date().toDateString();
                           const selectedDate = values.due_at_text
@@ -1288,6 +1363,7 @@ export default function Home() {
                           return "hover:bg-[#FFCCD0] hover:text-[#A3000E]";
                         }}
                       />
+
                       {touched.due_at_text && (errors as any).due_at_text ? (
                         <p className="text-red-500 absolute top-[85px] text-xs">
                           {(errors as any).due_at_text}

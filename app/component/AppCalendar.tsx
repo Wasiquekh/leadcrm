@@ -53,8 +53,7 @@ export default function AppCalendar({ leadId, reloadKey = 0, hitApi }: Props) {
       if (isValid(d)) return d;
     }
     if (t.due_at_ist) {
-      const s = String(t.due_at_ist).trim().toUpperCase(); // e.g., "2025-09-15 12:00 AM"
-      // try with and without leading zero for hour
+      const s = String(t.due_at_ist).trim().toUpperCase();
       let d = parse(s, "yyyy-MM-dd hh:mm a", new Date());
       if (isValid(d)) return d;
       d = parse(s, "yyyy-MM-dd h:mm a", new Date());
@@ -71,7 +70,6 @@ export default function AppCalendar({ leadId, reloadKey = 0, hitApi }: Props) {
           lead_id: leadId,
         });
         console.log("TTTTTTTTTTTTTT", res.data.data[0].task);
-        // shape: [{ task: {...} }, ...]  OR  [{...taskFields}]
         const rows = res.data.data[0].task;
         const list: TaskData[] = rows
           .map((r: any) => r?.task ?? r)
@@ -87,13 +85,13 @@ export default function AppCalendar({ leadId, reloadKey = 0, hitApi }: Props) {
     if (leadId) fetchTasks();
   }, [leadId, reloadKey, hitApi]);
 
-  // Map tasks -> RBC events; skip invalid dates
+  // Map tasks -> RBC events
   const events = tasks
     .map((t) => {
       const start = toStartDate(t);
       if (!start) return null;
       const mins = (t.timer_hours || 0) * 60 + (t.timer_minutes || 0);
-      const end = addMinutes(start, mins > 0 ? mins : 30); // default 30m
+      const end = addMinutes(start, mins > 0 ? mins : 30);
       return {
         id: t.id,
         title: `${t.details} — ${t.assigned_agent_name} (${t.status})`,
@@ -131,7 +129,6 @@ export default function AppCalendar({ leadId, reloadKey = 0, hitApi }: Props) {
               `Status: ${t.status}`,
               `Due (UTC): ${t.due_at ?? "-"}`,
               `Due (IST): ${t.due_at_ist ?? "-"}`,
-              `Timer: ${t.timer_hours}h ${t.timer_minutes}m`,
             ].join("\n")
           );
         }}
