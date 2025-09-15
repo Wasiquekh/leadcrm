@@ -16,7 +16,13 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
-import { FaNotesMedical, FaRegEye, FaStar, FaTasks } from "react-icons/fa";
+import {
+  FaCity,
+  FaNotesMedical,
+  FaRegEye,
+  FaStar,
+  FaTasks,
+} from "react-icons/fa";
 import { FaRegEyeSlash } from "react-icons/fa";
 import LeftSideBar from "../component/LeftSideBar";
 import UserActivityLogger from "../../provider/UserActivityLogger";
@@ -747,13 +753,13 @@ export default function Home() {
                       </div>
 
                       <div className=" flex text-white items-center  gap-2 mb-3">
-                        <AiOutlineSearch />
+                        <FaCity />
                         <p className=" text-sm font-medium leading-none">
                           {data?.address.postal_code || "-"}
                         </p>
                       </div>
                       <div className=" flex text-white items-center  gap-2 mb-3">
-                        <AiOutlineSearch />
+                        <MdLocationPin />
                         <p className=" text-sm font-medium leading-none">
                           {data?.address.state || "-"}
                         </p>
