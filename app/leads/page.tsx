@@ -100,7 +100,8 @@ type CreateLead = {
   lead_quality?: string;
   best_time_to_call?: string;
   lead_source_id: string; // UUID
-  debt_consolidation_status_id?: string;
+  debt_consolidation_status_id: string;
+  consolidated_credit_status_id?: string;
 };
 export interface LeadSource {
   id: string;
@@ -114,6 +115,13 @@ export interface Consolidation {
   is_active: boolean;
   created_at: string; // ISO datetime
   updated_at: string; // ISO datetime
+}
+export interface DebtConsolidation {
+  id: string;
+  name: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string | null;
 }
 
 export default function Home() {
@@ -144,12 +152,16 @@ export default function Home() {
   const [hitApi, setHitApi] = useState<boolean>(false);
   const [excelFile, setExcelFile] = useState<File | null>(null);
   const [editLeadData, setEditLeadData] = useState(null);
-  console.log("555555555555555555555", editLeadData);
+  //console.log("555555555555555555555", editLeadData);
   const [leadSourceData, setLeadSourceData] = useState<LeadSource[]>([]);
   const [consolidationData, setConsolidationData] = useState<Consolidation[]>(
     []
   );
-  //  console.log("EEEEEEEEEEDITTTTTT", leadSourceData);
+  const [debtConsolidation, setDebtConsolidation] = useState<
+    DebtConsolidation[]
+  >([]);
+
+  //  console.log("Debt Conolidation", debtConsolidation);
   //console.log("SELECTED DATA", selectedData);
   const storage = new StorageManager();
   const accessToken = storage.getAccessToken();
@@ -361,7 +373,7 @@ export default function Home() {
       // console.log("KKKKKKKKKKKKKKKKK", response.data.data.data);
       setTotalPages(response.data.data.pagination.totalPages);
       const result = response.data.data.data;
-      console.log("ALL CRM USER", result);
+      // console.log("ALL CRM USER", result);
       setData(result);
     } catch (error: any) {
       setIsError(true);
@@ -409,6 +421,22 @@ export default function Home() {
   };
   useEffect(() => {
     consolidationStatus();
+  }, []);
+
+  const debtConsolidationStatus = async () => {
+    try {
+      const response = await AxiosProvider.get("/leaddebtstatuses");
+      //  console.log("GGGGGGGGGGGGGGGG", response.data.data.data);
+      setDebtConsolidation(response.data.data.data);
+
+      // const result = response.data.data.data;
+      // console.log("ALL CRM USER", result);
+    } catch (error: any) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    debtConsolidationStatus();
   }, []);
 
   const hadleClear = () => {
@@ -773,11 +801,11 @@ export default function Home() {
                   lead_quality: "",
                   best_time_to_call: "",
                   lead_source_id: "",
-                  debt_consolidation_status_id: "",
+                  consilation: "", // ✅ was debt_consolidation_status_id
                 }}
                 validationSchema={LeadSchema}
                 onSubmit={(values, { setSubmitting, resetForm }) => {
-                  const value: CreateLead = {
+                  const value: any = {
                     first_name: values.first_name,
                     last_name: values.last_name,
                     full_name: values.full_name,
@@ -793,14 +821,14 @@ export default function Home() {
                     lead_quality: values.lead_quality || undefined,
                     best_time_to_call: values.best_time_to_call || undefined,
                     lead_source_id: values.lead_source_id || undefined,
-                    debt_consolidation_status_id:
-                      values.debt_consolidation_status_id || undefined,
+
+                    consilation: values.consilation || undefined, // ✅ changed key
                     id: "",
                   };
 
                   handleCreateLead(value);
                   setSubmitting(false);
-                  resetForm(); // ✅ clears after submit
+                  resetForm();
                 }}
               >
                 {({
@@ -1125,29 +1153,24 @@ export default function Home() {
                         {/* Debt Consolidation Status (Dropdown) */}
                         <div className="w-full">
                           <p className="text-secondBlack text-base leading-6 mb-2">
-                            Debt Consolidation Status
+                            Consolidation Credit Status
                           </p>
                           <Select
                             value={
                               (consolidationData || []).find(
-                                (opt) =>
-                                  opt.id === values.debt_consolidation_status_id
+                                (opt: any) => opt.id === values.consilation // ✅ was values.debt_consolidation_status_id
                               ) || null
                             }
-                            onChange={(selected: any) =>
-                              setFieldValue(
-                                "debt_consolidation_status_id",
-                                selected ? selected.id : ""
-                              )
+                            onChange={
+                              (selected: any) =>
+                                setFieldValue(
+                                  "consilation",
+                                  selected ? selected.id : ""
+                                ) // ✅ key updated
                             }
-                            onBlur={() =>
-                              setFieldTouched(
-                                "debt_consolidation_status_id",
-                                true
-                              )
-                            }
-                            getOptionLabel={(opt: any) => opt.name} // show name
-                            getOptionValue={(opt: any) => opt.id} // store id
+                            onBlur={() => setFieldTouched("consilation", true)} // ✅ key updated
+                            getOptionLabel={(opt: any) => opt.name}
+                            getOptionValue={(opt: any) => opt.id}
                             options={consolidationData}
                             placeholder="Select Consolidation Status"
                             isClearable
@@ -1178,6 +1201,7 @@ export default function Home() {
                               }),
                             }}
                           />
+
                           {/* Optional → no error message needed */}
                         </div>
                       </div>
@@ -1379,8 +1403,8 @@ export default function Home() {
                     lead_quality: values.lead_quality || undefined,
                     best_time_to_call: values.best_time_to_call || undefined,
                     lead_source_id: values.lead_source_id || undefined,
-                    debt_consolidation_status_id:
-                      values.debt_consolidation_status_id || undefined,
+                    // debt_consolidation_status_id:
+                    // values.debt_consolidation_status_id || undefined,
                   };
                   handleUpdateLead(value);
                   setSubmitting(false);
