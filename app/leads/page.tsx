@@ -101,6 +101,7 @@ type CreateLead = {
   best_time_to_call?: string;
   lead_source_id: string; // UUID
   debt_consolidation_status_id: string;
+  whatsapp_number: string;
   consolidated_credit_status_id?: string;
 };
 export interface LeadSource {
