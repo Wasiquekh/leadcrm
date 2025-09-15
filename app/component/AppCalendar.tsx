@@ -28,7 +28,7 @@ const localizer = dateFnsLocalizer({
   locales,
 });
 
-type Props = { leadId: string; reloadKey?: number };
+type Props = { leadId: string; reloadKey?: number; hitApi: boolean };
 
 export interface TaskData {
   id: string;
@@ -41,7 +41,7 @@ export interface TaskData {
   timer_minutes: number;
 }
 
-export default function AppCalendar({ leadId, reloadKey = 0 }: Props) {
+export default function AppCalendar({ leadId, reloadKey = 0, hitApi }: Props) {
   const [tasks, setTasks] = useState<TaskData[]>([]);
   console.log("TASK LIST", tasks);
   const [loading, setLoading] = useState(false);
@@ -85,7 +85,7 @@ export default function AppCalendar({ leadId, reloadKey = 0 }: Props) {
     };
 
     if (leadId) fetchTasks();
-  }, [leadId, reloadKey]);
+  }, [leadId, reloadKey, hitApi]);
 
   // Map tasks -> RBC events; skip invalid dates
   const events = tasks

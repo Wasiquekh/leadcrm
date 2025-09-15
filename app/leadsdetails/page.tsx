@@ -234,7 +234,10 @@ export default function Home() {
     const res = await AxiosProvider.post(UPDATE_ACTIVITY_URL, payload, {
       headers: { "Content-Type": "application/json" },
     });
-    console.log("UpdateLeadsActivity → response:", res.data);
+    // console.log("UpdateLeadsActivity → response:", res.data);
+    toast.success("Activity updated successfully");
+    setHitApi(!hitApi);
+    closeFlyOut();
     return res.data;
   }
   // ✅ Initial Values
@@ -267,6 +270,7 @@ export default function Home() {
       await AxiosProvider.post("/leads/tasks/create", n);
       toast.success("Lead task is created");
       setHitApi(!hitApi);
+      closeFlyOut();
     } catch (error: any) {
       toast.error("Lead task is not created");
     }
@@ -280,6 +284,7 @@ export default function Home() {
       await AxiosProvider.post("/leads/activities/create", n);
       toast.success("Lead activity is created");
       setHitApi(!hitApi);
+      closeFlyOut();
     } catch (error: any) {
       toast.error("Lead activity is created");
     }
@@ -328,7 +333,7 @@ export default function Home() {
   };
   useEffect(() => {
     fetchLeadActivity();
-  }, [page, leadId]);
+  }, [page, leadId, hitApi]);
 
   // FETCH DISPOSITION
   const fetchDisposition = async () => {
@@ -412,6 +417,8 @@ export default function Home() {
         headers: { "Content-Type": "multipart/form-data" },
       });
       toast.success("Document uploaded successfully");
+      closeFlyOut();
+      setHitApi(!hitApi);
       form.reset();
     } catch (err) {
       console.error(err);
@@ -434,7 +441,7 @@ export default function Home() {
 
   useEffect(() => {
     fetchLeadDocumentData();
-  }, [leadId]);
+  }, [leadId, hitApi]);
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? ""; // if storage_path is relative
   const url = (p: string) => (p?.startsWith("http") ? p : `${baseUrl}${p}`);
   const fmtSize = (b: number) => {
@@ -574,7 +581,7 @@ export default function Home() {
         <>
           {/* Tab content 3 */}
 
-          <AppCalendar leadId={leadId} reloadKey={reloadKey} />
+          <AppCalendar leadId={leadId} reloadKey={reloadKey} hitApi={hitApi} />
           {/* End Tab content 3 */}
         </>
       ),
