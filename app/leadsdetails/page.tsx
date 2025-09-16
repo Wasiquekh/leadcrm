@@ -620,18 +620,6 @@ export default function Home() {
                   key={d.id}
                   className="flex items-center gap-3 border border-[#DFEAF2] rounded-[6px] p-3"
                 >
-                  {d.is_image ? (
-                    <img
-                      src={url(d.storage_path)}
-                      alt={d.file_name}
-                      className="h-14 w-14 object-cover rounded"
-                    />
-                  ) : (
-                    <div className="h-14 w-14 flex items-center justify-center rounded bg-gray-100 text-gray-600 text-xs">
-                      {fileExt(d.file_name)}
-                    </div>
-                  )}
-
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-firstBlack truncate">
                       {d.file_name}
@@ -642,14 +630,6 @@ export default function Home() {
                     </p>
                   </div>
 
-                  <a
-                    href={url(d.storage_path)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="py-2 px-3 bg-primary-500 text-white rounded text-sm"
-                  >
-                    View
-                  </a>
                   <a
                     href={url(d.storage_path)}
                     download
