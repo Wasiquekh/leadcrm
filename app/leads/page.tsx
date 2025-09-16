@@ -179,6 +179,8 @@ export default function Home() {
   //  console.log("Debt Conolidation", debtConsolidation);
   //console.log("SELECTED DATA", selectedData);
   const storage = new StorageManager();
+  const userRole = storage.getUserRole();
+  console.log("user role", userRole);
   const accessToken = storage.getAccessToken();
 
   //console.log("Get all user Data", data);
