@@ -67,7 +67,7 @@ import {
   setHours,
   setMinutes,
 } from "date-fns";
-
+import { compressIfImage } from "../component/imageCompression";
 interface Lead {
   id: string;
   lead_number: string;
@@ -227,7 +227,7 @@ export default function Home() {
   const [docs, setDocs] = useState<LeadDocument[]>([]); // start empty
   const [activityHistoryData, setActivityHistoryData] =
     useState<ActivityHistory>(null);
-  console.log("lead activity edit data", activityHistoryData);
+  // console.log("lead activity edit data", activityHistoryData);
   // console.log("lead activity",fetchLeadActivityData)
   //  FOR CREATE ACTIVITY LEAD
   // ✅ Validation
@@ -417,24 +417,33 @@ export default function Home() {
 
   const handleSubmitDocument = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     if (!leadId) return;
     const userID = storage.getUserId();
     if (!userID) return;
 
     const form = e.currentTarget;
-    const fileInput = form.elements.namedItem("file") as HTMLInputElement; // 👈 'file'
+    const fileInput = form.elements.namedItem("file") as HTMLInputElement;
     const file = fileInput?.files?.[0];
     if (!file) return;
+
+    // Compress only if it's an image
+    const compressed = await compressIfImage(file, {
+      maxWidth: 1600,
+      maxHeight: 1600,
+      quality: 0.72,
+      mimeType: "image/jpeg", // use "image/webp" if your backend supports it
+      compressIfLargerThanBytes: 400 * 1024,
+    });
 
     const fd = new FormData();
     fd.set("lead_id", String(leadId));
     fd.set("uploaded_by", String(userID));
-    fd.set("file", file); // 👈 actual file blob
+    fd.set("file", compressed); // 👈 use the (maybe) compressed file
 
     try {
       await AxiosProvider.post(UPLOAD_URL, fd, {
         headers: { "Content-Type": "multipart/form-data" },
+        maxBodyLength: Infinity, // safe guard for large files
       });
       toast.success("Document uploaded successfully");
       closeFlyOut();
@@ -476,6 +485,18 @@ export default function Home() {
   };
   const fileExt = (name: string) =>
     (name?.split(".").pop() || "").toUpperCase();
+
+  const downLoadDocument = async (id: string) => {
+    console.log("DDDDDDDDDDDDDDD", id);
+    try {
+      const res = await AxiosProvider.post("/leads/documents/download", {
+        doc_id: id,
+      });
+      console.log("DOWNLOADED FILE", res);
+    } catch (error: any) {
+      console.error("Error fetching lead:", error);
+    }
+  };
   const tabs = [
     {
       label: "Activity History",
@@ -631,9 +652,10 @@ export default function Home() {
                   </div>
 
                   <a
-                    href={url(d.storage_path)}
-                    download
-                    className="py-2 px-3 border border-[#DFEAF2] rounded text-sm"
+                    onClick={() => downLoadDocument(d.id)}
+                    // href={url(d.storage_path)}
+                    // download
+                    className="py-2 px-3 border border-[#DFEAF2] rounded text-sm cursor-pointer hover:underline"
                   >
                     Download
                   </a>

@@ -8,12 +8,16 @@ import { useState } from "react";
 import { RiFileAddLine, RiHistoryLine } from "react-icons/ri";
 import { FaUserEdit } from "react-icons/fa";
 import { MdOutlineDashboard, MdOutlinePeopleOutline } from "react-icons/md";
+import { storage } from "firebase-admin";
+import StorageManager from "../../provider/StorageManager";
 
 const axiosProvider = new AxiosProvider();
 
 const LeftSideBar: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const pathname = usePathname();
+  const storage = new StorageManager();
+  const userRole = storage.getUserRole();
 
   const handleLogout = async () => {
     try {
@@ -89,57 +93,62 @@ const LeftSideBar: React.FC = () => {
             )}
           </div>
         </Link>
-
-        <Link href="/usermanagement">
-          <div
-            className={`mb-4 flex items-center gap-4 group px-3 py-2 rounded-[4px] relative cursor-pointer text-base leading-normal font-medium text-firstBlack hover:bg-sideBarHoverbg active:bg-sideBarHoverbgPressed hover:text-primary-600 ${
-              pathname === "/usermanagement" || pathname === "/useradd"
-                ? "bg-primary-600 text-white hover:!bg-primary-600 hover:!text-white"
-                : ""
-            }`}
-          >
-            <div className="h-6 w-6 shrink-0 grid place-items-center">
-              <FaUserEdit className="h-5 w-5" />
+        {userRole === "Admin" && (
+          <Link href="/usermanagement">
+            <div
+              className={`mb-4 flex items-center gap-4 group px-3 py-2 rounded-[4px] relative cursor-pointer text-base leading-normal font-medium text-firstBlack hover:bg-sideBarHoverbg active:bg-sideBarHoverbgPressed hover:text-primary-600 ${
+                pathname === "/usermanagement" || pathname === "/useradd"
+                  ? "bg-primary-600 text-white hover:!bg-primary-600 hover:!text-white"
+                  : ""
+              }`}
+            >
+              <div className="h-6 w-6 shrink-0 grid place-items-center">
+                <FaUserEdit className="h-5 w-5" />
+              </div>
+              {isExpanded && (
+                <p className="whitespace-nowrap leading-none">
+                  User Management
+                </p>
+              )}
             </div>
-            {isExpanded && (
-              <p className="whitespace-nowrap leading-none">User Management</p>
-            )}
-          </div>
-        </Link>
-
-        <Link href="/user-activity">
-          <div
-            className={`mb-4 flex items-center gap-4 group px-3 py-2 rounded-[4px] relative cursor-pointer text-base leading-normal font-medium text-firstBlack hover:bg-sideBarHoverbg active:bg-sideBarHoverbgPressed hover:text-primary-600 ${
-              pathname === "/user-activity"
-                ? "bg-primary-600 text-white hover:!bg-primary-600 hover:!text-white"
-                : ""
-            }`}
-          >
-            <div className="h-6 w-6 shrink-0 grid place-items-center">
-              <RiHistoryLine className="h-5 w-5" />
+          </Link>
+        )}
+        {userRole === "Admin" && (
+          <Link href="/user-activity">
+            <div
+              className={`mb-4 flex items-center gap-4 group px-3 py-2 rounded-[4px] relative cursor-pointer text-base leading-normal font-medium text-firstBlack hover:bg-sideBarHoverbg active:bg-sideBarHoverbgPressed hover:text-primary-600 ${
+                pathname === "/user-activity"
+                  ? "bg-primary-600 text-white hover:!bg-primary-600 hover:!text-white"
+                  : ""
+              }`}
+            >
+              <div className="h-6 w-6 shrink-0 grid place-items-center">
+                <RiHistoryLine className="h-5 w-5" />
+              </div>
+              {isExpanded && (
+                <p className="whitespace-nowrap leading-none">User Activity</p>
+              )}
             </div>
-            {isExpanded && (
-              <p className="whitespace-nowrap leading-none">User Activity</p>
-            )}
-          </div>
-        </Link>
-
-        <Link href="/setting">
-          <div
-            className={`mb-4 flex items-center gap-4 group px-3 py-2 rounded-[4px] relative cursor-pointer text-base leading-normal font-medium text-firstBlack hover:bg-sideBarHoverbg active:bg-sideBarHoverbgPressed hover:text-primary-600 ${
-              pathname === "/setting"
-                ? "bg-primary-600 text-white hover:!bg-primary-600 hover:!text-white"
-                : ""
-            }`}
-          >
-            <div className="h-6 w-6 shrink-0 grid place-items-center">
-              <IoMdSettings className="h-5 w-5" />
+          </Link>
+        )}
+        {userRole === "Admin" && (
+          <Link href="/setting">
+            <div
+              className={`mb-4 flex items-center gap-4 group px-3 py-2 rounded-[4px] relative cursor-pointer text-base leading-normal font-medium text-firstBlack hover:bg-sideBarHoverbg active:bg-sideBarHoverbgPressed hover:text-primary-600 ${
+                pathname === "/setting"
+                  ? "bg-primary-600 text-white hover:!bg-primary-600 hover:!text-white"
+                  : ""
+              }`}
+            >
+              <div className="h-6 w-6 shrink-0 grid place-items-center">
+                <IoMdSettings className="h-5 w-5" />
+              </div>
+              {isExpanded && (
+                <p className="whitespace-nowrap leading-none">Setting</p>
+              )}
             </div>
-            {isExpanded && (
-              <p className="whitespace-nowrap leading-none">Setting</p>
-            )}
-          </div>
-        </Link>
+          </Link>
+        )}
       </div>
       {/* END SIDE LEFT BAR TOP SECTION */}
 

@@ -180,7 +180,7 @@ export default function Home() {
   //console.log("SELECTED DATA", selectedData);
   const storage = new StorageManager();
   const userRole = storage.getUserRole();
-  console.log("user role", userRole);
+  //console.log("user role", userRole);
   const accessToken = storage.getAccessToken();
 
   //console.log("Get all user Data", data);
@@ -384,7 +384,7 @@ export default function Home() {
     setIsAgent(false);
   };
   const assignAgent = (leadId: string) => {
-setCurrentLeadId(leadId)
+    setCurrentLeadId(leadId);
     setFlyoutOpen(true);
     setIsCreateLeads(false);
     setIsBulkLeads(false);
@@ -518,6 +518,7 @@ setCurrentLeadId(leadId)
       toast.error("Please select an agent");
       return;
     }
+    setFlyoutOpen(false);
     //return;
     try {
       await AxiosProvider.post("/assignlead", {
@@ -526,11 +527,12 @@ setCurrentLeadId(leadId)
       });
       toast.success("Lead is Updated");
       setHitApi(!hitApi);
+      setSelectedAgent(null);
     } catch (error: any) {
       toast.error("Lead is not Updated");
     }
-    console.log("✅ Selected Agent Name:", selectedAgent.name);
-    console.log("✅ Selected Agent ID:", selectedAgent.id);
+    // console.log("✅ Selected Agent Name:", selectedAgent.name);
+    //  console.log("✅ Selected Agent ID:", selectedAgent.id);
 
     // Example: post to API
     // await AxiosProvider.post("/assign-agent", { agent_id: selectedAgent.id });
@@ -550,9 +552,9 @@ setCurrentLeadId(leadId)
     );
   }
 
-  function setFieldValue(arg0: string, arg1: any) {
-    throw new Error("Function not implemented.");
-  }
+  //   function setFieldValue(arg0: string, arg1: any) {
+  //     throw new Error("Function not implemented.");
+  //   }
 
   // Removed duplicate setExcelFile function to fix identifier conflict.
 
@@ -579,15 +581,19 @@ setCurrentLeadId(leadId)
                     Create Leads
                   </p>
                 </div>
-                <div
-                  className=" flex justify-center  gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 group"
-                  onClick={() => bulkLeads()}
-                >
-                  <FiFilter className=" w-5 h-5 text-white group-hover:text-white" />
-                  <p className=" text-white text-base font-medium group-hover:text-white">
-                    Bulk Leads
-                  </p>
-                </div>
+
+                {userRole === "Admin" && (
+                  <div
+                    className=" flex justify-center  gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 group"
+                    onClick={() => bulkLeads()}
+                  >
+                    <FiFilter className=" w-5 h-5 text-white group-hover:text-white" />
+                    <p className=" text-white text-base font-medium group-hover:text-white">
+                      Bulk Leads
+                    </p>
+                  </div>
+                )}
+
                 <div
                   className=" flex justify-center  gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 group"
                   onClick={() => filterLeads()}
@@ -757,15 +763,17 @@ setCurrentLeadId(leadId)
                                 Edit
                               </span>
                             </button>
-                            <button
-                              onClick={() => assignAgent(item.id)}
-                              className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"
-                            >
-                              <MdRemoveRedEye className="text-white w-4 h-4 hover:text-white" />
-                              <span className="text-xs sm:text-sm text-white hover:text-white">
-                                Assign to agent
-                              </span>
-                            </button>
+                            {userRole === "Admin" && (
+                              <button
+                                onClick={() => assignAgent(item.id)}
+                                className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"
+                              >
+                                <MdRemoveRedEye className="text-white w-4 h-4 hover:text-white" />
+                                <span className="text-xs sm:text-sm text-white hover:text-white">
+                                  Assign to agent
+                                </span>
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>

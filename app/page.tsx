@@ -48,6 +48,7 @@ export default function LoginHome() {
       });
       //console.log("LOG IN", res.data.data.role);
       storage.saveUserRole(res.data.data.role);
+
       // console.log(res.data.data.secretKey);
       // storage.saveUserId(res.data.data.id);
       // storage.saveUserSecretKey(res.data.data.secretKey);

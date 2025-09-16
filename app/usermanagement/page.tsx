@@ -64,17 +64,6 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { accessToken } = useContext(AppContext);
   const router = useRouter();
-  const permissions = storage.getUserPermissions();
-
-  const hasSystemUserView = permissions?.some(
-    (perm) => perm.name === "systemuser.view"
-  );
-  const hasSystemUserDelete = permissions?.some(
-    (perm) => perm.name === "systemuser.delete"
-  );
-  const hasSystemUserAdd = permissions?.some(
-    (perm) => perm.name === "systemuser.add"
-  );
 
   const toggleEditFlyout = () => {
     setIsEditFlyoutOpen(!isEditFlyoutOpen);
@@ -95,7 +84,7 @@ export default function Home() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await AxiosProvider.post("/deleteuser", { id: userID });
+          await AxiosProvider.post("/userdelete", { id: userID });
 
           toast.success("Successfully Deleted");
           setShouldRefetch((prev) => !prev);
@@ -254,103 +243,7 @@ export default function Home() {
                     </th>
                   </tr>
                 </thead>
-                {/* <tbody>
-                  {isError ? (
-                    <tr>
-                      <td colSpan={4} className="text-center text-xl py-4">
-                        Data not found
-                      </td>
-                    </tr>
-                  ) : (
-                    data &&
-                    data.map((item, index) => (
-                      <tr
-                        className="border border-tableBorder bg-white hover:bg-primary-100"
-                        key={index}
-                      >
-                        <td className="px-1 md:p-3 py-2  flex  md:flex-row gap-2">
-                          <div className="md:hidden flex">
-                            <FaEllipsisVertical
-                              data-tooltip-id="my-tooltip"
-                              data-tooltip-html={`<div>
-                                                  <strong>Name:</strong> <span style="text-transform: capitalize;">${item.name}</span><br/>
-                                                  <strong>Email:</strong> ${item.email}<br/>
-                                                  <strong>Mobile:</strong> ${item.mobile_number}<br/>
-                                                  <strong>Role:</strong> ${item.role}<br/>
-                                                </div>`}
-                              className="text-black leading-normal capitalize relative top-1"
-                            />
-                            <Tooltip id="my-tooltip" place="right" float />
-                          </div>
-                          <div>
-                            <p className="text-[#232323] text-sm font-semibold leading-normal mb-1 truncate">
-                              {item.name}
-                            </p>
-                            <p className="text-[#232323] text-xs md:text-sm leading-normal truncate">
-                              {item.email}
-                            </p>
-                          </div>
-                        </td>
-                        <td className="px-2 py-1 border border-tableBorder hidden md:table-cell">
-                          <p className="text-[#232323] text-sm leading-normal truncate">
-                            {item.mobile_number}
-                          </p>
-                        </td>
-                        <td className="px-2 py-1 border border-tableBorder hidden md:table-cell">
-                          <button className="py-[4px] px-6 bg-primary-400 rounded-xl w-auto text-xs md:text-sm sm:w-4/6">
-                            <p className="text-white">{item.role}</p>
-                          </button>
-                        </td>
-                        <td className="px-2 py-1 border border-tableBorder">
-                          <div className="flex gap-1 md:gap-2 justify-center md:justify-start">
-                            {hasSystemUserView ? (
-                              <button
-                                onClick={() => changeCurrentUserData(item)}
-                                className="py-[4px] px-3 bg-primary-600 hover:bg-primary-800 active:bg-primary-900 group flex gap-1 items-center rounded-xl text-xs md:text-sm "
-                              >
-                                <MdRemoveRedEye className="text-white w-4 h-4 group-hover:text-white" />
-                                <p className="text-white hidden md:block group-hover:text-white">
-                                  View
-                                </p>
-                              </button>
-                            ) : (
-                              <button
-                                disabled
-                                className="py-[4px] px-3 bg-[#C6F7FE] flex gap-1 items-center rounded-xl cursor-not-allowed text-xs md:text-sm"
-                              >
-                                <MdRemoveRedEye className="text-customBlue w-4 h-4" />
-                                <p className="text-customBlue hidden md:block">
-                                  Not Access
-                                </p>
-                              </button>
-                            )}
-                            {hasSystemUserDelete ? (
-                              <button
-                                onClick={() => deleteUserData(item)}
-                                className="py-[4px] px-3 bg-black flex gap-1 items-center rounded-full text-xs md:text-sm group hover:bg-primary-600"
-                              >
-                                <RiDeleteBin6Line className="text-white w-4 h-4" />
-                                <p className="text-white hidden md:block">
-                                  Delete
-                                </p>
-                              </button>
-                            ) : (
-                              <button
-                                disabled
-                                className="py-[4px] px-3 bg-[#FFD0D1] flex gap-1 items-center rounded-full cursor-not-allowed text-xs md:text-sm"
-                              >
-                                <RiDeleteBin6Line className="text-[#FF1C1F] w-4 h-4" />
-                                <p className="text-[#FF1C1F] hidden md:block">
-                                  Not Access
-                                </p>
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody> */}
+
                 <tbody>
                   {/* Row 1 */}
                   {!data || data.length === 0 || isError ? (
@@ -379,7 +272,7 @@ export default function Home() {
                         </td>
                         <td className="px-2 py-1 border border-tableBorder hidden md:table-cell">
                           <p className="text-[#232323] text-sm sm:text-base font-medium leading-normal capitalize truncate">
-                            {item?.mobile ?? "-"}
+                            {item?.mobile_number ?? "-"}
                           </p>
                         </td>
                         <td className="px-2 py-1 border border-tableBorder hidden md:table-cell">
@@ -397,7 +290,10 @@ export default function Home() {
                                 View
                               </p>
                             </button>
-                            <button className="py-[4px] px-3 bg-black flex gap-1 items-center rounded-full text-xs md:text-sm group hover:bg-primary-600">
+                            <button
+                              onClick={() => deleteUserData(item)}
+                              className="py-[4px] px-3 bg-black flex gap-1 items-center rounded-full text-xs md:text-sm group hover:bg-primary-600"
+                            >
                               <RiDeleteBin6Line className="text-white w-4 h-4" />
                               <p className="text-white hidden md:block">
                                 Delete
