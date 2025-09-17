@@ -140,7 +140,7 @@ export default function AppCalendar({ leadId, reloadKey = 0, hitApi }: Props) {
                 </td>
 
                 {/* Subject */}
-                <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+                <td className="px-3 py-2 border border-tableBorder hidden md:table-cell capitalize">
                   <span className="text-[#232323] text-sm sm:text-base">
                     {t?.subject || "-"}
                   </span>
