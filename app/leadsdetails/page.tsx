@@ -225,6 +225,7 @@ export default function Home() {
   );
   const searchParams = useSearchParams();
   const leadId = searchParams.get("id") ?? undefined;
+  // console.log("LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL", leadId);
   const [totp, setTotp] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [lead, setLead] = useState<Lead | null>(null);
@@ -310,994 +311,1019 @@ export default function Home() {
       }
     : { id: "", ...INITIAL_VALUES };
 
-const InitialValuesForCreateTask = {
-  lead_id: leadId, // required
-  assigned_agent_id: "", // will hold agent id
-  details: "", // task details
-  subject: "", // new field
-  task_type: "", // new field (e.g., followup, meeting, etc.)
-  start_at_text: "", // new field (datetime string)
-  end_at_text: "", // new field (datetime string)
-  location: "", // required
-  description: "", // optional
-};
+  const InitialValuesForCreateTask = {
+    lead_id: leadId, // required
+    assigned_agent_id: "", // will hold agent id
+    details: "", // task details
+    subject: "", // new field
+    task_type: "", // new field (e.g., followup, meeting, etc.)
+    start_at_text: "", // new field (datetime string)
+    end_at_text: "", // new field (datetime string)
+    location: "", // required
+    description: "", // optional
+  };
 
-const CreateTaskActivity = async (n: typeof InitialValuesForCreateTask) => {
-  console.log("Submitted task values:", n);
-  return;
-  try {
-    await AxiosProvider.post("/leads/tasks/create", n);
-    toast.success("Lead task is created");
-    setHitApi(!hitApi);
-    closeFlyOut();
-  } catch (error: any) {
-    toast.error("Lead task is not created");
-  }
-};
+  const CreateTaskActivity = async (n: typeof InitialValuesForCreateTask) => {
+    const { description, ...rest } = n;
+    const payload = {
+      ...rest,
+      lead_id: leadId, // ✅ now included
+    };
 
-// ✅ Submit handler
-const CreateLeadsActivity = async (n: typeof INITIAL_VALUES) => {
-  // console.log("Submitted values:", n);
+    console.log("Submitted task values:", payload);
 
-  const { occurred_at, ...payload } = n; // removes occurred_at
-  console.log("Payload without occurred_at:", payload);
-  try {
-    await AxiosProvider.post("/leads/activities/create", payload);
-    toast.success("Lead activity is created");
-    setHitApi(!hitApi);
-    closeFlyOut();
-  } catch (error: any) {
-    toast.error("Lead activity is created");
-  }
-  // 👉 Replace with your API call
-  // await AxiosProvider.post("/leads/activity/create", n);
-};
-//  END CREATE ACTIVITY LEAD
-const fetchData = async () => {
-  if (!leadId) return;
-  try {
-    const res = await AxiosProvider.post("/leads/get", {
-      lead_id: leadId,
-    });
+    try {
+      await AxiosProvider.post("/leads/tasks/create", n);
+      toast.success("Lead task is created");
+      setHitApi(!hitApi);
+      closeFlyOut();
+    } catch (error: any) {
+      toast.error("Lead task is not created");
+    }
+  };
 
-    //console.log("lead data", res.data.data);
-    setData(res.data.data); // <-- if you want to store in state
-  } catch (error: any) {
-    console.error("Error fetching lead:", error);
-  }
-};
+  // ✅ Submit handler
+  const CreateLeadsActivity = async (n: typeof INITIAL_VALUES) => {
+    // console.log("Submitted values:", n);
 
-useEffect(() => {
-  fetchData();
-}, [leadId, hitApi]);
-
-const fetchLeadActivity = async () => {
-  if (!leadId) return;
-  try {
-    const res = await AxiosProvider.post(
-      `/leads/activities/list?page=${page}&pageSize=${pageSize}`,
-      {
+    const { occurred_at, ...payload } = n; // removes occurred_at
+    console.log("Payload without occurred_at:", payload);
+    try {
+      await AxiosProvider.post("/leads/activities/create", payload);
+      toast.success("Lead activity is created");
+      setHitApi(!hitApi);
+      closeFlyOut();
+    } catch (error: any) {
+      toast.error("Lead activity is created");
+    }
+    // 👉 Replace with your API call
+    // await AxiosProvider.post("/leads/activity/create", n);
+  };
+  //  END CREATE ACTIVITY LEAD
+  const fetchData = async () => {
+    if (!leadId) return;
+    try {
+      const res = await AxiosProvider.post("/leads/get", {
         lead_id: leadId,
-      }
-    );
+      });
 
-    // console.log("Lead Activity", res.data.data.activities);
-    console.log(
-      "Lead Activity pagination",
-      res.data.data.pagination.totalPages
-    );
-    setFetchLeadaActivityData(res.data.data.activities);
-    setTotalPages(res.data.data.pagination.totalPages);
-  } catch (error: any) {
-    console.error("Error fetching lead:", error);
-  }
-};
-useEffect(() => {
-  fetchLeadActivity();
-}, [page, leadId, hitApi]);
+      //console.log("lead data", res.data.data);
+      setData(res.data.data); // <-- if you want to store in state
+    } catch (error: any) {
+      console.error("Error fetching lead:", error);
+    }
+  };
 
-// FETCH DISPOSITION
-const fetchDisposition = async () => {
-  try {
-    const res = await AxiosProvider.get("/leads/dispositions/all");
-    setDisposition(res.data.data.data);
+  useEffect(() => {
+    fetchData();
+  }, [leadId, hitApi]);
 
-    //console.log("fetch disposition", res.data.data.data);
-  } catch (error: any) {
-    console.error("Error fetching lead:", error);
-  }
-};
-useEffect(() => {
-  fetchDisposition();
-}, []);
-// FETCH AGENT
-const fetchAgent = async () => {
-  try {
-    const res = await AxiosProvider.get("/allagents");
-    //setDisposition(res.data.data.data);
+  const fetchLeadActivity = async () => {
+    if (!leadId) return;
+    try {
+      const res = await AxiosProvider.post(
+        `/leads/activities/list?page=${page}&pageSize=${pageSize}`,
+        {
+          lead_id: leadId,
+        }
+      );
 
-    //console.log("fetch agent", res.data.data.data);
-    setAgent(res.data.data.data);
-  } catch (error: any) {
-    console.error("Error fetching lead:", error);
-  }
-};
-useEffect(() => {
-  fetchAgent();
-}, []);
-const openActivityFlyout = () => {
-  setFlyoutFilterOpen(true);
-  setActivity(true);
-};
-const openTaskFlyout = () => {
-  setFlyoutFilterOpen(true);
-  setTask(true);
-};
-const openDocumentFlyout = () => {
-  setFlyoutFilterOpen(true);
-  setDocument(true);
-};
-const openActivityHistoryFlyout = (activity: ActivityHistory) => {
-  setFlyoutFilterOpen(true);
-  setUpdateActivityHistory(true);
-  setActivityHistoryData(activity);
-};
-const closeFlyOut = () => {
-  setActivity(false);
-  setTask(false);
-  setFlyoutFilterOpen(false);
-  setDocument(false);
-  setUpdateActivityHistory(false);
-};
-const handleChangepagination = (newPage: number) => {
-  if (newPage > 0 && newPage <= totalPages) {
-    setPage(newPage);
-  }
-};
-const UPLOAD_URL = "/leads/documents/upload"; // 👈 your final endpoint
+      // console.log("Lead Activity", res.data.data.activities);
+      console.log(
+        "Lead Activity pagination",
+        res.data.data.pagination.totalPages
+      );
+      setFetchLeadaActivityData(res.data.data.activities);
+      setTotalPages(res.data.data.pagination.totalPages);
+    } catch (error: any) {
+      console.error("Error fetching lead:", error);
+    }
+  };
+  useEffect(() => {
+    fetchLeadActivity();
+  }, [page, leadId, hitApi]);
 
-const handleSubmitDocument = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-  if (!leadId) return;
-  const userID = storage.getUserId();
-  if (!userID) return;
+  // FETCH DISPOSITION
+  const fetchDisposition = async () => {
+    try {
+      const res = await AxiosProvider.get("/leads/dispositions/all");
+      setDisposition(res.data.data.data);
 
-  const form = e.currentTarget;
-  const fileInput = form.elements.namedItem("file") as HTMLInputElement;
-  const file = fileInput?.files?.[0];
-  if (!file) return;
+      //console.log("fetch disposition", res.data.data.data);
+    } catch (error: any) {
+      console.error("Error fetching lead:", error);
+    }
+  };
+  useEffect(() => {
+    fetchDisposition();
+  }, []);
+  // FETCH AGENT
+  const fetchAgent = async () => {
+    try {
+      const res = await AxiosProvider.get("/allagents");
+      //setDisposition(res.data.data.data);
 
-  // Compress only if it's an image
-  const compressed = await compressIfImage(file, {
-    maxWidth: 1600,
-    maxHeight: 1600,
-    quality: 0.72,
-    mimeType: "image/jpeg", // use "image/webp" if your backend supports it
-    compressIfLargerThanBytes: 400 * 1024,
-  });
+      //console.log("fetch agent", res.data.data.data);
+      setAgent(res.data.data.data);
+    } catch (error: any) {
+      console.error("Error fetching lead:", error);
+    }
+  };
+  useEffect(() => {
+    fetchAgent();
+  }, []);
+  const openActivityFlyout = () => {
+    setFlyoutFilterOpen(true);
+    setActivity(true);
+  };
+  const openTaskFlyout = () => {
+    setFlyoutFilterOpen(true);
+    setTask(true);
+  };
+  const openDocumentFlyout = () => {
+    setFlyoutFilterOpen(true);
+    setDocument(true);
+  };
+  const openActivityHistoryFlyout = (activity: ActivityHistory) => {
+    setFlyoutFilterOpen(true);
+    setUpdateActivityHistory(true);
+    setActivityHistoryData(activity);
+  };
+  const closeFlyOut = () => {
+    setActivity(false);
+    setTask(false);
+    setFlyoutFilterOpen(false);
+    setDocument(false);
+    setUpdateActivityHistory(false);
+  };
+  const handleChangepagination = (newPage: number) => {
+    if (newPage > 0 && newPage <= totalPages) {
+      setPage(newPage);
+    }
+  };
+  const UPLOAD_URL = "/leads/documents/upload"; // 👈 your final endpoint
 
-  const fd = new FormData();
-  fd.set("lead_id", String(leadId));
-  fd.set("uploaded_by", String(userID));
-  fd.set("file", compressed); // 👈 use the (maybe) compressed file
-  fd.set("notes", documentName);
+  const handleSubmitDocument = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!leadId) return;
+    const userID = storage.getUserId();
+    if (!userID) return;
 
-  try {
-    await AxiosProvider.post(UPLOAD_URL, fd, {
-      headers: { "Content-Type": "multipart/form-data" },
-      maxBodyLength: Infinity, // safe guard for large files
-    });
-    toast.success("Document uploaded successfully");
-    closeFlyOut();
-    setHitApi(!hitApi);
-    setDocumentName("");
-    form.reset();
-  } catch (err) {
-    console.error(err);
-    toast.error("Upload failed. Please try again.");
-  }
-};
-const fetchLeadDocumentData = async () => {
-  if (!leadId) return;
-  try {
-    const res = await AxiosProvider.post("/leads/documents/list", {
-      lead_id: leadId,
+    const form = e.currentTarget;
+    const fileInput = form.elements.namedItem("file") as HTMLInputElement;
+    const file = fileInput?.files?.[0];
+    if (!file) return;
+
+    // Compress only if it's an image
+    const compressed = await compressIfImage(file, {
+      maxWidth: 1600,
+      maxHeight: 1600,
+      quality: 0.72,
+      mimeType: "image/jpeg", // use "image/webp" if your backend supports it
+      compressIfLargerThanBytes: 400 * 1024,
     });
 
-    console.log("lead document data", res.data.data.data);
-    setDocs(res.data.data.data); // <-- if you want to store in state
-  } catch (error: any) {
-    console.error("Error fetching lead:", error);
-  }
-};
+    const fd = new FormData();
+    fd.set("lead_id", String(leadId));
+    fd.set("uploaded_by", String(userID));
+    fd.set("file", compressed); // 👈 use the (maybe) compressed file
+    fd.set("notes", documentName);
 
-useEffect(() => {
-  fetchLeadDocumentData();
-}, [leadId, hitApi]);
-const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? ""; // if storage_path is relative
-const url = (p: string) => (p?.startsWith("http") ? p : `${baseUrl}${p}`);
-const fmtSize = (b: number) => {
-  const units = ["B", "KB", "MB", "GB"];
-  let i = 0,
-    n = b;
-  while (n >= 1024 && i < units.length - 1) {
-    n /= 1024;
-    i++;
-  }
-  return `${n.toFixed(1)} ${units[i]}`;
-};
-const fileExt = (name: string) => (name?.split(".").pop() || "").toUpperCase();
-
-const downLoadDocument = async (id: string) => {
-  try {
-    const res = await AxiosProvider.post("/leads/documents/geturl", { id });
-    console.log("DOWNLOAS IMAGE", res.data.data.fileUrl);
-    const fileUrl: string | undefined = res?.data?.data?.fileUrl;
-  } catch (error) {
-    console.error("Error fetching file:", error);
-  }
-};
-const deleteActivityHistory = async (deleteId: ActivityHistory) => {
-  const activityHistoryId = deleteId.id;
-  console.log("ACTIVITY HISTORY DELETE ID", activityHistoryId);
-  //return;
-  Swal.fire({
-    title: "Are you sure?",
-    text: "Do you really want to delete this user?",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonText: "Yes",
-    cancelButtonText: "No",
-    confirmButtonColor: "#FFCCD0",
-    cancelButtonColor: "#A3000E",
-  }).then(async (result) => {
-    if (result.isConfirmed) {
-      try {
-        await AxiosProvider.post("/leads/activities/soft-delete", {
-          id: activityHistoryId,
-        });
-
-        toast.success("Successfully Deleted");
-        setHitApi(!hitApi);
-      } catch (error) {
-        console.error("Error deleting user:", error);
-        toast.error("Failed to delete user");
-      }
+    try {
+      await AxiosProvider.post(UPLOAD_URL, fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+        maxBodyLength: Infinity, // safe guard for large files
+      });
+      toast.success("Document uploaded successfully");
+      closeFlyOut();
+      setHitApi(!hitApi);
+      setDocumentName("");
+      form.reset();
+    } catch (err) {
+      console.error(err);
+      toast.error("Upload failed. Please try again.");
     }
-  });
-};
-const deleteDocument = async (deleteId: LeadDocument) => {
-  const documentId = deleteId.id;
-  console.log("ACTIVITY HISTORY DELETE ID", documentId);
-  //return;
-  Swal.fire({
-    title: "Are you sure?",
-    text: "Do you really want to delete this user?",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonText: "Yes",
-    cancelButtonText: "No",
-    confirmButtonColor: "#FFCCD0",
-    cancelButtonColor: "#A3000E",
-  }).then(async (result) => {
-    if (result.isConfirmed) {
-      try {
-        await AxiosProvider.post("/leads/documents/soft-delete", {
-          id: deleteId.id,
-        });
+  };
+  const fetchLeadDocumentData = async () => {
+    if (!leadId) return;
+    try {
+      const res = await AxiosProvider.post("/leads/documents/list", {
+        lead_id: leadId,
+      });
 
-        toast.success("Successfully Deleted");
-        setHitApi(!hitApi);
-      } catch (error) {
-        console.error("Error deleting user:", error);
-        toast.error("Failed to delete user");
-      }
+      console.log("lead document data", res.data.data.data);
+      setDocs(res.data.data.data); // <-- if you want to store in state
+    } catch (error: any) {
+      console.error("Error fetching lead:", error);
     }
-  });
-};
-const handleSelect = (item: string) => {
-  setSelectedDropDownTaskValue(item); // save value in state
-  openTaskFlyout(); // your existing function
-};
+  };
 
-const tabs = [
-  {
-    label: "Activity History",
-    content: (
-      <>
-        {/* Tab content 3 */}
-        <div className="container mx-auto p-4">
-          <h2 className="text-base  font-semibold mb-4 text-secondBlack">
-            Today
-          </h2>
-          {fetchLeadActivityData && fetchLeadActivityData.length > 0 ? (
-            fetchLeadActivityData.map((activity) => {
-              const occurred = activity.occurred_at
-                ? new Date(activity.occurred_at)
-                : null;
-              const created = activity.created_at
-                ? new Date(activity.created_at)
-                : null;
+  useEffect(() => {
+    fetchLeadDocumentData();
+  }, [leadId, hitApi]);
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? ""; // if storage_path is relative
+  const url = (p: string) => (p?.startsWith("http") ? p : `${baseUrl}${p}`);
+  const fmtSize = (b: number) => {
+    const units = ["B", "KB", "MB", "GB"];
+    let i = 0,
+      n = b;
+    while (n >= 1024 && i < units.length - 1) {
+      n /= 1024;
+      i++;
+    }
+    return `${n.toFixed(1)} ${units[i]}`;
+  };
+  const fileExt = (name: string) =>
+    (name?.split(".").pop() || "").toUpperCase();
 
-              const occurredDate =
-                occurred?.toLocaleDateString("en-GB", {
-                  day: "2-digit",
-                  month: "short",
-                  timeZone: "Asia/Kolkata",
-                }) ?? "--";
-              const occurredTime =
-                occurred?.toLocaleTimeString("en-US", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: true,
-                  timeZone: "Asia/Kolkata",
-                }) ?? "--";
+  const downLoadDocument = async (id: string) => {
+    try {
+      const res = await AxiosProvider.post("/leads/documents/geturl", { id });
+      console.log("DOWNLOAS IMAGE", res.data.data.fileUrl);
+      const fileUrl: string | undefined = res?.data?.data?.fileUrl;
+    } catch (error) {
+      console.error("Error fetching file:", error);
+    }
+  };
+  const deleteActivityHistory = async (deleteId: ActivityHistory) => {
+    const activityHistoryId = deleteId.id;
+    console.log("ACTIVITY HISTORY DELETE ID", activityHistoryId);
+    //return;
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you really want to delete this user?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes",
+      cancelButtonText: "No",
+      confirmButtonColor: "#FFCCD0",
+      cancelButtonColor: "#A3000E",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await AxiosProvider.post("/leads/activities/soft-delete", {
+            id: activityHistoryId,
+          });
 
-              const createdDate =
-                created?.toLocaleDateString("en-GB", {
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric",
-                  timeZone: "Asia/Kolkata",
-                }) ?? "--";
-              const createdTime =
-                created?.toLocaleTimeString("en-US", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: true,
-                  timeZone: "Asia/Kolkata",
-                }) ?? "--";
+          toast.success("Successfully Deleted");
+          setHitApi(!hitApi);
+        } catch (error) {
+          console.error("Error deleting user:", error);
+          toast.error("Failed to delete user");
+        }
+      }
+    });
+  };
+  const deleteDocument = async (deleteId: LeadDocument) => {
+    const documentId = deleteId.id;
+    console.log("ACTIVITY HISTORY DELETE ID", documentId);
+    //return;
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you really want to delete this user?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes",
+      cancelButtonText: "No",
+      confirmButtonColor: "#FFCCD0",
+      cancelButtonColor: "#A3000E",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await AxiosProvider.post("/leads/documents/soft-delete", {
+            id: deleteId.id,
+          });
 
-              return (
-                <div
-                  key={activity.id}
-                  className="w-full flex items-center justify-between gap-4 hover:bg-primary-100 py-2 px-2 rounded"
-                >
-                  {/* Left: icon + occurred date/time */}
-                  <div className="flex items-center gap-2 shrink-0">
-                    <TbActivity className="bg-primary-500 text-white p-1 text-2xl rounded-full" />
-                    <div className="leading-5 text-sm">
-                      <p>{createdDate}</p>
-                      <p>{createdTime}</p>
-                    </div>
-                  </div>
+          toast.success("Successfully Deleted");
+          setHitApi(!hitApi);
+        } catch (error) {
+          console.error("Error deleting user:", error);
+          toast.error("Failed to delete user");
+        }
+      }
+    });
+  };
+  const handleSelect = (item: string) => {
+    setSelectedDropDownTaskValue(item); // save value in state
+    openTaskFlyout(); // your existing function
+  };
 
-                  {/* Middle: details */}
-                  <div className="flex-1 min-w-0">
-                    <p className="truncate">
-                      <span className="text-primary-600">
-                        {activity.disposition}:
-                      </span>{" "}
-                      {activity.conversation}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Added by {activity.agent_name} on {createdDate}{" "}
-                      {createdTime}
-                    </p>
-                  </div>
+  const tabs = [
+    {
+      label: "Activity History",
+      content: (
+        <>
+          {/* Tab content 3 */}
+          <div className="container mx-auto p-4">
+            <h2 className="text-base  font-semibold mb-4 text-secondBlack">
+              Today
+            </h2>
+            {fetchLeadActivityData && fetchLeadActivityData.length > 0 ? (
+              fetchLeadActivityData.map((activity) => {
+                const occurred = activity.occurred_at
+                  ? new Date(activity.occurred_at)
+                  : null;
+                const created = activity.created_at
+                  ? new Date(activity.created_at)
+                  : null;
 
-                  {/* Right: Edit button */}
-                  <button
-                    type="button"
-                    onClick={() => openActivityHistoryFlyout(activity)}
-                    className="shrink-0 py-1.5 px-3 bg-primary-500 text-white rounded text-sm hover:bg-primary-600"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => deleteActivityHistory(activity)}
-                    className="shrink-0 py-1.5 px-3 bg-primary-500 text-white rounded text-sm hover:bg-primary-600"
-                  >
-                    Delete
-                  </button>
-                </div>
-              );
-            })
-          ) : (
-            <p className="text-center text-gray-500 py-4">No data found</p>
-          )}
+                const occurredDate =
+                  occurred?.toLocaleDateString("en-GB", {
+                    day: "2-digit",
+                    month: "short",
+                    timeZone: "Asia/Kolkata",
+                  }) ?? "--";
+                const occurredTime =
+                  occurred?.toLocaleTimeString("en-US", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true,
+                    timeZone: "Asia/Kolkata",
+                  }) ?? "--";
 
-          {/* PAGINATION */}
-          <div className="flex justify-center items-center my-10 relative">
-            <button
-              onClick={() => handleChangepagination(page - 1)}
-              disabled={page === 1}
-              className="px-2 py-2 mx-2 border rounded bg-primary-500 hover:bg-primary-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <HiChevronDoubleLeft className=" w-6 h-auto" />
-            </button>
-            <span className="text-[#717171] text-sm">
-              Page {page} of {totalPages}
-            </span>
-            <button
-              onClick={() => handleChangepagination(page + 1)}
-              disabled={page === totalPages}
-              className="px-2 py-2 mx-2 border rounded bg-primary-500 hover:bg-primary-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <HiChevronDoubleRight className=" w-6 h-auto" />
-            </button>
-          </div>
-          {/* PAGINATION */}
-        </div>
+                const createdDate =
+                  created?.toLocaleDateString("en-GB", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                    timeZone: "Asia/Kolkata",
+                  }) ?? "--";
+                const createdTime =
+                  created?.toLocaleTimeString("en-US", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true,
+                    timeZone: "Asia/Kolkata",
+                  }) ?? "--";
 
-        {/* End Tab content 3 */}
-      </>
-    ),
-    // End Tab content 2
-  },
-  {
-    label: "Task",
-    content: (
-      <>
-        {/* Tab content 3 */}
-
-        <AppCalendar leadId={leadId} reloadKey={reloadKey} hitApi={hitApi} />
-        {/* End Tab content 3 */}
-      </>
-    ),
-  },
-  {
-    label: "Document",
-    content: (
-      <>
-        {/* Tab content 4 */}
-        <div className="space-y-3">
-          {docs.length === 0 ? (
-            <p className="text-sm text-gray-500">No documents found</p>
-          ) : (
-            docs.map((d) => (
-              <div
-                key={d.id}
-                className="grid grid-cols-[30%_70%] gap-4 border border-[#DFEAF2] rounded-[6px] p-3"
-              >
-                {/* Left Column: Notes */}
-                <div className="flex items-start">
-                  <p className="text-base text-secondBlack whitespace-pre-wrap capitalize">
-                    {d.notes || "—"}
-                  </p>
-                </div>
-
-                {/* Right Column: File Info */}
-                <div className="flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="font-medium text-firstBlack truncate">
-                      {d.file_name}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {d.mime_type} · {fmtSize(d.file_size)} ·{" "}
-                      {new Date(d.created_at).toLocaleString()}
-                    </p>
-                  </div>
-
-                  <a
-                    onClick={() => downLoadDocument(d.id)}
-                    className="py-2 px-3 border border-[#DFEAF2] rounded text-sm cursor-pointer hover:underline"
-                  >
-                    Download
-                  </a>
-                  <a
-                    onClick={() => deleteDocument(d)}
-                    className="py-2 px-3 border border-[#DFEAF2] rounded text-sm cursor-pointer hover:underline"
-                  >
-                    Delete
-                  </a>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-
-        {/* End Tab content 4 */}
-      </>
-    ),
-  },
-];
-if (isChecking) {
-  return (
-    <div className="h-screen flex flex-col gap-5 justify-center items-center bg-white">
-      <Image
-        src="/images/orizonIcon.svg"
-        alt="Loading"
-        width={150}
-        height={150}
-        className="animate-pulse rounded"
-      />
-    </div>
-  );
-}
-const handleSubmit = async () => {};
-// Round a date up to the next 5-minute tick
-const roundUpToNext5 = (d: Date) => {
-  const remainder = d.getMinutes() % 5;
-  return remainder === 0 ? d : addMinutes(d, 5 - remainder);
-};
-
-// Build min/max time for react-datepicker depending on the selected date
-const getMinTimeFor = (selected: Date | null) => {
-  if (selected && isToday(selected)) {
-    const nowRounded = roundUpToNext5(new Date());
-    return setMinutes(
-      setHours(new Date(), nowRounded.getHours()),
-      nowRounded.getMinutes()
-    );
-  }
-  // For future days, allow from 00:00
-  return setMinutes(setHours(new Date(), 0), 0);
-};
-
-const getMaxTimeFor = () => setMinutes(setHours(new Date(), 23), 59);
-
-return (
-  <>
-    <div className=" flex justify-end  min-h-screen">
-      {/* Main content right section */}
-      <div className="ml-[97px]  w-full md:w-[90%] m-auto bg-[#fff] min-h-[500px]  rounded p-4 mt-0 ">
-        <LeftSideBar />
-        {/* left section top row */}
-        <DesktopHeader />
-        {/* right section top row */}
-        {/* </div> */}
-        <div className=" w-full   bg-[#F5F7FA] flex justify-center relative">
-          <div className="w-full md:w-full min-h-[600px] bg-white !rounded-3xl  shadow-lastTransaction">
-            <div className="py-4 px-2 md:p-6">
-              {/* Buttons */}
-
-              <div className="flex justify-end items-center mb-6 w-full gap-2">
-                <div className="flex justify-center items-center gap-4 ">
+                return (
                   <div
-                    className="flex gap-2 py-3 px-0 justify-center rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 group min-w-32"
-                    onClick={() => openActivityFlyout()}
+                    key={activity.id}
+                    className="w-full flex items-center justify-between gap-4 hover:bg-primary-100 py-2 px-2 rounded"
                   >
-                    <LuSquareActivity className="w-5 h-5 text-white group-hover:text-white" />
-                    <p className="text-white text-base font-medium group-hover:text-white">
-                      Activity
-                    </p>
-                  </div>
-                </div>
-                {/* TASK */}
-                <div className="flex justify-center items-center gap-4">
-                  <div className="relative group">
-                    {/* Main Button */}
-                    <div
-                      className="flex gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 min-w-32"
-                      // onClick={() => openTaskFlyout()}
+                    {/* Left: icon + occurred date/time */}
+                    <div className="flex items-center gap-2 shrink-0">
+                      <TbActivity className="bg-primary-500 text-white p-1 text-2xl rounded-full" />
+                      <div className="leading-5 text-sm">
+                        <p>{createdDate}</p>
+                        <p>{createdTime}</p>
+                      </div>
+                    </div>
+
+                    {/* Middle: details */}
+                    <div className="flex-1 min-w-0">
+                      <p className="truncate">
+                        <span className="text-primary-600">
+                          {activity.disposition}:
+                        </span>{" "}
+                        {activity.conversation}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Added by {activity.agent_name} on {createdDate}{" "}
+                        {createdTime}
+                      </p>
+                    </div>
+
+                    {/* Right: Edit button */}
+                    <button
+                      type="button"
+                      onClick={() => openActivityHistoryFlyout(activity)}
+                      className="shrink-0 py-1.5 px-3 bg-primary-500 text-white rounded text-sm hover:bg-primary-600"
                     >
-                      <FaNotesMedical className="w-5 h-5 text-white" />
-                      <p className="text-white text-base font-medium">Task</p>
-                    </div>
-
-                    {/* Dropdown */}
-                    <div className="absolute left-0 mt-2 w-40 rounded-[4px] border border-[#E7E7E7] bg-white shadow-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
-                      <ul className="flex flex-col">
-                        {["meeting", "followup", "phonecall"].map((item) => (
-                          <li
-                            key={item}
-                            onClick={() => handleSelect(item)}
-                            className="px-4 py-2 text-gray-700 hover:bg-primary-100 hover:text-primary-700 cursor-pointer text-sm capitalize"
-                          >
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => deleteActivityHistory(activity)}
+                      className="shrink-0 py-1.5 px-3 bg-primary-500 text-white rounded text-sm hover:bg-primary-600"
+                    >
+                      Delete
+                    </button>
                   </div>
-                </div>
+                );
+              })
+            ) : (
+              <p className="text-center text-gray-500 py-4">No data found</p>
+            )}
 
-                {/* END TASK */}
-                <div className="flex justify-center items-center gap-4">
-                  <div
-                    className="flex gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 group min-w-32"
-                    onClick={() => openDocumentFlyout()}
-                  >
-                    <FaTasks className="w-5 h-5 text-white group-hover:text-white" />
-                    <p className="text-white text-base font-medium group-hover:text-white">
-                      Document
+            {/* PAGINATION */}
+            <div className="flex justify-center items-center my-10 relative">
+              <button
+                onClick={() => handleChangepagination(page - 1)}
+                disabled={page === 1}
+                className="px-2 py-2 mx-2 border rounded bg-primary-500 hover:bg-primary-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <HiChevronDoubleLeft className=" w-6 h-auto" />
+              </button>
+              <span className="text-[#717171] text-sm">
+                Page {page} of {totalPages}
+              </span>
+              <button
+                onClick={() => handleChangepagination(page + 1)}
+                disabled={page === totalPages}
+                className="px-2 py-2 mx-2 border rounded bg-primary-500 hover:bg-primary-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <HiChevronDoubleRight className=" w-6 h-auto" />
+              </button>
+            </div>
+            {/* PAGINATION */}
+          </div>
+
+          {/* End Tab content 3 */}
+        </>
+      ),
+      // End Tab content 2
+    },
+    {
+      label: "Task",
+      content: (
+        <>
+          {/* Tab content 3 */}
+
+          <AppCalendar leadId={leadId} reloadKey={reloadKey} hitApi={hitApi} />
+          {/* End Tab content 3 */}
+        </>
+      ),
+    },
+    {
+      label: "Document",
+      content: (
+        <>
+          {/* Tab content 4 */}
+          <div className="space-y-3">
+            {docs.length === 0 ? (
+              <p className="text-sm text-gray-500">No documents found</p>
+            ) : (
+              docs.map((d) => (
+                <div
+                  key={d.id}
+                  className="grid grid-cols-[30%_70%] gap-4 border border-[#DFEAF2] rounded-[6px] p-3"
+                >
+                  {/* Left Column: Notes */}
+                  <div className="flex items-start">
+                    <p className="text-base text-secondBlack whitespace-pre-wrap capitalize">
+                      {d.notes || "—"}
                     </p>
                   </div>
+
+                  {/* Right Column: File Info */}
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-medium text-firstBlack truncate">
+                        {d.file_name}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {d.mime_type} · {fmtSize(d.file_size)} ·{" "}
+                        {new Date(d.created_at).toLocaleString()}
+                      </p>
+                    </div>
+
+                    <a
+                      onClick={() => downLoadDocument(d.id)}
+                      className="py-2 px-3 border border-[#DFEAF2] rounded text-sm cursor-pointer hover:underline"
+                    >
+                      Download
+                    </a>
+                    <a
+                      onClick={() => deleteDocument(d)}
+                      className="py-2 px-3 border border-[#DFEAF2] rounded text-sm cursor-pointer hover:underline"
+                    >
+                      Delete
+                    </a>
+                  </div>
                 </div>
-              </div>
-              <div className=" grid grid-cols-[30%_70%]  gap-4">
-                <div className="  w-full">
-                  {/* LEAD */}
-                  {isEditFirstLead ? (
-                    /* ---------- VIEW MODE (unchanged) ---------- */
-                    <div className="w-full rounded bg-primary-600 px-4 py-6 mb-6">
-                      <div className=" flex text-white  gap-2 mb-5 capitalize">
-                        <FaStar />
-                        <div>
-                          <p className=" text-base font-medium leading-none">
-                            {data?.first_name || "-"} {data?.last_name || "-"}
+              ))
+            )}
+          </div>
+
+          {/* End Tab content 4 */}
+        </>
+      ),
+    },
+  ];
+  if (isChecking) {
+    return (
+      <div className="h-screen flex flex-col gap-5 justify-center items-center bg-white">
+        <Image
+          src="/images/orizonIcon.svg"
+          alt="Loading"
+          width={150}
+          height={150}
+          className="animate-pulse rounded"
+        />
+      </div>
+    );
+  }
+  const handleSubmit = async () => {};
+  // Round a date up to the next 5-minute tick
+  const roundUpToNext5 = (d: Date) => {
+    const remainder = d.getMinutes() % 5;
+    return remainder === 0 ? d : addMinutes(d, 5 - remainder);
+  };
+  // --------------------------- DATE
+  // helpers
+  const roundToNext5 = (d = new Date()) => {
+    const copy = new Date(d);
+    const mins = copy.getMinutes();
+    const add = (5 - (mins % 5)) % 5;
+    copy.setMinutes(mins + add, 0, 0);
+    return copy;
+  };
+
+  const addMinutes = (d: Date, mins: number) => {
+    const copy = new Date(d);
+    copy.setMinutes(copy.getMinutes() + mins);
+    return copy;
+  };
+
+  const formatDateTime = (d: Date) => {
+    const pad = (n: number) => String(n).padStart(2, "0");
+    let h = d.getHours();
+    const m = pad(d.getMinutes());
+    const ampm = h >= 12 ? "pm" : "am";
+    h = h % 12 || 12;
+    const yyyy = d.getFullYear();
+    const mm = pad(d.getMonth() + 1);
+    const dd = pad(d.getDate());
+    return `${yyyy}-${mm}-${dd} ${pad(h)}:${m}${ampm}`;
+  };
+
+  const defaultStart = roundToNext5();
+  const defaultEnd = addMinutes(defaultStart, 30); // still 30 min gap
+
+  return (
+    <>
+      <div className=" flex justify-end  min-h-screen">
+        {/* Main content right section */}
+        <div className="ml-[97px]  w-full md:w-[90%] m-auto bg-[#fff] min-h-[500px]  rounded p-4 mt-0 ">
+          <LeftSideBar />
+          {/* left section top row */}
+          <DesktopHeader />
+          {/* right section top row */}
+          {/* </div> */}
+          <div className=" w-full   bg-[#F5F7FA] flex justify-center relative">
+            <div className="w-full md:w-full min-h-[600px] bg-white !rounded-3xl  shadow-lastTransaction">
+              <div className="py-4 px-2 md:p-6">
+                {/* Buttons */}
+
+                <div className="flex justify-end items-center mb-6 w-full gap-2">
+                  <div className="flex justify-center items-center gap-4 ">
+                    <div
+                      className="flex gap-2 py-3 px-0 justify-center rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 group min-w-32"
+                      onClick={() => openActivityFlyout()}
+                    >
+                      <LuSquareActivity className="w-5 h-5 text-white group-hover:text-white" />
+                      <p className="text-white text-base font-medium group-hover:text-white">
+                        Activity
+                      </p>
+                    </div>
+                  </div>
+                  {/* TASK */}
+                  <div className="flex justify-center items-center gap-4">
+                    <div className="relative group">
+                      {/* Main Button */}
+                      <div
+                        className="flex gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 min-w-32"
+                        // onClick={() => openTaskFlyout()}
+                      >
+                        <FaNotesMedical className="w-5 h-5 text-white" />
+                        <p className="text-white text-base font-medium">Task</p>
+                      </div>
+
+                      {/* Dropdown */}
+                      <div className="absolute left-0 mt-2 w-40 rounded-[4px] border border-[#E7E7E7] bg-white shadow-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+                        <ul className="flex flex-col">
+                          {["meeting", "followup", "phonecall"].map((item) => (
+                            <li
+                              key={item}
+                              onClick={() => handleSelect(item)}
+                              className="px-4 py-2 text-gray-700 hover:bg-primary-100 hover:text-primary-700 cursor-pointer text-sm capitalize"
+                            >
+                              {item}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* END TASK */}
+                  <div className="flex justify-center items-center gap-4">
+                    <div
+                      className="flex gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 group min-w-32"
+                      onClick={() => openDocumentFlyout()}
+                    >
+                      <FaTasks className="w-5 h-5 text-white group-hover:text-white" />
+                      <p className="text-white text-base font-medium group-hover:text-white">
+                        Document
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className=" grid grid-cols-[30%_70%]  gap-4">
+                  <div className="  w-full">
+                    {/* LEAD */}
+                    {isEditFirstLead ? (
+                      /* ---------- VIEW MODE (unchanged) ---------- */
+                      <div className="w-full rounded bg-primary-600 px-4 py-6 mb-6">
+                        <div className=" flex text-white  gap-2 mb-5 capitalize">
+                          <FaStar />
+                          <div>
+                            <p className=" text-base font-medium leading-none">
+                              {data?.first_name || "-"} {data?.last_name || "-"}
+                            </p>
+                            {data?.address?.country || "-"}
+                          </div>
+                        </div>
+
+                        <div className=" flex text-white items-center  gap-2 mb-3">
+                          <IoIosMail />
+                          <p className=" text-sm font-medium leading-none">
+                            {data?.email || "-"}
                           </p>
-                          {data?.address?.country || "-"}
+                        </div>
+
+                        <div className=" flex text-white items-center  gap-2 mb-3">
+                          <IoIosCall />
+                          <p className=" text-sm font-medium leading-none">
+                            {data?.phone || "-"}
+                          </p>
+                        </div>
+
+                        <div className=" flex text-white items-center  gap-2 mb-3">
+                          <MdLocationPin />
+                          <p className=" text-sm font-medium leading-none">
+                            {data?.address?.line1 || "-"}{" "}
+                            {data?.address?.line2 || "-"}{" "}
+                            {data?.address?.city || "-"}{" "}
+                            {data?.address?.state || "-"}
+                          </p>
+                        </div>
+
+                        <div className=" flex text-white items-center  gap-2 mb-3">
+                          <FaCity />
+                          <p className=" text-sm font-medium leading-none">
+                            {data?.address?.postal_code || "-"}
+                          </p>
+                        </div>
+
+                        <div className=" flex text-white items-center  gap-2 mb-3">
+                          <MdLocationPin />
+                          <p className=" text-sm font-medium leading-none">
+                            {data?.address?.state || "-"}
+                          </p>
+                        </div>
+
+                        {/* ✅ Edit button */}
+                        <div className="flex justify-end pt-4">
+                          <button
+                            type="button"
+                            onClick={() => setIsEditFirstLead(false)} // flip state
+                            className="px-4 py-2 rounded-[4px] bg-white text-secondBlack text-sm font-medium"
+                          >
+                            Edit
+                          </button>
                         </div>
                       </div>
+                    ) : (
+                      /* ---------- EDIT MODE (Formik form) ---------- */
+                      /* ---------- EDIT MODE (Formik form) ---------- */
+                      <div className="w-full rounded bg-white px-4 py-6 mb-6">
+                        <Formik
+                          enableReinitialize
+                          initialValues={{
+                            first_name: data?.first_name ?? "",
+                            last_name: data?.last_name ?? "",
+                            country: data?.address?.country ?? "",
+                            email: data?.email ?? "",
+                            phone: data?.phone ?? "",
+                            address_line1: data?.address?.line1 ?? "",
+                            address_line2: data?.address?.line2 ?? "",
+                            city: data?.address?.city ?? "",
+                            state: data?.address?.state ?? "",
+                          }}
+                          validationSchema={Yup.object({
+                            first_name: Yup.string()
+                              .trim()
+                              .required("First name is required"),
+                            last_name: Yup.string()
+                              .trim()
+                              .required("Last name is required"),
+                            email: Yup.string()
+                              .trim()
+                              .email("Invalid email")
+                              .required("Email is required"),
+                            phone: Yup.string()
+                              .trim()
+                              .required("Mobile is required"),
+                            country: Yup.string().trim().nullable(),
+                            address_line1: Yup.string().trim().nullable(),
+                            address_line2: Yup.string().trim().nullable(),
+                            city: Yup.string().trim().nullable(),
+                            state: Yup.string().trim().nullable(),
+                          })}
+                          onSubmit={async (values, { setSubmitting }) => {
+                            try {
+                              // ⬇️ Flat payload (no nested objects)
+                              const payload = {
+                                id: data?.id, // keep if your API needs id for update
+                                ...values,
+                              };
+                              //console.log("PPPPPPPPPPP", payload);
 
-                      <div className=" flex text-white items-center  gap-2 mb-3">
-                        <IoIosMail />
-                        <p className=" text-sm font-medium leading-none">
-                          {data?.email || "-"}
-                        </p>
-                      </div>
-
-                      <div className=" flex text-white items-center  gap-2 mb-3">
-                        <IoIosCall />
-                        <p className=" text-sm font-medium leading-none">
-                          {data?.phone || "-"}
-                        </p>
-                      </div>
-
-                      <div className=" flex text-white items-center  gap-2 mb-3">
-                        <MdLocationPin />
-                        <p className=" text-sm font-medium leading-none">
-                          {data?.address?.line1 || "-"}{" "}
-                          {data?.address?.line2 || "-"}{" "}
-                          {data?.address?.city || "-"}{" "}
-                          {data?.address?.state || "-"}
-                        </p>
-                      </div>
-
-                      <div className=" flex text-white items-center  gap-2 mb-3">
-                        <FaCity />
-                        <p className=" text-sm font-medium leading-none">
-                          {data?.address?.postal_code || "-"}
-                        </p>
-                      </div>
-
-                      <div className=" flex text-white items-center  gap-2 mb-3">
-                        <MdLocationPin />
-                        <p className=" text-sm font-medium leading-none">
-                          {data?.address?.state || "-"}
-                        </p>
-                      </div>
-
-                      {/* ✅ Edit button */}
-                      <div className="flex justify-end pt-4">
-                        <button
-                          type="button"
-                          onClick={() => setIsEditFirstLead(false)} // flip state
-                          className="px-4 py-2 rounded-[4px] bg-white text-secondBlack text-sm font-medium"
+                              await AxiosProvider.post(
+                                "/leads/update",
+                                payload
+                              ); // or .post, use your actual route
+                              toast.success("Lead updated successfully");
+                              setIsEditFirstLead(true); // back to view mode
+                              setHitApi(!hitApi);
+                              // optionally refetch here if needed
+                            } catch (e) {
+                              console.error(e);
+                              toast.error("Failed to update lead");
+                            } finally {
+                              setSubmitting(false);
+                            }
+                          }}
                         >
-                          Edit
-                        </button>
+                          {({ isSubmitting, errors, touched }) => (
+                            <Form className="space-y-4">
+                              {/* Name row */}
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                  <label className="block text-sm font-medium text-secondBlack mb-1">
+                                    First Name *
+                                  </label>
+                                  <Field
+                                    name="first_name"
+                                    type="text"
+                                    className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
+                                    placeholder="Enter first name"
+                                  />
+                                  <ErrorMessage
+                                    name="first_name"
+                                    component="p"
+                                    className="text-red-500 text-xs mt-1"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-medium text-secondBlack mb-1">
+                                    Last Name *
+                                  </label>
+                                  <Field
+                                    name="last_name"
+                                    type="text"
+                                    className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
+                                    placeholder="Enter last name"
+                                  />
+                                  <ErrorMessage
+                                    name="last_name"
+                                    component="p"
+                                    className="text-red-500 text-xs mt-1"
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Email / Phone */}
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                  <label className="block text-sm font-medium text-secondBlack mb-1">
+                                    Email *
+                                  </label>
+                                  <Field
+                                    name="email"
+                                    type="email"
+                                    className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
+                                    placeholder="name@example.com"
+                                  />
+                                  <ErrorMessage
+                                    name="email"
+                                    component="p"
+                                    className="text-red-500 text-xs mt-1"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-medium text-secondBlack mb-1">
+                                    Mobile *
+                                  </label>
+                                  <Field
+                                    name="phone"
+                                    type="text"
+                                    className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
+                                    placeholder="Enter mobile number"
+                                  />
+                                  <ErrorMessage
+                                    name="phone"
+                                    component="p"
+                                    className="text-red-500 text-xs mt-1"
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Country */}
+                              <div>
+                                <label className="block text-sm font-medium text-secondBlack mb-1">
+                                  Country
+                                </label>
+                                <Field
+                                  name="country"
+                                  type="text"
+                                  className="w-full border border[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
+                                  placeholder="Country"
+                                />
+                                <ErrorMessage
+                                  name="country"
+                                  component="p"
+                                  className="text-red-500 text-xs mt-1"
+                                />
+                              </div>
+
+                              {/* Address lines */}
+                              <div>
+                                <label className="block text-sm font-medium text-secondBlack mb-1">
+                                  Address Line 1
+                                </label>
+                                <Field
+                                  name="address_line1"
+                                  type="text"
+                                  className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
+                                  placeholder="House / Street / Area"
+                                />
+                                <ErrorMessage
+                                  name="address_line1"
+                                  component="p"
+                                  className="text-red-500 text-xs mt-1"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-secondBlack mb-1">
+                                  Address Line 2
+                                </label>
+                                <Field
+                                  name="address_line2"
+                                  type="text"
+                                  className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
+                                  placeholder="Landmark / Apartment"
+                                />
+                                <ErrorMessage
+                                  name="address_line2"
+                                  component="p"
+                                  className="text-red-500 text-xs mt-1"
+                                />
+                              </div>
+
+                              {/* City / State */}
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                  <label className="block text-sm font-medium text-secondBlack mb-1">
+                                    City
+                                  </label>
+                                  <Field
+                                    name="city"
+                                    type="text"
+                                    className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
+                                    placeholder="City"
+                                  />
+                                  <ErrorMessage
+                                    name="city"
+                                    component="p"
+                                    className="text-red-500 text-xs mt-1"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-medium text-secondBlack mb-1">
+                                    State
+                                  </label>
+                                  <Field
+                                    name="state"
+                                    type="text"
+                                    className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
+                                    placeholder="State"
+                                  />
+                                  <ErrorMessage
+                                    name="state"
+                                    component="p"
+                                    className="text-red-500 text-xs mt-1"
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Actions */}
+                              <div className="flex items-center justify-end gap-3 pt-4">
+                                <button
+                                  type="button"
+                                  onClick={() => setIsEditFirstLead(true)}
+                                  className="px-4 py-2 rounded-[4px] border border-[#DFEAF2] text-secondBlack text-sm font-medium bg-white"
+                                >
+                                  Cancel
+                                </button>
+                                <button
+                                  type="submit"
+                                  disabled={isSubmitting}
+                                  className="px-4 py-2 rounded-[4px] bg-primary-600 text-white text-sm font-medium disabled:opacity-60"
+                                >
+                                  {isSubmitting ? "Saving..." : "Save"}
+                                </button>
+                              </div>
+                            </Form>
+                          )}
+                        </Formik>
                       </div>
+                    )}
+
+                    {/* LEAD PROPERTIES */}
+                    <div className="w-full">
+                      <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 ">
+                        <thead className="text-xs text-[#999999] bg-white">
+                          <tr className="border border-tableBorder">
+                            <th
+                              scope="col"
+                              className="px-3 py-3 md:p-3 border border-tableBorder font-semibold text-secondBlack text-base"
+                              colSpan={2}
+                            >
+                              Lead Properties
+                            </th>
+                          </tr>
+                        </thead>
+
+                        <tbody>
+                          <tr className="border border-tableBorder bg-white hover:bg-primary-100 transition-colors">
+                            <td className="text-sm text-[#78829D] py-4 px-4">
+                              Lead Number
+                            </td>
+                            <td className="text-sm font-medium text-[#252F4A]  py-4 px-4">
+                              {data?.lead_number || "-"}
+                            </td>
+                          </tr>
+
+                          <tr className="border border-tableBorder bg-white hover:bg-primary-100 transition-colors">
+                            <td className="text-sm text-[#78829D] py-4 px-4">
+                              Agent Name
+                            </td>
+                            <td className="text-sm font-medium text-[#252F4A]  py-4 px-4">
+                              {data?.agent.name || "-"}
+                            </td>
+                          </tr>
+                          <tr className="border border-tableBorder bg-white hover:bg-primary-100 transition-colors">
+                            <td className="text-sm text-[#78829D] py-4 px-4">
+                              Best time to call
+                            </td>
+                            <td className="text-sm font-medium text-[#252F4A]  py-4 px-4">
+                              {data?.best_time_to_call || "-"}
+                            </td>
+                          </tr>
+
+                          <tr className="border border-tableBorder bg-white hover:bg-primary-100 transition-colors">
+                            <td className="text-sm text-[#78829D] py-4 px-4">
+                              Lead Source
+                            </td>
+                            <td className="text-sm font-medium text-[#252F4A]  py-4 px-4">
+                              {data?.lead_source || "-"}
+                            </td>
+                          </tr>
+                          <tr className="border border-tableBorder bg-white hover:bg-primary-100 transition-colors">
+                            <td className="text-sm text-[#78829D] py-4 px-4">
+                              Debt Consolidation Status
+                            </td>
+                            <td className="text-sm font-medium text-[#252F4A]  py-4 px-4">
+                              {data?.debt_consolidation_status || "-"}
+                            </td>
+                          </tr>
+                          <tr className="border border-tableBorder bg-white hover:bg-primary-100 transition-colors">
+                            <td className="text-sm text-[#78829D] py-4 px-4">
+                              Lead Score
+                            </td>
+                            <td className="text-sm font-medium text-[#252F4A]  py-4 px-4">
+                              {data?.lead_score || "-"}
+                            </td>
+                          </tr>
+                          <tr className="border border-tableBorder bg-white hover:bg-primary-100 transition-colors">
+                            <td className="text-sm text-[#78829D] py-4 px-4">
+                              WHATSAPP
+                            </td>
+                            <td className="text-sm font-medium text-[#252F4A]  py-4 px-4">
+                              {data?.whatsapp_number || "-"}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
                     </div>
-                  ) : (
-                    /* ---------- EDIT MODE (Formik form) ---------- */
-                    /* ---------- EDIT MODE (Formik form) ---------- */
-                    <div className="w-full rounded bg-white px-4 py-6 mb-6">
-                      <Formik
-                        enableReinitialize
-                        initialValues={{
-                          first_name: data?.first_name ?? "",
-                          last_name: data?.last_name ?? "",
-                          country: data?.address?.country ?? "",
-                          email: data?.email ?? "",
-                          phone: data?.phone ?? "",
-                          address_line1: data?.address?.line1 ?? "",
-                          address_line2: data?.address?.line2 ?? "",
-                          city: data?.address?.city ?? "",
-                          state: data?.address?.state ?? "",
-                        }}
-                        validationSchema={Yup.object({
-                          first_name: Yup.string()
-                            .trim()
-                            .required("First name is required"),
-                          last_name: Yup.string()
-                            .trim()
-                            .required("Last name is required"),
-                          email: Yup.string()
-                            .trim()
-                            .email("Invalid email")
-                            .required("Email is required"),
-                          phone: Yup.string()
-                            .trim()
-                            .required("Mobile is required"),
-                          country: Yup.string().trim().nullable(),
-                          address_line1: Yup.string().trim().nullable(),
-                          address_line2: Yup.string().trim().nullable(),
-                          city: Yup.string().trim().nullable(),
-                          state: Yup.string().trim().nullable(),
-                        })}
-                        onSubmit={async (values, { setSubmitting }) => {
-                          try {
-                            // ⬇️ Flat payload (no nested objects)
-                            const payload = {
-                              id: data?.id, // keep if your API needs id for update
-                              ...values,
-                            };
-                            //console.log("PPPPPPPPPPP", payload);
-
-                            await AxiosProvider.post("/leads/update", payload); // or .post, use your actual route
-                            toast.success("Lead updated successfully");
-                            setIsEditFirstLead(true); // back to view mode
-                            setHitApi(!hitApi);
-                            // optionally refetch here if needed
-                          } catch (e) {
-                            console.error(e);
-                            toast.error("Failed to update lead");
-                          } finally {
-                            setSubmitting(false);
-                          }
-                        }}
-                      >
-                        {({ isSubmitting, errors, touched }) => (
-                          <Form className="space-y-4">
-                            {/* Name row */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                              <div>
-                                <label className="block text-sm font-medium text-secondBlack mb-1">
-                                  First Name *
-                                </label>
-                                <Field
-                                  name="first_name"
-                                  type="text"
-                                  className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
-                                  placeholder="Enter first name"
-                                />
-                                <ErrorMessage
-                                  name="first_name"
-                                  component="p"
-                                  className="text-red-500 text-xs mt-1"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-sm font-medium text-secondBlack mb-1">
-                                  Last Name *
-                                </label>
-                                <Field
-                                  name="last_name"
-                                  type="text"
-                                  className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
-                                  placeholder="Enter last name"
-                                />
-                                <ErrorMessage
-                                  name="last_name"
-                                  component="p"
-                                  className="text-red-500 text-xs mt-1"
-                                />
-                              </div>
-                            </div>
-
-                            {/* Email / Phone */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                              <div>
-                                <label className="block text-sm font-medium text-secondBlack mb-1">
-                                  Email *
-                                </label>
-                                <Field
-                                  name="email"
-                                  type="email"
-                                  className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
-                                  placeholder="name@example.com"
-                                />
-                                <ErrorMessage
-                                  name="email"
-                                  component="p"
-                                  className="text-red-500 text-xs mt-1"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-sm font-medium text-secondBlack mb-1">
-                                  Mobile *
-                                </label>
-                                <Field
-                                  name="phone"
-                                  type="text"
-                                  className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
-                                  placeholder="Enter mobile number"
-                                />
-                                <ErrorMessage
-                                  name="phone"
-                                  component="p"
-                                  className="text-red-500 text-xs mt-1"
-                                />
-                              </div>
-                            </div>
-
-                            {/* Country */}
-                            <div>
-                              <label className="block text-sm font-medium text-secondBlack mb-1">
-                                Country
-                              </label>
-                              <Field
-                                name="country"
-                                type="text"
-                                className="w-full border border[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
-                                placeholder="Country"
-                              />
-                              <ErrorMessage
-                                name="country"
-                                component="p"
-                                className="text-red-500 text-xs mt-1"
-                              />
-                            </div>
-
-                            {/* Address lines */}
-                            <div>
-                              <label className="block text-sm font-medium text-secondBlack mb-1">
-                                Address Line 1
-                              </label>
-                              <Field
-                                name="address_line1"
-                                type="text"
-                                className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
-                                placeholder="House / Street / Area"
-                              />
-                              <ErrorMessage
-                                name="address_line1"
-                                component="p"
-                                className="text-red-500 text-xs mt-1"
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium text-secondBlack mb-1">
-                                Address Line 2
-                              </label>
-                              <Field
-                                name="address_line2"
-                                type="text"
-                                className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
-                                placeholder="Landmark / Apartment"
-                              />
-                              <ErrorMessage
-                                name="address_line2"
-                                component="p"
-                                className="text-red-500 text-xs mt-1"
-                              />
-                            </div>
-
-                            {/* City / State */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                              <div>
-                                <label className="block text-sm font-medium text-secondBlack mb-1">
-                                  City
-                                </label>
-                                <Field
-                                  name="city"
-                                  type="text"
-                                  className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
-                                  placeholder="City"
-                                />
-                                <ErrorMessage
-                                  name="city"
-                                  component="p"
-                                  className="text-red-500 text-xs mt-1"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-sm font-medium text-secondBlack mb-1">
-                                  State
-                                </label>
-                                <Field
-                                  name="state"
-                                  type="text"
-                                  className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
-                                  placeholder="State"
-                                />
-                                <ErrorMessage
-                                  name="state"
-                                  component="p"
-                                  className="text-red-500 text-xs mt-1"
-                                />
-                              </div>
-                            </div>
-
-                            {/* Actions */}
-                            <div className="flex items-center justify-end gap-3 pt-4">
-                              <button
-                                type="button"
-                                onClick={() => setIsEditFirstLead(true)}
-                                className="px-4 py-2 rounded-[4px] border border-[#DFEAF2] text-secondBlack text-sm font-medium bg-white"
-                              >
-                                Cancel
-                              </button>
-                              <button
-                                type="submit"
-                                disabled={isSubmitting}
-                                className="px-4 py-2 rounded-[4px] bg-primary-600 text-white text-sm font-medium disabled:opacity-60"
-                              >
-                                {isSubmitting ? "Saving..." : "Save"}
-                              </button>
-                            </div>
-                          </Form>
-                        )}
-                      </Formik>
-                    </div>
-                  )}
-
-                  {/* LEAD PROPERTIES */}
-                  <div className="w-full">
-                    <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 ">
-                      <thead className="text-xs text-[#999999] bg-white">
-                        <tr className="border border-tableBorder">
-                          <th
-                            scope="col"
-                            className="px-3 py-3 md:p-3 border border-tableBorder font-semibold text-secondBlack text-base"
-                            colSpan={2}
-                          >
-                            Lead Properties
-                          </th>
-                        </tr>
-                      </thead>
-
-                      <tbody>
-                        <tr className="border border-tableBorder bg-white hover:bg-primary-100 transition-colors">
-                          <td className="text-sm text-[#78829D] py-4 px-4">
-                            Lead Number
-                          </td>
-                          <td className="text-sm font-medium text-[#252F4A]  py-4 px-4">
-                            {data?.lead_number || "-"}
-                          </td>
-                        </tr>
-
-                        <tr className="border border-tableBorder bg-white hover:bg-primary-100 transition-colors">
-                          <td className="text-sm text-[#78829D] py-4 px-4">
-                            Agent Name
-                          </td>
-                          <td className="text-sm font-medium text-[#252F4A]  py-4 px-4">
-                            {data?.agent.name || "-"}
-                          </td>
-                        </tr>
-                        <tr className="border border-tableBorder bg-white hover:bg-primary-100 transition-colors">
-                          <td className="text-sm text-[#78829D] py-4 px-4">
-                            Best time to call
-                          </td>
-                          <td className="text-sm font-medium text-[#252F4A]  py-4 px-4">
-                            {data?.best_time_to_call || "-"}
-                          </td>
-                        </tr>
-
-                        <tr className="border border-tableBorder bg-white hover:bg-primary-100 transition-colors">
-                          <td className="text-sm text-[#78829D] py-4 px-4">
-                            Lead Source
-                          </td>
-                          <td className="text-sm font-medium text-[#252F4A]  py-4 px-4">
-                            {data?.lead_source || "-"}
-                          </td>
-                        </tr>
-                        <tr className="border border-tableBorder bg-white hover:bg-primary-100 transition-colors">
-                          <td className="text-sm text-[#78829D] py-4 px-4">
-                            Debt Consolidation Status
-                          </td>
-                          <td className="text-sm font-medium text-[#252F4A]  py-4 px-4">
-                            {data?.debt_consolidation_status || "-"}
-                          </td>
-                        </tr>
-                        <tr className="border border-tableBorder bg-white hover:bg-primary-100 transition-colors">
-                          <td className="text-sm text-[#78829D] py-4 px-4">
-                            Lead Score
-                          </td>
-                          <td className="text-sm font-medium text-[#252F4A]  py-4 px-4">
-                            {data?.lead_score || "-"}
-                          </td>
-                        </tr>
-                        <tr className="border border-tableBorder bg-white hover:bg-primary-100 transition-colors">
-                          <td className="text-sm text-[#78829D] py-4 px-4">
-                            WHATSAPP
-                          </td>
-                          <td className="text-sm font-medium text-[#252F4A]  py-4 px-4">
-                            {data?.whatsapp_number || "-"}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
                   </div>
-                </div>
-                <div className=" md:flex relative w-full">
-                  <Tabs tabs={tabs} />
-                  <GrPowerReset
-                    onClick={() => setHitApi(!hitApi)}
-                    className=" absolute -top-5 -right-1 md:top-2 md:right-1 cursor-pointer text-lg md:text-2xl text-[#4B5675] hover:text-tabHoverColor active:text-tabActiveColor"
-                  />
+                  <div className=" md:flex relative w-full">
+                    <Tabs tabs={tabs} />
+                    <GrPowerReset
+                      onClick={() => setHitApi(!hitApi)}
+                      className=" absolute -top-5 -right-1 md:top-2 md:right-1 cursor-pointer text-lg md:text-2xl text-[#4B5675] hover:text-tabHoverColor active:text-tabActiveColor"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    {/* <CustomerViewDetails
+      {/* <CustomerViewDetails
         isCustomerViewDetailOpen={isCustomerViewDetailOpen}
         setIsEditFlyoutOpen={setIsCustomerViewDetailOpen}
         customer={customer}
@@ -1310,695 +1336,785 @@ return (
         hitApi={hitApi}
         setHitApi={setHitApi}
       /> */}
-    {/* START FLY OUT */}
-    {/* FITLER FLYOUT */}
-    {isFlyoutFilterOpen && (
-      <div
-        className=" min-h-screen w-full bg-[#1f1d1d80] fixed top-0 left-0 right-0 z-[999]"
-        onClick={() => {
-          closeFlyOut();
-        }}
-      ></div>
-    )}
+      {/* START FLY OUT */}
+      {/* FITLER FLYOUT */}
+      {isFlyoutFilterOpen && (
+        <div
+          className=" min-h-screen w-full bg-[#1f1d1d80] fixed top-0 left-0 right-0 z-[999]"
+          onClick={() => {
+            closeFlyOut();
+          }}
+        ></div>
+      )}
 
-    <div className={`filterflyout ${isFlyoutFilterOpen ? "filteropen" : ""}`}>
-      {activity && (
-        <div className=" w-full min-h-auto">
-          {/* Flyout content here */}
-          <div className=" flex justify-between mb-4">
-            <p className=" text-primary-600 text-[26px] font-bold leading-9">
-              Create Lead Activity
-            </p>
-            <IoCloseOutline
-              onClick={toggleFilterFlyout}
-              className=" h-8 w-8 border border-[#E7E7E7] text-secondBlack rounded cursor-pointer"
-            />
+      <div className={`filterflyout ${isFlyoutFilterOpen ? "filteropen" : ""}`}>
+        {activity && (
+          <div className=" w-full min-h-auto">
+            {/* Flyout content here */}
+            <div className=" flex justify-between mb-4">
+              <p className=" text-primary-600 text-[26px] font-bold leading-9">
+                Create Lead Activity
+              </p>
+              <IoCloseOutline
+                onClick={toggleFilterFlyout}
+                className=" h-8 w-8 border border-[#E7E7E7] text-secondBlack rounded cursor-pointer"
+              />
+            </div>
+            <div className=" w-full border-b border-[#E7E7E7] mb-4"></div>
+
+            {/* FORM */}
+            <Formik
+              initialValues={INITIAL_VALUES}
+              validationSchema={CreateLeadsActivitySchema}
+              onSubmit={async (values, { setSubmitting }) => {
+                const n = values;
+                await CreateLeadsActivity(n);
+                setReloadKey((k) => k + 1);
+                setSubmitting(false);
+              }}
+            >
+              {({
+                values,
+                errors,
+                touched,
+                handleChange,
+                handleSubmit,
+                setFieldValue,
+                setFieldTouched,
+                isSubmitting,
+                isValid,
+              }) => (
+                <form onSubmit={handleSubmit} noValidate>
+                  {/* GRID: 2 inputs per row */}
+                  <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 md:justify-between mb-4 sm:mb-6">
+                    {/* Conversation (required) */}
+                    <div className="w-full relative">
+                      <p className="text-secondBlack font-medium text-base leading-6 mb-2">
+                        Conversation
+                      </p>
+                      <input
+                        type="text"
+                        name="conversation"
+                        value={values.conversation}
+                        onChange={handleChange}
+                        onBlur={() => setFieldTouched("conversation", true)}
+                        placeholder="Enter conversation"
+                        className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                      />
+                      {touched.conversation && (errors as any).conversation ? (
+                        <p className="text-red-500 absolute top-[85px] text-xs">
+                          {(errors as any).conversation}
+                        </p>
+                      ) : null}
+                    </div>
+
+                    {/* Disposition (required) */}
+                    <div className="w-full relative">
+                      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+                        Disposition
+                      </p>
+                      <Select
+                        value={
+                          (disposition || []).find(
+                            (opt: any) => opt.id === values.disposition_id
+                          ) || null
+                        }
+                        onChange={(selectedOption: any) =>
+                          setFieldValue(
+                            "disposition_id",
+                            selectedOption ? selectedOption.id : ""
+                          )
+                        }
+                        onBlur={() => setFieldTouched("disposition_id", true)}
+                        getOptionLabel={(opt: any) => opt.name}
+                        getOptionValue={(opt: any) => opt.id}
+                        options={disposition}
+                        placeholder="Select Disposition"
+                        isClearable
+                        classNames={{
+                          control: ({ isFocused }) =>
+                            `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+                              isFocused
+                                ? "!border-primary-500"
+                                : "!border-[#DFEAF2]"
+                            }`,
+                        }}
+                        styles={{
+                          menu: (base) => ({
+                            ...base,
+                            borderRadius: "4px",
+                            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+                            backgroundColor: "#fff",
+                          }),
+                          option: (base, { isFocused, isSelected }) => ({
+                            ...base,
+                            backgroundColor: isSelected
+                              ? "var(--primary-500)"
+                              : isFocused
+                              ? "var(--primary-100)"
+                              : "#fff",
+                            color: isSelected ? "#fff" : "#333",
+                            cursor: "pointer",
+                          }),
+                        }}
+                      />
+                      {touched.disposition_id &&
+                      (errors as any).disposition_id ? (
+                        <p className="text-red-500 absolute top-[85px] text-xs">
+                          {(errors as any).disposition_id}
+                        </p>
+                      ) : null}
+                    </div>
+
+                    {/* Agent  */}
+                    <div className="w-full relative">
+                      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+                        Agent
+                      </p>
+                      <Select
+                        value={
+                          (agent || []).find(
+                            (opt: any) => opt.id === values.agent_id
+                          ) || null
+                        }
+                        onChange={(selectedOption: any) =>
+                          setFieldValue(
+                            "agent_id",
+                            selectedOption ? selectedOption.id : ""
+                          )
+                        }
+                        onBlur={() => setFieldTouched("agent_id", true)}
+                        getOptionLabel={(opt: any) => opt.name}
+                        getOptionValue={(opt: any) => opt.id}
+                        options={agent}
+                        placeholder="Select Agent"
+                        isClearable
+                        classNames={{
+                          control: ({ isFocused }) =>
+                            `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+                              isFocused
+                                ? "!border-primary-500"
+                                : "!border-[#DFEAF2]"
+                            }`,
+                        }}
+                        styles={{
+                          menu: (base) => ({
+                            ...base,
+                            borderRadius: "4px",
+                            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+                            backgroundColor: "#fff",
+                          }),
+                          option: (base, { isFocused, isSelected }) => ({
+                            ...base,
+                            backgroundColor: isSelected
+                              ? "var(--primary-500)"
+                              : isFocused
+                              ? "var(--primary-100)"
+                              : "#fff",
+                            color: isSelected ? "#fff" : "#333",
+                            cursor: "pointer",
+                          }),
+                        }}
+                      />
+                      {touched.agent_id && (errors as any).agent_id ? (
+                        <p className="text-red-500 absolute top-[85px] text-xs">
+                          {(errors as any).agent_id}
+                        </p>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  {/* Buttons */}
+                  <div className="mt-10 w-full flex flex-col gap-y-4 md:flex-row justify-between items-center ">
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className=" py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full  text-center hover:bg-primary-700 hover:text-white "
+                    >
+                      Create Lead Activity
+                    </button>
+                  </div>
+                </form>
+              )}
+            </Formik>
+
+            {/* {END FORM} */}
           </div>
-          <div className=" w-full border-b border-[#E7E7E7] mb-4"></div>
+        )}
+        {task && (
+          <div className=" w-full min-h-auto">
+            {/* Flyout content here */}
+            <div className=" flex justify-between mb-4">
+              <p className=" text-primary-600 text-[26px] font-bold leading-9">
+                Create Lead Task
+              </p>
+              <IoCloseOutline
+                onClick={toggleFilterFlyout}
+                className=" h-8 w-8 border border-[#E7E7E7] text-secondBlack rounded cursor-pointer"
+              />
+            </div>
+            <div className=" w-full border-b border-[#E7E7E7] mb-4"></div>
 
-          {/* FORM */}
-          <Formik
-            initialValues={INITIAL_VALUES}
-            validationSchema={CreateLeadsActivitySchema}
-            onSubmit={async (values, { setSubmitting }) => {
-              const n = values;
-              await CreateLeadsActivity(n);
-              setReloadKey((k) => k + 1);
-              setSubmitting(false);
-            }}
-          >
-            {({
-              values,
-              errors,
-              touched,
-              handleChange,
-              handleSubmit,
-              setFieldValue,
-              setFieldTouched,
-              isSubmitting,
-              isValid,
-            }) => (
-              <form onSubmit={handleSubmit} noValidate>
-                {/* GRID: 2 inputs per row */}
+            {/* TASK FORM */}
+            <Formik
+              initialValues={{
+                owner: data?.agent.id || "",
+                associated_lead: data?.first_name + " " + data?.last_name || "",
+                subject:
+                  (selectedDropDownTaskValue
+                    ? selectedDropDownTaskValue + ": "
+                    : "") +
+                  (data?.first_name || "") +
+                  " " +
+                  (data?.last_name || ""),
+                location: "",
+                description: "",
+                start_at: defaultStart, // schedule → From
+                end_at: defaultEnd, // schedule → To (auto, read-only)
+              }}
+              validationSchema={Yup.object({
+                location: Yup.string().trim().required("Location is required"),
+                description: Yup.string().trim().optional(),
+                start_at: Yup.date().required("Start date is required"),
+                end_at: Yup.date()
+                  .required("End date is required")
+                  .test("after", "End must be after start", function (value) {
+                    const { start_at } = this.parent as {
+                      start_at?: Date | null;
+                    };
+                    return start_at && value ? value > start_at : true;
+                  }),
+              })}
+              onSubmit={async (values, { setSubmitting }) => {
+                const payload = {
+                  lead_id: leadId,
+                  assigned_agent_id: data?.agent?.id || "",
+                  details: values.description || "",
+                  subject: values.subject || "",
+                  task_type: "followup",
+                  start_at_text: values.start_at
+                    ? formatDateTime(values.start_at)
+                    : "",
+                  end_at_text: values.end_at
+                    ? formatDateTime(values.end_at)
+                    : "",
+                  location: values.location,
+                  description: values.description || "",
+                };
+                await CreateTaskActivity(payload);
+                setSubmitting(false);
+              }}
+            >
+              {({
+                values,
+                errors,
+                touched,
+                handleChange,
+                handleSubmit,
+                setFieldTouched,
+                setFieldValue,
+                isSubmitting,
+              }) => (
+                <form onSubmit={handleSubmit} noValidate>
+                  {/* grid wrapper */}
+                  <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 md:justify-between mb-4 sm:mb-6">
+                    {/* Owner (readonly: submit id, display name) */}
+                    <div className="w-full relative">
+                      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+                        Owner
+                      </p>
+                      <input
+                        type="hidden"
+                        name="owner"
+                        value={data?.agent?.id}
+                        readOnly
+                      />
+                      <input
+                        type="text"
+                        value={data?.agent?.name || ""}
+                        readOnly
+                        className="capitalize hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack bg-gray-50 cursor-not-allowed"
+                      />
+                    </div>
+
+                    {/* Associated Lead (readonly) */}
+                    <div className="w-full relative">
+                      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+                        Associated Lead
+                      </p>
+                      <input
+                        type="text"
+                        name="associated_lead"
+                        value={values.associated_lead}
+                        readOnly
+                        onBlur={() => setFieldTouched("associated_lead", true)}
+                        className="capitalize hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack bg-gray-50 cursor-not-allowed"
+                      />
+                    </div>
+
+                    {/* Subject (readonly) */}
+                    <div className="w-full relative">
+                      <p className="text-secondBlack font-medium text-base leading-6 mb-2">
+                        Subject
+                      </p>
+                      <input
+                        type="text"
+                        name="subject"
+                        value={values.subject}
+                        readOnly
+                        onBlur={() => setFieldTouched("subject", true)}
+                        placeholder="Subject"
+                        className="capitalize hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack bg-gray-50 cursor-not-allowed"
+                      />
+                    </div>
+
+                    {/* Location (required) */}
+                    <div className="w-full relative">
+                      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+                        Location
+                      </p>
+                      <input
+                        type="text"
+                        name="location"
+                        value={values.location}
+                        onChange={handleChange}
+                        onBlur={() => setFieldTouched("location", true)}
+                        placeholder="Enter location"
+                        className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                      />
+                      {touched.location && (errors as any).location ? (
+                        <p className="text-red-500 absolute top-[85px] text-xs">
+                          {(errors as any).location}
+                        </p>
+                      ) : null}
+                    </div>
+
+                    {/* ===== Schedule (stacked: From, To-readonly) ===== */}
+                    <div className="w-full md:col-span-2">
+                      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-3">
+                        Schedule
+                      </p>
+
+                      {/* From */}
+                      <div className="w-full relative mb-4">
+                        <p className="text-[#0A0A0A] font-medium text-sm leading-6 mb-2">
+                          From
+                        </p>
+                        <DatePicker
+                          selected={values.start_at}
+                          onChange={(date: Date | null) => {
+                            setFieldValue("start_at", date);
+                            if (date)
+                              setFieldValue("end_at", addMinutes(date, 30)); // 🔄 +30 min
+                          }}
+                          onBlur={() => setFieldTouched("start_at", true)}
+                          name="start_at"
+                          showTimeSelect
+                          timeFormat="h:mm aa"
+                          timeIntervals={15}
+                          dateFormat="yyyy-MM-dd h:mm aa"
+                          placeholderText="yyyy-mm-dd hh:mm am/pm"
+                          className="hover:shadow-hoverInputShadow focus-border-primary 
+                !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 
+                font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
+                          popperClassName="custom-datepicker"
+                          dayClassName={(date) => {
+                            const today = new Date().toDateString();
+                            const selectedDate = values.start_at
+                              ? new Date(values.start_at).toDateString()
+                              : null;
+                            if (today === date.toDateString())
+                              return "bg-[#FFF0F1] text-[#A3000E]";
+                            if (selectedDate === date.toDateString())
+                              return "bg-[#A3000E] text-white";
+                            return "hover:bg-[#FFCCD0] hover:text-[#A3000E]";
+                          }}
+                        />
+                        {touched.start_at && (errors as any).start_at ? (
+                          <p className="text-red-500 absolute top-[85px] text-xs">
+                            {(errors as any).start_at}
+                          </p>
+                        ) : null}
+                      </div>
+
+                      {/* To (read-only) */}
+                      <div className="w-full relative">
+                        <p className="text-[#0A0A0A] font-medium text-sm leading-6 mb-2">
+                          To
+                        </p>
+                        <DatePicker
+                          selected={values.end_at}
+                          onChange={() => {}}
+                          onBlur={() => setFieldTouched("end_at", true)}
+                          name="end_at"
+                          showTimeSelect
+                          timeFormat="h:mm aa"
+                          timeIntervals={15}
+                          dateFormat="yyyy-MM-dd h:mm aa"
+                          placeholderText="yyyy-mm-dd hh:mm am/pm"
+                          disabled
+                          className="hover:shadow-hoverInputShadow focus-border-primary 
+                !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 
+                font-medium placeholder-[#717171] py-4 px-4 bg-gray-50 text-firstBlack cursor-not-allowed"
+                          popperClassName="custom-datepicker"
+                          dayClassName={() => "pointer-events-none"}
+                        />
+                        {touched.end_at && (errors as any).end_at ? (
+                          <p className="text-red-500 absolute top-[85px] text-xs">
+                            {(errors as any).end_at}
+                          </p>
+                        ) : null}
+                      </div>
+                    </div>
+                    {/* ===== /Schedule ===== */}
+
+                    {/* Description (optional) */}
+                    <div className="w-full relative md:col-span-2">
+                      <p className="text-secondBlack font-medium text-base leading-6 mb-2">
+                        Description (optional)
+                      </p>
+                      <textarea
+                        name="description"
+                        value={values.description}
+                        onChange={handleChange}
+                        onBlur={() => setFieldTouched("description", true)}
+                        placeholder="Add description (optional)"
+                        rows={4}
+                        className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-5 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack resize-y"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Buttons */}
+                  <div className="mt-10 w-full flex flex-col gap-y-4 md:flex-row justify-between items-center">
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
+                    >
+                      Create Task Activity
+                    </button>
+                  </div>
+                </form>
+              )}
+            </Formik>
+
+            {/* {END FORM} */}
+          </div>
+        )}
+        {document && (
+          <div className="w-full min-h-auto">
+            <div className="flex justify-between mb-4">
+              <p className="text-primary-600 text-[26px] font-bold leading-9">
+                Create Document
+              </p>
+              <IoCloseOutline
+                onClick={toggleFilterFlyout}
+                className="h-8 w-8 border border-[#E7E7E7] text-secondBlack rounded cursor-pointer"
+              />
+            </div>
+            <div className="w-full border-b border-[#E7E7E7] mb-4"></div>
+
+            <form onSubmit={handleSubmitDocument} encType="multipart/form-data">
+              <div className="w-full">
                 <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 md:justify-between mb-4 sm:mb-6">
                   {/* Conversation (required) */}
-                  <div className="w-full relative">
+                  <div className="w-full">
                     <p className="text-secondBlack font-medium text-base leading-6 mb-2">
-                      Conversation
+                      Document name
                     </p>
                     <input
                       type="text"
-                      name="conversation"
-                      value={values.conversation}
-                      onChange={handleChange}
-                      onBlur={() => setFieldTouched("conversation", true)}
-                      placeholder="Enter conversation"
+                      value={documentName}
+                      onChange={(e) => setDocumentName(e.target.value)}
+                      placeholder="Enter notes"
+                      required
                       className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
                     />
-                    {touched.conversation && (errors as any).conversation ? (
-                      <p className="text-red-500 absolute top-[85px] text-xs">
-                        {(errors as any).conversation}
-                      </p>
-                    ) : null}
                   </div>
-
-                  {/* Disposition (required) */}
-                  <div className="w-full relative">
-                    <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
-                      Disposition
+                  <div className="w-full">
+                    <p className="text-secondBlack font-medium text-base leading-6 mb-2">
+                      Document
                     </p>
-                    <Select
-                      value={
-                        (disposition || []).find(
-                          (opt: any) => opt.id === values.disposition_id
-                        ) || null
-                      }
-                      onChange={(selectedOption: any) =>
-                        setFieldValue(
-                          "disposition_id",
-                          selectedOption ? selectedOption.id : ""
-                        )
-                      }
-                      onBlur={() => setFieldTouched("disposition_id", true)}
-                      getOptionLabel={(opt: any) => opt.name}
-                      getOptionValue={(opt: any) => opt.id}
-                      options={disposition}
-                      placeholder="Select Disposition"
-                      isClearable
-                      classNames={{
-                        control: ({ isFocused }) =>
-                          `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
-                            isFocused
-                              ? "!border-primary-500"
-                              : "!border-[#DFEAF2]"
-                          }`,
-                      }}
-                      styles={{
-                        menu: (base) => ({
-                          ...base,
-                          borderRadius: "4px",
-                          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-                          backgroundColor: "#fff",
-                        }),
-                        option: (base, { isFocused, isSelected }) => ({
-                          ...base,
-                          backgroundColor: isSelected
-                            ? "var(--primary-500)"
-                            : isFocused
-                            ? "var(--primary-100)"
-                            : "#fff",
-                          color: isSelected ? "#fff" : "#333",
-                          cursor: "pointer",
-                        }),
-                      }}
+                    <input
+                      type="file"
+                      name="file" // 👈 matches backend ("file")
+                      required
+                      accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.pdf,.doc,.docx"
+                      className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack bg-white"
                     />
-                    {touched.disposition_id &&
-                    (errors as any).disposition_id ? (
-                      <p className="text-red-500 absolute top-[85px] text-xs">
-                        {(errors as any).disposition_id}
-                      </p>
-                    ) : null}
-                  </div>
-
-                  {/* Agent  */}
-                  <div className="w-full relative">
-                    <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
-                      Agent
-                    </p>
-                    <Select
-                      value={
-                        (agent || []).find(
-                          (opt: any) => opt.id === values.agent_id
-                        ) || null
-                      }
-                      onChange={(selectedOption: any) =>
-                        setFieldValue(
-                          "agent_id",
-                          selectedOption ? selectedOption.id : ""
-                        )
-                      }
-                      onBlur={() => setFieldTouched("agent_id", true)}
-                      getOptionLabel={(opt: any) => opt.name}
-                      getOptionValue={(opt: any) => opt.id}
-                      options={agent}
-                      placeholder="Select Agent"
-                      isClearable
-                      classNames={{
-                        control: ({ isFocused }) =>
-                          `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
-                            isFocused
-                              ? "!border-primary-500"
-                              : "!border-[#DFEAF2]"
-                          }`,
-                      }}
-                      styles={{
-                        menu: (base) => ({
-                          ...base,
-                          borderRadius: "4px",
-                          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-                          backgroundColor: "#fff",
-                        }),
-                        option: (base, { isFocused, isSelected }) => ({
-                          ...base,
-                          backgroundColor: isSelected
-                            ? "var(--primary-500)"
-                            : isFocused
-                            ? "var(--primary-100)"
-                            : "#fff",
-                          color: isSelected ? "#fff" : "#333",
-                          cursor: "pointer",
-                        }),
-                      }}
-                    />
-                    {touched.agent_id && (errors as any).agent_id ? (
-                      <p className="text-red-500 absolute top-[85px] text-xs">
-                        {(errors as any).agent_id}
-                      </p>
-                    ) : null}
                   </div>
                 </div>
 
-                {/* Buttons */}
                 <div className="mt-10 w-full flex flex-col gap-y-4 md:flex-row justify-between items-center ">
                   <button
                     type="submit"
-                    disabled={isSubmitting}
-                    className=" py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full  text-center hover:bg-primary-700 hover:text-white "
-                  >
-                    Create Lead Activity
-                  </button>
-                </div>
-              </form>
-            )}
-          </Formik>
-
-          {/* {END FORM} */}
-        </div>
-      )}
-      {task && (
-        <div className=" w-full min-h-auto">
-          {/* Flyout content here */}
-          <div className=" flex justify-between mb-4">
-            <p className=" text-primary-600 text-[26px] font-bold leading-9">
-              Create Lead Task
-            </p>
-            <IoCloseOutline
-              onClick={toggleFilterFlyout}
-              className=" h-8 w-8 border border-[#E7E7E7] text-secondBlack rounded cursor-pointer"
-            />
-          </div>
-          <div className=" w-full border-b border-[#E7E7E7] mb-4"></div>
-
-          {/* TASK FORM */}
-          <Formik
-            initialValues={{
-              owner: data?.agent.id || "", // ✅ pass your value here
-              associated_lead: data?.first_name + " " + data?.last_name || "", // ✅ pass your value here
-              subject:
-                selectedDropDownTaskValue +
-                  ":" +
-                  " " +
-                  data?.first_name +
-                  " " +
-                  data?.last_name || "", // ✅ pass your value here
-              location: "",
-              description: "",
-            }}
-            validationSchema={Yup.object({
-              // owner / associated_lead / subject are readonly (no validation needed)
-              location: Yup.string().trim().required("Location is required"),
-              description: Yup.string().trim().optional(),
-            })}
-            onSubmit={async (values, { setSubmitting }) => {
-              const payload = {
-                lead_id: leadId, // use the prop/variable you already have
-                assigned_agent_id: data?.agent?.id || "", // from your Owner field
-                details: values.description || "", // or a separate "details" field if you have
-                subject: values.subject || "",
-                task_type: "followup", // set dynamically if you have a dropdown
-                start_at_text: "2025-09-16 08:55pm", //|| "", // hook up DatePicker later
-                end_at_text: "2025-09-16 11:55pm", // ||// "", // hook up DatePicker later
-                location: values.location,
-                description: values.description || "",
-              };
-
-              await CreateTaskActivity(payload);
-              setSubmitting(false);
-            }}
-          >
-            {({
-              values,
-              errors,
-              touched,
-              handleChange,
-              handleSubmit,
-              setFieldTouched,
-              isSubmitting,
-            }) => (
-              <form onSubmit={handleSubmit} noValidate>
-                {/* 2 inputs per row */}
-                <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 md:justify-between mb-4 sm:mb-6">
-                  {/* Owner (readonly) */}
-                  {/* Owner (readonly: show name, submit id) */}
-                  <div className="w-full relative">
-                    <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
-                      Owner
-                    </p>
-
-                    {/* Hidden field that Formik will submit (ID) */}
-                    <input
-                      type="hidden"
-                      name="owner"
-                      value={data?.agent?.id} // <-- agent.id
-                      readOnly
-                    />
-
-                    {/* Visual input just for display (Name) */}
-                    <input
-                      type="text"
-                      value={data?.agent?.name || ""} // <-- shows agent.name
-                      readOnly
-                      className=" capitalize hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack bg-gray-50 cursor-not-allowed"
-                    />
-                  </div>
-
-                  {/* Associated Lead (readonly) */}
-                  <div className="w-full relative">
-                    <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
-                      Associated Lead
-                    </p>
-                    <input
-                      type="text"
-                      name="associated_lead"
-                      value={values.associated_lead}
-                      readOnly
-                      onBlur={() => setFieldTouched("associated_lead", true)}
-                      className=" capitalize hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack bg-gray-50 cursor-not-allowed"
-                    />
-                  </div>
-
-                  {/* Subject (readonly) */}
-                  <div className="w-full relative">
-                    <p className="text-secondBlack font-medium text-base leading-6 mb-2">
-                      Subject
-                    </p>
-                    <input
-                      type="text"
-                      name="subject"
-                      value={values.subject}
-                      readOnly
-                      onBlur={() => setFieldTouched("subject", true)}
-                      placeholder="Subject"
-                      className=" capitalize hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack bg-gray-50 cursor-not-allowed"
-                    />
-                  </div>
-
-                  {/* Location (required) */}
-                  <div className="w-full relative">
-                    <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
-                      Location
-                    </p>
-                    <input
-                      type="text"
-                      name="location"
-                      value={values.location}
-                      onChange={handleChange}
-                      onBlur={() => setFieldTouched("location", true)}
-                      placeholder="Enter location"
-                      className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
-                    />
-                    {touched.location && (errors as any).location ? (
-                      <p className="text-red-500 absolute top-[85px] text-xs">
-                        {(errors as any).location}
-                      </p>
-                    ) : null}
-                  </div>
-
-                  {/* Description (optional) — single full-width row */}
-                  <div className="w-full relative md:col-span-2">
-                    <p className="text-secondBlack font-medium text-base leading-6 mb-2">
-                      Description (optional)
-                    </p>
-                    <textarea
-                      name="description"
-                      value={values.description}
-                      onChange={handleChange}
-                      onBlur={() => setFieldTouched("description", true)}
-                      placeholder="Add description (optional)"
-                      rows={4}
-                      className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-5 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack resize-y"
-                    />
-                  </div>
-                </div>
-
-                {/* Buttons */}
-                <div className="mt-10 w-full flex flex-col gap-y-4 md:flex-row justify-between items-center">
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
                     className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
                   >
-                    Create Task Activity
+                    Submit Document
                   </button>
                 </div>
-              </form>
-            )}
-          </Formik>
-
-          {/* {END FORM} */}
-        </div>
-      )}
-      {document && (
-        <div className="w-full min-h-auto">
-          <div className="flex justify-between mb-4">
-            <p className="text-primary-600 text-[26px] font-bold leading-9">
-              Create Document
-            </p>
-            <IoCloseOutline
-              onClick={toggleFilterFlyout}
-              className="h-8 w-8 border border-[#E7E7E7] text-secondBlack rounded cursor-pointer"
-            />
+              </div>
+            </form>
           </div>
-          <div className="w-full border-b border-[#E7E7E7] mb-4"></div>
-
-          <form onSubmit={handleSubmitDocument} encType="multipart/form-data">
-            <div className="w-full">
-              <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 md:justify-between mb-4 sm:mb-6">
-                {/* Conversation (required) */}
-                <div className="w-full">
-                  <p className="text-secondBlack font-medium text-base leading-6 mb-2">
-                    Document name
-                  </p>
-                  <input
-                    type="text"
-                    value={documentName}
-                    onChange={(e) => setDocumentName(e.target.value)}
-                    placeholder="Enter notes"
-                    required
-                    className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
-                  />
-                </div>
-                <div className="w-full">
-                  <p className="text-secondBlack font-medium text-base leading-6 mb-2">
-                    Document
-                  </p>
-                  <input
-                    type="file"
-                    name="file" // 👈 matches backend ("file")
-                    required
-                    accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.pdf,.doc,.docx"
-                    className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack bg-white"
-                  />
-                </div>
-              </div>
-
-              <div className="mt-10 w-full flex flex-col gap-y-4 md:flex-row justify-between items-center ">
-                <button
-                  type="submit"
-                  className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
-                >
-                  Submit Document
-                </button>
-              </div>
+        )}
+        {updateAcitivityHistory && (
+          <div className=" w-full min-h-auto">
+            {/* Flyout content here */}
+            <div className=" flex justify-between mb-4">
+              <p className=" text-primary-600 text-[26px] font-bold leading-9">
+                Update Lead Activity
+              </p>
+              <IoCloseOutline
+                onClick={toggleFilterFlyout}
+                className=" h-8 w-8 border border-[#E7E7E7] text-secondBlack rounded cursor-pointer"
+              />
             </div>
-          </form>
-        </div>
-      )}
-      {updateAcitivityHistory && (
-        <div className=" w-full min-h-auto">
-          {/* Flyout content here */}
-          <div className=" flex justify-between mb-4">
-            <p className=" text-primary-600 text-[26px] font-bold leading-9">
-              Update Lead Activity
-            </p>
-            <IoCloseOutline
-              onClick={toggleFilterFlyout}
-              className=" h-8 w-8 border border-[#E7E7E7] text-secondBlack rounded cursor-pointer"
-            />
-          </div>
-          <div className=" w-full border-b border-[#E7E7E7] mb-4"></div>
+            <div className=" w-full border-b border-[#E7E7E7] mb-4"></div>
 
-          {/* FORM */}
+            {/* FORM */}
 
-          <Formik
-            enableReinitialize
-            initialValues={formInitialValues}
-            validationSchema={CreateLeadsActivitySchema}
-            onSubmit={async (values, { setSubmitting }) => {
-              console.log("Formik values (raw):", values);
-              const payload: UpdateActivityPayload = {
-                id: values.id, // required for update
-                lead_id: values.lead_id,
-                conversation: values.conversation,
-                occurred_at: values.occurred_at || undefined,
-                disposition_id: values.disposition_id || undefined,
-                agent_id: values.agent_id || undefined,
-              };
-              console.log("Update payload:", payload);
-              try {
-                await UpdateLeadsActivity(payload);
-                setReloadKey((k) => k + 1);
-              } catch (e) {
-                console.error("API error:", e);
-              } finally {
-                setSubmitting(false);
-              }
-            }}
-          >
-            {({
-              values,
-              errors,
-              touched,
-              handleChange,
-              handleSubmit,
-              setFieldValue,
-              setFieldTouched,
-              isSubmitting,
-            }) => (
-              <form onSubmit={handleSubmit} noValidate>
-                {/* GRID: 2 inputs per row */}
-                <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 md:justify-between mb-4 sm:mb-6">
-                  {/* Conversation (required) */}
-                  <div className="w-full relative">
-                    <p className="text-secondBlack font-medium text-base leading-6 mb-2">
-                      Conversation
-                    </p>
-                    <input
-                      type="text"
-                      name="conversation"
-                      value={values.conversation}
-                      onChange={handleChange}
-                      onBlur={() => setFieldTouched("conversation", true)}
-                      placeholder="Enter conversation"
-                      className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
-                    />
-                    {touched.conversation && (errors as any).conversation ? (
-                      <p className="text-red-500 absolute top-[85px] text-xs">
-                        {(errors as any).conversation}
+            <Formik
+              enableReinitialize
+              initialValues={formInitialValues}
+              validationSchema={CreateLeadsActivitySchema}
+              onSubmit={async (values, { setSubmitting }) => {
+                console.log("Formik values (raw):", values);
+                const payload: UpdateActivityPayload = {
+                  id: values.id, // required for update
+                  lead_id: values.lead_id,
+                  conversation: values.conversation,
+                  occurred_at: values.occurred_at || undefined,
+                  disposition_id: values.disposition_id || undefined,
+                  agent_id: values.agent_id || undefined,
+                };
+                console.log("Update payload:", payload);
+                try {
+                  await UpdateLeadsActivity(payload);
+                  setReloadKey((k) => k + 1);
+                } catch (e) {
+                  console.error("API error:", e);
+                } finally {
+                  setSubmitting(false);
+                }
+              }}
+            >
+              {({
+                values,
+                errors,
+                touched,
+                handleChange,
+                handleSubmit,
+                setFieldValue,
+                setFieldTouched,
+                isSubmitting,
+              }) => (
+                <form onSubmit={handleSubmit} noValidate>
+                  {/* GRID: 2 inputs per row */}
+                  <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 md:justify-between mb-4 sm:mb-6">
+                    {/* Conversation (required) */}
+                    <div className="w-full relative">
+                      <p className="text-secondBlack font-medium text-base leading-6 mb-2">
+                        Conversation
                       </p>
-                    ) : null}
-                  </div>
+                      <input
+                        type="text"
+                        name="conversation"
+                        value={values.conversation}
+                        onChange={handleChange}
+                        onBlur={() => setFieldTouched("conversation", true)}
+                        placeholder="Enter conversation"
+                        className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                      />
+                      {touched.conversation && (errors as any).conversation ? (
+                        <p className="text-red-500 absolute top-[85px] text-xs">
+                          {(errors as any).conversation}
+                        </p>
+                      ) : null}
+                    </div>
 
-                  {/* Occurred At (optional) */}
-                  <div className="w-full relative">
-                    <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
-                      Created At
-                    </p>
-                    <DatePicker
-                      selected={
-                        values.occurred_at ? new Date(values.occurred_at) : null
-                      }
-                      onChange={(date: Date | null) =>
-                        setFieldValue(
-                          "occurred_at",
-                          date ? date.toISOString() : ""
-                        )
-                      }
-                      onBlur={() => setFieldTouched("occurred_at", true)}
-                      name="occurred_at"
-                      dateFormat="yyyy-MM-dd"
-                      placeholderText="yyyy-mm-dd"
-                      className="hover:shadow-hoverInputShadow focus-border-primary 
+                    {/* Occurred At (optional) */}
+                    <div className="w-full relative">
+                      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+                        Created At
+                      </p>
+                      <DatePicker
+                        selected={
+                          values.occurred_at
+                            ? new Date(values.occurred_at)
+                            : null
+                        }
+                        onChange={(date: Date | null) =>
+                          setFieldValue(
+                            "occurred_at",
+                            date ? date.toISOString() : ""
+                          )
+                        }
+                        onBlur={() => setFieldTouched("occurred_at", true)}
+                        name="occurred_at"
+                        dateFormat="yyyy-MM-dd"
+                        placeholderText="yyyy-mm-dd"
+                        className="hover:shadow-hoverInputShadow focus-border-primary 
               !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 
               font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
-                      popperClassName="custom-datepicker"
-                      dayClassName={(date) => {
-                        const today = new Date().toDateString();
-                        const selectedDate = values.occurred_at
-                          ? new Date(values.occurred_at).toDateString()
-                          : null;
-                        if (today === date.toDateString())
-                          return "bg-[#FFF0F1] text-[#A3000E]";
-                        if (selectedDate === date.toDateString())
-                          return "bg-[#A3000E] text-white";
-                        return "hover:bg-[#FFCCD0] hover:text-[#A3000E]";
-                      }}
-                    />
-                    {touched.occurred_at && (errors as any).occurred_at ? (
-                      <p className="text-red-500 absolute top-[85px] text-xs">
-                        {(errors as any).occurred_at}
+                        popperClassName="custom-datepicker"
+                        dayClassName={(date) => {
+                          const today = new Date().toDateString();
+                          const selectedDate = values.occurred_at
+                            ? new Date(values.occurred_at).toDateString()
+                            : null;
+                          if (today === date.toDateString())
+                            return "bg-[#FFF0F1] text-[#A3000E]";
+                          if (selectedDate === date.toDateString())
+                            return "bg-[#A3000E] text-white";
+                          return "hover:bg-[#FFCCD0] hover:text-[#A3000E]";
+                        }}
+                      />
+                      {touched.occurred_at && (errors as any).occurred_at ? (
+                        <p className="text-red-500 absolute top-[85px] text-xs">
+                          {(errors as any).occurred_at}
+                        </p>
+                      ) : null}
+                    </div>
+
+                    {/* Disposition (required) */}
+                    <div className="w-full relative">
+                      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+                        Disposition
                       </p>
-                    ) : null}
+                      <Select
+                        value={
+                          (disposition || []).find(
+                            (opt: any) =>
+                              String(opt.id) === String(values.disposition_id)
+                          ) || null
+                        }
+                        onChange={(selectedOption: any) =>
+                          setFieldValue(
+                            "disposition_id",
+                            selectedOption ? String(selectedOption.id) : ""
+                          )
+                        }
+                        onBlur={() => setFieldTouched("disposition_id", true)}
+                        getOptionLabel={(opt: any) => opt.name}
+                        getOptionValue={(opt: any) => String(opt.id)}
+                        options={disposition}
+                        placeholder="Select Disposition"
+                        isClearable
+                        classNames={{
+                          control: ({ isFocused }) =>
+                            `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+                              isFocused
+                                ? "!border-primary-500"
+                                : "!border-[#DFEAF2]"
+                            }`,
+                        }}
+                        styles={{
+                          menu: (base) => ({
+                            ...base,
+                            borderRadius: "4px",
+                            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+                            backgroundColor: "#fff",
+                          }),
+                          option: (base, { isFocused, isSelected }) => ({
+                            ...base,
+                            backgroundColor: isSelected
+                              ? "var(--primary-500)"
+                              : isFocused
+                              ? "var(--primary-100)"
+                              : "#fff",
+                            color: isSelected ? "#fff" : "#333",
+                            cursor: "pointer",
+                          }),
+                        }}
+                      />
+                      {touched.disposition_id &&
+                      (errors as any).disposition_id ? (
+                        <p className="text-red-500 absolute top-[85px] text-xs">
+                          {(errors as any).disposition_id}
+                        </p>
+                      ) : null}
+                    </div>
+
+                    {/* Agent */}
+                    <div className="w-full relative">
+                      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+                        Agent
+                      </p>
+                      <Select
+                        value={
+                          (agent || []).find(
+                            (opt: any) =>
+                              String(opt.id) === String(values.agent_id)
+                          ) || null
+                        }
+                        onChange={(selectedOption: any) =>
+                          setFieldValue(
+                            "agent_id",
+                            selectedOption ? String(selectedOption.id) : ""
+                          )
+                        }
+                        onBlur={() => setFieldTouched("agent_id", true)}
+                        getOptionLabel={(opt: any) => opt.name}
+                        getOptionValue={(opt: any) => String(opt.id)}
+                        options={agent}
+                        placeholder="Select Agent"
+                        isClearable
+                        classNames={{
+                          control: ({ isFocused }) =>
+                            `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+                              isFocused
+                                ? "!border-primary-500"
+                                : "!border-[#DFEAF2]"
+                            }`,
+                        }}
+                        styles={{
+                          menu: (base) => ({
+                            ...base,
+                            borderRadius: "4px",
+                            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+                            backgroundColor: "#fff",
+                          }),
+                          option: (base, { isFocused, isSelected }) => ({
+                            ...base,
+                            backgroundColor: isSelected
+                              ? "var(--primary-500)"
+                              : isFocused
+                              ? "var(--primary-100)"
+                              : "#fff",
+                            color: isSelected ? "#fff" : "#333",
+                            cursor: "pointer",
+                          }),
+                        }}
+                      />
+                      {touched.agent_id && (errors as any).agent_id ? (
+                        <p className="text-red-500 absolute top-[85px] text-xs">
+                          {(errors as any).agent_id}
+                        </p>
+                      ) : null}
+                    </div>
                   </div>
 
-                  {/* Disposition (required) */}
-                  <div className="w-full relative">
-                    <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
-                      Disposition
-                    </p>
-                    <Select
-                      value={
-                        (disposition || []).find(
-                          (opt: any) =>
-                            String(opt.id) === String(values.disposition_id)
-                        ) || null
-                      }
-                      onChange={(selectedOption: any) =>
-                        setFieldValue(
-                          "disposition_id",
-                          selectedOption ? String(selectedOption.id) : ""
-                        )
-                      }
-                      onBlur={() => setFieldTouched("disposition_id", true)}
-                      getOptionLabel={(opt: any) => opt.name}
-                      getOptionValue={(opt: any) => String(opt.id)}
-                      options={disposition}
-                      placeholder="Select Disposition"
-                      isClearable
-                      classNames={{
-                        control: ({ isFocused }) =>
-                          `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
-                            isFocused
-                              ? "!border-primary-500"
-                              : "!border-[#DFEAF2]"
-                          }`,
-                      }}
-                      styles={{
-                        menu: (base) => ({
-                          ...base,
-                          borderRadius: "4px",
-                          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-                          backgroundColor: "#fff",
-                        }),
-                        option: (base, { isFocused, isSelected }) => ({
-                          ...base,
-                          backgroundColor: isSelected
-                            ? "var(--primary-500)"
-                            : isFocused
-                            ? "var(--primary-100)"
-                            : "#fff",
-                          color: isSelected ? "#fff" : "#333",
-                          cursor: "pointer",
-                        }),
-                      }}
-                    />
-                    {touched.disposition_id &&
-                    (errors as any).disposition_id ? (
-                      <p className="text-red-500 absolute top-[85px] text-xs">
-                        {(errors as any).disposition_id}
-                      </p>
-                    ) : null}
+                  {/* Buttons */}
+                  <div className="mt-10 w-full flex flex-col gap-y-4 md:flex-row justify-between items-center ">
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className=" py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full  text-center hover:bg-primary-700 hover:text-white "
+                    >
+                      Update Lead Activity
+                    </button>
                   </div>
+                </form>
+              )}
+            </Formik>
 
-                  {/* Agent */}
-                  <div className="w-full relative">
-                    <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
-                      Agent
-                    </p>
-                    <Select
-                      value={
-                        (agent || []).find(
-                          (opt: any) =>
-                            String(opt.id) === String(values.agent_id)
-                        ) || null
-                      }
-                      onChange={(selectedOption: any) =>
-                        setFieldValue(
-                          "agent_id",
-                          selectedOption ? String(selectedOption.id) : ""
-                        )
-                      }
-                      onBlur={() => setFieldTouched("agent_id", true)}
-                      getOptionLabel={(opt: any) => opt.name}
-                      getOptionValue={(opt: any) => String(opt.id)}
-                      options={agent}
-                      placeholder="Select Agent"
-                      isClearable
-                      classNames={{
-                        control: ({ isFocused }) =>
-                          `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
-                            isFocused
-                              ? "!border-primary-500"
-                              : "!border-[#DFEAF2]"
-                          }`,
-                      }}
-                      styles={{
-                        menu: (base) => ({
-                          ...base,
-                          borderRadius: "4px",
-                          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-                          backgroundColor: "#fff",
-                        }),
-                        option: (base, { isFocused, isSelected }) => ({
-                          ...base,
-                          backgroundColor: isSelected
-                            ? "var(--primary-500)"
-                            : isFocused
-                            ? "var(--primary-100)"
-                            : "#fff",
-                          color: isSelected ? "#fff" : "#333",
-                          cursor: "pointer",
-                        }),
-                      }}
-                    />
-                    {touched.agent_id && (errors as any).agent_id ? (
-                      <p className="text-red-500 absolute top-[85px] text-xs">
-                        {(errors as any).agent_id}
-                      </p>
-                    ) : null}
-                  </div>
-                </div>
+            {/* {END FORM} */}
+          </div>
+        )}
+      </div>
 
-                {/* Buttons */}
-                <div className="mt-10 w-full flex flex-col gap-y-4 md:flex-row justify-between items-center ">
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className=" py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full  text-center hover:bg-primary-700 hover:text-white "
-                  >
-                    Update Lead Activity
-                  </button>
-                </div>
-              </form>
-            )}
-          </Formik>
-
-          {/* {END FORM} */}
-        </div>
-      )}
-    </div>
-
-    {/* FITLER FLYOUT END */}
-  </>
-);
+      {/* FITLER FLYOUT END */}
+    </>
+  );
 }
