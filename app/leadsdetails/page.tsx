@@ -68,6 +68,8 @@ import {
   setMinutes,
 } from "date-fns";
 import { compressIfImage } from "../component/imageCompression";
+import Swal from "sweetalert2";
+
 interface Lead {
   id: string;
   lead_number: string;
@@ -112,7 +114,7 @@ interface LeadActivity {
   disposition: string;
   disposition_id: string;
   conversation: string;
-  occurred_at: string; // ISO date string
+  //occurred_at: string; // ISO date string
   agent_name: string;
   agent_id: string;
 }
@@ -251,6 +253,9 @@ export default function Home() {
     useState<ActivityHistory>(null);
   const [isEditFirstLead, setIsEditFirstLead] = useState<boolean>(true);
   const [documentName, setDocumentName] = useState<string>("");
+  const [selectedDropDownTaskValue, setSelectedDropDownTaskValue] =
+    useState("");
+  console.log("VVVVVVVVVVVVVVVVVVVVVVVVVV", selectedDropDownTaskValue);
   const hiddenLinkRef = useRef<HTMLAnchorElement | null>(null);
   //console.log("DOCUMENT NAME", documentName);
   // console.log("lead activity edit data", activityHistoryData);
@@ -326,8 +331,10 @@ export default function Home() {
   const CreateLeadsActivity = async (n: typeof INITIAL_VALUES) => {
     // console.log("Submitted values:", n);
 
+    const { occurred_at, ...payload } = n; // removes occurred_at
+    console.log("Payload without occurred_at:", payload);
     try {
-      await AxiosProvider.post("/leads/activities/create", n);
+      await AxiosProvider.post("/leads/activities/create", payload);
       toast.success("Lead activity is created");
       setHitApi(!hitApi);
       closeFlyOut();
@@ -523,6 +530,68 @@ export default function Home() {
       console.error("Error fetching file:", error);
     }
   };
+  const deleteActivityHistory = async (deleteId: ActivityHistory) => {
+    const activityHistoryId = deleteId.id;
+    console.log("ACTIVITY HISTORY DELETE ID", activityHistoryId);
+    //return;
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you really want to delete this user?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes",
+      cancelButtonText: "No",
+      confirmButtonColor: "#FFCCD0",
+      cancelButtonColor: "#A3000E",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await AxiosProvider.post("/leads/activities/soft-delete", {
+            id: activityHistoryId,
+          });
+
+          toast.success("Successfully Deleted");
+          setHitApi(!hitApi);
+        } catch (error) {
+          console.error("Error deleting user:", error);
+          toast.error("Failed to delete user");
+        }
+      }
+    });
+  };
+  const deleteDocument = async (deleteId: LeadDocument) => {
+    const documentId = deleteId.id;
+    console.log("ACTIVITY HISTORY DELETE ID", documentId);
+    //return;
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you really want to delete this user?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes",
+      cancelButtonText: "No",
+      confirmButtonColor: "#FFCCD0",
+      cancelButtonColor: "#A3000E",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await AxiosProvider.post("/leads/documents/soft-delete", {
+            id: deleteId.id,
+          });
+
+          toast.success("Successfully Deleted");
+          setHitApi(!hitApi);
+        } catch (error) {
+          console.error("Error deleting user:", error);
+          toast.error("Failed to delete user");
+        }
+      }
+    });
+  };
+  const handleSelect = (item: string) => {
+    setSelectedDropDownTaskValue(item); // save value in state
+    openTaskFlyout(); // your existing function
+  };
 
   const tabs = [
     {
@@ -581,8 +650,8 @@ export default function Home() {
                     <div className="flex items-center gap-2 shrink-0">
                       <TbActivity className="bg-primary-500 text-white p-1 text-2xl rounded-full" />
                       <div className="leading-5 text-sm">
-                        <p>{occurredDate}</p>
-                        <p>{occurredTime}</p>
+                        <p>{createdDate}</p>
+                        <p>{createdTime}</p>
                       </div>
                     </div>
 
@@ -607,6 +676,13 @@ export default function Home() {
                       className="shrink-0 py-1.5 px-3 bg-primary-500 text-white rounded text-sm hover:bg-primary-600"
                     >
                       Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => deleteActivityHistory(activity)}
+                      className="shrink-0 py-1.5 px-3 bg-primary-500 text-white rounded text-sm hover:bg-primary-600"
+                    >
+                      Delete
                     </button>
                   </div>
                 );
@@ -693,6 +769,12 @@ export default function Home() {
                     >
                       Download
                     </a>
+                    <a
+                      onClick={() => deleteDocument(d)}
+                      className="py-2 px-3 border border-[#DFEAF2] rounded text-sm cursor-pointer hover:underline"
+                    >
+                      Delete
+                    </a>
                   </div>
                 </div>
               ))
@@ -766,17 +848,36 @@ export default function Home() {
                       </p>
                     </div>
                   </div>
+                  {/* TASK */}
                   <div className="flex justify-center items-center gap-4">
-                    <div
-                      className="flex gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 group min-w-32"
-                      onClick={() => openTaskFlyout()}
-                    >
-                      <FaNotesMedical className="w-5 h-5 text-white group-hover:text-white" />
-                      <p className="text-white text-base font-medium group-hover:text-white">
-                        Task
-                      </p>
+                    <div className="relative group">
+                      {/* Main Button */}
+                      <div
+                        className="flex gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 min-w-32"
+                        onClick={() => openTaskFlyout()}
+                      >
+                        <FaNotesMedical className="w-5 h-5 text-white" />
+                        <p className="text-white text-base font-medium">Task</p>
+                      </div>
+
+                      {/* Dropdown */}
+                      <div className="absolute left-0 mt-2 w-40 rounded-[4px] border border-[#E7E7E7] bg-white shadow-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+                        <ul className="flex flex-col">
+                          {["meeting", "followup", "phonecall"].map((item) => (
+                            <li
+                              key={item}
+                              onClick={() => handleSelect(item)}
+                              className="px-4 py-2 text-gray-700 hover:bg-primary-100 hover:text-primary-700 cursor-pointer text-sm capitalize"
+                            >
+                              {item}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     </div>
                   </div>
+
+                  {/* END TASK */}
                   <div className="flex justify-center items-center gap-4">
                     <div
                       className="flex gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 group min-w-32"
@@ -1205,6 +1306,7 @@ export default function Home() {
         hitApi={hitApi}
         setHitApi={setHitApi}
       /> */}
+      {/* START FLY OUT */}
       {/* FITLER FLYOUT */}
       {isFlyoutFilterOpen && (
         <div
@@ -1272,50 +1374,6 @@ export default function Home() {
                       {touched.conversation && (errors as any).conversation ? (
                         <p className="text-red-500 absolute top-[85px] text-xs">
                           {(errors as any).conversation}
-                        </p>
-                      ) : null}
-                    </div>
-
-                    {/* Occurred At (optional) */}
-                    <div className="w-full relative">
-                      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
-                        Created At
-                      </p>
-                      <DatePicker
-                        selected={
-                          values.occurred_at
-                            ? new Date(values.occurred_at)
-                            : null
-                        }
-                        onChange={(date: Date | null) =>
-                          setFieldValue(
-                            "occurred_at",
-                            date ? date.toISOString() : ""
-                          )
-                        }
-                        onBlur={() => setFieldTouched("occurred_at", true)}
-                        name="occurred_at"
-                        dateFormat="yyyy-MM-dd"
-                        placeholderText="yyyy-mm-dd"
-                        className="hover:shadow-hoverInputShadow focus-border-primary 
-              !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 
-              font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
-                        popperClassName="custom-datepicker"
-                        dayClassName={(date) => {
-                          const today = new Date().toDateString();
-                          const selectedDate = values.occurred_at
-                            ? new Date(values.occurred_at).toDateString()
-                            : null;
-                          if (today === date.toDateString())
-                            return "bg-[#FFF0F1] text-[#A3000E]";
-                          if (selectedDate === date.toDateString())
-                            return "bg-[#A3000E] text-white";
-                          return "hover:bg-[#FFCCD0] hover:text-[#A3000E]";
-                        }}
-                      />
-                      {touched.occurred_at && (errors as any).occurred_at ? (
-                        <p className="text-red-500 absolute top-[85px] text-xs">
-                          {(errors as any).occurred_at}
                         </p>
                       ) : null}
                     </div>

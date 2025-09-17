@@ -2,7 +2,10 @@
 import Image from "next/image";
 import { SetStateAction, useContext, useEffect, useState } from "react";
 import { CiSettings } from "react-icons/ci";
-import { IoIosNotificationsOutline } from "react-icons/io";
+import {
+  IoIosCloseCircleOutline,
+  IoIosNotificationsOutline,
+} from "react-icons/io";
 import { FaGreaterThan } from "react-icons/fa6";
 import { FiFilter } from "react-icons/fi";
 import { HiOutlineBookOpen } from "react-icons/hi2";
@@ -32,6 +35,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
 import Select from "react-select";
+import Swal from "sweetalert2";
 
 const axiosProvider = new AxiosProvider();
 
@@ -132,6 +136,21 @@ interface Agent {
   created_at: string; // ISO date string
   updated_at: string; // ISO date string
 }
+type FilterValues = {
+  first_name: string;
+  last_name: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  lead_number: string;
+  city: string;
+  state: string;
+  agent_id: string;
+  lead_source_id: string;
+  debt_consolidation_status_id: string;
+  consolidated_credit_status_id: string;
+};
+type LeadSourceOption = { id: string | number; name: string };
 
 export default function Home() {
   // const isChecking = useAuthRedirect();
@@ -175,6 +194,8 @@ export default function Home() {
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   //console.log("DDDAAANISHHHH", agentFetchedData);
   const [currentLeadId, setCurrentLeadId] = useState<string>(null);
+  const [leadSourceDisplay, setLeadSourceDisplay] = useState<any>(null);
+  const [clearFilter, setClearFilter] = useState<boolean>(false);
 
   //  console.log("Debt Conolidation", debtConsolidation);
   //console.log("SELECTED DATA", selectedData);
@@ -263,31 +284,46 @@ export default function Home() {
     e.preventDefault();
     if (!excelFile) return toast.error("Please select a file");
 
+    // If lead source is mandatory, uncomment:
+    // if (!leadSourceDisplay?.id) return toast.error("Please select a Lead Source");
+
     const formEl = e.currentTarget;
 
     try {
       setIsLoading(true);
       setFlyoutOpen(false);
+
       const fd = new FormData();
-      fd.append("file", excelFile as File); // key = "file"
+      fd.append("file", excelFile as File); // key = "file" (as before)
+      if (leadSourceDisplay?.id != null) {
+        fd.append("lead_source_id", String(leadSourceDisplay.id)); // add lead_source_id
+      }
+      // console.log("LLLLLLLLLLLLLLLLLLLL", leadSourceDisplay);
 
       const res = await fetch(
         "https://manageleadcrmbackend.dynsimulation.com/api/v1/managelead/leads/bulk/upload",
-        { method: "POST", body: fd }
+        {
+          method: "POST",
+          body: fd, // let the browser set multipart/form-data with boundary
+        }
       );
 
       const ct = res.headers.get("content-type") || "";
       const payload = ct.includes("application/json")
         ? await res.json()
         : await res.text();
-      if (!res.ok)
+
+      if (!res.ok) {
         throw new Error(
-          (payload && payload.message) || payload || `HTTP ${res.status}`
+          (payload && (payload.message || payload.error)) ||
+            (typeof payload === "string" ? payload : `HTTP ${res.status}`)
         );
+      }
 
       toast.success("Bulk Lead is uploaded");
       setHitApi(!hitApi);
       setExcelFile(null);
+      setLeadSourceDisplay(null);
       formEl.reset();
     } catch (err: any) {
       toast.error(err?.message || "Bulk Lead is not uploaded");
@@ -537,6 +573,74 @@ export default function Home() {
     // Example: post to API
     // await AxiosProvider.post("/assign-agent", { agent_id: selectedAgent.id });
   };
+
+  const deleteUserLead = async (deleteId: CreateLead) => {
+    const userID = deleteId;
+    console.log("LEAD DELETE ID", userID);
+
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you really want to delete this user?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes",
+      cancelButtonText: "No",
+      confirmButtonColor: "#FFCCD0",
+      cancelButtonColor: "#A3000E",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await AxiosProvider.post("/leads/soft-delete", { id: userID });
+
+          toast.success("Successfully Deleted");
+          setHitApi(!hitApi);
+        } catch (error) {
+          console.error("Error deleting user:", error);
+          toast.error("Failed to delete user");
+        }
+      }
+    });
+  };
+  const toCleanFilter = (raw: FilterValues) => {
+    const out: Record<string, any> = {};
+    Object.entries(raw).forEach(([k, v]) => {
+      const t = String(v ?? "").trim();
+      if (t !== "") out[k] = t;
+    });
+    return out;
+  };
+
+  // you handle API/state with this
+  const onFilterSubmit = async (values: FilterValues) => {
+    // console.log("FITLER VALUE NOT CLEAN", values);
+    const clean = toCleanFilter(values);
+    if (Object.keys(clean).length === 0) {
+      toast.error("Please fill at least one field before submitting.");
+      return;
+    }
+    //console.log("FILTER VALUES (clean):", clean);
+    // e.g. setFilters(clean); fetchList(1, clean);
+    try {
+      const response = await AxiosProvider.post(
+        "/leads/filter?page=${page}&pageSize=${pageSize}",
+        values
+      );
+      console.log("FILTERED VALUE", response.data.data.data);
+      setData(response.data.data.data);
+      setFlyoutOpen(false);
+      //  toast.success("Lead is Creatted");
+      //setHitApi(!hitApi);
+      setClearFilter(true);
+    } catch (error: any) {
+      toast.error("Lead is not Creatted");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const clickedFilterClear = () => {
+    setClearFilter(false);
+    setHitApi(!hitApi);
+  };
   if (isLoading) {
     return (
       <div className="h-screen flex flex-col gap-5 justify-center items-center">
@@ -610,6 +714,30 @@ export default function Home() {
 
             {/* ---------------- Table--------------------------- */}
             <div className="w-full overflow-x-auto custom-scrollbar">
+              {clearFilter && (
+                <button
+                  type="button"
+                  onClick={() => clickedFilterClear()}
+                  className="flex items-center gap-2 text-primary-600 text-sm font-medium transition-colors p-1 border border-primary-500 rounded mb-2"
+                >
+                  <span>Clear Filter</span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2}
+                    stroke="currentColor"
+                    className="w-4 h-4"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              )}
+
               <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 whitespace-nowrap">
                 <thead className="text-xs text-[#999999] bg-white">
                   <tr className="border border-tableBorder">
@@ -774,6 +902,17 @@ export default function Home() {
                                 </span>
                               </button>
                             )}
+                            {userRole === "Admin" && (
+                              <button
+                                onClick={() => deleteUserLead(item.id)}
+                                className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"
+                              >
+                                <MdRemoveRedEye className="text-white w-4 h-4 hover:text-white" />
+                                <span className="text-xs sm:text-sm text-white hover:text-white">
+                                  Delete
+                                </span>
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -832,7 +971,7 @@ export default function Home() {
           {/* <div className="w-full h-24 bg-header-gradient opacity-20 absolute top-0 left-0 right-0 "></div> */}
         </div>
       </div>
-
+      {/* START FLYOUT */}
       {/*  FLYOUT */}
       {isFlyoutOpen && (
         <div
@@ -1432,6 +1571,53 @@ export default function Home() {
                       className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
                     />
                   </div>
+
+                  {/* Lead Source Dropdown */}
+                  <div className="w-full mb-4">
+                    <p className="text-secondBlack text-base leading-6 mb-2">
+                      Lead Source
+                    </p>
+                    <Select
+                      value={leadSourceDisplay}
+                      onChange={(selected: any) =>
+                        setLeadSourceDisplay(selected)
+                      }
+                      getOptionLabel={(opt: any) => opt.name}
+                      getOptionValue={(opt: any) => String(opt.id)}
+                      options={leadSourceData}
+                      placeholder="Select Lead Source"
+                      isClearable
+                      classNames={{
+                        control: ({ isFocused }: any) =>
+                          `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+                            isFocused
+                              ? "!border-primary-500"
+                              : "!border-[#DFEAF2]"
+                          }`,
+                      }}
+                      styles={{
+                        menu: (base: any) => ({
+                          ...base,
+                          borderRadius: "4px",
+                          boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+                          backgroundColor: "#fff",
+                        }),
+                        option: (
+                          base: any,
+                          { isFocused, isSelected }: any
+                        ) => ({
+                          ...base,
+                          backgroundColor: isSelected
+                            ? "var(--primary-500)"
+                            : isFocused
+                            ? "var(--primary-100)"
+                            : "#fff",
+                          color: isSelected ? "#fff" : "#333",
+                          cursor: "pointer",
+                        }),
+                      }}
+                    />
+                  </div>
                 </div>
 
                 {/* END FORM */}
@@ -1458,72 +1644,364 @@ export default function Home() {
               </div>
               <div className=" w-full border-b border-[#E7E7E7] mb-4"></div>
               {/* FORM */}
-              <form onSubmit={handleSubmit}>
-                <div className=" w-full">
-                  <div className=" w-full flex gap-4 mb-4">
-                    <div className=" w-full">
-                      <p className=" text-secondBlack font-medium text-base leading-6 mb-2">
-                        First Name
-                      </p>
-                      <input
-                        type="text"
-                        value={filterData.name}
-                        name="name"
-                        onChange={handleChange}
-                        placeholder="Alexandre"
-                        className=" hover:shadow-hoverInputShadow focus-border-primary w-full  border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
-                      />
-                    </div>
-                  </div>
+              <Formik
+                enableReinitialize
+                initialValues={{
+                  first_name: "",
+                  last_name: "",
+                  full_name: "",
+                  email: "",
+                  phone: "",
+                  lead_number: "",
+                  city: "",
+                  state: "",
+                  agent_id: "",
+                  lead_source_id: "",
+                  debt_consolidation_status_id: "",
+                  consolidated_credit_status_id: "",
+                }}
+                onSubmit={(values, { setSubmitting }) => {
+                  onFilterSubmit(values as FilterValues);
+                  setSubmitting(false);
+                }}
+              >
+                {({
+                  handleSubmit,
+                  values,
+                  setFieldValue,
+                  setFieldTouched,
+                  isSubmitting,
+                }) =>
+                  (() => {
+                    const norm = (v: any) => String(v ?? "").toLowerCase();
 
-                  <div className=" w-full flex flex-col md:flex-row gap-4 mb-4">
-                    <div className=" w-full">
-                      <p className=" text-secondBlack font-medium text-base leading-6 mb-2">
-                        Phone
-                      </p>
-                      <input
-                        type="number"
-                        value={filterData.mobilephonenumber}
-                        onChange={handleChange}
-                        name="mobilephonenumber"
-                        placeholder="1 (800) 667-6389"
-                        className=" hover:shadow-hoverInputShadow focus-border-primary w-full  border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4"
-                      />
-                    </div>
-                    <div className=" w-full">
-                      <p className=" text-secondBlack font-medium text-base leading-6 mb-2">
-                        Birth Date
-                      </p>
-                      <input
-                        type="date"
-                        value={filterData.birthdate}
-                        onChange={handleChange}
-                        disabled
-                        name="birthdate"
-                        placeholder=""
-                        className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 cursor-not-allowed bg-[#F5F5F5] text-[#A0A0A0] focus:outline-none"
-                      />
-                    </div>
-                  </div>
-                </div>
+                    // Pre-select display objects for the 3 dropdowns (optional if you pass data)
+                    const leadSourceDisplay = values.lead_source_id
+                      ? (leadSourceData || []).find(
+                          (o: any) => norm(o.id) === norm(values.lead_source_id)
+                        ) || null
+                      : null;
 
-                {/* END FORM */}
+                    const debtDisplay = values.debt_consolidation_status_id
+                      ? (debtConsolidation || []).find(
+                          (o: any) =>
+                            norm(o.id) ===
+                            norm(values.debt_consolidation_status_id)
+                        ) || null
+                      : null;
 
-                <div className="mt-10 w-full flex flex-col gap-y-4 md:flex-row justify-between items-center ">
-                  <div
-                    onClick={hadleClear}
-                    className=" py-[13px] px-[26px] bg-primary-700 rounded-[4px] text-base font-medium leading-6  cursor-pointer w-full md:w-[49%] text-center text-white hover:bg-primary-500 hover:text-white "
-                  >
-                    Clear Data
-                  </div>
-                  <button
-                    type="submit"
-                    className=" py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full md:w-[49%] text-center hover:bg-primary-700 hover:text-white "
-                  >
-                    Filter Now
-                  </button>
-                </div>
-              </form>
+                    const creditDisplay = values.consolidated_credit_status_id
+                      ? (consolidationData || []).find(
+                          (o: any) =>
+                            norm(o.id) ===
+                            norm(values.consolidated_credit_status_id)
+                        ) || null
+                      : null;
+
+                    return (
+                      <>
+                        <form onSubmit={handleSubmit}>
+                          <div className="w-full">
+                            <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                              {/* First Name */}
+                              <div className="w-full">
+                                <p className="text-secondBlack  text-base leading-6 mb-2">
+                                  First Name
+                                </p>
+                                <Field
+                                  type="text"
+                                  name="first_name"
+                                  placeholder="Alexandre"
+                                  className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                                />
+                              </div>
+
+                              {/* Last Name */}
+                              <div className="w-full">
+                                <p className="text-secondBlack  text-base leading-6 mb-2">
+                                  Last Name
+                                </p>
+                                <Field
+                                  type="text"
+                                  name="last_name"
+                                  placeholder="Dumas"
+                                  className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                                />
+                              </div>
+
+                              {/* Full Name */}
+                              <div className="w-full">
+                                <p className="text-secondBlack  text-base leading-6 mb-2">
+                                  Full Name
+                                </p>
+                                <Field
+                                  type="text"
+                                  name="full_name"
+                                  placeholder="Alexandre Dumas"
+                                  className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                                />
+                              </div>
+
+                              {/* Email */}
+                              <div className="w-full">
+                                <p className="text-secondBlack  text-base leading-6 mb-2">
+                                  Email
+                                </p>
+                                <Field
+                                  type="email"
+                                  name="email"
+                                  placeholder="alexandre@example.com"
+                                  className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                                />
+                              </div>
+
+                              {/* Phone */}
+                              <div className="w-full">
+                                <p className="text-secondBlack  text-base leading-6 mb-2">
+                                  Phone
+                                </p>
+                                <Field
+                                  type="text"
+                                  name="phone"
+                                  placeholder="+91 9XXXXXXXXX"
+                                  className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                                />
+                              </div>
+
+                              {/* Lead Number */}
+                              <div className="w-full">
+                                <p className="text-secondBlack  text-base leading-6 mb-2">
+                                  Lead Number
+                                </p>
+                                <Field
+                                  type="text"
+                                  name="lead_number"
+                                  placeholder="LN-000123"
+                                  className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                                />
+                              </div>
+
+                              {/* City */}
+                              <div className="w-full">
+                                <p className="text-secondBlack  text-base leading-6 mb-2">
+                                  City
+                                </p>
+                                <Field
+                                  type="text"
+                                  name="city"
+                                  placeholder="Mumbai"
+                                  className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                                />
+                              </div>
+
+                              {/* State */}
+                              <div className="w-full">
+                                <p className="text-secondBlack  text-base leading-6 mb-2">
+                                  State
+                                </p>
+                                <Field
+                                  type="text"
+                                  name="state"
+                                  placeholder="Maharashtra"
+                                  className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                                />
+                              </div>
+
+                              {/* Agent ID (text; switch to <Select> if you have agent list) */}
+                              <div className="w-full">
+                                <p className="text-secondBlack  text-base leading-6 mb-2">
+                                  Agent ID
+                                </p>
+                                <Field
+                                  type="text"
+                                  name="agent_id"
+                                  placeholder="AGT-001"
+                                  className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                                />
+                              </div>
+
+                              {/* Lead Source */}
+                              <div className="w-full">
+                                <p className="text-secondBlack text-base leading-6 mb-2">
+                                  Lead Source
+                                </p>
+                                <Select
+                                  value={leadSourceDisplay}
+                                  onChange={(selected: any) =>
+                                    setFieldValue(
+                                      "lead_source_id",
+                                      selected ? selected.id : ""
+                                    )
+                                  }
+                                  onBlur={() =>
+                                    setFieldTouched("lead_source_id", true)
+                                  }
+                                  getOptionLabel={(opt: any) => opt.name}
+                                  getOptionValue={(opt: any) => String(opt.id)}
+                                  options={leadSourceData}
+                                  placeholder="Select Lead Source"
+                                  isClearable
+                                  classNames={{
+                                    control: ({ isFocused }: any) =>
+                                      `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+                                        isFocused
+                                          ? "!border-primary-500"
+                                          : "!border-[#DFEAF2]"
+                                      }`,
+                                  }}
+                                  styles={{
+                                    menu: (base: any) => ({
+                                      ...base,
+                                      borderRadius: "4px",
+                                      boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+                                      backgroundColor: "#fff",
+                                    }),
+                                    option: (
+                                      base: any,
+                                      { isFocused, isSelected }: any
+                                    ) => ({
+                                      ...base,
+                                      backgroundColor: isSelected
+                                        ? "var(--primary-500)"
+                                        : isFocused
+                                        ? "var(--primary-100)"
+                                        : "#fff",
+                                      color: isSelected ? "#fff" : "#333",
+                                      cursor: "pointer",
+                                    }),
+                                  }}
+                                />
+                              </div>
+
+                              {/* Debt Consolidation Status */}
+                              <div className="w-full">
+                                <p className="text-secondBlack text-base leading-6 mb-2">
+                                  Debt Consolidation Status
+                                </p>
+                                <Select
+                                  value={debtDisplay}
+                                  onChange={(selected: any) =>
+                                    setFieldValue(
+                                      "debt_consolidation_status_id",
+                                      selected ? selected.id : ""
+                                    )
+                                  }
+                                  onBlur={() =>
+                                    setFieldTouched(
+                                      "debt_consolidation_status_id",
+                                      true
+                                    )
+                                  }
+                                  getOptionLabel={(opt: any) => opt.name}
+                                  getOptionValue={(opt: any) => String(opt.id)}
+                                  options={debtConsolidation}
+                                  placeholder="Select Debt Consolidation Status"
+                                  isClearable
+                                  classNames={{
+                                    control: ({ isFocused }: any) =>
+                                      `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+                                        isFocused
+                                          ? "!border-primary-500"
+                                          : "!border-[#DFEAF2]"
+                                      }`,
+                                  }}
+                                  styles={{
+                                    menu: (base: any) => ({
+                                      ...base,
+                                      borderRadius: "4px",
+                                      boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+                                      backgroundColor: "#fff",
+                                    }),
+                                    option: (
+                                      base: any,
+                                      { isFocused, isSelected }: any
+                                    ) => ({
+                                      ...base,
+                                      backgroundColor: isSelected
+                                        ? "var(--primary-500)"
+                                        : isFocused
+                                        ? "var(--primary-100)"
+                                        : "#fff",
+                                      color: isSelected ? "#fff" : "#333",
+                                      cursor: "pointer",
+                                    }),
+                                  }}
+                                />
+                              </div>
+
+                              {/* Consolidated Credit Status */}
+                              <div className="w-full">
+                                <p className="text-secondBlack text-base leading-6 mb-2">
+                                  Consolidated Credit Status
+                                </p>
+                                <Select
+                                  value={creditDisplay}
+                                  onChange={(selected: any) =>
+                                    setFieldValue(
+                                      "consolidated_credit_status_id",
+                                      selected ? selected.id : ""
+                                    )
+                                  }
+                                  onBlur={() =>
+                                    setFieldTouched(
+                                      "consolidated_credit_status_id",
+                                      true
+                                    )
+                                  }
+                                  getOptionLabel={(opt: any) => opt.name}
+                                  getOptionValue={(opt: any) => String(opt.id)}
+                                  options={consolidationData}
+                                  placeholder="Select Consolidated Credit Status"
+                                  isClearable
+                                  classNames={{
+                                    control: ({ isFocused }: any) =>
+                                      `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+                                        isFocused
+                                          ? "!border-primary-500"
+                                          : "!border-[#DFEAF2]"
+                                      }`,
+                                  }}
+                                  styles={{
+                                    menu: (base: any) => ({
+                                      ...base,
+                                      borderRadius: "4px",
+                                      boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+                                      backgroundColor: "#fff",
+                                    }),
+                                    option: (
+                                      base: any,
+                                      { isFocused, isSelected }: any
+                                    ) => ({
+                                      ...base,
+                                      backgroundColor: isSelected
+                                        ? "var(--primary-500)"
+                                        : isFocused
+                                        ? "var(--primary-100)"
+                                        : "#fff",
+                                      color: isSelected ? "#fff" : "#333",
+                                      cursor: "pointer",
+                                    }),
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
+                          >
+                            Filter Leads
+                          </button>
+                        </form>
+                      </>
+                    );
+                  })()
+                }
+              </Formik>
+
+              {/* { END FROM } */}
             </div>
           )}
           {isEditLead && (
