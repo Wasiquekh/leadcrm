@@ -231,7 +231,7 @@ export default function Home() {
   const [lead, setLead] = useState<Lead | null>(null);
   const [isTotpPopupOpen, setIsTotpPopupOpen] = useState<boolean>(false);
   const [data, setData] = useState<any>(null);
-  console.log("LEAD SINGLE DATA", data);
+  //console.log("LEAD SINGLE DATA", data);
   const [leadActivityData, setLeadActivityData] = useState<LeadActivity>();
   const [disposition, setDisposition] = useState<Disposition[]>([]);
   const [agent, setAgent] = useState<Agent[]>([]);
@@ -256,7 +256,7 @@ export default function Home() {
   const [documentName, setDocumentName] = useState<string>("");
   const [selectedDropDownTaskValue, setSelectedDropDownTaskValue] =
     useState("");
-  console.log("VVVVVVVVVVVVVVVVVVVVVVVVVV", selectedDropDownTaskValue);
+  // console.log("VVVVVVVVVVVVVVVVVVVVVVVVVV", selectedDropDownTaskValue);
   const hiddenLinkRef = useRef<HTMLAnchorElement | null>(null);
   //console.log("DOCUMENT NAME", documentName);
   // console.log("lead activity edit data", activityHistoryData);
@@ -511,7 +511,7 @@ export default function Home() {
         lead_id: leadId,
       });
 
-      console.log("lead document data", res.data.data.data);
+      // console.log("lead document data", res.data.data.data);
       setDocs(res.data.data.data); // <-- if you want to store in state
     } catch (error: any) {
       console.error("Error fetching lead:", error);
