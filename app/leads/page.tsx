@@ -36,6 +36,7 @@ import * as Yup from "yup";
 import { toast } from "react-toastify";
 import Select from "react-select";
 import Swal from "sweetalert2";
+import Tabs from "../component/Tabs";
 
 const axiosProvider = new AxiosProvider();
 
@@ -434,7 +435,7 @@ export default function Home() {
     // setIsFilter(false);
     try {
       const response = await AxiosProvider.get(
-        `/alleads?page=${page}&pageSize=${pageSize}`
+        `/leads/notassigned?page=${page}&pageSize=${pageSize}`
       );
       // console.log("KKKKKKKKKKKKKKKKK", response.data.data.data);
       setTotalPages(response.data.data.pagination.totalPages);
@@ -661,7 +662,32 @@ export default function Home() {
   //   }
 
   // Removed duplicate setExcelFile function to fix identifier conflict.
+  const tabs = [
+    {
+      label: "UnAssign User",
+      content: (
+        <>
+          {/* Tab content 3 */}
+          <h1>UnAssign user</h1>
 
+          {/* End Tab content 3 */}
+        </>
+      ),
+      // End Tab content 2
+    },
+    {
+      label: "Assign User",
+      content: (
+        <>
+          {/* Tab content 3 */}
+
+          <h1>Assign User</h1>
+
+          {/* End Tab content 3 */}
+        </>
+      ),
+    },
+  ];
   return (
     <>
       <LeftSideBar />
@@ -711,7 +737,7 @@ export default function Home() {
             </div>
             {/* End search and filter row */}
             {/* Show Applied Filters */}
-
+            <Tabs tabs={tabs} />
             {/* ---------------- Table--------------------------- */}
             <div className="w-full overflow-x-auto custom-scrollbar">
               {clearFilter && (
