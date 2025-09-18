@@ -258,6 +258,11 @@ export default function Home() {
     useState("");
   // console.log("VVVVVVVVVVVVVVVVVVVVVVVVVV", selectedDropDownTaskValue);
   const hiddenLinkRef = useRef<HTMLAnchorElement | null>(null);
+  const [isActivityFilter, setIsActvityFilter] = useState<boolean>(false);
+  const [isTaskFilter, setIsTaskFilter] = useState<boolean>(false);
+  const [isDocumentFilter, setIsDocumentFilter] = useState<boolean>(false);
+  const [fileteredTaskData, setFilteredTasKData] = useState<[]>([]);
+
   //console.log("DOCUMENT NAME", documentName);
   // console.log("lead activity edit data", activityHistoryData);
   // console.log("lead activity",fetchLeadActivityData)
@@ -444,6 +449,18 @@ export default function Home() {
     setFlyoutFilterOpen(true);
     setDocument(true);
   };
+  const openLeadActivityFlyOut = () => {
+    setFlyoutFilterOpen(true);
+    setIsActvityFilter(true);
+  };
+  const openLeadTaskInFlyout = () => {
+    setFlyoutFilterOpen(true);
+    setIsTaskFilter(true);
+  };
+  const openLeadDocumentInFlyOut = () => {
+    setFlyoutFilterOpen(true);
+    setIsDocumentFilter(true);
+  };
   const openActivityHistoryFlyout = (activity: ActivityHistory) => {
     setFlyoutFilterOpen(true);
     setUpdateActivityHistory(true);
@@ -455,6 +472,9 @@ export default function Home() {
     setFlyoutFilterOpen(false);
     setDocument(false);
     setUpdateActivityHistory(false);
+    setIsActvityFilter(false);
+    setIsTaskFilter(false);
+    setIsDocumentFilter(false);
   };
   const handleChangepagination = (newPage: number) => {
     if (newPage > 0 && newPage <= totalPages) {
@@ -615,9 +635,12 @@ export default function Home() {
         <>
           {/* Tab content 3 */}
           <div className="container mx-auto p-4">
-            <h2 className="text-base  font-semibold mb-4 text-secondBlack">
-              Today
-            </h2>
+            <button
+              onClick={() => openLeadActivityFlyOut()}
+              className="bg-primary-600 hover:bg-primary-700 py-3 px-4 rounded-[4px] text-sm font-medium text-white mb-2"
+            >
+              Filter Activity
+            </button>
             {fetchLeadActivityData && fetchLeadActivityData.length > 0 ? (
               fetchLeadActivityData.map((activity) => {
                 const occurred = activity.occurred_at
@@ -745,6 +768,8 @@ export default function Home() {
             reloadKey={reloadKey}
             hitApi={hitApi}
             setHitApi={setHitApi}
+            openLeadTaskInFlyout={openLeadTaskInFlyout}
+            //filteredTaskData={fileteredTaskData}
           />
           {/* End Tab content 3 */}
         </>
@@ -756,6 +781,12 @@ export default function Home() {
         <>
           {/* Tab content 4 */}
           <div className="space-y-3">
+            <button
+              onClick={() => openLeadDocumentInFlyOut()}
+              className="bg-primary-600 hover:bg-primary-700 py-3 px-4 rounded-[4px] text-sm font-medium text-white mb-2"
+            >
+              Filter Document
+            </button>
             {docs.length === 0 ? (
               <p className="text-sm text-gray-500">No documents found</p>
             ) : (
@@ -2115,6 +2146,737 @@ export default function Home() {
             </Formik>
 
             {/* {END FORM} */}
+          </div>
+        )}
+        {isActivityFilter && (
+          <div className="w-full min-h-auto">
+            <div className="flex justify-between mb-4">
+              <p className="text-primary-600 text-[26px] font-bold leading-9">
+                Filter Activity
+              </p>
+              <IoCloseOutline
+                onClick={toggleFilterFlyout}
+                className="h-8 w-8 border border-[#E7E7E7] text-secondBlack rounded cursor-pointer"
+              />
+            </div>
+            <div className="w-full border-b border-[#E7E7E7] mb-4"></div>
+
+            {/* ✅ Drop this Formik block inside your existing component (uses your local `disposition` and `agent` vars). */}
+            <Formik<{
+              conversation: string;
+              disposition_id: string;
+              agent_id: string;
+              startDate: string; // yyyy-MM-dd or ""
+              endDate: string; // yyyy-MM-dd or ""
+              lead_id: string;
+            }>
+              initialValues={{
+                conversation: "",
+                disposition_id: "",
+                agent_id: "",
+                startDate: "",
+                endDate: "",
+                lead_id: leadId,
+              }}
+              onSubmit={async (values, { setSubmitting }) => {
+                if (
+                  !values.conversation &&
+                  !values.disposition_id &&
+                  !values.agent_id &&
+                  !values.startDate &&
+                  !values.endDate
+                ) {
+                  toast.error("At least 1 field is required");
+                } else {
+                  try {
+                    const res = await AxiosProvider.post(
+                      "/lead/activity/filter",
+                      values
+                    );
+                    //  toast.success("Task Completed");
+                    console.log("--------------", res.data.data.activities);
+                    //setHitApi(!hitApi);
+                    //  setData()
+                    setFetchLeadaActivityData(res.data.data.activities);
+                  } catch (error) {
+                    console.error("Error deleting user:", error);
+                    toast.error("Task not Completed");
+                  }
+                  console.log("Filter Activity payload:", values);
+                }
+                setSubmitting(false);
+              }}
+            >
+              {(formik) => {
+                // keep helpers/types INSIDE Formik
+                type Option = { id: string; name: string };
+                const fmt = (d: Date) => {
+                  const y = d.getFullYear();
+                  const m = String(d.getMonth() + 1).padStart(2, "0");
+                  const day = String(d.getDate()).padStart(2, "0");
+                  return `${y}-${m}-${day}`;
+                };
+
+                const {
+                  values,
+                  handleChange,
+                  handleSubmit,
+                  setFieldValue,
+                  setFieldTouched,
+                  isSubmitting,
+                } = formik;
+
+                return (
+                  <form onSubmit={handleSubmit} noValidate>
+                    {/* -------- Date Range (From / To) -------- */}
+                    <div className="w-full flex flex-col md:flex-row gap-4 md:justify-between mb-4 sm:mb-6">
+                      {/* From */}
+                      <div className="w-full md:w-[49%]">
+                        <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+                          From
+                        </p>
+                        <DatePicker
+                          selected={
+                            values.startDate ? new Date(values.startDate) : null
+                          }
+                          onChange={(date: Date | null) =>
+                            setFieldValue("startDate", date ? fmt(date) : "")
+                          }
+                          onBlur={() => setFieldTouched("startDate", true)}
+                          name="startDate"
+                          dateFormat="yyyy-MM-dd"
+                          placeholderText="yyyy-mm-dd"
+                          className="hover:shadow-hoverInputShadow focus-border-primary 
+               !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 
+               font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
+                          popperClassName="custom-datepicker"
+                          dayClassName={(date) => {
+                            const today = new Date().toDateString();
+                            const selectedDate = values.startDate
+                              ? new Date(values.startDate).toDateString()
+                              : null;
+
+                            if (today === date.toDateString())
+                              return "bg-[#FFF0F1] text-[#A3000E]"; // Current date
+                            if (selectedDate === date.toDateString())
+                              return "bg-[#A3000E] text-white"; // Selected date
+                            return "hover:bg-[#FFCCD0] hover:text-[#A3000E]"; // Hover effect
+                          }}
+                          isClearable
+                        />
+                      </div>
+
+                      {/* To */}
+                      <div className="w-full md:w-[49%]">
+                        <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+                          To
+                        </p>
+                        <DatePicker
+                          selected={
+                            values.endDate ? new Date(values.endDate) : null
+                          }
+                          onChange={(date: Date | null) =>
+                            setFieldValue("endDate", date ? fmt(date) : "")
+                          }
+                          onBlur={() => setFieldTouched("endDate", true)}
+                          name="endDate"
+                          dateFormat="yyyy-MM-dd"
+                          placeholderText="yyyy-mm-dd"
+                          className="hover:shadow-hoverInputShadow focus-border-primary 
+               !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 
+               font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
+                          popperClassName="custom-datepicker"
+                          dayClassName={(date) => {
+                            const today = new Date().toDateString();
+                            const selectedDate = values.endDate
+                              ? new Date(values.endDate).toDateString()
+                              : null;
+
+                            if (today === date.toDateString())
+                              return "bg-[#FFF0F1] text-[#A3000E]"; // Current date
+                            if (selectedDate === date.toDateString())
+                              return "bg-[#A3000E] text-white"; // Selected date
+                            return "hover:bg-[#FFCCD0] hover:text-[#A3000E]"; // Hover effect
+                          }}
+                          isClearable
+                        />
+                      </div>
+                    </div>
+
+                    {/* -------- Other Fields (keep UI/CSS same) -------- */}
+                    <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 md:justify-between mb-4 sm:mb-6">
+                      {/* Conversation */}
+                      <div className="w-full relative">
+                        <p className="text-secondBlack font-medium text-base leading-6 mb-2">
+                          Conversation
+                        </p>
+                        <input
+                          type="text"
+                          name="conversation"
+                          value={values.conversation}
+                          onChange={handleChange}
+                          onBlur={() => setFieldTouched("conversation", true)}
+                          placeholder="Enter conversation"
+                          className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                        />
+                      </div>
+
+                      {/* Disposition */}
+                      <div className="w-full relative">
+                        <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+                          Disposition
+                        </p>
+                        <Select
+                          value={
+                            (disposition || []).find(
+                              (opt: any) => opt.id === values.disposition_id
+                            ) || null
+                          }
+                          onChange={(selected: Option | null) =>
+                            setFieldValue(
+                              "disposition_id",
+                              selected ? selected.id : ""
+                            )
+                          }
+                          onBlur={() => setFieldTouched("disposition_id", true)}
+                          getOptionLabel={(opt: Option) => opt.name}
+                          getOptionValue={(opt: Option) => opt.id}
+                          options={disposition}
+                          placeholder="Select Disposition"
+                          isClearable
+                          classNames={{
+                            control: ({ isFocused }) =>
+                              `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+                                isFocused
+                                  ? "!border-primary-500"
+                                  : "!border-[#DFEAF2]"
+                              }`,
+                          }}
+                          styles={{
+                            menu: (base) => ({
+                              ...base,
+                              borderRadius: "4px",
+                              boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+                              backgroundColor: "#fff",
+                            }),
+                            option: (base, { isFocused, isSelected }) => ({
+                              ...base,
+                              backgroundColor: isSelected
+                                ? "var(--primary-500)"
+                                : isFocused
+                                ? "var(--primary-100)"
+                                : "#fff",
+                              color: isSelected ? "#fff" : "#333",
+                              cursor: "pointer",
+                            }),
+                          }}
+                        />
+                      </div>
+
+                      {/* Agent */}
+                      <div className="w-full relative">
+                        <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+                          Agent
+                        </p>
+                        <Select
+                          value={
+                            (agent || []).find(
+                              (opt: any) => opt.id === values.agent_id
+                            ) || null
+                          }
+                          onChange={(selected: Option | null) =>
+                            setFieldValue(
+                              "agent_id",
+                              selected ? selected.id : ""
+                            )
+                          }
+                          onBlur={() => setFieldTouched("agent_id", true)}
+                          getOptionLabel={(opt: Option) => opt.name}
+                          getOptionValue={(opt: Option) => opt.id}
+                          options={agent}
+                          placeholder="Select Agent"
+                          isClearable
+                          classNames={{
+                            control: ({ isFocused }) =>
+                              `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+                                isFocused
+                                  ? "!border-primary-500"
+                                  : "!border-[#DFEAF2]"
+                              }`,
+                          }}
+                          styles={{
+                            menu: (base) => ({
+                              ...base,
+                              borderRadius: "4px",
+                              boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+                              backgroundColor: "#fff",
+                            }),
+                            option: (base, { isFocused, isSelected }) => ({
+                              ...base,
+                              backgroundColor: isSelected
+                                ? "var(--primary-500)"
+                                : isFocused
+                                ? "var(--primary-100)"
+                                : "#fff",
+                              color: isSelected ? "#fff" : "#333",
+                              cursor: "pointer",
+                            }),
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* -------- Submit -------- */}
+                    <div className="mt-10 w-full flex flex-col gap-y-4 md:flex-row justify-between items-center ">
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700"
+                      >
+                        Filter Lead Activity
+                      </button>
+                    </div>
+                  </form>
+                );
+              }}
+            </Formik>
+          </div>
+        )}
+        {isTaskFilter && (
+          <div className="w-full min-h-auto">
+            <div className="flex justify-between mb-4">
+              <p className="text-primary-600 text-[26px] font-bold leading-9">
+                Filter Task
+              </p>
+              <IoCloseOutline
+                onClick={toggleFilterFlyout}
+                className="h-8 w-8 border border-[#E7E7E7] text-secondBlack rounded cursor-pointer"
+              />
+            </div>
+            <div className="w-full border-b border-[#E7E7E7] mb-4"></div>
+
+            {/* 🔎 Filter Tasks Formik — drop inside your existing component (uses your local leadId, agent list, etc.). 
+    No Yup. Same UI/CSS patterns. Two date pickers: From / To (yyyy-MM-dd). 
+    Endpoint: "/leads/tasks/fliter". Sends only non-empty fields. */}
+
+            <Formik<{
+              lead_id: string;
+              details: string;
+              from: string; // yyyy-MM-dd or ""
+              to: string; // yyyy-MM-dd or ""
+              subject: string;
+              date: string; // yyyy-MM-dd or ""
+              location: string;
+              task_type: string;
+              status: string;
+              assigned_agent_id: string;
+            }>
+              initialValues={{
+                lead_id: leadId, // ✅ from your local var
+                details: "",
+                from: "",
+                to: "",
+                subject: "",
+                date: "",
+                location: "",
+                task_type: "",
+                status: "",
+                assigned_agent_id: "",
+              }}
+              onSubmit={async (values, { setSubmitting }) => {
+                // require at least one filter (besides lead_id)
+                const { lead_id, ...rest } = values;
+                const allEmpty = Object.values(rest).every((v) => !v);
+                if (allEmpty) {
+                  toast.error("At least 1 field is required");
+                  setSubmitting(false);
+                  return;
+                }
+
+                // date consistency (optional guard)
+                if (values.from && values.to) {
+                  const s = new Date(values.from);
+                  const e = new Date(values.to);
+                  if (e < s) {
+                    toast.error("To date cannot be earlier than From date");
+                    setSubmitting(false);
+                    return;
+                  }
+                }
+
+                // send only non-empty fields
+                const payload = Object.fromEntries(
+                  Object.entries(values).filter(
+                    ([_, v]) => v !== "" && v != null
+                  )
+                );
+
+                try {
+                  const res = await AxiosProvider.post(
+                    "/leads/tasks/filter",
+                    payload
+                  );
+                  console.log("Filter Task result:", res.data.data.task);
+                  setTask(res.data?.data?.tasks || []);
+                } catch (err) {
+                  console.error("Filter Task error:", err);
+                  //  toast.error("Failed to filter tasks");
+                } finally {
+                  setSubmitting(false);
+                }
+              }}
+            >
+              {(formik) => {
+                // helpers INSIDE Formik
+                type Option = { id: string; name: string };
+
+                const fmt = (d: Date) => {
+                  const y = d.getFullYear();
+                  const m = String(d.getMonth() + 1).padStart(2, "0");
+                  const day = String(d.getDate()).padStart(2, "0");
+                  return `${y}-${m}-${day}`;
+                };
+
+                const {
+                  values,
+                  handleChange,
+                  handleSubmit,
+                  setFieldValue,
+                  setFieldTouched,
+                  isSubmitting,
+                } = formik;
+
+                return (
+                  <form onSubmit={handleSubmit} noValidate>
+                    {/* ===== Lead (readonly) ===== */}
+                    <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 md:justify-between mb-4 sm:mb-6">
+                      <div className="w-full">
+                        <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+                          Lead ID
+                        </p>
+                        <input
+                          type="text"
+                          name="lead_id"
+                          value={values.lead_id}
+                          readOnly
+                          className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack bg-gray-50 cursor-not-allowed"
+                        />
+                      </div>
+
+                      {/* Assigned Agent */}
+                      <div className="w-full">
+                        <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+                          Assigned Agent
+                        </p>
+                        <Select
+                          value={
+                            (agent || []).find(
+                              (opt: any) => opt.id === values.assigned_agent_id
+                            ) || null
+                          }
+                          onChange={(selected: Option | null) =>
+                            setFieldValue(
+                              "assigned_agent_id",
+                              selected ? selected.id : ""
+                            )
+                          }
+                          onBlur={() =>
+                            setFieldTouched("assigned_agent_id", true)
+                          }
+                          getOptionLabel={(opt: Option) => opt.name}
+                          getOptionValue={(opt: Option) => opt.id}
+                          options={agent}
+                          placeholder="Select Agent"
+                          isClearable
+                          classNames={{
+                            control: ({ isFocused }) =>
+                              `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+                                isFocused
+                                  ? "!border-primary-500"
+                                  : "!border-[#DFEAF2]"
+                              }`,
+                          }}
+                          styles={{
+                            menu: (base) => ({
+                              ...base,
+                              borderRadius: "4px",
+                              boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+                              backgroundColor: "#fff",
+                            }),
+                            option: (base, { isFocused, isSelected }) => ({
+                              ...base,
+                              backgroundColor: isSelected
+                                ? "var(--primary-500)"
+                                : isFocused
+                                ? "var(--primary-100)"
+                                : "#fff",
+                              color: isSelected ? "#fff" : "#333",
+                              cursor: "pointer",
+                            }),
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* ===== Date Range (From / To) ===== */}
+                    <div className="w-full flex flex-col md:flex-row gap-4 md:justify-between mb-4 sm:mb-6">
+                      {/* From */}
+                      <div className="w-full md:w-[49%]">
+                        <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+                          From
+                        </p>
+                        <DatePicker
+                          selected={values.from ? new Date(values.from) : null}
+                          onChange={(date: Date | null) =>
+                            setFieldValue("from", date ? fmt(date) : "")
+                          }
+                          onBlur={() => setFieldTouched("from", true)}
+                          name="from"
+                          dateFormat="yyyy-MM-dd"
+                          placeholderText="yyyy-mm-dd"
+                          className="hover:shadow-hoverInputShadow focus-border-primary 
+               !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 
+               font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
+                          popperClassName="custom-datepicker"
+                          dayClassName={(date) => {
+                            const today = new Date().toDateString();
+                            const selectedDate = values.from
+                              ? new Date(values.from).toDateString()
+                              : null;
+                            if (today === date.toDateString())
+                              return "bg-[#FFF0F1] text-[#A3000E]";
+                            if (selectedDate === date.toDateString())
+                              return "bg-[#A3000E] text-white";
+                            return "hover:bg-[#FFCCD0] hover:text-[#A3000E]";
+                          }}
+                          maxDate={values.to ? new Date(values.to) : undefined}
+                          isClearable
+                        />
+                      </div>
+
+                      {/* To */}
+                      <div className="w-full md:w-[49%]">
+                        <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+                          To
+                        </p>
+                        <DatePicker
+                          selected={values.to ? new Date(values.to) : null}
+                          onChange={(date: Date | null) =>
+                            setFieldValue("to", date ? fmt(date) : "")
+                          }
+                          onBlur={() => setFieldTouched("to", true)}
+                          name="to"
+                          dateFormat="yyyy-MM-dd"
+                          placeholderText="yyyy-mm-dd"
+                          className="hover:shadow-hoverInputShadow focus-border-primary 
+               !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 
+               font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
+                          popperClassName="custom-datepicker"
+                          dayClassName={(date) => {
+                            const today = new Date().toDateString();
+                            const selectedDate = values.to
+                              ? new Date(values.to).toDateString()
+                              : null;
+                            if (today === date.toDateString())
+                              return "bg-[#FFF0F1] text-[#A3000E]";
+                            if (selectedDate === date.toDateString())
+                              return "bg-[#A3000E] text-white";
+                            return "hover:bg-[#FFCCD0] hover:text-[#A3000E]";
+                          }}
+                          minDate={
+                            values.from ? new Date(values.from) : undefined
+                          }
+                          isClearable
+                        />
+                      </div>
+                    </div>
+
+                    {/* ===== Single Date (optional) ===== */}
+                    <div className="w-full mb-4 sm:mb-6">
+                      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+                        On Date
+                      </p>
+                      <DatePicker
+                        selected={values.date ? new Date(values.date) : null}
+                        onChange={(date: Date | null) =>
+                          setFieldValue("date", date ? fmt(date) : "")
+                        }
+                        onBlur={() => setFieldTouched("date", true)}
+                        name="date"
+                        dateFormat="yyyy-MM-dd"
+                        placeholderText="yyyy-mm-dd"
+                        className="hover:shadow-hoverInputShadow focus-border-primary 
+             !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 
+             font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
+                        popperClassName="custom-datepicker"
+                        dayClassName={(date) => {
+                          const today = new Date().toDateString();
+                          const selectedDate = values.date
+                            ? new Date(values.date).toDateString()
+                            : null;
+                          if (today === date.toDateString())
+                            return "bg-[#FFF0F1] text-[#A3000E]";
+                          if (selectedDate === date.toDateString())
+                            return "bg-[#A3000E] text-white";
+                          return "hover:bg-[#FFCCD0] hover:text-[#A3000E]";
+                        }}
+                        isClearable
+                      />
+                    </div>
+
+                    {/* ===== Text Filters ===== */}
+                    <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 md:justify-between mb-4 sm:mb-6">
+                      {/* Subject */}
+                      <div className="w-full">
+                        <p className="text-secondBlack font-medium text-base leading-6 mb-2">
+                          Subject
+                        </p>
+                        <input
+                          type="text"
+                          name="subject"
+                          value={values.subject}
+                          onChange={handleChange}
+                          onBlur={() => setFieldTouched("subject", true)}
+                          placeholder="Subject contains…"
+                          className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                        />
+                      </div>
+
+                      {/* Details */}
+                      <div className="w-full">
+                        <p className="text-secondBlack font-medium text-base leading-6 mb-2">
+                          Details
+                        </p>
+                        <input
+                          type="text"
+                          name="details"
+                          value={values.details}
+                          onChange={handleChange}
+                          onBlur={() => setFieldTouched("details", true)}
+                          placeholder="Details contain…"
+                          className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                        />
+                      </div>
+
+                      {/* Location */}
+                      <div className="w-full">
+                        <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+                          Location
+                        </p>
+                        <input
+                          type="text"
+                          name="location"
+                          value={values.location}
+                          onChange={handleChange}
+                          onBlur={() => setFieldTouched("location", true)}
+                          placeholder="Location contains…"
+                          className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                        />
+                      </div>
+
+                      {/* Task Type */}
+                      <div className="w-full">
+                        <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+                          Task Type
+                        </p>
+                        <input
+                          type="text"
+                          name="task_type"
+                          value={values.task_type}
+                          onChange={handleChange}
+                          onBlur={() => setFieldTouched("task_type", true)}
+                          placeholder="e.g., meeting / followup / phonecall"
+                          className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                        />
+                      </div>
+
+                      {/* Status */}
+                      <div className="w-full">
+                        <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+                          Status
+                        </p>
+                        <input
+                          type="text"
+                          name="status"
+                          value={values.status}
+                          onChange={handleChange}
+                          onBlur={() => setFieldTouched("status", true)}
+                          placeholder="e.g., open / completed / overdue"
+                          className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                        />
+                      </div>
+                    </div>
+
+                    {/* ===== Actions ===== */}
+                    <div className="mt-10 w-full flex flex-col gap-y-4 md:flex-row justify-between items-center">
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700"
+                      >
+                        Filter Tasks
+                      </button>
+                    </div>
+                  </form>
+                );
+              }}
+            </Formik>
+          </div>
+        )}
+        {isDocumentFilter && (
+          <div className="w-full min-h-auto">
+            <div className="flex justify-between mb-4">
+              <p className="text-primary-600 text-[26px] font-bold leading-9">
+                Filter Document
+              </p>
+              <IoCloseOutline
+                onClick={toggleFilterFlyout}
+                className="h-8 w-8 border border-[#E7E7E7] text-secondBlack rounded cursor-pointer"
+              />
+            </div>
+            <div className="w-full border-b border-[#E7E7E7] mb-4"></div>
+
+            <form onSubmit={handleSubmitDocument} encType="multipart/form-data">
+              <div className="w-full">
+                <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 md:justify-between mb-4 sm:mb-6">
+                  {/* Conversation (required) */}
+                  <div className="w-full">
+                    <p className="text-secondBlack font-medium text-base leading-6 mb-2">
+                      Document name
+                    </p>
+                    <input
+                      type="text"
+                      value={documentName}
+                      onChange={(e) => setDocumentName(e.target.value)}
+                      placeholder="Enter notes"
+                      required
+                      className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                    />
+                  </div>
+                  <div className="w-full">
+                    <p className="text-secondBlack font-medium text-base leading-6 mb-2">
+                      Document
+                    </p>
+                    <input
+                      type="file"
+                      name="file" // 👈 matches backend ("file")
+                      required
+                      accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.pdf,.doc,.docx"
+                      className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack bg-white"
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-10 w-full flex flex-col gap-y-4 md:flex-row justify-between items-center ">
+                  <button
+                    type="submit"
+                    className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
+                  >
+                    Submit Document
+                  </button>
+                </div>
+              </div>
+            </form>
           </div>
         )}
       </div>

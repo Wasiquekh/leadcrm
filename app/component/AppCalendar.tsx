@@ -13,6 +13,7 @@ type Props = {
   reloadKey?: number;
   hitApi: boolean;
   setHitApi: React.Dispatch<React.SetStateAction<boolean>>;
+  openLeadTaskInFlyout: () => void;
 };
 
 export interface TaskData {
@@ -48,6 +49,7 @@ export default function AppCalendar({
   reloadKey = 0,
   hitApi,
   setHitApi,
+  openLeadTaskInFlyout,
 }: Props) {
   const [tasks, setTasks] = useState<TaskData[]>([]);
   // console.log("TASK LIST", tasks);
@@ -98,6 +100,12 @@ export default function AppCalendar({
 
   return (
     <div className="w-full overflow-x-auto custom-scrollbar">
+      <button
+        onClick={() => openLeadTaskInFlyout()}
+        className="bg-primary-600 hover:bg-primary-700 py-3 px-4 rounded-[4px] text-sm font-medium text-white mb-2"
+      >
+        Filter Task
+      </button>
       <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 whitespace-nowrap">
         <thead className="text-xs text-[#999999] bg-white">
           <tr className="border border-tableBorder">
