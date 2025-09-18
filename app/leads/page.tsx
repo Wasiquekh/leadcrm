@@ -1243,15 +1243,7 @@ export default function Home() {
                             </button>
 
                            
-                              <button
-                                onClick={() => deleteUserLead(item.id)}
-                                className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"
-                              >
-                                <MdRemoveRedEye className="text-white w-4 h-4 hover:text-white" />
-                                <span className="text-xs sm:text-sm text-white hover:text-white">
-                                  Delete
-                                </span>
-                              </button>
+                      
                             
                           </div>
                         </td>
