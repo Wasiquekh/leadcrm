@@ -14,6 +14,7 @@ type Props = {
   hitApi: boolean;
   setHitApi: React.Dispatch<React.SetStateAction<boolean>>;
   openLeadTaskInFlyout: () => void;
+  incomingTasks: TaskData[];
 };
 
 export interface TaskData {
@@ -50,9 +51,13 @@ export default function AppCalendar({
   hitApi,
   setHitApi,
   openLeadTaskInFlyout,
+  incomingTasks,
 }: Props) {
   const [tasks, setTasks] = useState<TaskData[]>([]);
-  // console.log("TASK LIST", tasks);
+  console.log("TASK LIST", tasks);
+  useEffect(() => {
+    setTasks(incomingTasks || []);
+  }, [incomingTasks]);
 
   useEffect(() => {
     const fetchTasks = async () => {

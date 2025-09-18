@@ -262,7 +262,7 @@ export default function Home() {
   const [isTaskFilter, setIsTaskFilter] = useState<boolean>(false);
   const [isDocumentFilter, setIsDocumentFilter] = useState<boolean>(false);
   const [fileteredTaskData, setFilteredTasKData] = useState<[]>([]);
-
+  console.log("DDDDDDDDDDDDDDDDDDLLLLLLLLLLLLLLLL", fileteredTaskData);
   //console.log("DOCUMENT NAME", documentName);
   // console.log("lead activity edit data", activityHistoryData);
   // console.log("lead activity",fetchLeadActivityData)
@@ -769,6 +769,7 @@ export default function Home() {
             hitApi={hitApi}
             setHitApi={setHitApi}
             openLeadTaskInFlyout={openLeadTaskInFlyout}
+            incomingTasks={fileteredTaskData}
             //filteredTaskData={fileteredTaskData}
           />
           {/* End Tab content 3 */}
@@ -2516,8 +2517,11 @@ export default function Home() {
                     "/leads/tasks/filter",
                     payload
                   );
-                  console.log("Filter Task result:", res.data.data.task);
-                  setTask(res.data?.data?.tasks || []);
+                  console.log(
+                    "DDDDDDDDDDDDDDDDDDD1111111111111111",
+                    res.data.data.task
+                  );
+                  setFilteredTasKData(res.data.data.task);
                 } catch (err) {
                   console.error("Filter Task error:", err);
                   //  toast.error("Failed to filter tasks");
@@ -2835,48 +2839,192 @@ export default function Home() {
               />
             </div>
             <div className="w-full border-b border-[#E7E7E7] mb-4"></div>
+            <Formik<{
+              lead_id: string;
+              notes: string;
+              from: string; // yyyy-MM-dd or ""
+              to: string; // yyyy-MM-dd or ""
+            }>
+              initialValues={{
+                lead_id: leadId, // 👈 dynamic
+                notes: "",
+                from: "",
+                to: "",
+              }}
+              onSubmit={async (values, { setSubmitting }) => {
+                // Require at least one filter besides lead_id
+                const { lead_id, ...rest } = values;
+                if (Object.values(rest).every((v) => !v)) {
+                  alert("At least 1 field is required");
+                } else {
+                  console.log("Filter Document payload:", values);
+                  try {
+                    const res = await AxiosProvider.post(
+                      "/leads/documents/filter",
+                      values
+                    );
+                    // console.log(
+                    //   "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+                    //   res.data.data.data
+                    // );
+                    setDocs(res.data.data.data);
+                  } catch (err) {
+                    console.error("Filter Task error:", err);
+                    //  toast.error("Failed to filter tasks");
+                  }
 
-            <form onSubmit={handleSubmitDocument} encType="multipart/form-data">
-              <div className="w-full">
-                <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 md:justify-between mb-4 sm:mb-6">
-                  {/* Conversation (required) */}
-                  <div className="w-full">
-                    <p className="text-secondBlack font-medium text-base leading-6 mb-2">
-                      Document name
-                    </p>
-                    <input
-                      type="text"
-                      value={documentName}
-                      onChange={(e) => setDocumentName(e.target.value)}
-                      placeholder="Enter notes"
-                      required
-                      className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
-                    />
-                  </div>
-                  <div className="w-full">
-                    <p className="text-secondBlack font-medium text-base leading-6 mb-2">
-                      Document
-                    </p>
-                    <input
-                      type="file"
-                      name="file" // 👈 matches backend ("file")
-                      required
-                      accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.pdf,.doc,.docx"
-                      className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack bg-white"
-                    />
-                  </div>
-                </div>
+                  // 🔧 If/when you want to call the API:
+                  // const payload = Object.fromEntries(Object.entries(values).filter(([_, v]) => v !== "" && v != null));
+                  // AxiosProvider.post("/leads/documents/filter", payload)
+                  //   .then(res => console.log("Filter Document result:", res.data))
+                  //   .catch(err => console.error("Filter Document error:", err));
+                }
+                setSubmitting(false);
+              }}
+            >
+              {(formik) => {
+                const {
+                  values,
+                  handleChange,
+                  handleSubmit,
+                  setFieldValue,
+                  setFieldTouched,
+                  isSubmitting,
+                } = formik;
 
-                <div className="mt-10 w-full flex flex-col gap-y-4 md:flex-row justify-between items-center ">
-                  <button
-                    type="submit"
-                    className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
-                  >
-                    Submit Document
-                  </button>
-                </div>
-              </div>
-            </form>
+                const fmt = (d: Date) => {
+                  const y = d.getFullYear();
+                  const m = String(d.getMonth() + 1).padStart(2, "0");
+                  const day = String(d.getDate()).padStart(2, "0");
+                  return `${y}-${m}-${day}`;
+                };
+
+                return (
+                  <form onSubmit={handleSubmit} noValidate>
+                    {/* Lead ID (readonly) */}
+                    <div className="mb-4">
+                      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+                        Lead ID
+                      </p>
+                      <input
+                        type="text"
+                        name="lead_id"
+                        value={values.lead_id}
+                        readOnly
+                        className="hover:shadow-hoverInputShadow focus-border-primary 
+              w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 
+              font-medium placeholder-[#717171] py-4 px-4 text-firstBlack 
+              bg-gray-50 cursor-not-allowed"
+                      />
+                    </div>
+
+                    {/* Notes */}
+                    <div className="mb-4">
+                      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+                        Notes
+                      </p>
+                      <input
+                        type="text"
+                        name="notes"
+                        value={values.notes}
+                        onChange={handleChange}
+                        onBlur={() => setFieldTouched("notes", true)}
+                        placeholder="Enter notes"
+                        className="hover:shadow-hoverInputShadow focus-border-primary 
+              w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 
+              font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+                      />
+                    </div>
+
+                    {/* Date Range (From / To) */}
+                    <div className="w-full flex flex-col md:flex-row gap-4 md:justify-between mb-6">
+                      {/* From */}
+                      <div className="w-full md:w-[49%]">
+                        <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+                          From
+                        </p>
+                        <DatePicker
+                          selected={values.from ? new Date(values.from) : null}
+                          onChange={(date: Date | null) =>
+                            setFieldValue("from", date ? fmt(date) : "")
+                          }
+                          onBlur={() => setFieldTouched("from", true)}
+                          name="from"
+                          dateFormat="yyyy-MM-dd"
+                          placeholderText="yyyy-mm-dd"
+                          className="hover:shadow-hoverInputShadow focus-border-primary 
+                !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 
+                font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
+                          popperClassName="custom-datepicker"
+                          dayClassName={(date) => {
+                            const today = new Date().toDateString();
+                            const selectedDate = values.from
+                              ? new Date(values.from).toDateString()
+                              : null;
+                            if (today === date.toDateString())
+                              return "bg-[#FFF0F1] text-[#A3000E]";
+                            if (selectedDate === date.toDateString())
+                              return "bg-[#A3000E] text-white";
+                            return "hover:bg-[#FFCCD0] hover:text-[#A3000E]";
+                          }}
+                          maxDate={values.to ? new Date(values.to) : undefined}
+                          isClearable
+                        />
+                      </div>
+
+                      {/* To */}
+                      <div className="w-full md:w-[49%]">
+                        <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+                          To
+                        </p>
+                        <DatePicker
+                          selected={values.to ? new Date(values.to) : null}
+                          onChange={(date: Date | null) =>
+                            setFieldValue("to", date ? fmt(date) : "")
+                          }
+                          onBlur={() => setFieldTouched("to", true)}
+                          name="to"
+                          dateFormat="yyyy-MM-dd"
+                          placeholderText="yyyy-mm-dd"
+                          className="hover:shadow-hoverInputShadow focus-border-primary 
+                !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 
+                font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
+                          popperClassName="custom-datepicker"
+                          dayClassName={(date) => {
+                            const today = new Date().toDateString();
+                            const selectedDate = values.to
+                              ? new Date(values.to).toDateString()
+                              : null;
+                            if (today === date.toDateString())
+                              return "bg-[#FFF0F1] text-[#A3000E]";
+                            if (selectedDate === date.toDateString())
+                              return "bg-[#A3000E] text-white";
+                            return "hover:bg-[#FFCCD0] hover:text-[#A3000E]";
+                          }}
+                          minDate={
+                            values.from ? new Date(values.from) : undefined
+                          }
+                          isClearable
+                        />
+                      </div>
+                    </div>
+
+                    {/* Submit */}
+                    <div className="mt-6">
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] 
+              text-base font-medium leading-6 text-white 
+              hover:bg-primary-700 w-full text-center"
+                      >
+                        Filter Document
+                      </button>
+                    </div>
+                  </form>
+                );
+              }}
+            </Formik>
           </div>
         )}
       </div>
@@ -2885,3 +3033,4 @@ export default function Home() {
     </>
   );
 }
+
