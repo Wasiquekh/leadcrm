@@ -156,7 +156,10 @@ type LeadSourceOption = { id: string | number; name: string };
 export default function Home() {
   // const isChecking = useAuthRedirect();
   const [isFlyoutOpen, setFlyoutOpen] = useState<boolean>(false);
-  const [data, setData] = useState<Lead[]>([]);
+  const [notAssignData, setNotAssignData] = useState<Lead[]>([]);
+ // console.log("NOT ASSIGN DATAAAAAAAAA",notAssignData)
+ const [assignLeadData, setAssignLeadData] = useState<Lead[]>([]);
+ console.log(" ASSIGN DATAAAAAAAAA",assignLeadData)
   //console.log("DATAAAAA", data);
   const [page, setPage] = useState<number>(1);
   const [filterPage, setFilterPage] = useState<number>(1);
@@ -353,39 +356,6 @@ export default function Home() {
     setAppliedFilters(filters);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    // e.preventDefault();
-    // filterDataValue();
-    // setIsFilter(true);
-    // toggleFilterFlyout();
-    // const filteredData = Object.fromEntries(
-    //   Object.entries(filterData).filter(([_, value]) => value !== "")
-    // );
-    // if (Object.keys(filteredData).length === 0) {
-    //   setPage(1);
-    //   fetchData(page);
-    // } else {
-    //   userFilterData(filteredData, filterPage);
-    // }
-  };
-  // const userFilterData = async (data: any, page: number) => {
-  //   setIsFilter(true);
-  //   setIsLoading(true);
-  //   try {
-  //     const response = await axiosProvider.post(
-  //       `/filter?page=${page}&pageSize=${pageSize}`,
-  //       data
-  //     );
-  //     const result = response.data.data;
-  //     // console.log("VVVVVVVVVVVVVVVVV", result);
-  //     setData(result.customers);
-  //     setTotalPagesFilter(result.totalPages);
-  //   } catch (error: any) {
-  //     setData([]);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
 
   const createLeads = () => {
     setFlyoutOpen(true);
@@ -430,18 +400,18 @@ export default function Home() {
     setIsAgent(true);
   };
 
-  const fetchData = async () => {
+  const notAssignfetchData = async () => {
     setIsLoading(true);
     // setIsFilter(false);
     try {
       const response = await AxiosProvider.get(
         `/leads/notassigned?page=${page}&pageSize=${pageSize}`
       );
-      // console.log("KKKKKKKKKKKKKKKKK", response.data.data.data);
+       console.log("KKKKKKKKKKKKKKKKK", response.data.data.data);
       setTotalPages(response.data.data.pagination.totalPages);
       const result = response.data.data.data;
       // console.log("ALL CRM USER", result);
-      setData(result);
+      setNotAssignData(result);
     } catch (error: any) {
       setIsError(true);
     } finally {
@@ -450,7 +420,30 @@ export default function Home() {
   };
 
   useEffect(() => {
-    fetchData();
+    notAssignfetchData();
+  }, [page, hitApi]);
+
+    const assignfetchData = async () => {
+    setIsLoading(true);
+    // setIsFilter(false);
+    try {
+      const response = await AxiosProvider.get(
+        `/leads/assigned?page=${page}&pageSize=${pageSize}`
+      );
+      // console.log("KKKKKKKKKKKKKKKKK", response.data.data.data);
+      setTotalPages(response.data.data.pagination.totalPages);
+      const result = response.data.data.data;
+      // console.log("ALL CRM USER", result);
+      setAssignLeadData(result);
+    } catch (error: any) {
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    assignfetchData();
   }, [page, hitApi]);
 
   const handlePageChange = (newPage: number) => {
@@ -517,7 +510,7 @@ export default function Home() {
   // };
 
   const test = (id: string) => {
-    console.log("IDDDDDDDDDDDDDDDDDDDDDD", id);
+   // console.log("IDDDDDDDDDDDDDDDDDDDDDD", id);
     router.push(`/leadsdetails?id=${id}`);
   };
   // if (isChecking) {
@@ -627,7 +620,7 @@ export default function Home() {
         values
       );
       console.log("FILTERED VALUE", response.data.data.data);
-      setData(response.data.data.data);
+     // setData(response.data.data.data);
       setFlyoutOpen(false);
       //  toast.success("Lead is Creatted");
       //setHitApi(!hitApi);
@@ -663,108 +656,13 @@ export default function Home() {
 
   // Removed duplicate setExcelFile function to fix identifier conflict.
   const tabs = [
+    
     {
-      label: "UnAssign User",
+      label: "NotAssign User",
       content: (
         <>
           {/* Tab content 3 */}
-          <h1>UnAssign user</h1>
-
-          {/* End Tab content 3 */}
-        </>
-      ),
-      // End Tab content 2
-    },
-    {
-      label: "Assign User",
-      content: (
-        <>
-          {/* Tab content 3 */}
-
-          <h1>Assign User</h1>
-
-          {/* End Tab content 3 */}
-        </>
-      ),
-    },
-  ];
-  return (
-    <>
-      <LeftSideBar />
-      <div className=" flex justify-end  min-h-screen">
-        {/* Main content right section */}
-        <div className=" ml-[97px] w-full md:w-[90%] m-auto bg-[#fff] min-h-[500px]  rounded p-4 mt-0 ">
-          {/* left section top row */}
-          <DesktopHeader />
-          {/* Main content middle section */}
-          {/* ----------------Table----------------------- */}
-          <div className="relative overflow-x-auto shadow-lastTransaction rounded-xl sm:rounded-3xl px-1 py-6 md:p-6 !bg-white  z-10">
-            {/* Search and filter table row */}
-            <div className=" flex justify-end items-center mb-6  w-full mx-auto">
-              <div className=" flex justify-center items-center gap-4">
-                <div
-                  className=" flex justify-center gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 group"
-                  onClick={() => createLeads()}
-                >
-                  <FiFilter className=" w-5 h-5 text-white group-hover:text-white" />
-                  <p className=" text-white text-base font-medium group-hover:text-white">
-                    Create Leads
-                  </p>
-                </div>
-
-                {userRole === "Admin" && (
-                  <div
-                    className=" flex justify-center  gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 group"
-                    onClick={() => bulkLeads()}
-                  >
-                    <FiFilter className=" w-5 h-5 text-white group-hover:text-white" />
-                    <p className=" text-white text-base font-medium group-hover:text-white">
-                      Bulk Leads
-                    </p>
-                  </div>
-                )}
-
-                <div
-                  className=" flex justify-center  gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 group"
-                  onClick={() => filterLeads()}
-                >
-                  <FiFilter className=" w-5 h-5 text-white group-hover:text-white" />
-                  <p className=" text-white text-base font-medium group-hover:text-white">
-                    Filter Leads
-                  </p>
-                </div>
-              </div>
-            </div>
-            {/* End search and filter row */}
-            {/* Show Applied Filters */}
-            <Tabs tabs={tabs} />
-            {/* ---------------- Table--------------------------- */}
-            <div className="w-full overflow-x-auto custom-scrollbar">
-              {clearFilter && (
-                <button
-                  type="button"
-                  onClick={() => clickedFilterClear()}
-                  className="flex items-center gap-2 text-primary-600 text-sm font-medium transition-colors p-1 border border-primary-500 rounded mb-2"
-                >
-                  <span>Clear Filter</span>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={2}
-                    stroke="currentColor"
-                    className="w-4 h-4"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              )}
-
-              <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                       <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 whitespace-nowrap">
                 <thead className="text-xs text-[#999999] bg-white">
                   <tr className="border border-tableBorder">
                     {/* Name - Birth Date: Always Visible */}
@@ -829,14 +727,14 @@ export default function Home() {
                 </thead>
 
                 <tbody>
-                  {!data || data.length === 0 || isError ? (
+                  {!notAssignData || notAssignData.length === 0 || isError ? (
                     <tr>
                       <td colSpan={8} className="text-center text-xl mt-5">
                         <div className="mt-5">Data not found</div>
                       </td>
                     </tr>
                   ) : (
-                    data.map((item: any, index: number) => (
+                    notAssignData.map((item: any, index: number) => (
                       <tr
                         key={item?.id ?? index}
                         className="border border-tableBorder bg-white hover:bg-primary-100"
@@ -946,6 +844,449 @@ export default function Home() {
                   )}
                 </tbody>
               </table>
+
+          {/* End Tab content 3 */}
+        </>
+      ),
+      // End Tab content 2
+    },
+    {
+      label: "Assign User",
+      content: (
+        <>
+          {/* Tab content 3 */}
+
+                              <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                <thead className="text-xs text-[#999999] bg-white">
+                  <tr className="border border-tableBorder">
+                    {/* Name - Birth Date: Always Visible */}
+                    <th
+                      scope="col"
+                      className="px-3 py-3 md:p-3 border border-tableBorder"
+                    >
+                      <div className="flex items-center gap-2">
+                        <RxAvatar className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <span className=" font-semibold text-secondBlack text-lg sm:text-base">
+                          Full Name
+                        </span>
+                      </div>
+                    </th>
+
+                    {/* Other columns: Hidden on mobile, visible from md: */}
+                    <th
+                      scope="col"
+                      className="px-3 py-2 border border-tableBorder hidden md:table-cell"
+                    >
+                      <div className="flex items-center gap-2">
+                        <HiOutlineBookOpen className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <span className="font-semibold text-secondBlack text-lg sm:text-base">
+                          Email
+                        </span>
+                      </div>
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-3 py-2 border border-tableBorder hidden md:table-cell"
+                    >
+                      <div className="flex items-center gap-2">
+                        <HiOutlineBookOpen className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <span className="font-semibold text-secondBlack text-lg sm:text-base">
+                          Phone
+                        </span>
+                      </div>
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-3 py-2 border border-tableBorder hidden md:table-cell"
+                    >
+                      <div className="flex items-center gap-2">
+                        <SiHomeassistantcommunitystore className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <span className="font-semibold text-secondBlack text-lg sm:text-base">
+                          Address
+                        </span>
+                      </div>
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-3 py-2 border border-tableBorder md:table-cell"
+                    >
+                      <div className="flex items-center gap-2">
+                        <LiaArrowCircleDownSolid className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <span className="font-semibold text-secondBlack text-lg sm:text-base">
+                          Action
+                        </span>
+                      </div>
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {!assignLeadData || assignLeadData.length === 0 || isError ? (
+                    <tr>
+                      <td colSpan={8} className="text-center text-xl mt-5">
+                        <div className="mt-5">Data not found</div>
+                      </td>
+                    </tr>
+                  ) : (
+                    assignLeadData.map((item: any, index: number) => (
+                      <tr
+                        key={item?.id ?? index}
+                        className="border border-tableBorder bg-white hover:bg-primary-100"
+                      >
+                        {/* Full name */}
+                        <td className="px-1 py-2 md:px-3 md:py-2 border-tableBorder flex items-center gap-2">
+                          <div className="flex gap-2">
+                            <div className="md:hidden">
+                              <FaEllipsisVertical
+                                data-tooltip-id="my-tooltip"
+                                data-tooltip-html={`<div>
+                  <strong>Name:</strong> <span style="text-transform: capitalize;">${
+                    item?.full_name ?? "-"
+                  }</span><br/>
+                  <strong>Email:</strong> ${item?.email ?? "-"}<br/>
+                  <strong>Phone:</strong> ${item?.phone ?? "-"}<br/>
+                  <strong>Owner:</strong> ${item?.owner_name ?? "-"}<br/>
+                  <strong>Account Manager:</strong> ${
+                    item?.account_manager ?? "-"
+                  }
+                </div>`}
+                                className="text-black leading-normal relative top-[5.3px] capitalize"
+                              />
+                              <Tooltip
+                                id="my-tooltip"
+                                place="right"
+                                float
+                                className="box"
+                              />
+                            </div>
+                            <div>
+                              <p className="text-[#232323] text-sm sm:text-base font-medium leading-normal capitalize">
+                                {item?.full_name ?? "-"}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Email */}
+                        <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+                          <span className="text-[#232323] text-sm sm:text-base">
+                            {item?.email ?? "-"}
+                          </span>
+                        </td>
+
+                        {/* Phone */}
+                        <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+                          <span className="text-[#232323] text-sm sm:text-base">
+                            {item?.phone ?? "-"}
+                          </span>
+                        </td>
+
+                        {/* Owner */}
+                        <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+                          <span className="text-[#232323] text-sm sm:text-base capitalize">
+                            {item?.address.country ?? "-"}
+                          </span>
+                        </td>
+
+                        {/* Action */}
+                        <td className="px-3 py-2 border border-tableBorder md:table-cell">
+                          <div className="flex gap-1 md:gap-2 justify-center md:justify-start">
+                            <button
+                              onClick={() => test(item.id)}
+                              className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"
+                            >
+                              <MdRemoveRedEye className="text-white w-4 h-4 hover:text-white" />
+                              <span className="text-xs sm:text-sm text-white hover:text-white">
+                                View Details
+                              </span>
+                            </button>
+                            <button
+                              onClick={() => editLead(item)}
+                              className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"
+                            >
+                              <MdRemoveRedEye className="text-white w-4 h-4 hover:text-white" />
+                              <span className="text-xs sm:text-sm text-white hover:text-white">
+                                Edit
+                              </span>
+                            </button>
+
+                            {userRole === "Admin" && (
+                              <button
+                                onClick={() => deleteUserLead(item.id)}
+                                className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"
+                              >
+                                <MdRemoveRedEye className="text-white w-4 h-4 hover:text-white" />
+                                <span className="text-xs sm:text-sm text-white hover:text-white">
+                                  Delete
+                                </span>
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+
+          {/* End Tab content 3 */}
+        </>
+      ),
+    },
+  ];
+  return (
+    <>
+      <LeftSideBar />
+      <div className=" flex justify-end  min-h-screen">
+        {/* Main content right section */}
+        <div className=" ml-[97px] w-full md:w-[90%] m-auto bg-[#fff] min-h-[500px]  rounded p-4 mt-0 ">
+          {/* left section top row */}
+          <DesktopHeader />
+          {/* Main content middle section */}
+          {/* ----------------Table----------------------- */}
+          <div className="relative overflow-x-auto shadow-lastTransaction rounded-xl sm:rounded-3xl px-1 py-6 md:p-6 !bg-white  z-10">
+            {/* Search and filter table row */}
+            <div className=" flex justify-end items-center mb-6  w-full mx-auto">
+              <div className=" flex justify-center items-center gap-4">
+                <div
+                  className=" flex justify-center gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 group"
+                  onClick={() => createLeads()}
+                >
+                  <FiFilter className=" w-5 h-5 text-white group-hover:text-white" />
+                  <p className=" text-white text-base font-medium group-hover:text-white">
+                    Create Leads
+                  </p>
+                </div>
+
+                {userRole === "Admin" && (
+                  <div
+                    className=" flex justify-center  gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 group"
+                    onClick={() => bulkLeads()}
+                  >
+                    <FiFilter className=" w-5 h-5 text-white group-hover:text-white" />
+                    <p className=" text-white text-base font-medium group-hover:text-white">
+                      Bulk Leads
+                    </p>
+                  </div>
+                )}
+
+                <div
+                  className=" flex justify-center  gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 group"
+                  onClick={() => filterLeads()}
+                >
+                  <FiFilter className=" w-5 h-5 text-white group-hover:text-white" />
+                  <p className=" text-white text-base font-medium group-hover:text-white">
+                    Filter Leads
+                  </p>
+                </div>
+              </div>
+            </div>
+            {/* End search and filter row */}
+            {/* Show Applied Filters */}
+            {userRole === "Admin" && (
+    <Tabs tabs={tabs} />
+            )}
+        {userRole === "Agent" && 
+        (
+                                        <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                <thead className="text-xs text-[#999999] bg-white">
+                  <tr className="border border-tableBorder">
+                    {/* Name - Birth Date: Always Visible */}
+                    <th
+                      scope="col"
+                      className="px-3 py-3 md:p-3 border border-tableBorder"
+                    >
+                      <div className="flex items-center gap-2">
+                        <RxAvatar className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <span className=" font-semibold text-secondBlack text-lg sm:text-base">
+                          Full Name
+                        </span>
+                      </div>
+                    </th>
+
+                    {/* Other columns: Hidden on mobile, visible from md: */}
+                    <th
+                      scope="col"
+                      className="px-3 py-2 border border-tableBorder hidden md:table-cell"
+                    >
+                      <div className="flex items-center gap-2">
+                        <HiOutlineBookOpen className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <span className="font-semibold text-secondBlack text-lg sm:text-base">
+                          Email
+                        </span>
+                      </div>
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-3 py-2 border border-tableBorder hidden md:table-cell"
+                    >
+                      <div className="flex items-center gap-2">
+                        <HiOutlineBookOpen className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <span className="font-semibold text-secondBlack text-lg sm:text-base">
+                          Phone
+                        </span>
+                      </div>
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-3 py-2 border border-tableBorder hidden md:table-cell"
+                    >
+                      <div className="flex items-center gap-2">
+                        <SiHomeassistantcommunitystore className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <span className="font-semibold text-secondBlack text-lg sm:text-base">
+                          Address
+                        </span>
+                      </div>
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-3 py-2 border border-tableBorder md:table-cell"
+                    >
+                      <div className="flex items-center gap-2">
+                        <LiaArrowCircleDownSolid className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <span className="font-semibold text-secondBlack text-lg sm:text-base">
+                          Action
+                        </span>
+                      </div>
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {!assignLeadData || assignLeadData.length === 0 || isError ? (
+                    <tr>
+                      <td colSpan={8} className="text-center text-xl mt-5">
+                        <div className="mt-5">Data not found</div>
+                      </td>
+                    </tr>
+                  ) : (
+                    assignLeadData.map((item: any, index: number) => (
+                      <tr
+                        key={item?.id ?? index}
+                        className="border border-tableBorder bg-white hover:bg-primary-100"
+                      >
+                        {/* Full name */}
+                        <td className="px-1 py-2 md:px-3 md:py-2 border-tableBorder flex items-center gap-2">
+                          <div className="flex gap-2">
+                            <div className="md:hidden">
+                              <FaEllipsisVertical
+                                data-tooltip-id="my-tooltip"
+                                data-tooltip-html={`<div>
+                  <strong>Name:</strong> <span style="text-transform: capitalize;">${
+                    item?.full_name ?? "-"
+                  }</span><br/>
+                  <strong>Email:</strong> ${item?.email ?? "-"}<br/>
+                  <strong>Phone:</strong> ${item?.phone ?? "-"}<br/>
+                  <strong>Owner:</strong> ${item?.owner_name ?? "-"}<br/>
+                  <strong>Account Manager:</strong> ${
+                    item?.account_manager ?? "-"
+                  }
+                </div>`}
+                                className="text-black leading-normal relative top-[5.3px] capitalize"
+                              />
+                              <Tooltip
+                                id="my-tooltip"
+                                place="right"
+                                float
+                                className="box"
+                              />
+                            </div>
+                            <div>
+                              <p className="text-[#232323] text-sm sm:text-base font-medium leading-normal capitalize">
+                                {item?.full_name ?? "-"}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Email */}
+                        <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+                          <span className="text-[#232323] text-sm sm:text-base">
+                            {item?.email ?? "-"}
+                          </span>
+                        </td>
+
+                        {/* Phone */}
+                        <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+                          <span className="text-[#232323] text-sm sm:text-base">
+                            {item?.phone ?? "-"}
+                          </span>
+                        </td>
+
+                        {/* Owner */}
+                        <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+                          <span className="text-[#232323] text-sm sm:text-base capitalize">
+                            {item?.address.country ?? "-"}
+                          </span>
+                        </td>
+
+                        {/* Action */}
+                        <td className="px-3 py-2 border border-tableBorder md:table-cell">
+                          <div className="flex gap-1 md:gap-2 justify-center md:justify-start">
+                            <button
+                              onClick={() => test(item.id)}
+                              className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"
+                            >
+                              <MdRemoveRedEye className="text-white w-4 h-4 hover:text-white" />
+                              <span className="text-xs sm:text-sm text-white hover:text-white">
+                                View Details
+                              </span>
+                            </button>
+                            <button
+                              onClick={() => editLead(item)}
+                              className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"
+                            >
+                              <MdRemoveRedEye className="text-white w-4 h-4 hover:text-white" />
+                              <span className="text-xs sm:text-sm text-white hover:text-white">
+                                Edit
+                              </span>
+                            </button>
+
+                           
+                              <button
+                                onClick={() => deleteUserLead(item.id)}
+                                className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"
+                              >
+                                <MdRemoveRedEye className="text-white w-4 h-4 hover:text-white" />
+                                <span className="text-xs sm:text-sm text-white hover:text-white">
+                                  Delete
+                                </span>
+                              </button>
+                            
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+        )}
+            {/* ---------------- Table--------------------------- */}
+            <div className="w-full overflow-x-auto custom-scrollbar">
+              {clearFilter && (
+                <button
+                  type="button"
+                  onClick={() => clickedFilterClear()}
+                  className="flex items-center gap-2 text-primary-600 text-sm font-medium transition-colors p-1 border border-primary-500 rounded mb-2"
+                >
+                  <span>Clear Filter</span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2}
+                    stroke="currentColor"
+                    className="w-4 h-4"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              )}
+
             </div>
 
             {/* ----------------End table------------------------ */}

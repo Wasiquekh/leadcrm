@@ -888,7 +888,7 @@ export default function Home() {
   const defaultStart = roundToNext5();
   const defaultEnd = addMinutes(defaultStart, 30); // still 30 min gap
 
-  return (
+  return ( 
     <>
       <div className=" flex justify-end  min-h-screen">
         {/* Main content right section */}
