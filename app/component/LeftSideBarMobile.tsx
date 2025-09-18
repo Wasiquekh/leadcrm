@@ -29,17 +29,7 @@ const storage = new StorageManager();
 const LeftSideBarMobile: React.FC = () => {
   const pathname = usePathname();
   const router = useRouter();
-  const permissions = storage.getUserPermissions();
-
-  const hasCustomerView = permissions?.some(
-    (perm) => perm.name === "customer.view"
-  );
-  const hasSystemUserView = permissions?.some(
-    (perm) => perm.name === "systemuser.view"
-  );
-  const hasUserActivityView = permissions?.some(
-    (perm) => perm.name === "useractivity.view"
-  );
+  //const permissions = storage.getUserPermissions();
 
   const crmPaths = [
     "/crm/total-accounts",
@@ -89,74 +79,69 @@ const LeftSideBarMobile: React.FC = () => {
           icon={<BiSolidHome />}
           pathname={pathname}
         />
-        {hasCustomerView && (
-          <SidebarItem
-            href="/customer"
-            label="Customers"
-            icon={<MdOutlinePeopleOutline />}
-            pathname={pathname}
-          />
-        )}
 
-        {hasCustomerView && (
-          <>
-            <div
-              onClick={toggleSubmenu}
-              className={`mb-2 flex items-center gap-4 px-3 py-3 cursor-pointer rounded-[4px] ${
-                isCRMActive
-                  ? "bg-primary-600 text-white"
-                  : "text-firstBlack hover:bg-sideBarHoverbg active:bg-sideBarHoverbgPressed hover:text-primary-600"
-              }`}
-            >
-              <div className="w-6 h-6 flex items-center justify-center">
-                <AiOutlineDashboard className="w-6 h-6" />
-              </div>
-              <p className="text-base font-medium leading-none">CRM</p>
-              <FaChevronDown className="ml-auto" />
+        <SidebarItem
+          href="/customer"
+          label="Customers"
+          icon={<MdOutlinePeopleOutline />}
+          pathname={pathname}
+        />
+
+        <>
+          <div
+            onClick={toggleSubmenu}
+            className={`mb-2 flex items-center gap-4 px-3 py-3 cursor-pointer rounded-[4px] ${
+              isCRMActive
+                ? "bg-primary-600 text-white"
+                : "text-firstBlack hover:bg-sideBarHoverbg active:bg-sideBarHoverbgPressed hover:text-primary-600"
+            }`}
+          >
+            <div className="w-6 h-6 flex items-center justify-center">
+              <AiOutlineDashboard className="w-6 h-6" />
             </div>
+            <p className="text-base font-medium leading-none">CRM</p>
+            <FaChevronDown className="ml-auto" />
+          </div>
 
-            {isSubmenuOpen && (
-              <div className="pl-6">
-                <SidebarItem
-                  href="/crm/total-accounts"
-                  label="Accounts"
-                  icon={<MdOutlineSwitchAccount />}
-                  pathname={pathname}
-                />
-                <SidebarItem
-                  href="/crm/total-contacts"
-                  label="Contacts"
-                  icon={<RiContactsBook3Fill />}
-                  pathname={pathname}
-                />
-                <SidebarItem
-                  href="/crm/total-leads"
-                  label="Leads"
-                  icon={<SiGoogleadsense />}
-                  pathname={pathname}
-                />
-                <SidebarItem
-                  href="/crm/total-quotes"
-                  label="Quotes"
-                  icon={<ImQuotesLeft />}
-                  pathname={pathname}
-                />
-                <SidebarItem
-                  href="/crm/get-product"
-                  label="Products"
-                  icon={<AiFillProduct />}
-                  pathname={pathname}
-                />
-                <SidebarItem
-                  href="/crm/get-category"
-                  label="Product Category"
-                  icon={<MdCategory />}
-                  pathname={pathname}
-                />
-              </div>
-            )}
-          </>
-        )}
+          <div className="pl-6">
+            <SidebarItem
+              href="/crm/total-accounts"
+              label="Accounts"
+              icon={<MdOutlineSwitchAccount />}
+              pathname={pathname}
+            />
+            <SidebarItem
+              href="/crm/total-contacts"
+              label="Contacts"
+              icon={<RiContactsBook3Fill />}
+              pathname={pathname}
+            />
+            <SidebarItem
+              href="/crm/total-leads"
+              label="Leads"
+              icon={<SiGoogleadsense />}
+              pathname={pathname}
+            />
+            <SidebarItem
+              href="/crm/total-quotes"
+              label="Quotes"
+              icon={<ImQuotesLeft />}
+              pathname={pathname}
+            />
+            <SidebarItem
+              href="/crm/get-product"
+              label="Products"
+              icon={<AiFillProduct />}
+              pathname={pathname}
+            />
+            <SidebarItem
+              href="/crm/get-category"
+              label="Product Category"
+              icon={<MdCategory />}
+              pathname={pathname}
+            />
+          </div>
+        </>
 
         <SidebarItem
           href="/transaction"
@@ -183,22 +168,20 @@ const LeftSideBarMobile: React.FC = () => {
           pathname={pathname}
         />
 
-        {hasSystemUserView && (
-          <SidebarItem
-            href="/usermanagement"
-            label="User Management"
-            icon={<BiSolidUser />}
-            pathname={pathname}
-          />
-        )}
-        {hasUserActivityView && (
-          <SidebarItem
-            href="/user-activity"
-            label="User Activity"
-            icon={<RiHistoryLine />}
-            pathname={pathname}
-          />
-        )}
+        <SidebarItem
+          href="/usermanagement"
+          label="User Management"
+          icon={<BiSolidUser />}
+          pathname={pathname}
+        />
+
+        <SidebarItem
+          href="/user-activity"
+          label="User Activity"
+          icon={<RiHistoryLine />}
+          pathname={pathname}
+        />
+
         <SidebarItem
           href="/setting"
           label="Setting"

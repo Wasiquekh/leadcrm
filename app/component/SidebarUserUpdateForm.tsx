@@ -41,10 +41,7 @@ const SidebarUserUpdateForm: React.FC<SidebarUserUpdateFormProps> = ({
   //console.log('user desc',userDescription)
   const [isVisible, setIsVisible] = useState<boolean>(true);
   const { accessToken } = useContext(AppContext);
-  const permissions = storage.getUserPermissions();
-  const hasSystemUserEdit = permissions?.some(
-    (perm) => perm.name === "systemuser.edit"
-  );
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -304,25 +301,14 @@ const SidebarUserUpdateForm: React.FC<SidebarUserUpdateFormProps> = ({
                 </div>
 
                 <div className="mt-10 w-full flex justify-end items-center gap-5">
-                  {hasSystemUserEdit ? (
-                    <button
-                      type="submit"
-                      onClick={() => setIsEditFlyoutOpen(false)}
-                      disabled={isSubmitting}
-                      className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:bg-primary-600 hover:text-white w-full md:w-[48%]"
-                    >
-                      {isSubmitting ? "Updating Details" : "Update Details"}
-                    </button>
-                  ) : (
-                    <button
-                      type="submit"
-                      onClick={() => setIsEditFlyoutOpen(false)}
-                      disabled
-                      className="py-[13px] px-[26px] bg-customBlue rounded-[4px] text-base font-medium leading-6 text-white cursor-not-allowed"
-                    >
-                      Not Access
-                    </button>
-                  )}
+                  <button
+                    type="submit"
+                    onClick={() => setIsEditFlyoutOpen(false)}
+                    disabled={isSubmitting}
+                    className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:bg-primary-600 hover:text-white w-full md:w-[48%]"
+                  >
+                    {isSubmitting ? "Updating Details" : "Update Details"}
+                  </button>
                 </div>
               </Form>
             )}
