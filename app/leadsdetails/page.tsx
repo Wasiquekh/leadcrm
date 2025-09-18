@@ -108,6 +108,7 @@ interface Lead {
 
   created_at: string; // ISO string
   updated_at: string; // ISO string
+  note:string;
 }
 interface LeadActivity {
   id: string;
@@ -231,7 +232,7 @@ export default function Home() {
   const [lead, setLead] = useState<Lead | null>(null);
   const [isTotpPopupOpen, setIsTotpPopupOpen] = useState<boolean>(false);
   const [data, setData] = useState<any>(null);
-  //console.log("LEAD SINGLE DATA", data);
+  console.log("LEAD SINGLE DATA", data);
   const [leadActivityData, setLeadActivityData] = useState<LeadActivity>();
   const [disposition, setDisposition] = useState<Disposition[]>([]);
   const [agent, setAgent] = useState<Agent[]>([]);
@@ -247,7 +248,7 @@ export default function Home() {
   const [fetchLeadActivityData, setFetchLeadaActivityData] = useState<
     LeadActivityData[]
   >([]);
-  //console.log("INTERFACE", fetchLeadActivityData);
+ // console.log("fetched single lead data", fetchLeadActivityData);
   const [reloadKey, setReloadKey] = useState(0);
   const [docs, setDocs] = useState<LeadDocument[]>([]); // start empty
   const [activityHistoryData, setActivityHistoryData] =
@@ -262,8 +263,10 @@ export default function Home() {
   const [isTaskFilter, setIsTaskFilter] = useState<boolean>(false);
   const [isDocumentFilter, setIsDocumentFilter] = useState<boolean>(false);
   const [fileteredTaskData, setFilteredTasKData] = useState<[]>([]);
-  console.log("DDDDDDDDDDDDDDDDDDLLLLLLLLLLLLLLLL", fileteredTaskData);
-  //console.log("DOCUMENT NAME", documentName);
+ // console.log("DDDDDDDDDDDDDDDDDDLLLLLLLLLLLLLLLL", fileteredTaskData);
+
+
+  //console.log("", documentName);
   // console.log("lead activity edit data", activityHistoryData);
   // console.log("lead activity",fetchLeadActivityData)
   //  FOR CREATE ACTIVITY LEAD
@@ -1010,6 +1013,12 @@ export default function Home() {
                             {data?.address?.state || "-"}
                           </p>
                         </div>
+                                                <div className=" flex text-white items-center  gap-2 mb-3">
+                         <p className="text-sm font-medium leading-none">Note:</p>
+                          <p className=" text-sm font-medium leading-none">
+                            {data?.note || "-"}
+                          </p>
+                        </div>
 
                         {/* ✅ Edit button */}
                         <div className="flex justify-end pt-4">
@@ -1281,6 +1290,13 @@ export default function Home() {
                             >
                               Lead Properties
                             </th>
+                               <th
+                              scope="col"
+                              className="px-3 py-3 md:p-3 border border-tableBorder font-semibold text-secondBlack text-base"
+                              colSpan={2}
+                            >
+                              Edit
+                            </th>
                           </tr>
                         </thead>
 
@@ -1325,14 +1341,6 @@ export default function Home() {
                             </td>
                             <td className="text-sm font-medium text-[#252F4A]  py-4 px-4">
                               {data?.debt_consolidation_status || "-"}
-                            </td>
-                          </tr>
-                          <tr className="border border-tableBorder bg-white hover:bg-primary-100 transition-colors">
-                            <td className="text-sm text-[#78829D] py-4 px-4">
-                              Lead Score
-                            </td>
-                            <td className="text-sm font-medium text-[#252F4A]  py-4 px-4">
-                              {data?.lead_score || "-"}
                             </td>
                           </tr>
                           <tr className="border border-tableBorder bg-white hover:bg-primary-100 transition-colors">
