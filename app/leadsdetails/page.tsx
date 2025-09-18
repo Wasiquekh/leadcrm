@@ -740,7 +740,12 @@ export default function Home() {
         <>
           {/* Tab content 3 */}
 
-          <AppCalendar leadId={leadId} reloadKey={reloadKey} hitApi={hitApi} />
+          <AppCalendar
+            leadId={leadId}
+            reloadKey={reloadKey}
+            hitApi={hitApi}
+            setHitApi={setHitApi}
+          />
           {/* End Tab content 3 */}
         </>
       ),

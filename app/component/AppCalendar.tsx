@@ -6,8 +6,14 @@ import { RxAvatar } from "react-icons/rx";
 import { HiOutlineBookOpen } from "react-icons/hi";
 import { SiHomeassistantcommunitystore } from "react-icons/si";
 import { LiaArrowCircleDownSolid } from "react-icons/lia";
+import { toast } from "react-toastify";
 
-type Props = { leadId: string; reloadKey?: number; hitApi: boolean };
+type Props = {
+  leadId: string;
+  reloadKey?: number;
+  hitApi: boolean;
+  setHitApi: React.Dispatch<React.SetStateAction<boolean>>;
+};
 
 export interface TaskData {
   id: string;
@@ -37,7 +43,12 @@ export interface TaskData {
   type: string; // just string now
 }
 
-export default function AppCalendar({ leadId, reloadKey = 0, hitApi }: Props) {
+export default function AppCalendar({
+  leadId,
+  reloadKey = 0,
+  hitApi,
+  setHitApi,
+}: Props) {
   const [tasks, setTasks] = useState<TaskData[]>([]);
   // console.log("TASK LIST", tasks);
 
@@ -67,6 +78,22 @@ export default function AppCalendar({ leadId, reloadKey = 0, hitApi }: Props) {
     if (x === "cancelled" || x === "canceled" || x === "failed")
       return "bg-red-100 text-red-700 border-red-200";
     return "bg-gray-100 text-gray-700 border-gray-200";
+  };
+
+  const compeleteTask = async (id: string) => {
+    console.log("Got id", id);
+    try {
+      await AxiosProvider.post("/leads/tasks/complete", {
+        lead_id: leadId,
+        task_id: id,
+      });
+
+      toast.success("Task Completed");
+      setHitApi(!hitApi);
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast.error("Task not Completed");
+    }
   };
 
   return (
@@ -101,6 +128,17 @@ export default function AppCalendar({ leadId, reloadKey = 0, hitApi }: Props) {
             </th>
 
             {/* Due at IST */}
+            <th
+              scope="col"
+              className="px-3 py-2 border border-tableBorder hidden md:table-cell"
+            >
+              <div className="flex items-center gap-2">
+                <HiOutlineBookOpen className="w-5 h-5 sm:w-6 sm:h-6" />
+                <span className="font-semibold text-secondBlack text-lg sm:text-base">
+                  Status
+                </span>
+              </div>
+            </th>
             <th
               scope="col"
               className="px-3 py-2 border border-tableBorder hidden md:table-cell"
@@ -154,6 +192,17 @@ export default function AppCalendar({ leadId, reloadKey = 0, hitApi }: Props) {
                     )}`}
                   >
                     {(t?.status || "-").toString().toLowerCase()}
+                  </span>
+                </td>
+                {/* ACTION */}
+                <td className="px-3 py-2 border border-tableBorder hidden md:table-cell capitalize">
+                  <span className="text-[#232323] text-sm sm:text-base">
+                    <button
+                      onClick={() => compeleteTask(t.id)}
+                      className=" p-1 bg-primary-500 hover:bg-primary-600 text-white text-sm px-3 rounded"
+                    >
+                      Complete Task
+                    </button>
                   </span>
                 </td>
               </tr>
