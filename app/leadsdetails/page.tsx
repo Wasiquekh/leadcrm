@@ -202,6 +202,21 @@ type UpdateActivityPayload = {
   disposition_id?: string;
   agent_id?: string;
 };
+export interface Consolidation {
+  id: string;
+  name: string;
+  is_active: boolean;
+  created_at: string; // ISO datetime
+  updated_at: string; // ISO datetime
+}
+export interface DebtConsolidation {
+  id: string;
+  name: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string | null;
+}
+
 
 export default function Home() {
   const [isFlyoutFilterOpen, setFlyoutFilterOpen] = useState<boolean>(false);
@@ -236,6 +251,9 @@ export default function Home() {
   const [leadActivityData, setLeadActivityData] = useState<LeadActivity>();
   const [disposition, setDisposition] = useState<Disposition[]>([]);
   const [agent, setAgent] = useState<Agent[]>([]);
+    const [consolidationData, setConsolidationData] = useState<Consolidation[]>([]);
+  const [debtConsolidation, setDebtConsolidation] = useState<DebtConsolidation[]>([]);
+ 
   const [activity, setActivity] = useState<boolean>(false);
   const [task, setTask] = useState<boolean>(false);
   const [document, setDocument] = useState<boolean>(false);
@@ -264,6 +282,7 @@ export default function Home() {
   const [isDocumentFilter, setIsDocumentFilter] = useState<boolean>(false);
   const [fileteredTaskData, setFilteredTasKData] = useState<[]>([]);
  // console.log("DDDDDDDDDDDDDDDDDDLLLLLLLLLLLLLLLL", fileteredTaskData);
+ const [isleadPropertyEdit, setIsLeadPropertyEdit] = useState<boolean>(true)
 
 
   //console.log("", documentName);
@@ -425,7 +444,7 @@ export default function Home() {
   useEffect(() => {
     fetchDisposition();
   }, []);
-  // FETCH AGENT
+  // FETCH AGENT CONSILATION AND DEBT CONSILATION
   const fetchAgent = async () => {
     try {
       const res = await AxiosProvider.get("/allagents");
@@ -440,6 +459,39 @@ export default function Home() {
   useEffect(() => {
     fetchAgent();
   }, []);
+    const consolidationStatus = async () => {
+    try {
+      const response = await AxiosProvider.get("/getconsolidation");
+      //  console.log("KKKKKKKKMMMMMMM", response.data.data.data);
+      setConsolidationData(response.data.data.data);
+
+      // const result = response.data.data.data;
+      // console.log("ALL CRM USER", result);
+    } catch (error: any) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    consolidationStatus();
+  }, []);
+
+  const debtConsolidationStatus = async () => {
+    try {
+      const response = await AxiosProvider.get("/leaddebtstatuses");
+      //  console.log("GGGGGGGGGGGGGGGG", response.data.data.data);
+      setDebtConsolidation(response.data.data.data);
+
+      // const result = response.data.data.data;
+      // console.log("ALL CRM USER", result);
+    } catch (error: any) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    debtConsolidationStatus();
+  }, []);
+
+    // END ETCH AGENT CONSILATION AND DEBT CONSILATION and lead source
   const openActivityFlyout = () => {
     setFlyoutFilterOpen(true);
     setActivity(true);
@@ -1035,251 +1087,262 @@ export default function Home() {
                       /* ---------- EDIT MODE (Formik form) ---------- */
                       /* ---------- EDIT MODE (Formik form) ---------- */
                       <div className="w-full rounded bg-white px-4 py-6 mb-6">
-                        <Formik
-                          enableReinitialize
-                          initialValues={{
-                            first_name: data?.first_name ?? "",
-                            last_name: data?.last_name ?? "",
-                            country: data?.address?.country ?? "",
-                            email: data?.email ?? "",
-                            phone: data?.phone ?? "",
-                            address_line1: data?.address?.line1 ?? "",
-                            address_line2: data?.address?.line2 ?? "",
-                            city: data?.address?.city ?? "",
-                            state: data?.address?.state ?? "",
-                          }}
-                          validationSchema={Yup.object({
-                            first_name: Yup.string()
-                              .trim()
-                              .required("First name is required"),
-                            last_name: Yup.string()
-                              .trim()
-                              .required("Last name is required"),
-                            email: Yup.string()
-                              .trim()
-                              .email("Invalid email")
-                              .required("Email is required"),
-                            phone: Yup.string()
-                              .trim()
-                              .required("Mobile is required"),
-                            country: Yup.string().trim().nullable(),
-                            address_line1: Yup.string().trim().nullable(),
-                            address_line2: Yup.string().trim().nullable(),
-                            city: Yup.string().trim().nullable(),
-                            state: Yup.string().trim().nullable(),
-                          })}
-                          onSubmit={async (values, { setSubmitting }) => {
-                            try {
-                              // ⬇️ Flat payload (no nested objects)
-                              const payload = {
-                                id: data?.id, // keep if your API needs id for update
-                                ...values,
-                              };
-                              //console.log("PPPPPPPPPPP", payload);
+                         <Formik
+    enableReinitialize
+    initialValues={{
+      first_name: data?.first_name ?? "",
+      last_name: data?.last_name ?? "",
+      country: data?.address?.country ?? "",
+      email: data?.email ?? "",
+      phone: data?.phone ?? "",
+      address_line1: data?.address?.line1 ?? "",
+      address_line2: data?.address?.line2 ?? "",
+      city: data?.address?.city ?? "",
+      state: data?.address?.state ?? "",
+      note: data?.note ?? "", // ✅ Added note
+    }}
+    validationSchema={Yup.object({
+      first_name: Yup.string().trim().required("First name is required"),
+      last_name: Yup.string().trim().required("Last name is required"),
+      email: Yup.string()
+        .trim()
+        .email("Invalid email")
+        .required("Email is required"),
+      phone: Yup.string().trim().required("Mobile is required"),
+      country: Yup.string().trim().nullable(),
+      address_line1: Yup.string().trim().nullable(),
+      address_line2: Yup.string().trim().nullable(),
+      city: Yup.string().trim().nullable(),
+      state: Yup.string().trim().nullable(),
+      note: Yup.string().trim().nullable(), // ✅ Optional note
+    })}
+    onSubmit={async (values, { setSubmitting }) => {
+      try {
+        const payload = {
+          id: data?.id,
+          ...values, // ✅ includes note
+        };
 
-                              await AxiosProvider.post(
-                                "/leads/update",
-                                payload
-                              ); // or .post, use your actual route
-                              toast.success("Lead updated successfully");
-                              setIsEditFirstLead(true); // back to view mode
-                              setHitApi(!hitApi);
-                              // optionally refetch here if needed
-                            } catch (e) {
-                              console.error(e);
-                              toast.error("Failed to update lead");
-                            } finally {
-                              setSubmitting(false);
-                            }
-                          }}
-                        >
-                          {({ isSubmitting, errors, touched }) => (
-                            <Form className="space-y-4">
-                              {/* Name row */}
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                  <label className="block text-sm font-medium text-secondBlack mb-1">
-                                    First Name *
-                                  </label>
-                                  <Field
-                                    name="first_name"
-                                    type="text"
-                                    className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
-                                    placeholder="Enter first name"
-                                  />
-                                  <ErrorMessage
-                                    name="first_name"
-                                    component="p"
-                                    className="text-red-500 text-xs mt-1"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-sm font-medium text-secondBlack mb-1">
-                                    Last Name *
-                                  </label>
-                                  <Field
-                                    name="last_name"
-                                    type="text"
-                                    className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
-                                    placeholder="Enter last name"
-                                  />
-                                  <ErrorMessage
-                                    name="last_name"
-                                    component="p"
-                                    className="text-red-500 text-xs mt-1"
-                                  />
-                                </div>
-                              </div>
+        await AxiosProvider.post("/leads/update", payload);
+        toast.success("Lead updated successfully");
+        setIsEditFirstLead(true);
+        setHitApi(!hitApi);
+      } catch (e) {
+        console.error(e);
+        toast.error("Failed to update lead");
+      } finally {
+        setSubmitting(false);
+      }
+    }}
+  >
+    {({ isSubmitting }) => (
+      <Form className="space-y-4">
+        {/* Name row */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-secondBlack mb-1">
+              First Name *
+            </label>
+            <Field
+              name="first_name"
+              type="text"
+              className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
+              placeholder="Enter first name"
+            />
+            <ErrorMessage
+              name="first_name"
+              component="p"
+              className="text-red-500 text-xs mt-1"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-secondBlack mb-1">
+              Last Name *
+            </label>
+            <Field
+              name="last_name"
+              type="text"
+              className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
+              placeholder="Enter last name"
+            />
+            <ErrorMessage
+              name="last_name"
+              component="p"
+              className="text-red-500 text-xs mt-1"
+            />
+          </div>
+        </div>
 
-                              {/* Email / Phone */}
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                  <label className="block text-sm font-medium text-secondBlack mb-1">
-                                    Email *
-                                  </label>
-                                  <Field
-                                    name="email"
-                                    type="email"
-                                    className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
-                                    placeholder="name@example.com"
-                                  />
-                                  <ErrorMessage
-                                    name="email"
-                                    component="p"
-                                    className="text-red-500 text-xs mt-1"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-sm font-medium text-secondBlack mb-1">
-                                    Mobile *
-                                  </label>
-                                  <Field
-                                    name="phone"
-                                    type="text"
-                                    className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
-                                    placeholder="Enter mobile number"
-                                  />
-                                  <ErrorMessage
-                                    name="phone"
-                                    component="p"
-                                    className="text-red-500 text-xs mt-1"
-                                  />
-                                </div>
-                              </div>
+        {/* Email / Phone */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-secondBlack mb-1">
+              Email *
+            </label>
+            <Field
+              name="email"
+              type="email"
+              className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
+              placeholder="name@example.com"
+            />
+            <ErrorMessage
+              name="email"
+              component="p"
+              className="text-red-500 text-xs mt-1"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-secondBlack mb-1">
+              Mobile *
+            </label>
+            <Field
+              name="phone"
+              type="text"
+              className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
+              placeholder="Enter mobile number"
+            />
+            <ErrorMessage
+              name="phone"
+              component="p"
+              className="text-red-500 text-xs mt-1"
+            />
+          </div>
+        </div>
 
-                              {/* Country */}
-                              <div>
-                                <label className="block text-sm font-medium text-secondBlack mb-1">
-                                  Country
-                                </label>
-                                <Field
-                                  name="country"
-                                  type="text"
-                                  className="w-full border border[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
-                                  placeholder="Country"
-                                />
-                                <ErrorMessage
-                                  name="country"
-                                  component="p"
-                                  className="text-red-500 text-xs mt-1"
-                                />
-                              </div>
+        {/* Country */}
+        <div>
+          <label className="block text-sm font-medium text-secondBlack mb-1">
+            Country
+          </label>
+          <Field
+            name="country"
+            type="text"
+            className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
+            placeholder="Country"
+          />
+          <ErrorMessage
+            name="country"
+            component="p"
+            className="text-red-500 text-xs mt-1"
+          />
+        </div>
 
-                              {/* Address lines */}
-                              <div>
-                                <label className="block text-sm font-medium text-secondBlack mb-1">
-                                  Address Line 1
-                                </label>
-                                <Field
-                                  name="address_line1"
-                                  type="text"
-                                  className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
-                                  placeholder="House / Street / Area"
-                                />
-                                <ErrorMessage
-                                  name="address_line1"
-                                  component="p"
-                                  className="text-red-500 text-xs mt-1"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-sm font-medium text-secondBlack mb-1">
-                                  Address Line 2
-                                </label>
-                                <Field
-                                  name="address_line2"
-                                  type="text"
-                                  className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
-                                  placeholder="Landmark / Apartment"
-                                />
-                                <ErrorMessage
-                                  name="address_line2"
-                                  component="p"
-                                  className="text-red-500 text-xs mt-1"
-                                />
-                              </div>
+        {/* Address lines */}
+        <div>
+          <label className="block text-sm font-medium text-secondBlack mb-1">
+            Address Line 1
+          </label>
+          <Field
+            name="address_line1"
+            type="text"
+            className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
+            placeholder="House / Street / Area"
+          />
+          <ErrorMessage
+            name="address_line1"
+            component="p"
+            className="text-red-500 text-xs mt-1"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-secondBlack mb-1">
+            Address Line 2
+          </label>
+          <Field
+            name="address_line2"
+            type="text"
+            className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
+            placeholder="Landmark / Apartment"
+          />
+          <ErrorMessage
+            name="address_line2"
+            component="p"
+            className="text-red-500 text-xs mt-1"
+          />
+        </div>
 
-                              {/* City / State */}
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                  <label className="block text-sm font-medium text-secondBlack mb-1">
-                                    City
-                                  </label>
-                                  <Field
-                                    name="city"
-                                    type="text"
-                                    className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
-                                    placeholder="City"
-                                  />
-                                  <ErrorMessage
-                                    name="city"
-                                    component="p"
-                                    className="text-red-500 text-xs mt-1"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-sm font-medium text-secondBlack mb-1">
-                                    State
-                                  </label>
-                                  <Field
-                                    name="state"
-                                    type="text"
-                                    className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
-                                    placeholder="State"
-                                  />
-                                  <ErrorMessage
-                                    name="state"
-                                    component="p"
-                                    className="text-red-500 text-xs mt-1"
-                                  />
-                                </div>
-                              </div>
+        {/* City / State */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-secondBlack mb-1">
+              City
+            </label>
+            <Field
+              name="city"
+              type="text"
+              className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
+              placeholder="City"
+            />
+            <ErrorMessage
+              name="city"
+              component="p"
+              className="text-red-500 text-xs mt-1"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-secondBlack mb-1">
+              State
+            </label>
+            <Field
+              name="state"
+              type="text"
+              className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
+              placeholder="State"
+            />
+            <ErrorMessage
+              name="state"
+              component="p"
+              className="text-red-500 text-xs mt-1"
+            />
+          </div>
+        </div>
 
-                              {/* Actions */}
-                              <div className="flex items-center justify-end gap-3 pt-4">
-                                <button
-                                  type="button"
-                                  onClick={() => setIsEditFirstLead(true)}
-                                  className="px-4 py-2 rounded-[4px] border border-[#DFEAF2] text-secondBlack text-sm font-medium bg-white"
-                                >
-                                  Cancel
-                                </button>
-                                <button
-                                  type="submit"
-                                  disabled={isSubmitting}
-                                  className="px-4 py-2 rounded-[4px] bg-primary-600 text-white text-sm font-medium disabled:opacity-60"
-                                >
-                                  {isSubmitting ? "Saving..." : "Save"}
-                                </button>
-                              </div>
-                            </Form>
-                          )}
-                        </Formik>
+        {/* ✅ Note field */}
+        <div>
+          <label className="block text-sm font-medium text-secondBlack mb-1">
+            Note
+          </label>
+          <Field
+            as="textarea"
+            name="note"
+            rows={3}
+            className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
+            placeholder="Enter notes here"
+          />
+          <ErrorMessage
+            name="note"
+            component="p"
+            className="text-red-500 text-xs mt-1"
+          />
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center justify-end gap-3 pt-4">
+          <button
+            type="button"
+            onClick={() => setIsEditFirstLead(true)}
+            className="px-4 py-2 rounded-[4px] border border-[#DFEAF2] text-secondBlack text-sm font-medium bg-white"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="px-4 py-2 rounded-[4px] bg-primary-600 text-white text-sm font-medium disabled:opacity-60"
+          >
+            {isSubmitting ? "Saving..." : "Save"}
+          </button>
+        </div>
+      </Form>
+    )}
+  </Formik>
                       </div>
                     )}
 
                     {/* LEAD PROPERTIES */}
-                    <div className="w-full">
+                   {isleadPropertyEdit ? 
+                   ( 
+                   <div className="w-full">
                       <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 ">
                         <thead className="text-xs text-[#999999] bg-white">
                           <tr className="border border-tableBorder">
@@ -1291,6 +1354,7 @@ export default function Home() {
                               Lead Properties
                             </th>
                                <th
+                               onClick={()=>setIsLeadPropertyEdit(!isleadPropertyEdit)}
                               scope="col"
                               className="px-3 py-3 md:p-3 border border-tableBorder font-semibold text-secondBlack text-base"
                               colSpan={2}
@@ -1343,6 +1407,14 @@ export default function Home() {
                               {data?.debt_consolidation_status || "-"}
                             </td>
                           </tr>
+                                                    <tr className="border border-tableBorder bg-white hover:bg-primary-100 transition-colors">
+                            <td className="text-sm text-[#78829D] py-4 px-4">
+                               Consolidation Status
+                            </td>
+                            <td className="text-sm font-medium text-[#252F4A]  py-4 px-4">
+                              {data?.consolidated_credit_status || "-"}
+                            </td>
+                          </tr>
                           <tr className="border border-tableBorder bg-white hover:bg-primary-100 transition-colors">
                             <td className="text-sm text-[#78829D] py-4 px-4">
                               WHATSAPP
@@ -1354,6 +1426,10 @@ export default function Home() {
                         </tbody>
                       </table>
                     </div>
+                    )
+                    : 
+                    // LEAD PROPERTIES EDIT FORM
+                    (<p>empty update form now</p>)}
                   </div>
                   <div className=" md:flex relative w-full">
                     <Tabs tabs={tabs} />
