@@ -194,6 +194,7 @@ export default function Home() {
   >([]);
   const [isAgent, setIsAgent] = useState<boolean>(false);
   const [agentList, setAgentList] = useState<Agent[]>([]);
+  console.log("ALL AGENTS",agentList)
   // 👉 holds the selected agent from dropdown
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   //console.log("DDDAAANISHHHH", agentFetchedData);
