@@ -2169,7 +2169,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
                           name="start_at"
                           showTimeSelect
                           timeFormat="h:mm aa"
-                          timeIntervals={15}
+                          timeIntervals={5}
                           dateFormat="yyyy-MM-dd h:mm aa"
                           placeholderText="yyyy-mm-dd hh:mm am/pm"
                           className="hover:shadow-hoverInputShadow focus-border-primary 
@@ -2207,7 +2207,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
                           name="end_at"
                           showTimeSelect
                           timeFormat="h:mm aa"
-                          timeIntervals={15}
+                          timeIntervals={5}
                           dateFormat="yyyy-MM-dd h:mm aa"
                           placeholderText="yyyy-mm-dd hh:mm am/pm"
                           disabled
