@@ -159,7 +159,7 @@ export default function Home() {
   const [notAssignData, setNotAssignData] = useState<Lead[]>([]);
  // console.log("NOT ASSIGN DATAAAAAAAAA",notAssignData)
  const [assignLeadData, setAssignLeadData] = useState<Lead[]>([]);
- //console.log(" ASSIGN DATAAAAAAAAA",assignLeadData)
+ console.log(" ASSIGN DATAAAAAAAAA",assignLeadData)
   //console.log("DATAAAAA", data);
   const [page, setPage] = useState<number>(1);
   const [filterPage, setFilterPage] = useState<number>(1);
@@ -892,6 +892,17 @@ export default function Home() {
                     </th>
                     <th
                       scope="col"
+                      className="px-3 py-2 border border-tableBorder hidden md:table-cell"
+                    >
+                      <div className="flex items-center gap-2">
+                        <SiHomeassistantcommunitystore className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <span className="font-semibold text-secondBlack text-lg sm:text-base">
+                          Agent
+                        </span>
+                      </div>
+                    </th>
+                    <th
+                      scope="col"
                       className="px-3 py-2 border border-tableBorder md:table-cell"
                     >
                       <div className="flex items-center gap-2">
@@ -971,7 +982,11 @@ export default function Home() {
                             {item?.address.country ?? "-"}
                           </span>
                         </td>
-
+                        <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+                          <span className="text-[#232323] text-sm sm:text-base capitalize">
+                            {item?.agent.name ?? "-"}
+                          </span>
+                        </td>
                         {/* Action */}
                         <td className="px-3 py-2 border border-tableBorder md:table-cell">
                           <div className="flex gap-1 md:gap-2 justify-center md:justify-start">
@@ -2022,6 +2037,9 @@ export default function Home() {
             norm(o.id) === norm(values.debt_consolidation_status_id)
         ) || null
       : null;
+      const agentDisplay = values.agent_id
+  ? (agentList || []).find((o: any) => norm(o.id) === norm(values.agent_id)) || null
+  : null;
 
     const creditDisplay = values.consolidated_credit_status_id
       ? (consolidationData || []).find(
@@ -2194,17 +2212,46 @@ export default function Home() {
             </div>
 
             {/* Agent ID */}
-            <div className="w-full">
-              <p className="text-secondBlack  text-base leading-6 mb-2">
-                Agent ID
-              </p>
-              <Field
-                type="text"
-                name="agent_id"
-                placeholder="AGT-001"
-                className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
-              />
-            </div>
+{/* Agent */}
+<div className="w-full">
+  <p className="text-secondBlack  text-base leading-6 mb-2">Agent</p>
+  <Select
+    value={agentDisplay}
+    onChange={(selected: any) =>
+      setFieldValue("agent_id", selected ? selected.id : "")
+    }
+    onBlur={() => setFieldTouched("agent_id", true)}
+    getOptionLabel={(opt: any) => opt.name}
+    getOptionValue={(opt: any) => String(opt.id)}
+    options={agentList}
+    placeholder="Select Agent"
+    isClearable
+    classNames={{
+      control: ({ isFocused }: any) =>
+        `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+          isFocused ? "!border-primary-500" : "!border-[#DFEAF2]"}`
+    }}
+    styles={{
+      menu: (base: any) => ({
+        ...base,
+        borderRadius: "4px",
+        boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+        backgroundColor: "#fff",
+      }),
+      option: (base: any, { isFocused, isSelected }: any) => ({
+        ...base,
+        backgroundColor: isSelected
+          ? "var(--primary-500)"
+          : isFocused
+          ? "var(--primary-100)"
+          : "#fff",
+        color: isSelected ? "#fff" : "#333",
+        cursor: "pointer",
+      }),
+    }}
+  />
+</div>
+
 
             {/* Lead Source */}
             <div className="w-full">
