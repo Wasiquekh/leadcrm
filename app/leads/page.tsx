@@ -159,7 +159,7 @@ export default function Home() {
   const [notAssignData, setNotAssignData] = useState<Lead[]>([]);
  // console.log("NOT ASSIGN DATAAAAAAAAA",notAssignData)
  const [assignLeadData, setAssignLeadData] = useState<Lead[]>([]);
- console.log(" ASSIGN DATAAAAAAAAA",assignLeadData)
+ //console.log(" ASSIGN DATAAAAAAAAA",assignLeadData)
   //console.log("DATAAAAA", data);
   const [page, setPage] = useState<number>(1);
   const [filterPage, setFilterPage] = useState<number>(1);
@@ -407,7 +407,7 @@ export default function Home() {
       const response = await AxiosProvider.get(
         `/leads/notassigned?page=${page}&pageSize=${pageSize}`
       );
-       console.log("KKKKKKKKKKKKKKKKK", response.data.data.data);
+      // console.log("KKKKKKKKKKKKKKKKK", response.data.data.data);
       setTotalPages(response.data.data.pagination.totalPages);
       const result = response.data.data.data;
       // console.log("ALL CRM USER", result);
@@ -604,33 +604,16 @@ export default function Home() {
     return out;
   };
 
+
+  // const handleNotAssign = async (values: FilterValues) => {
+  //   console.log("FITLER VALUE NOT CLEAN", values);
+   
+  // };
   // you handle API/state with this
-  const onFilterSubmit = async (values: FilterValues) => {
-    // console.log("FITLER VALUE NOT CLEAN", values);
-    const clean = toCleanFilter(values);
-    if (Object.keys(clean).length === 0) {
-      toast.error("Please fill at least one field before submitting.");
-      return;
-    }
-    //console.log("FILTER VALUES (clean):", clean);
-    // e.g. setFilters(clean); fetchList(1, clean);
-    try {
-      const response = await AxiosProvider.post(
-        "/leads/filter?page=${page}&pageSize=${pageSize}",
-        values
-      );
-      console.log("FILTERED VALUE", response.data.data.data);
-     // setData(response.data.data.data);
-      setFlyoutOpen(false);
-      //  toast.success("Lead is Creatted");
-      //setHitApi(!hitApi);
-      setClearFilter(true);
-    } catch (error: any) {
-      toast.error("Lead is not Creatted");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // const handleAssign = async (values: FilterValues) => {
+  //    console.log("FITLER VALUE NOT CLEAN", values);
+    
+  // };
   const clickedFilterClear = () => {
     setClearFilter(false);
     setHitApi(!hitApi);
@@ -1088,7 +1071,7 @@ export default function Home() {
             )}
         {userRole === "Agent" && 
         (
-                                        <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 whitespace-nowrap">
                 <thead className="text-xs text-[#999999] bg-white">
                   <tr className="border border-tableBorder">
                     {/* Name - Birth Date: Always Visible */}
@@ -2003,362 +1986,391 @@ export default function Home() {
               </div>
               <div className=" w-full border-b border-[#E7E7E7] mb-4"></div>
               {/* FORM */}
-              <Formik
-                enableReinitialize
-                initialValues={{
-                  first_name: "",
-                  last_name: "",
-                  full_name: "",
-                  email: "",
-                  phone: "",
-                  lead_number: "",
-                  city: "",
-                  state: "",
-                  agent_id: "",
-                  lead_source_id: "",
-                  debt_consolidation_status_id: "",
-                  consolidated_credit_status_id: "",
-                }}
-                onSubmit={(values, { setSubmitting }) => {
-                  onFilterSubmit(values as FilterValues);
-                  setSubmitting(false);
-                }}
-              >
-                {({
-                  handleSubmit,
-                  values,
-                  setFieldValue,
-                  setFieldTouched,
-                  isSubmitting,
-                }) =>
-                  (() => {
-                    const norm = (v: any) => String(v ?? "").toLowerCase();
+             <Formik
+  enableReinitialize
+  initialValues={{
+    first_name: "",
+    last_name: "",
+    full_name: "",
+    email: "",
+    phone: "",
+    lead_number: "",
+    city: "",
+    state: "",
+    agent_id: "",
+    lead_source_id: "",
+    debt_consolidation_status_id: "",
+    consolidated_credit_status_id: "",
+  }}
+  onSubmit={() => {
+    // no-op: buttons handle submission separately
+  }}
+>
+  {({ handleSubmit, values, setFieldValue, setFieldTouched, isSubmitting }) => {
+    const norm = (v: any) => String(v ?? "").toLowerCase();
 
-                    // Pre-select display objects for the 3 dropdowns (optional if you pass data)
-                    const leadSourceDisplay = values.lead_source_id
-                      ? (leadSourceData || []).find(
-                          (o: any) => norm(o.id) === norm(values.lead_source_id)
-                        ) || null
-                      : null;
+    const leadSourceDisplay = values.lead_source_id
+      ? (leadSourceData || []).find(
+          (o: any) => norm(o.id) === norm(values.lead_source_id)
+        ) || null
+      : null;
 
-                    const debtDisplay = values.debt_consolidation_status_id
-                      ? (debtConsolidation || []).find(
-                          (o: any) =>
-                            norm(o.id) ===
-                            norm(values.debt_consolidation_status_id)
-                        ) || null
-                      : null;
+    const debtDisplay = values.debt_consolidation_status_id
+      ? (debtConsolidation || []).find(
+          (o: any) =>
+            norm(o.id) === norm(values.debt_consolidation_status_id)
+        ) || null
+      : null;
 
-                    const creditDisplay = values.consolidated_credit_status_id
-                      ? (consolidationData || []).find(
-                          (o: any) =>
-                            norm(o.id) ===
-                            norm(values.consolidated_credit_status_id)
-                        ) || null
-                      : null;
+    const creditDisplay = values.consolidated_credit_status_id
+      ? (consolidationData || []).find(
+          (o: any) =>
+            norm(o.id) === norm(values.consolidated_credit_status_id)
+        ) || null
+      : null;
 
-                    return (
-                      <>
-                        <form onSubmit={handleSubmit}>
-                          <div className="w-full">
-                            <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                              {/* First Name */}
-                              <div className="w-full">
-                                <p className="text-secondBlack  text-base leading-6 mb-2">
-                                  First Name
-                                </p>
-                                <Field
-                                  type="text"
-                                  name="first_name"
-                                  placeholder="Alexandre"
-                                  className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
-                                />
-                              </div>
+    // 🔹 handlers
+    const handleNotAssign = async () => {
+      console.log("NotAssign values:", values);
+       const clean = toCleanFilter(values);
+    if (Object.keys(clean).length === 0) {
+      toast.error("Please fill at least one field before submitting.");
+      return;
+    }
+    //console.log("FILTER VALUES (clean):", clean);
+    // e.g. setFilters(clean); fetchList(1, clean);
+    try {
+      const response = await AxiosProvider.post(
+        "/notassignedleads/filter?page=${page}&pageSize=${pageSize}",
+        values
+      );
+      console.log("NOT ASSIGN FILTERED VALUE", response.data.data.data);
+     setNotAssignData(response.data.data.data)
+      setFlyoutOpen(false);
+      //  toast.success("Lead is Creatted");
+      //setHitApi(!hitApi);
+      setClearFilter(true);
+    } catch (error: any) {
+      toast.error("Lead is not Creatted");
+    } finally {
+      setIsLoading(false);
+    }
+    };
 
-                              {/* Last Name */}
-                              <div className="w-full">
-                                <p className="text-secondBlack  text-base leading-6 mb-2">
-                                  Last Name
-                                </p>
-                                <Field
-                                  type="text"
-                                  name="last_name"
-                                  placeholder="Dumas"
-                                  className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
-                                />
-                              </div>
+    const handleAssign = async() => {
+      console.log("Assign values:", values);
+     const clean = toCleanFilter(values);
+    if (Object.keys(clean).length === 0) {
+      toast.error("Please fill at least one field before submitting.");
+      return;
+    }
+    //console.log("FILTER VALUES (clean):", clean);
+    // e.g. setFilters(clean); fetchList(1, clean);
+    try {
+      const response = await AxiosProvider.post(
+        "/leads/filter?page=${page}&pageSize=${pageSize}",
+        values
+      );
+      console.log("FILTERED VALUE", response.data.data.data);
+     setAssignLeadData(response.data.data.data)
+      setFlyoutOpen(false);
+      //  toast.success("Lead is Creatted");
+      //setHitApi(!hitApi);
+      setClearFilter(true);
+    } catch (error: any) {
+      toast.error("Lead is not Creatted");
+    } finally {
+      setIsLoading(false);
+    }
+    };
 
-                              {/* Full Name */}
-                              <div className="w-full">
-                                <p className="text-secondBlack  text-base leading-6 mb-2">
-                                  Full Name
-                                </p>
-                                <Field
-                                  type="text"
-                                  name="full_name"
-                                  placeholder="Alexandre Dumas"
-                                  className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
-                                />
-                              </div>
+    return (
+      <form onSubmit={handleSubmit}>
+        <div className="w-full">
+          <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            {/* First Name */}
+            <div className="w-full">
+              <p className="text-secondBlack  text-base leading-6 mb-2">
+                First Name
+              </p>
+              <Field
+                type="text"
+                name="first_name"
+                placeholder="Alexandre"
+                className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+              />
+            </div>
 
-                              {/* Email */}
-                              <div className="w-full">
-                                <p className="text-secondBlack  text-base leading-6 mb-2">
-                                  Email
-                                </p>
-                                <Field
-                                  type="email"
-                                  name="email"
-                                  placeholder="alexandre@example.com"
-                                  className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
-                                />
-                              </div>
+            {/* Last Name */}
+            <div className="w-full">
+              <p className="text-secondBlack  text-base leading-6 mb-2">
+                Last Name
+              </p>
+              <Field
+                type="text"
+                name="last_name"
+                placeholder="Dumas"
+                className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+              />
+            </div>
 
-                              {/* Phone */}
-                              <div className="w-full">
-                                <p className="text-secondBlack  text-base leading-6 mb-2">
-                                  Phone
-                                </p>
-                                <Field
-                                  type="text"
-                                  name="phone"
-                                  placeholder="+91 9XXXXXXXXX"
-                                  className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
-                                />
-                              </div>
+            {/* Full Name */}
+            <div className="w-full">
+              <p className="text-secondBlack  text-base leading-6 mb-2">
+                Full Name
+              </p>
+              <Field
+                type="text"
+                name="full_name"
+                placeholder="Alexandre Dumas"
+                className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+              />
+            </div>
 
-                              {/* Lead Number */}
-                              <div className="w-full">
-                                <p className="text-secondBlack  text-base leading-6 mb-2">
-                                  Lead Number
-                                </p>
-                                <Field
-                                  type="text"
-                                  name="lead_number"
-                                  placeholder="LN-000123"
-                                  className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
-                                />
-                              </div>
+            {/* Email */}
+            <div className="w-full">
+              <p className="text-secondBlack  text-base leading-6 mb-2">
+                Email
+              </p>
+              <Field
+                type="email"
+                name="email"
+                placeholder="alexandre@example.com"
+                className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+              />
+            </div>
 
-                              {/* City */}
-                              <div className="w-full">
-                                <p className="text-secondBlack  text-base leading-6 mb-2">
-                                  City
-                                </p>
-                                <Field
-                                  type="text"
-                                  name="city"
-                                  placeholder="Mumbai"
-                                  className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
-                                />
-                              </div>
+            {/* Phone */}
+            <div className="w-full">
+              <p className="text-secondBlack  text-base leading-6 mb-2">
+                Phone
+              </p>
+              <Field
+                type="text"
+                name="phone"
+                placeholder="+91 9XXXXXXXXX"
+                className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+              />
+            </div>
 
-                              {/* State */}
-                              <div className="w-full">
-                                <p className="text-secondBlack  text-base leading-6 mb-2">
-                                  State
-                                </p>
-                                <Field
-                                  type="text"
-                                  name="state"
-                                  placeholder="Maharashtra"
-                                  className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
-                                />
-                              </div>
+            {/* Lead Number */}
+            <div className="w-full">
+              <p className="text-secondBlack  text-base leading-6 mb-2">
+                Lead Number
+              </p>
+              <Field
+                type="text"
+                name="lead_number"
+                placeholder="LN-000123"
+                className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+              />
+            </div>
 
-                              {/* Agent ID (text; switch to <Select> if you have agent list) */}
-                              <div className="w-full">
-                                <p className="text-secondBlack  text-base leading-6 mb-2">
-                                  Agent ID
-                                </p>
-                                <Field
-                                  type="text"
-                                  name="agent_id"
-                                  placeholder="AGT-001"
-                                  className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
-                                />
-                              </div>
+            {/* City */}
+            <div className="w-full">
+              <p className="text-secondBlack  text-base leading-6 mb-2">
+                City
+              </p>
+              <Field
+                type="text"
+                name="city"
+                placeholder="Mumbai"
+                className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+              />
+            </div>
 
-                              {/* Lead Source */}
-                              <div className="w-full">
-                                <p className="text-secondBlack text-base leading-6 mb-2">
-                                  Lead Source
-                                </p>
-                                <Select
-                                  value={leadSourceDisplay}
-                                  onChange={(selected: any) =>
-                                    setFieldValue(
-                                      "lead_source_id",
-                                      selected ? selected.id : ""
-                                    )
-                                  }
-                                  onBlur={() =>
-                                    setFieldTouched("lead_source_id", true)
-                                  }
-                                  getOptionLabel={(opt: any) => opt.name}
-                                  getOptionValue={(opt: any) => String(opt.id)}
-                                  options={leadSourceData}
-                                  placeholder="Select Lead Source"
-                                  isClearable
-                                  classNames={{
-                                    control: ({ isFocused }: any) =>
-                                      `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
-                                        isFocused
-                                          ? "!border-primary-500"
-                                          : "!border-[#DFEAF2]"
-                                      }`,
-                                  }}
-                                  styles={{
-                                    menu: (base: any) => ({
-                                      ...base,
-                                      borderRadius: "4px",
-                                      boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
-                                      backgroundColor: "#fff",
-                                    }),
-                                    option: (
-                                      base: any,
-                                      { isFocused, isSelected }: any
-                                    ) => ({
-                                      ...base,
-                                      backgroundColor: isSelected
-                                        ? "var(--primary-500)"
-                                        : isFocused
-                                        ? "var(--primary-100)"
-                                        : "#fff",
-                                      color: isSelected ? "#fff" : "#333",
-                                      cursor: "pointer",
-                                    }),
-                                  }}
-                                />
-                              </div>
+            {/* State */}
+            <div className="w-full">
+              <p className="text-secondBlack  text-base leading-6 mb-2">
+                State
+              </p>
+              <Field
+                type="text"
+                name="state"
+                placeholder="Maharashtra"
+                className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+              />
+            </div>
 
-                              {/* Debt Consolidation Status */}
-                              <div className="w-full">
-                                <p className="text-secondBlack text-base leading-6 mb-2">
-                                  Debt Consolidation Status
-                                </p>
-                                <Select
-                                  value={debtDisplay}
-                                  onChange={(selected: any) =>
-                                    setFieldValue(
-                                      "debt_consolidation_status_id",
-                                      selected ? selected.id : ""
-                                    )
-                                  }
-                                  onBlur={() =>
-                                    setFieldTouched(
-                                      "debt_consolidation_status_id",
-                                      true
-                                    )
-                                  }
-                                  getOptionLabel={(opt: any) => opt.name}
-                                  getOptionValue={(opt: any) => String(opt.id)}
-                                  options={debtConsolidation}
-                                  placeholder="Select Debt Consolidation Status"
-                                  isClearable
-                                  classNames={{
-                                    control: ({ isFocused }: any) =>
-                                      `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
-                                        isFocused
-                                          ? "!border-primary-500"
-                                          : "!border-[#DFEAF2]"
-                                      }`,
-                                  }}
-                                  styles={{
-                                    menu: (base: any) => ({
-                                      ...base,
-                                      borderRadius: "4px",
-                                      boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
-                                      backgroundColor: "#fff",
-                                    }),
-                                    option: (
-                                      base: any,
-                                      { isFocused, isSelected }: any
-                                    ) => ({
-                                      ...base,
-                                      backgroundColor: isSelected
-                                        ? "var(--primary-500)"
-                                        : isFocused
-                                        ? "var(--primary-100)"
-                                        : "#fff",
-                                      color: isSelected ? "#fff" : "#333",
-                                      cursor: "pointer",
-                                    }),
-                                  }}
-                                />
-                              </div>
+            {/* Agent ID */}
+            <div className="w-full">
+              <p className="text-secondBlack  text-base leading-6 mb-2">
+                Agent ID
+              </p>
+              <Field
+                type="text"
+                name="agent_id"
+                placeholder="AGT-001"
+                className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+              />
+            </div>
 
-                              {/* Consolidated Credit Status */}
-                              <div className="w-full">
-                                <p className="text-secondBlack text-base leading-6 mb-2">
-                                  Consolidated Credit Status
-                                </p>
-                                <Select
-                                  value={creditDisplay}
-                                  onChange={(selected: any) =>
-                                    setFieldValue(
-                                      "consolidated_credit_status_id",
-                                      selected ? selected.id : ""
-                                    )
-                                  }
-                                  onBlur={() =>
-                                    setFieldTouched(
-                                      "consolidated_credit_status_id",
-                                      true
-                                    )
-                                  }
-                                  getOptionLabel={(opt: any) => opt.name}
-                                  getOptionValue={(opt: any) => String(opt.id)}
-                                  options={consolidationData}
-                                  placeholder="Select Consolidated Credit Status"
-                                  isClearable
-                                  classNames={{
-                                    control: ({ isFocused }: any) =>
-                                      `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
-                                        isFocused
-                                          ? "!border-primary-500"
-                                          : "!border-[#DFEAF2]"
-                                      }`,
-                                  }}
-                                  styles={{
-                                    menu: (base: any) => ({
-                                      ...base,
-                                      borderRadius: "4px",
-                                      boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
-                                      backgroundColor: "#fff",
-                                    }),
-                                    option: (
-                                      base: any,
-                                      { isFocused, isSelected }: any
-                                    ) => ({
-                                      ...base,
-                                      backgroundColor: isSelected
-                                        ? "var(--primary-500)"
-                                        : isFocused
-                                        ? "var(--primary-100)"
-                                        : "#fff",
-                                      color: isSelected ? "#fff" : "#333",
-                                      cursor: "pointer",
-                                    }),
-                                  }}
-                                />
-                              </div>
-                            </div>
-                          </div>
-
-                          <button
-                            type="submit"
-                            disabled={isSubmitting}
-                            className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
-                          >
-                            Filter Leads
-                          </button>
-                        </form>
-                      </>
-                    );
-                  })()
+            {/* Lead Source */}
+            <div className="w-full">
+              <p className="text-secondBlack text-base leading-6 mb-2">
+                Lead Source
+              </p>
+              <Select
+                value={leadSourceDisplay}
+                onChange={(selected: any) =>
+                  setFieldValue("lead_source_id", selected ? selected.id : "")
                 }
-              </Formik>
+                onBlur={() => setFieldTouched("lead_source_id", true)}
+                getOptionLabel={(opt: any) => opt.name}
+                getOptionValue={(opt: any) => String(opt.id)}
+                options={leadSourceData}
+                placeholder="Select Lead Source"
+                isClearable
+                classNames={{
+                  control: ({ isFocused }: any) =>
+                    `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+                      isFocused ? "!border-primary-500" : "!border-[#DFEAF2]"
+                    }`,
+                }}
+                styles={{
+                  menu: (base: any) => ({
+                    ...base,
+                    borderRadius: "4px",
+                    boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+                    backgroundColor: "#fff",
+                  }),
+                  option: (base: any, { isFocused, isSelected }: any) => ({
+                    ...base,
+                    backgroundColor: isSelected
+                      ? "var(--primary-500)"
+                      : isFocused
+                      ? "var(--primary-100)"
+                      : "#fff",
+                    color: isSelected ? "#fff" : "#333",
+                    cursor: "pointer",
+                  }),
+                }}
+              />
+            </div>
+
+            {/* Debt Consolidation Status */}
+            <div className="w-full">
+              <p className="text-secondBlack text-base leading-6 mb-2">
+                Debt Consolidation Status
+              </p>
+              <Select
+                value={debtDisplay}
+                onChange={(selected: any) =>
+                  setFieldValue(
+                    "debt_consolidation_status_id",
+                    selected ? selected.id : ""
+                  )
+                }
+                onBlur={() =>
+                  setFieldTouched("debt_consolidation_status_id", true)
+                }
+                getOptionLabel={(opt: any) => opt.name}
+                getOptionValue={(opt: any) => String(opt.id)}
+                options={debtConsolidation}
+                placeholder="Select Debt Consolidation Status"
+                isClearable
+                classNames={{
+                  control: ({ isFocused }: any) =>
+                    `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+                      isFocused ? "!border-primary-500" : "!border-[#DFEAF2]"
+                    }`,
+                }}
+                styles={{
+                  menu: (base: any) => ({
+                    ...base,
+                    borderRadius: "4px",
+                    boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+                    backgroundColor: "#fff",
+                  }),
+                  option: (base: any, { isFocused, isSelected }: any) => ({
+                    ...base,
+                    backgroundColor: isSelected
+                      ? "var(--primary-500)"
+                      : isFocused
+                      ? "var(--primary-100)"
+                      : "#fff",
+                    color: isSelected ? "#fff" : "#333",
+                    cursor: "pointer",
+                  }),
+                }}
+              />
+            </div>
+
+            {/* Consolidated Credit Status */}
+            <div className="w-full">
+              <p className="text-secondBlack text-base leading-6 mb-2">
+                Consolidated Credit Status
+              </p>
+              <Select
+                value={creditDisplay}
+                onChange={(selected: any) =>
+                  setFieldValue(
+                    "consolidated_credit_status_id",
+                    selected ? selected.id : ""
+                  )
+                }
+                onBlur={() =>
+                  setFieldTouched("consolidated_credit_status_id", true)
+                }
+                getOptionLabel={(opt: any) => opt.name}
+                getOptionValue={(opt: any) => String(opt.id)}
+                options={consolidationData}
+                placeholder="Select Consolidated Credit Status"
+                isClearable
+                classNames={{
+                  control: ({ isFocused }: any) =>
+                    `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+                      isFocused ? "!border-primary-500" : "!border-[#DFEAF2]"
+                    }`,
+                }}
+                styles={{
+                  menu: (base: any) => ({
+                    ...base,
+                    borderRadius: "4px",
+                    boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+                    backgroundColor: "#fff",
+                  }),
+                  option: (base: any, { isFocused, isSelected }: any) => ({
+                    ...base,
+                    backgroundColor: isSelected
+                      ? "var(--primary-500)"
+                      : isFocused
+                      ? "var(--primary-100)"
+                      : "#fff",
+                    color: isSelected ? "#fff" : "#333",
+                    cursor: "pointer",
+                  }),
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className=" flex gap-2">
+          {userRole === "Admin" && 
+          (          <button
+            type="button"
+            disabled={isSubmitting}
+            onClick={handleNotAssign}
+            className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
+          >
+            Filter NotAssign leads
+          </button>)}
+
+          <button
+            type="button"
+            disabled={isSubmitting}
+            onClick={handleAssign}
+            className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
+          >
+            Filter Assign leads
+          </button>
+        </div>
+      </form>
+    );
+  }}
+</Formik>
+
 
               {/* { END FROM } */}
             </div>

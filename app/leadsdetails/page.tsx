@@ -181,6 +181,8 @@ export interface LeadDocument {
   storage_path: string; // e.g. "/uploads/doc/xxxx.png"
   is_image: boolean;
   created_at: string; // ISO datetime
+  url: string;
+  download: string;
 }
 export interface ActivityHistory {
   id: string;
@@ -289,6 +291,7 @@ export default function Home() {
  // console.log("fetched single lead data", fetchLeadActivityData);
   const [reloadKey, setReloadKey] = useState(0);
   const [docs, setDocs] = useState<LeadDocument[]>([]); // start empty
+  console.log("DDDDDDDDDDDDOOOOOOOOOOOOOOCCCCCCCCSSSSSS",docs)
   const [activityHistoryData, setActivityHistoryData] =
     useState<ActivityHistory>(null);
   const [isEditFirstLead, setIsEditFirstLead] = useState<boolean>(true);
@@ -606,7 +609,7 @@ export default function Home() {
         lead_id: leadId,
       });
 
-      // console.log("lead document data", res.data.data.data);
+   console.log("lead document data", res.data.data.data);
       setDocs(res.data.data.data); // <-- if you want to store in state
     } catch (error: any) {
       console.error("Error fetching lead:", error);
@@ -630,30 +633,30 @@ export default function Home() {
   };
   const fileExt = (name: string) =>
     (name?.split(".").pop() || "").toUpperCase();
+// ----------------- DOWNLOAD IMAGE
 
-const downLoadDocument = async (id: string) => {
-  console.log("document clicked id", id);
-  try {
-    const res = await AxiosProvider.post("/leads/documents/geturl", { id });
-    const fileUrl: string | undefined = res?.data?.data?.url;
-
-    if (fileUrl) {
-      const link = window.document.createElement("a");
-      link.href = fileUrl;
-
-      const fileName = fileUrl.split("/").pop()?.split("?")[0] || "document.jpg";
-      link.setAttribute("download", fileName);
-
-      window.document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } else {
-      console.error("No file URL found in response");
-    }
-  } catch (error) {
-    console.error("Error fetching file:", error);
+const downloadDocument = (src: string | Blob, fileName = "image.jpg") => {
+  if (typeof src === "string") {
+    // case 1: URL string
+    const a = window.document.createElement("a");
+    a.href = src;
+    a.download = fileName;
+    window.document.body.appendChild(a);
+    a.click();
+    a.remove();
+  } else {
+    // case 2: Blob object
+    const url = URL.createObjectURL(src);
+    const a = window.document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    window.document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
   }
 };
+// -----------------------END DOWNLOAD IMAGE
 
 
   const deleteActivityHistory = async (deleteId: ActivityHistory) => {
@@ -906,18 +909,24 @@ const downLoadDocument = async (id: string) => {
                       </p>
                     </div>
 
-                    <a
-                      onClick={() => downLoadDocument(d.id)}
+                    <a 
+                    href={d.download} download
+                 
+                 //  href={`${d.url}?download=${d.download}`}
+                 //  onClick={() => downloadDocument(d.url,"forest.jpg")}
                       className="py-2 px-3 border border-[#DFEAF2] rounded text-sm cursor-pointer hover:underline"
+                      
                     >
                       Download
                     </a>
+
                    
                     <a
                       onClick={() => deleteDocument(d)}
                       className="py-2 px-3 border border-[#DFEAF2] rounded text-sm cursor-pointer hover:underline"
                     >
                       Delete
+                   
                     </a>
                   </div>
                 </div>
