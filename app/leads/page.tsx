@@ -642,7 +642,7 @@ export default function Home() {
   const tabs = [
     
     {
-      label: "NotAssign User",
+      label: "Unassign Leads",
       content: (
         <>
           {/* Tab content 3 */}
@@ -781,7 +781,7 @@ export default function Home() {
                         {/* Action */}
                         <td className="px-3 py-2 border border-tableBorder md:table-cell">
                           <div className="flex gap-1 md:gap-2 justify-center md:justify-start">
-                            <button
+                            {/* <button
                               onClick={() => test(item.id)}
                               className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"
                             >
@@ -789,7 +789,7 @@ export default function Home() {
                               <span className="text-xs sm:text-sm text-white hover:text-white">
                                 View Details
                               </span>
-                            </button>
+                            </button> */}
                             <button
                               onClick={() => editLead(item)}
                               className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"
@@ -835,7 +835,7 @@ export default function Home() {
       // End Tab content 2
     },
     {
-      label: "Assign User",
+      label: "Assign Leads",
       content: (
         <>
           {/* Tab content 3 */}

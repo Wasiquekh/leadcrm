@@ -1817,7 +1817,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
                 Create Lead Activity
               </p>
               <IoCloseOutline
-                onClick={toggleFilterFlyout}
+                onClick={()=>  closeFlyOut()}
                 className=" h-8 w-8 border border-[#E7E7E7] text-secondBlack rounded cursor-pointer"
               />
             </div>
@@ -1848,141 +1848,138 @@ const getIdFromName = (list: any[], name?: string | null) => {
                 <form onSubmit={handleSubmit} noValidate>
                   {/* GRID: 2 inputs per row */}
                   <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 md:justify-between mb-4 sm:mb-6">
-                    {/* Conversation (required) */}
-                    <div className="w-full relative">
-                      <p className="text-secondBlack font-medium text-base leading-6 mb-2">
-                        Conversation
-                      </p>
-                      <input
-                        type="text"
-                        name="conversation"
-                        value={values.conversation}
-                        onChange={handleChange}
-                        onBlur={() => setFieldTouched("conversation", true)}
-                        placeholder="Enter conversation"
-                        className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
-                      />
-                      {touched.conversation && (errors as any).conversation ? (
-                        <p className="text-red-500 absolute top-[85px] text-xs">
-                          {(errors as any).conversation}
-                        </p>
-                      ) : null}
-                    </div>
+                {/* ===== Row 1: Disposition + Agent (side-by-side) ===== */}
 
-                    {/* Disposition (required) */}
-                    <div className="w-full relative">
-                      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
-                        Disposition
-                      </p>
-                      <Select
-                        value={
-                          (disposition || []).find(
-                            (opt: any) => opt.id === values.disposition_id
-                          ) || null
-                        }
-                        onChange={(selectedOption: any) =>
-                          setFieldValue(
-                            "disposition_id",
-                            selectedOption ? selectedOption.id : ""
-                          )
-                        }
-                        onBlur={() => setFieldTouched("disposition_id", true)}
-                        getOptionLabel={(opt: any) => opt.name}
-                        getOptionValue={(opt: any) => opt.id}
-                        options={disposition}
-                        placeholder="Select Disposition"
-                        isClearable
-                        classNames={{
-                          control: ({ isFocused }) =>
-                            `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
-                              isFocused
-                                ? "!border-primary-500"
-                                : "!border-[#DFEAF2]"
-                            }`,
-                        }}
-                        styles={{
-                          menu: (base) => ({
-                            ...base,
-                            borderRadius: "4px",
-                            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-                            backgroundColor: "#fff",
-                          }),
-                          option: (base, { isFocused, isSelected }) => ({
-                            ...base,
-                            backgroundColor: isSelected
-                              ? "var(--primary-500)"
-                              : isFocused
-                              ? "var(--primary-100)"
-                              : "#fff",
-                            color: isSelected ? "#fff" : "#333",
-                            cursor: "pointer",
-                          }),
-                        }}
-                      />
-                      {touched.disposition_id &&
-                      (errors as any).disposition_id ? (
-                        <p className="text-red-500 absolute top-[85px] text-xs">
-                          {(errors as any).disposition_id}
-                        </p>
-                      ) : null}
-                    </div>
+  {/* Disposition (required) */}
+  <div className="w-full relative">
+    <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+      Disposition
+    </p>
+    <Select
+      value={
+        (disposition || []).find(
+          (opt: any) => opt.id === values.disposition_id
+        ) || null
+      }
+      onChange={(selectedOption: any) =>
+        setFieldValue(
+          "disposition_id",
+          selectedOption ? selectedOption.id : ""
+        )
+      }
+      onBlur={() => setFieldTouched("disposition_id", true)}
+      getOptionLabel={(opt: any) => opt.name}
+      getOptionValue={(opt: any) => opt.id}
+      options={disposition}
+      placeholder="Select Disposition"
+      isClearable
+      classNames={{
+        control: ({ isFocused }) =>
+          `onHoverBoxShadow !w/full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+            isFocused ? "!border-primary-500" : "!border-[#DFEAF2]"
+          }`,
+      }}
+      styles={{
+        menu: (base) => ({
+          ...base,
+          borderRadius: "4px",
+          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+          backgroundColor: "#fff",
+        }),
+        option: (base, { isFocused, isSelected }) => ({
+          ...base,
+          backgroundColor: isSelected
+            ? "var(--primary-500)"
+            : isFocused
+            ? "var(--primary-100)"
+            : "#fff",
+          color: isSelected ? "#fff" : "#333",
+          cursor: "pointer",
+        }),
+      }}
+    />
+    {touched.disposition_id && (errors as any).disposition_id ? (
+      <p className="text-red-500 absolute top-[85px] text-xs">
+        {(errors as any).disposition_id}
+      </p>
+    ) : null}
+  </div>
 
-                    {/* Agent  */}
-                    <div className="w-full relative">
-                      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
-                        Agent
-                      </p>
-                      <Select
-                        value={
-                          (agent || []).find(
-                            (opt: any) => opt.id === values.agent_id
-                          ) || null
-                        }
-                        onChange={(selectedOption: any) =>
-                          setFieldValue(
-                            "agent_id",
-                            selectedOption ? selectedOption.id : ""
-                          )
-                        }
-                        onBlur={() => setFieldTouched("agent_id", true)}
-                        getOptionLabel={(opt: any) => opt.name}
-                        getOptionValue={(opt: any) => opt.id}
-                        options={agent}
-                        placeholder="Select Agent"
-                        isClearable
-                        classNames={{
-                          control: ({ isFocused }) =>
-                            `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
-                              isFocused
-                                ? "!border-primary-500"
-                                : "!border-[#DFEAF2]"
-                            }`,
-                        }}
-                        styles={{
-                          menu: (base) => ({
-                            ...base,
-                            borderRadius: "4px",
-                            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-                            backgroundColor: "#fff",
-                          }),
-                          option: (base, { isFocused, isSelected }) => ({
-                            ...base,
-                            backgroundColor: isSelected
-                              ? "var(--primary-500)"
-                              : isFocused
-                              ? "var(--primary-100)"
-                              : "#fff",
-                            color: isSelected ? "#fff" : "#333",
-                            cursor: "pointer",
-                          }),
-                        }}
-                      />
-                      {touched.agent_id && (errors as any).agent_id ? (
-                        <p className="text-red-500 absolute top-[85px] text-xs">
-                          {(errors as any).agent_id}
-                        </p>
-                      ) : null}
-                    </div>
+  {/* Agent */}
+  <div className="w-full relative">
+    <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+      Agent
+    </p>
+    <Select
+      value={
+        (agent || []).find((opt: any) => opt.id === values.agent_id) || null
+      }
+      onChange={(selectedOption: any) =>
+        setFieldValue("agent_id", selectedOption ? selectedOption.id : "")
+      }
+      onBlur={() => setFieldTouched("agent_id", true)}
+      getOptionLabel={(opt: any) => opt.name}
+      getOptionValue={(opt: any) => opt.id}
+      options={agent}
+      placeholder="Select Agent"
+      isClearable
+      classNames={{
+        control: ({ isFocused }) =>
+          `onHoverBoxShadow !w/full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+            isFocused ? "!border-primary-500" : "!border-[#DFEAF2]"
+          }`,
+      }}
+      styles={{
+        menu: (base) => ({
+          ...base,
+          borderRadius: "4px",
+          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+          backgroundColor: "#fff",
+        }),
+        option: (base, { isFocused, isSelected }) => ({
+          ...base,
+          backgroundColor: isSelected
+            ? "var(--primary-500)"
+            : isFocused
+            ? "var(--primary-100)"
+            : "#fff",
+          color: isSelected ? "#fff" : "#333",
+          cursor: "pointer",
+        }),
+      }}
+    />
+    {touched.agent_id && (errors as any).agent_id ? (
+      <p className="text-red-500 absolute top-[85px] text-xs">
+        {(errors as any).agent_id}
+      </p>
+    ) : null}
+  </div>
+
+
+{/* ===== Row 2: Conversation (full width textarea) ===== */}
+<div className="w-full relative mt-4 col-span-2">
+  <p className="text-secondBlack font-medium text-base leading-6 mb-2">
+    Conversation
+  </p>
+  <textarea
+    name="conversation"
+    value={values.conversation}
+    onChange={handleChange}
+    onBlur={() => setFieldTouched("conversation", true)}
+    placeholder="Enter conversation"
+    className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+    rows={5} // height without changing your classes
+  />
+  {touched.conversation && (errors as any).conversation ? (
+    <p className="text-red-500 absolute top-[85px] text-xs">
+      {(errors as any).conversation}
+    </p>
+  ) : null}
+</div>
+
+                 
+
+                   
                   </div>
 
                   {/* Buttons */}
@@ -2010,7 +2007,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
                 Create Lead Task
               </p>
               <IoCloseOutline
-                onClick={toggleFilterFlyout}
+                onClick={()=>  closeFlyOut()}
                 className=" h-8 w-8 border border-[#E7E7E7] text-secondBlack rounded cursor-pointer"
               />
             </div>
@@ -2270,7 +2267,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
                 Create Document
               </p>
               <IoCloseOutline
-                onClick={toggleFilterFlyout}
+                onClick={()=>  closeFlyOut()}
                 className="h-8 w-8 border border-[#E7E7E7] text-secondBlack rounded cursor-pointer"
               />
             </div>
@@ -2327,7 +2324,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
                 Update Lead Activity
               </p>
               <IoCloseOutline
-                onClick={toggleFilterFlyout}
+              onClick={()=>  closeFlyOut()}
                 className=" h-8 w-8 border border-[#E7E7E7] text-secondBlack rounded cursor-pointer"
               />
             </div>
@@ -2580,7 +2577,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
                 Filter Activity
               </p>
               <IoCloseOutline
-                onClick={toggleFilterFlyout}
+               onClick={()=>  closeFlyOut()}
                 className="h-8 w-8 border border-[#E7E7E7] text-secondBlack rounded cursor-pointer"
               />
             </div>
@@ -2874,7 +2871,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
                 Filter Task
               </p>
               <IoCloseOutline
-                onClick={toggleFilterFlyout}
+                onClick={()=>  closeFlyOut()}
                 className="h-8 w-8 border border-[#E7E7E7] text-secondBlack rounded cursor-pointer"
               />
             </div>
@@ -3258,7 +3255,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
                 Filter Document
               </p>
               <IoCloseOutline
-                onClick={toggleFilterFlyout}
+               onClick={()=>  closeFlyOut()}
                 className="h-8 w-8 border border-[#E7E7E7] text-secondBlack rounded cursor-pointer"
               />
             </div>
