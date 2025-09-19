@@ -9,8 +9,8 @@ import { usePathname } from "next/navigation";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Orizon",
-  description: "CRM",
+  title: "Lead CRM",
+  description: "",
 };
 
 // Client-only chunks
