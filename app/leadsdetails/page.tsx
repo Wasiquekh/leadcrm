@@ -631,33 +631,16 @@ export default function Home() {
   const fileExt = (name: string) =>
     (name?.split(".").pop() || "").toUpperCase();
 
-const downLoadDocument = async (id: string) => {
-  console.log("document clicked id", id);
-  try {
-    const res = await AxiosProvider.post("/leads/documents/geturl", { id });
-    const fileUrl: string | undefined = res?.data?.data?.url;
-
-    if (fileUrl) {
-      // Create a temporary <a> element
-      const link = document.createElement("a");
-      link.href = fileUrl;
-
-      // Extract file name from the URL (or set a default)
-      const fileName = fileUrl.split("/").pop()?.split("?")[0] || "document.jpg";
-      link.setAttribute("download", fileName);
-
-      // Append, trigger click, and clean up
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } else {
-      console.error("No file URL found in response");
+  const downLoadDocument = async (id: string) => {
+    console.log("document clicked id",id)
+    try {
+      const res = await AxiosProvider.post("/leads/documents/geturl", { id });
+      console.log("DOWNLOAS IMAGE", res.data.data.url);
+     // const fileUrl: string | undefined = res?.data?.data?.fileUrl;
+    } catch (error) {
+      console.error("Error fetching file:", error);
     }
-  } catch (error) {
-    console.error("Error fetching file:", error);
-  }
-};
-
+  };
   const deleteActivityHistory = async (deleteId: ActivityHistory) => {
     const activityHistoryId = deleteId.id;
     console.log("ACTIVITY HISTORY DELETE ID", activityHistoryId);
