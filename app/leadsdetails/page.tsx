@@ -216,7 +216,27 @@ export interface DebtConsolidation {
   created_at: string;
   updated_at: string | null;
 }
-
+type CreateLead = {
+  id: string;
+  first_name: string;
+  last_name: string;
+  full_name?: string;
+  email: string;
+  phone: string;
+  address_line1: string;
+  address_line2?: string;
+  city: string;
+  state: string;
+  postal_code: string;
+  country: string;
+  lead_score?: number;
+  lead_quality?: string;
+  best_time_to_call?: string;
+  lead_source_id: string;
+  debt_consolidation_status_id: string;
+  whatsapp_number: string;
+  consolidated_credit_status_id?: string;
+};
 
 export default function Home() {
   const [isFlyoutFilterOpen, setFlyoutFilterOpen] = useState<boolean>(false);
@@ -611,15 +631,33 @@ export default function Home() {
   const fileExt = (name: string) =>
     (name?.split(".").pop() || "").toUpperCase();
 
-  const downLoadDocument = async (id: string) => {
-    try {
-      const res = await AxiosProvider.post("/leads/documents/geturl", { id });
-      console.log("DOWNLOAS IMAGE", res.data.data.fileUrl);
-      const fileUrl: string | undefined = res?.data?.data?.fileUrl;
-    } catch (error) {
-      console.error("Error fetching file:", error);
+const downLoadDocument = async (id: string) => {
+  console.log("document clicked id", id);
+  try {
+    const res = await AxiosProvider.post("/leads/documents/geturl", { id });
+    const fileUrl: string | undefined = res?.data?.data?.url;
+
+    if (fileUrl) {
+      // Create a temporary <a> element
+      const link = document.createElement("a");
+      link.href = fileUrl;
+
+      // Extract file name from the URL (or set a default)
+      const fileName = fileUrl.split("/").pop()?.split("?")[0] || "document.jpg";
+      link.setAttribute("download", fileName);
+
+      // Append, trigger click, and clean up
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } else {
+      console.error("No file URL found in response");
     }
-  };
+  } catch (error) {
+    console.error("Error fetching file:", error);
+  }
+};
+
   const deleteActivityHistory = async (deleteId: ActivityHistory) => {
     const activityHistoryId = deleteId.id;
     console.log("ACTIVITY HISTORY DELETE ID", activityHistoryId);
@@ -876,6 +914,7 @@ export default function Home() {
                     >
                       Download
                     </a>
+                   
                     <a
                       onClick={() => deleteDocument(d)}
                       className="py-2 px-3 border border-[#DFEAF2] rounded text-sm cursor-pointer hover:underline"
@@ -942,6 +981,16 @@ export default function Home() {
 
   const defaultStart = roundToNext5();
   const defaultEnd = addMinutes(defaultStart, 30); // still 30 min gap
+
+  // helpers (put inside the component)
+const findById = (list: any[], id: string | number) =>
+  list?.find((o: any) => String(o.id) === String(id)) || null;
+
+const getIdFromName = (list: any[], name?: string | null) => {
+  if (!name) return "";
+  const item = list?.find((o: any) => String(o.name) === String(name));
+  return item ? item.id : "";
+};
 
   return ( 
     <>
@@ -1429,7 +1478,291 @@ export default function Home() {
                     )
                     : 
                     // LEAD PROPERTIES EDIT FORM
-                    (<p>empty update form now</p>)}
+                    (
+                     <>
+                     <div className="w-full">
+  <Formik
+    enableReinitialize
+    initialValues={{
+      id:leadId,
+      agent_id: data?.agent?.id ?? "",
+      debt_consolidation_status_id:
+        data?.debt_consolidation_status_id ??
+        getIdFromName(debtConsolidation, data?.debt_consolidation_status) ??
+        "",
+      consolidated_credit_status_id:
+        data?.consolidated_credit_status_id ??
+        getIdFromName(consolidationData, data?.consolidated_credit_status) ??
+        "",
+      best_time_to_call: data?.best_time_to_call ?? "",
+      whatsapp_number: data?.whatsapp_number ?? "",
+    }}
+    validationSchema={Yup.object({
+      agent_id: Yup.string().nullable(),
+      debt_consolidation_status_id: Yup.string().nullable(),
+      consolidated_credit_status_id: Yup.string().nullable(),
+      best_time_to_call: Yup.string().trim().nullable(),
+      whatsapp_number: Yup.string().trim().nullable(),
+    })}
+    onSubmit={async (values) => {
+      console.log("Lead Properties (edit) submit:", values);
+
+      try {
+      await AxiosProvider.post("/leads/update", values);
+      toast.success("Lead is Updated");
+      setHitApi(!hitApi);
+    } catch (error: any) {
+      toast.error("Lead is not Updated");
+    }
+    }}
+  >
+    {({ setFieldValue, setFieldTouched, values, isSubmitting }) => {
+      const findById = (list: any[], id: string | number) =>
+        list?.find((o: any) => String(o.id) === String(id)) || null;
+
+      const agentValue = findById(agent, values.agent_id);
+      const debtConsValue = findById(
+        debtConsolidation,
+        values.debt_consolidation_status_id
+      );
+      const consValue = findById(
+        consolidationData,
+        values.consolidated_credit_status_id
+      );
+
+      return (
+        <Form>
+          <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+            <thead className="text-xs text-[#999999] bg-white">
+              <tr className="border border-tableBorder">
+                <th
+                  scope="col"
+                  className="px-3 py-3 md:p-3 border border-tableBorder font-semibold text-secondBlack text-base"
+                  colSpan={2}
+                >
+                  Lead Properties (Edit)
+                </th>
+                <th
+                  scope="col"
+                  onClick={() => setIsLeadPropertyEdit(!isleadPropertyEdit)}
+                  className="px-3 py-3 md:p-3 border border-tableBorder font-semibold text-secondBlack text-base cursor-pointer"
+                  colSpan={2}
+                >
+                  Close
+                </th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {/* Agent -> Dropdown */}
+              <tr className="border border-tableBorder bg-white hover:bg-primary-100 transition-colors">
+                <td className="text-sm text-[#78829D] py-4 px-4">Agent Name</td>
+                <td className="py-4 px-4">
+                  <Select
+                    value={agentValue}
+                    onChange={(selected: any) =>
+                      setFieldValue("agent_id", selected ? selected.id : "")
+                    }
+                    onBlur={() => setFieldTouched("agent_id", true)}
+                    getOptionLabel={(opt: any) => opt.name}
+                    getOptionValue={(opt: any) => String(opt.id)}
+                    options={agent}
+                    placeholder="Select Agent"
+                    isClearable
+                    classNames={{
+                      control: ({ isFocused }: any) =>
+                        `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+                          isFocused ? "!border-primary-500" : "!border-[#DFEAF2]"
+                        }`,
+                    }}
+                    styles={{
+                      menu: (base: any) => ({
+                        ...base,
+                        borderRadius: "4px",
+                        boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+                        backgroundColor: "#fff",
+                      }),
+                      option: (base: any, { isFocused, isSelected }: any) => ({
+                        ...base,
+                        backgroundColor: isSelected
+                          ? "var(--primary-500)"
+                          : isFocused
+                          ? "var(--primary-100)"
+                          : "#fff",
+                        color: isSelected ? "#fff" : "#333",
+                        cursor: "pointer",
+                      }),
+                    }}
+                  />
+                </td>
+              </tr>
+
+              {/* Best time to call -> Input */}
+              <tr className="border border-tableBorder bg-white hover:bg-primary-100 transition-colors">
+                <td className="text-sm text-[#78829D] py-4 px-4">
+                  Best time to call
+                </td>
+                <td className="py-4 px-4">
+                  <Field
+                    name="best_time_to_call"
+                    type="text"
+                    className="w-full border border-[#DFEAF2] rounded-[4px] text-sm px-3 py-2 focus:outline-none"
+                    placeholder="Enter best time to call"
+                  />
+                  <ErrorMessage
+                    name="best_time_to_call"
+                    component="p"
+                    className="text-red-500 text-xs mt-1"
+                  />
+                </td>
+              </tr>
+
+              {/* Debt Consolidation Status -> Dropdown */}
+              <tr className="border border-tableBorder bg-white hover:bg-primary-100 transition-colors">
+                <td className="text-sm text-[#78829D] py-4 px-4">
+                  Debt Consolidation Status
+                </td>
+                <td className="py-4 px-4">
+                  <Select
+                    value={debtConsValue}
+                    onChange={(selected: any) =>
+                      setFieldValue(
+                        "debt_consolidation_status_id",
+                        selected ? selected.id : ""
+                      )
+                    }
+                    onBlur={() =>
+                      setFieldTouched("debt_consolidation_status_id", true)
+                    }
+                    getOptionLabel={(opt: any) => opt.name}
+                    getOptionValue={(opt: any) => String(opt.id)}
+                    options={debtConsolidation}
+                    placeholder="Select Debt Consolidation Status"
+                    isClearable
+                    classNames={{
+                      control: ({ isFocused }: any) =>
+                        `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+                          isFocused ? "!border-primary-500" : "!border-[#DFEAF2]"
+                        }`,
+                    }}
+                    styles={{
+                      menu: (base: any) => ({
+                        ...base,
+                        borderRadius: "4px",
+                        boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+                        backgroundColor: "#fff",
+                      }),
+                      option: (base: any, { isFocused, isSelected }: any) => ({
+                        ...base,
+                        backgroundColor: isSelected
+                          ? "var(--primary-500)"
+                          : isFocused
+                          ? "var(--primary-100)"
+                          : "#fff",
+                        color: isSelected ? "#fff" : "#333",
+                        cursor: "pointer",
+                      }),
+                    }}
+                  />
+                </td>
+              </tr>
+
+              {/* Consolidation Status -> Dropdown */}
+              <tr className="border border-tableBorder bg-white hover:bg-primary-100 transition-colors">
+                <td className="text-sm text-[#78829D] py-4 px-4">
+                  Consolidation Status
+                </td>
+                <td className="py-4 px-4">
+                  <Select
+                    value={consValue}
+                    onChange={(selected: any) =>
+                      setFieldValue(
+                        "consolidated_credit_status_id",
+                        selected ? selected.id : ""
+                      )
+                    }
+                    onBlur={() =>
+                      setFieldTouched("consolidated_credit_status_id", true)
+                    }
+                    getOptionLabel={(opt: any) => opt.name}
+                    getOptionValue={(opt: any) => String(opt.id)}
+                    options={consolidationData}
+                    placeholder="Select Consolidation Status"
+                    isClearable
+                    classNames={{
+                      control: ({ isFocused }: any) =>
+                        `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+                          isFocused ? "!border-primary-500" : "!border-[#DFEAF2]"
+                        }`,
+                    }}
+                    styles={{
+                      menu: (base: any) => ({
+                        ...base,
+                        borderRadius: "4px",
+                        boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+                        backgroundColor: "#fff",
+                      }),
+                      option: (base: any, { isFocused, isSelected }: any) => ({
+                        ...base,
+                        backgroundColor: isSelected
+                          ? "var(--primary-500)"
+                          : isFocused
+                          ? "var(--primary-100)"
+                          : "#fff",
+                        color: isSelected ? "#fff" : "#333",
+                        cursor: "pointer",
+                      }),
+                    }}
+                  />
+                </td>
+              </tr>
+
+              {/* WhatsApp -> Input */}
+              <tr className="border border-tableBorder bg-white hover:bg-primary-100 transition-colors">
+                <td className="text-sm text-[#78829D] py-4 px-4">WHATSAPP</td>
+                <td className="py-4 px-4">
+                  <Field
+                    name="whatsapp_number"
+                    type="text"
+                    className="w-full border border-[#DFEAF2] rounded-[4px] text-sm px-3 py-2 focus:outline-none"
+                    placeholder="Enter WhatsApp number"
+                  />
+                  <ErrorMessage
+                    name="whatsapp_number"
+                    component="p"
+                    className="text-red-500 text-xs mt-1"
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          {/* Buttons */}
+          <div className="flex items-center justify-end gap-3 pt-4">
+            <button
+              type="button"
+              onClick={() => setIsLeadPropertyEdit(false)}
+              className="px-4 py-2 rounded-[4px] border border-[#DFEAF2] text-secondBlack text-sm font-medium bg-white"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-4 py-2 rounded-[4px] bg-primary-600 text-white text-sm font-medium disabled:opacity-60"
+            >
+              {isSubmitting ? "Saving..." : "Save"}
+            </button>
+          </div>
+        </Form>
+      );
+    }}
+  </Formik>
+
+</div>
+                     </>
+                    )
+                    }
                   </div>
                   <div className=" md:flex relative w-full">
                     <Tabs tabs={tabs} />
