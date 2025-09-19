@@ -130,7 +130,7 @@ const userEmail = storage.getUserEmail();
           className="mx-auto mb-5"
         />
         <p className="font-bold text-lg sm:text-base leading-normal text-center text-black mb-2">
-          Authenticate your Account
+          Verify your email
         </p>
         {qrCode && (
           <Image
@@ -142,8 +142,7 @@ const userEmail = storage.getUserEmail();
           />
         )}
         <p className="text-[#232323] text-base leading-[26px] text-center mb-10 sm:mb-14">
-          Please confirm your account by entering the authentication number sent
-          to your authenticator app
+          We&apos;ve sent you a one-time password (OTP). Please enter it below to confirm your account.
         </p>
         <form onSubmit={handleSubmit} className="w-full">
           <div>
