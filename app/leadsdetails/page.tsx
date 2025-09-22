@@ -1192,17 +1192,17 @@ const getIdFromName = (list: any[], name?: string | null) => {
     }}
   >
     {({ isSubmitting }) => (
-      <Form className="space-y-4">
+      <Form className="w-full rounded bg-primary-600 px-4 py-6 mb-6">
         {/* Name row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-white">
           <div>
-            <label className="block text-sm font-medium text-secondBlack mb-1">
-              First Name *
+            <label className="block text-sm font-medium text-white mb-1">
+              First Name <span className=" text-red-400">*</span>
             </label>
             <Field
               name="first_name"
               type="text"
-              className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
+              className="w-full border-b border-white pl-0.5 text-sm leading-6 px-0 py-0 focus:outline-none bg-transparent mb-2"
               placeholder="Enter first name"
             />
             <ErrorMessage
@@ -1212,13 +1212,13 @@ const getIdFromName = (list: any[], name?: string | null) => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-secondBlack mb-1">
-              Last Name *
+            <label className="block text-sm font-medium text-white mb-1">
+              Last Name <span className=" text-red-400">*</span>
             </label>
             <Field
               name="last_name"
               type="text"
-              className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
+              className="w-full border-b border-white pl-0.5 text-sm leading-6 px-0 py-0 focus:outline-none bg-transparent mb-2"
               placeholder="Enter last name"
             />
             <ErrorMessage
@@ -1232,13 +1232,13 @@ const getIdFromName = (list: any[], name?: string | null) => {
         {/* Email / Phone */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-secondBlack mb-1">
-              Email *
+            <label className="block text-sm font-medium text-white mb-1">
+              Email <span className=" text-red-400">*</span>
             </label>
             <Field
               name="email"
               type="email"
-              className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
+              className="w-full border-b border-white pl-0.5 text-sm leading-6 px-0 py-0 focus:outline-none bg-transparent text-white mb-2"
               placeholder="name@example.com"
             />
             <ErrorMessage
@@ -1248,13 +1248,13 @@ const getIdFromName = (list: any[], name?: string | null) => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-secondBlack mb-1">
-              Mobile *
+            <label className="block text-sm font-medium text-white mb-1">
+              Mobile <span className=" text-red-400">*</span>
             </label>
             <Field
               name="phone"
               type="text"
-              className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
+              className="w-full border-b border-white pl-0.5 text-sm leading-6 px-0 py-0 focus:outline-none bg-transparent text-white mb-2"
               placeholder="Enter mobile number"
             />
             <ErrorMessage
@@ -1267,13 +1267,13 @@ const getIdFromName = (list: any[], name?: string | null) => {
 
         {/* Country */}
         <div>
-          <label className="block text-sm font-medium text-secondBlack mb-1">
+          <label className="block text-sm font-medium text-white mb-1">
             Country
           </label>
           <Field
             name="country"
             type="text"
-            className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
+            className="w-full border-b border-white pl-0.5 text-sm leading-6 px-0 py-0 focus:outline-none bg-transparent text-white mb-2"
             placeholder="Country"
           />
           <ErrorMessage
@@ -1285,13 +1285,13 @@ const getIdFromName = (list: any[], name?: string | null) => {
 
         {/* Address lines */}
         <div>
-          <label className="block text-sm font-medium text-secondBlack mb-1">
+          <label className="block text-sm font-medium text-white mb-1">
             Address Line 1
           </label>
           <Field
             name="address_line1"
             type="text"
-            className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
+            className="w-full border-b border-white pl-0.5 text-sm leading-6 px-0 py-0 focus:outline-none bg-transparent text-white mb-2"
             placeholder="House / Street / Area"
           />
           <ErrorMessage
@@ -1301,13 +1301,13 @@ const getIdFromName = (list: any[], name?: string | null) => {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-secondBlack mb-1">
+          <label className="block text-sm font-medium text-white mb-1">
             Address Line 2
           </label>
           <Field
             name="address_line2"
             type="text"
-            className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
+            className="w-full border-b border-white pl-0.5 text-sm leading-6 px-0 py-0 focus:outline-none bg-transparent text-white mb-2"
             placeholder="Landmark / Apartment"
           />
           <ErrorMessage
@@ -1320,13 +1320,13 @@ const getIdFromName = (list: any[], name?: string | null) => {
         {/* City / State */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-secondBlack mb-1">
+            <label className="block text-sm font-medium text-white mb-1">
               City
             </label>
             <Field
               name="city"
               type="text"
-              className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
+              className="w-full border-b border-white pl-0.5 text-sm leading-6 px-0 py-0 focus:outline-none bg-transparent text-white mb-2"
               placeholder="City"
             />
             <ErrorMessage
@@ -1336,13 +1336,13 @@ const getIdFromName = (list: any[], name?: string | null) => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-secondBlack mb-1">
+            <label className="block text-sm font-medium text-white mb-1">
               State
             </label>
             <Field
               name="state"
               type="text"
-              className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
+              className="w-full border-b border-white pl-0.5 text-sm leading-6 px-0 py-0 focus:outline-none bg-transparent text-white mb-2"
               placeholder="State"
             />
             <ErrorMessage
@@ -1355,14 +1355,14 @@ const getIdFromName = (list: any[], name?: string | null) => {
 
         {/* ✅ Note field */}
         <div>
-          <label className="block text-sm font-medium text-secondBlack mb-1">
+          <label className="block text-sm font-medium text-white mb-1">
             Note
           </label>
           <Field
             as="textarea"
             name="note"
             rows={3}
-            className="w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-6 px-3 py-2 focus:outline-none"
+            className="w-full border-b border-white pl-0.5 text-sm leading-6 px-0 py-0 focus:outline-none bg-transparent text-white mb-2"
             placeholder="Enter notes here"
           />
           <ErrorMessage
@@ -1377,14 +1377,14 @@ const getIdFromName = (list: any[], name?: string | null) => {
           <button
             type="button"
             onClick={() => setIsEditFirstLead(true)}
-            className="px-4 py-2 rounded-[4px] border border-[#DFEAF2] text-secondBlack text-sm font-medium bg-white"
+            className="px-4 py-2 rounded-[4px] border border-[#DFEAF2] text-secondBlack text-sm font-medium bg-white mb-2"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="px-4 py-2 rounded-[4px] bg-primary-600 text-white text-sm font-medium disabled:opacity-60"
+            className="px-4 py-2 rounded-[4px] border border-[#DFEAF2] text-secondBlack text-sm font-medium bg-white mb-2 disabled:opacity-60"
           >
             {isSubmitting ? "Saving..." : "Save"}
           </button>

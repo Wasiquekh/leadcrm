@@ -161,7 +161,25 @@ export default function Home() {
  const [assignLeadData, setAssignLeadData] = useState<Lead[]>([]);
  console.log(" ASSIGN DATAAAAAAAAA",assignLeadData)
   //console.log("DATAAAAA", data);
-  const [page, setPage] = useState<number>(1);
+  // PAGINATION USE STATES
+    const [globalPageSize] = useState<number>(10)
+    const [unAssignPage, setUnAssignPage] = useState<number>(1);
+    const [unAssignTotalPages, setUsAssignTotalPages] = useState<number>(1)
+
+    const [assignPage, setAssignPage] = useState<number>(1);
+    const [assignTotalPages, setassignTotalPages] = useState<number>(1)
+
+    const [UnAssignPageFilter, setUnAssignPageFilter] = useState<number>(1);
+    const [UnAssignTotalPagesFilter, setUnAssignTotalPagesFilter] = useState<number>(1)
+
+    const [assignPageFilter, setAssignPageFilter] = useState<number>(1);
+    const [assignTotalPagesFilter, setAssignTotalPagesFilter] = useState<number>(1)
+
+    const [unAssignFilterPagination, setUnAssignFilterPagination] = useState<boolean>(false)
+    const [assignFilterPagination, setAssignFilterPagination] = useState<boolean>(false)
+
+    // END PAGINATION USE STATES
+
   const [filterPage, setFilterPage] = useState<number>(1);
   const [pageSize] = useState<number>(10);
   const [totalPages, setTotalPages] = useState<number>(1);
@@ -401,15 +419,15 @@ export default function Home() {
     setIsAgent(true);
   };
 
-  const notAssignfetchData = async () => {
+  const unAssignfetchData = async () => {
     setIsLoading(true);
     // setIsFilter(false);
     try {
       const response = await AxiosProvider.get(
-        `/leads/notassigned?page=${page}&pageSize=${pageSize}`
+        `/leads/notassigned?page=${unAssignPage}&pageSize=${globalPageSize}`
       );
       // console.log("KKKKKKKKKKKKKKKKK", response.data.data.data);
-      setTotalPages(response.data.data.pagination.totalPages);
+      setUsAssignTotalPages(response.data.data.pagination.totalPages);
       const result = response.data.data.data;
       // console.log("ALL CRM USER", result);
       setNotAssignData(result);
@@ -421,37 +439,31 @@ export default function Home() {
   };
 
   useEffect(() => {
-    notAssignfetchData();
-  }, [page, hitApi]);
+    unAssignfetchData();
+  }, [unAssignPage, hitApi]);
 
     const assignfetchData = async () => {
-    setIsLoading(true);
+   // setIsLoading(true);
     // setIsFilter(false);
     try {
       const response = await AxiosProvider.get(
-        `/leads/assigned?page=${page}&pageSize=${pageSize}`
+        `/leads/assigned?page=${assignPage}&pageSize=${globalPageSize}`
       );
       // console.log("KKKKKKKKKKKKKKKKK", response.data.data.data);
-      setTotalPages(response.data.data.pagination.totalPages);
+      setassignTotalPages(response.data.data.pagination.totalPages);
       const result = response.data.data.data;
       // console.log("ALL CRM USER", result);
       setAssignLeadData(result);
     } catch (error: any) {
       setIsError(true);
-    } finally {
-      setIsLoading(false);
     }
   };
 
   useEffect(() => {
     assignfetchData();
-  }, [page, hitApi]);
+  }, [assignPage, hitApi]);
 
-  const handlePageChange = (newPage: number) => {
-    if (newPage > 0 && newPage <= totalPages) {
-      setPage(newPage);
-    }
-  };
+
   const leadSource = async () => {
     try {
       const response = await AxiosProvider.get("/leadsources");
@@ -618,7 +630,35 @@ export default function Home() {
   const clickedFilterClear = () => {
     setClearFilter(false);
     setHitApi(!hitApi);
+       setUnAssignFilterPagination(false)
+    setAssignFilterPagination(false)
+    
   };
+  // PAGINATION HANDLE CHANGES
+
+      const handleUnAssignPagination = (newPage: number) => {
+      
+    if (newPage > 0 && newPage <= unAssignTotalPages) {
+      setUnAssignPage(newPage);
+    }
+  };
+        const handleUnAssignPaginationFilter = (newPage: number) => {
+    if (newPage > 0 && newPage <= UnAssignTotalPagesFilter) {
+      setUnAssignPageFilter(newPage);
+    }
+  };
+
+      const handleAssignPagination = (newPage: number) => {
+    if (newPage > 0 && newPage <= assignTotalPages) {
+      setAssignPage(newPage);
+    }
+  };
+      const handleAssignPaginationFilter = (newPage: number) => {
+    if (newPage > 0 && newPage <= assignTotalPages) {
+      setAssignPage(newPage);
+    }
+  };
+    // END PAGINATION HANDLE CHANGES
   if (isLoading) {
     return (
       <div className="h-screen flex flex-col gap-5 justify-center items-center">
@@ -828,8 +868,55 @@ export default function Home() {
                   )}
                 </tbody>
               </table>
-
           {/* End Tab content 3 */}
+          {/* UNASSIGN PAGINATION */}
+          {unAssignFilterPagination ? 
+     (   
+          <div className="flex justify-center items-center my-10 relative">
+              <button
+                onClick={() => handleUnAssignPaginationFilter(UnAssignPageFilter - 1)}
+                disabled={UnAssignPageFilter === 1}
+                className="px-2 py-2 mx-2 border rounded bg-primary-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <HiChevronDoubleLeft className=" w-6 h-auto" />
+              </button>
+              <span className="text-[#232323] text-sm">
+                Page {UnAssignPageFilter} of {UnAssignTotalPagesFilter}
+              </span>
+              <button
+                 onClick={() => handleUnAssignPaginationFilter(UnAssignPageFilter + 1)}
+                disabled={UnAssignPageFilter === UnAssignTotalPagesFilter}
+                className="px-2 py-2 mx-2 border rounded bg-primary-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <HiChevronDoubleRight className=" w-6 h-auto" />
+              </button>
+            </div>
+          )
+        :
+                  (   
+          <div className="flex justify-center items-center my-10 relative">
+              <button
+                onClick={() => handleUnAssignPagination(unAssignPage - 1)}
+                disabled={unAssignPage === 1}
+                className="px-2 py-2 mx-2 border rounded bg-primary-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <HiChevronDoubleLeft className=" w-6 h-auto" />
+              </button>
+              <span className="text-[#232323] text-sm">
+                Page {unAssignPage} of {unAssignTotalPages}
+              </span>
+              <button
+                 onClick={() => handleUnAssignPagination(unAssignPage + 1)}
+                disabled={unAssignPage === unAssignTotalPages}
+                className="px-2 py-2 mx-2 border rounded bg-primary-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <HiChevronDoubleRight className=" w-6 h-auto" />
+              </button>
+            </div>
+            )
+        }
+
+          {/* END PAGINATION */}
         </>
       ),
       // End Tab content 2
@@ -1029,6 +1116,50 @@ export default function Home() {
               </table>
 
           {/* End Tab content 3 */}
+          {assignFilterPagination ?
+           ( 
+           <div className="flex justify-center items-center my-10 relative">
+              <button
+                onClick={() => handleAssignPaginationFilter(assignPageFilter - 1)}
+                disabled={assignPageFilter === 1}
+                className="px-2 py-2 mx-2 border rounded bg-primary-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <HiChevronDoubleLeft className=" w-6 h-auto" />
+              </button>
+              <span className="text-[#232323] text-sm">
+                Page  {assignPageFilter} of {assignTotalPagesFilter}
+              </span>
+              <button
+                 onClick={() => handleAssignPaginationFilter(assignPageFilter + 1)}
+                disabled={assignPageFilter === assignTotalPagesFilter}
+                className="px-2 py-2 mx-2 border rounded bg-primary-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <HiChevronDoubleRight className=" w-6 h-auto" />
+              </button>
+            </div>
+            ):
+          (   
+                     <div className="flex justify-center items-center my-10 relative">
+              <button
+                onClick={() => handleAssignPagination(assignPage - 1)}
+                disabled={assignPage === 1}
+                className="px-2 py-2 mx-2 border rounded bg-primary-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <HiChevronDoubleLeft className=" w-6 h-auto" />
+              </button>
+              <span className="text-[#232323] text-sm">
+                Page  {assignPage} of {assignTotalPages}
+              </span>
+              <button
+                 onClick={() => handleAssignPagination(assignPage + 1)}
+                disabled={assignPage === assignTotalPages}
+                className="px-2 py-2 mx-2 border rounded bg-primary-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <HiChevronDoubleRight className=" w-6 h-auto" />
+              </button>
+            </div>)
+        }
+
         </>
       ),
     },
@@ -1081,6 +1212,32 @@ export default function Home() {
               </div>
             </div>
             {/* End search and filter row */}
+                 <div className="w-full overflow-x-auto custom-scrollbar">
+              {clearFilter && (
+                <button
+                  type="button"
+                  onClick={() => clickedFilterClear()}
+                  className="flex items-center gap-2 text-primary-600 text-sm font-medium transition-colors p-1 border border-primary-500 rounded mb-2"
+                >
+                  <span>Clear Filter</span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2}
+                    stroke="currentColor"
+                    className="w-4 h-4"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              )}
+
+            </div>
             {/* Show Applied Filters */}
             {userRole === "Admin" && (
     <Tabs tabs={tabs} />
@@ -1251,79 +1408,63 @@ export default function Home() {
                   )}
                 </tbody>
               </table>
-        )}
-            {/* ---------------- Table--------------------------- */}
-            <div className="w-full overflow-x-auto custom-scrollbar">
-              {clearFilter && (
-                <button
-                  type="button"
-                  onClick={() => clickedFilterClear()}
-                  className="flex items-center gap-2 text-primary-600 text-sm font-medium transition-colors p-1 border border-primary-500 rounded mb-2"
-                >
-                  <span>Clear Filter</span>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={2}
-                    stroke="currentColor"
-                    className="w-4 h-4"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              )}
+        )
 
-            </div>
+        }
+       {userRole === "Agent" && (
+        <>
+        {assignFilterPagination ? (
+      <div className="flex justify-center items-center my-10 relative">
+        <button
+          onClick={() => handleAssignPaginationFilter(assignPageFilter - 1)}
+          disabled={assignPageFilter === 1}
+          className="px-2 py-2 mx-2 border rounded bg-primary-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <HiChevronDoubleLeft className="w-6 h-auto" />
+        </button>
+        <span className="text-[#232323] text-sm">
+          Page {assignPageFilter} of {assignTotalPagesFilter}
+        </span>
+        <button
+          onClick={() => handleAssignPaginationFilter(assignPageFilter + 1)}
+          disabled={assignPageFilter === assignTotalPagesFilter}
+          className="px-2 py-2 mx-2 border rounded bg-primary-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <HiChevronDoubleRight className="w-6 h-auto" />
+        </button>
+      </div>
+    ) : (
+      <div className="flex justify-center items-center my-10 relative">
+        <button
+          onClick={() => handleAssignPagination(assignPage - 1)}
+          disabled={assignPage === 1}
+          className="px-2 py-2 mx-2 border rounded bg-primary-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <HiChevronDoubleLeft className="w-6 h-auto" />
+        </button>
+        <span className="text-[#232323] text-sm">
+          Page {assignPage} of {assignTotalPages}
+        </span>
+        <button
+          onClick={() => handleAssignPagination(assignPage + 1)}
+          disabled={assignPage === assignTotalPages}
+          className="px-2 py-2 mx-2 border rounded bg-primary-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <HiChevronDoubleRight className="w-6 h-auto" />
+        </button>
+      </div>
+    )}
+  </>
+)}
+
+            {/* ---------------- Table--------------------------- */}
+       
 
             {/* ----------------End table------------------------ */}
           </div>
           {/* Pagination Controls */}
-          {isFilter ? (
-            <div className="flex justify-center items-center my-10 relative">
-              <button
-                //onClick={() => handlePageChangeFilter(filterPage - 1)}
-                disabled={filterPage === 1}
-                className="px-2 py-2 mx-2 border rounded bg-primary-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <HiChevronDoubleLeft className=" w-6 h-auto" />
-              </button>
-              <span className="text-[#232323] text-sm">
-                Page {filterPage} of {totalPagesFilter}
-              </span>
-              <button
-                // onClick={() => handlePageChangeFilter(filterPage + 1)}
-                disabled={filterPage === totalPagesFilter}
-                className="px-2 py-2 mx-2 border rounded bg-primary-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <HiChevronDoubleRight className=" w-6 h-auto" />
-              </button>
-            </div>
-          ) : (
-            <div className="flex justify-center items-center my-10 relative">
-              <button
-                onClick={() => handlePageChange(page - 1)}
-                disabled={page === 1}
-                className="px-2 py-2 mx-2 border rounded bg-primary-500 hover:bg-primary-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <HiChevronDoubleLeft className=" w-6 h-auto" />
-              </button>
-              <span className="text-[#717171] text-sm">
-                Page {page} of {totalPages}
-              </span>
-              <button
-                onClick={() => handlePageChange(page + 1)}
-                disabled={page === totalPages}
-                className="px-2 py-2 mx-2 border rounded bg-primary-500 hover:bg-primary-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <HiChevronDoubleRight className=" w-6 h-auto" />
-              </button>
-            </div>
-          )}
+
+      
           {/* ----------------End prgination--------------------------- */}
 
           {/* <div className="w-full h-24 bg-header-gradient opacity-20 absolute top-0 left-0 right-0 "></div> */}
@@ -2049,7 +2190,7 @@ export default function Home() {
       : null;
 
     // 🔹 handlers
-    const handleNotAssign = async () => {
+    const handleUnassignFilter = async () => {
       console.log("NotAssign values:", values);
        const clean = toCleanFilter(values);
     if (Object.keys(clean).length === 0) {
@@ -2060,15 +2201,17 @@ export default function Home() {
     // e.g. setFilters(clean); fetchList(1, clean);
     try {
       const response = await AxiosProvider.post(
-        "/notassignedleads/filter?page=${page}&pageSize=${pageSize}",
+        `/notassignedleads/filter?page=${UnAssignPageFilter}&pageSize=${globalPageSize}`,
         values
       );
-      console.log("NOT ASSIGN FILTERED VALUE", response.data.data.data);
+      console.log("NOT ASSIGN FILTERED VALUE", response);
+      setUnAssignTotalPagesFilter(response.data.data.pagination.totalPages)
      setNotAssignData(response.data.data.data)
       setFlyoutOpen(false);
       //  toast.success("Lead is Creatted");
       //setHitApi(!hitApi);
       setClearFilter(true);
+      setUnAssignFilterPagination(true)
     } catch (error: any) {
       toast.error("Lead is not Creatted");
     } finally {
@@ -2076,7 +2219,7 @@ export default function Home() {
     }
     };
 
-    const handleAssign = async() => {
+    const handleAssignFilter = async() => {
       console.log("Assign values:", values);
      const clean = toCleanFilter(values);
     if (Object.keys(clean).length === 0) {
@@ -2096,6 +2239,7 @@ export default function Home() {
       //  toast.success("Lead is Creatted");
       //setHitApi(!hitApi);
       setClearFilter(true);
+      setAssignFilterPagination(true)
     } catch (error: any) {
       toast.error("Lead is not Creatted");
     } finally {
@@ -2399,16 +2543,16 @@ export default function Home() {
           (          <button
             type="button"
             disabled={isSubmitting}
-            onClick={handleNotAssign}
+            onClick={handleUnassignFilter}
             className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
           >
-            Filter NotAssign leads
+            Filter UnAssign leads
           </button>)}
 
           <button
             type="button"
             disabled={isSubmitting}
-            onClick={handleAssign}
+            onClick={handleAssignFilter}
             className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
           >
             Filter Assign leads
