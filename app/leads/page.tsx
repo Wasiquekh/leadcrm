@@ -157,7 +157,7 @@ export default function Home() {
   const [notAssignData, setNotAssignData] = useState<Lead[]>([]);
  // console.log("NOT ASSIGN DATAAAAAAAAA",notAssignData)
  const [assignLeadData, setAssignLeadData] = useState<Lead[]>([]);
- console.log(" ASSIGN DATAAAAAAAAA",assignLeadData)
+ //console.log(" ASSIGN DATAAAAAAAAA",assignLeadData)
   //console.log("DATAAAAA", data);
   // PAGINATION USE STATES
     const [globalPageSize] = useState<number>(10)
@@ -210,7 +210,7 @@ export default function Home() {
   >([]);
   const [isAgent, setIsAgent] = useState<boolean>(false);
   const [agentList, setAgentList] = useState<Agent[]>([]);
-  console.log("ALL AGENTS",agentList)
+  //console.log("ALL AGENTS",agentList)
   // 👉 holds the selected agent from dropdown
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   //console.log("DDDAAANISHHHH", agentFetchedData);

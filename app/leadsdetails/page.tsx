@@ -719,7 +719,21 @@ const downloadDocument = (src: string | Blob, fileName = "image.jpg") => {
     setSelectedDropDownTaskValue(item); // save value in state
     openTaskFlyout(); // your existing function
   };
-
+    const provinceOptions = [
+  { id: "alberta", name: "Alberta" },
+  { id: "british-columbia", name: "British Columbia" },
+  { id: "manitoba", name: "Manitoba" },
+  { id: "new-brunswick", name: "New Brunswick" },
+  { id: "newfoundland-labrador", name: "Newfoundland and Labrador" },
+  { id: "northwest-territories", name: "Northwest Territories" },
+  { id: "nova-scotia", name: "Nova Scotia" },
+  { id: "nunavut", name: "Nunavut" },
+  { id: "ontario", name: "Ontario" },
+  { id: "prince-edward-island", name: "Prince Edward Island" },
+  { id: "quebec", name: "Quebec" },
+  { id: "saskatchewan", name: "Saskatchewan" },
+  { id: "yukon", name: "Yukon" },
+];
   const tabs = [
     {
       label: "Activity History",
@@ -997,6 +1011,14 @@ const getIdFromName = (list: any[], name?: string | null) => {
   return item ? item.id : "";
 };
 
+  function setFieldTouched(arg0: string, arg1: boolean): void {
+    throw new Error("Function not implemented.");
+  }
+
+  function setFieldValue(arg0: string, arg1: any) {
+    throw new Error("Function not implemented.");
+  }
+
   return ( 
     <>
       <div className=" flex justify-end  min-h-screen">
@@ -1125,7 +1147,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
                         </div>
 
                         <div className=" flex text-white items-center  gap-2 mb-3">
-                          <MdLocationPin />
+                           <p className="text-sm font-medium leading-none">Provinces:</p>
                           <p className=" text-sm font-medium leading-none">
                             {data?.address?.state || "-"}
                           </p>
@@ -1194,7 +1216,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
       }
     }}
   >
-    {({ isSubmitting }) => (
+    {({ isSubmitting, values, setFieldValue, setFieldTouched  }) => (
       <Form className="w-full rounded bg-primary-600 px-4 py-6 mb-6">
         {/* Name row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-white">
@@ -1322,38 +1344,100 @@ const getIdFromName = (list: any[], name?: string | null) => {
 
         {/* City / State */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-white mb-1">
-              City
-            </label>
-            <Field
-              name="city"
-              type="text"
-              className="w-full border-b border-white pl-0.5 text-sm leading-6 px-0 py-0 focus:outline-none bg-transparent text-white mb-2"
-              placeholder="City"
-            />
-            <ErrorMessage
-              name="city"
-              component="p"
-              className="text-red-500 text-xs mt-1"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-white mb-1">
-              State
-            </label>
-            <Field
-              name="state"
-              type="text"
-              className="w-full border-b border-white pl-0.5 text-sm leading-6 px-0 py-0 focus:outline-none bg-transparent text-white mb-2"
-              placeholder="State"
-            />
-            <ErrorMessage
-              name="state"
-              component="p"
-              className="text-red-500 text-xs mt-1"
-            />
-          </div>
+ <div>
+    <label className="block text-sm font-medium text-white mb-1">City</label>
+    <Field
+      name="city"
+      type="text"
+      className="w-full border-b border-white pl-0.5 text-sm leading-6 px-0 py-0 focus:outline-none bg-transparent text-white mb-2"
+      placeholder="City"
+    />
+    <ErrorMessage name="city" component="p" className="text-red-500 text-xs mt-1" />
+  </div>
+
+  {/* Province (stored in backend as "state") */}
+  <div>
+    <label className="block text-sm font-medium text-white mb-1">Province</label>
+    <Select
+      // pick by name against Formik's values.state (optional)
+      value={
+        provinceOptions.find(
+          (opt: any) => (opt.name || "").toLowerCase() === (values.state || "").toLowerCase()
+        ) || null
+      }
+      onChange={(selected: any) => setFieldValue("state", selected ? selected.name : "")}
+      onBlur={() => setFieldTouched("state", true)}
+      getOptionLabel={(opt: any) => opt.name}
+      getOptionValue={(opt: any) => opt.name}
+      options={provinceOptions}
+      placeholder="Province"
+      isClearable
+      // Keep className minimal; we'll do most via 'styles'
+      className="mb-2"
+      styles={{
+        // Make it look like your text input (underline, transparent, white text)
+        control: (base, state) => ({
+          ...base,
+          backgroundColor: "transparent",
+          border: "none",
+          borderBottom: "1px solid #FFFFFF",
+          borderRadius: 0,
+          boxShadow: "none",
+          minHeight: "unset",
+          paddingLeft: "2px",
+          cursor: "text",
+        }),
+        valueContainer: (base) => ({
+          ...base,
+          padding: 0,
+        }),
+        placeholder: (base) => ({
+          ...base,
+          color: "rgba(255,255,255,0.9)",
+          margin: 0,
+        }),
+        singleValue: (base) => ({
+          ...base,
+          color: "#FFFFFF",
+          margin: 0,
+        }),
+        input: (base) => ({
+          ...base,
+          color: "#FFFFFF",
+          margin: 0,
+        }),
+        indicatorSeparator: () => ({ display: "none" }),
+        dropdownIndicator: (base) => ({
+          ...base,
+          color: "#FFFFFF",
+          padding: 0,
+        }),
+        clearIndicator: (base) => ({
+          ...base,
+          color: "#FFFFFF",
+          padding: 0,
+        }),
+        menu: (base) => ({
+          ...base,
+          backgroundColor: "#FFFFFF",
+          color: "#333",
+          borderRadius: 4,
+          boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+          overflow: "hidden",
+          zIndex: 50,
+        }),
+        option: (base, { isFocused, isSelected }) => ({
+          ...base,
+          backgroundColor: isSelected ? "var(--primary-500)" : isFocused ? "var(--primary-100)" : "#fff",
+          color: isSelected ? "#fff" : "#333",
+          cursor: "pointer",
+        }),
+      }}
+    />
+    <ErrorMessage name="state" component="p" className="text-red-500 text-xs mt-1" />
+  </div>
+
+
         </div>
 
         {/* ✅ Note field */}
