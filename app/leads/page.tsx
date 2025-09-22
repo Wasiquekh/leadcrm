@@ -90,8 +90,6 @@ interface Lead {
 //CREATE LEADS
 type CreateLead = {
   id: string;
-  first_name: string;
-  last_name: string;
   full_name?: string;
   email: string;
   phone: string;
@@ -235,8 +233,6 @@ export default function Home() {
     router.push(`/leadsdetails?id=${customer.id}`);
   };
   const LeadSchema = Yup.object({
-    first_name: Yup.string().trim().required("First name is required"),
-    last_name: Yup.string().trim().required("Last name is required"),
     full_name: Yup.string().trim().required("Full name is required"),
     email: Yup.string()
       .trim()
@@ -658,7 +654,25 @@ export default function Home() {
       setAssignPage(newPage);
     }
   };
+
     // END PAGINATION HANDLE CHANGES
+
+    const provinceOptions = [
+  { id: "alberta", name: "Alberta" },
+  { id: "british-columbia", name: "British Columbia" },
+  { id: "manitoba", name: "Manitoba" },
+  { id: "new-brunswick", name: "New Brunswick" },
+  { id: "newfoundland-labrador", name: "Newfoundland and Labrador" },
+  { id: "northwest-territories", name: "Northwest Territories" },
+  { id: "nova-scotia", name: "Nova Scotia" },
+  { id: "nunavut", name: "Nunavut" },
+  { id: "ontario", name: "Ontario" },
+  { id: "prince-edward-island", name: "Prince Edward Island" },
+  { id: "quebec", name: "Quebec" },
+  { id: "saskatchewan", name: "Saskatchewan" },
+  { id: "yukon", name: "Yukon" },
+];
+
   if (isLoading) {
     return (
       <div className="h-screen flex flex-col gap-5 justify-center items-center">
@@ -1500,8 +1514,6 @@ export default function Home() {
 
               <Formik
                 initialValues={{
-                  first_name: "",
-                  last_name: "",
                   full_name: "",
                   email: "",
                   phone: "",
@@ -1523,8 +1535,6 @@ export default function Home() {
                 onSubmit={(values, { setSubmitting, resetForm }) => {
                   // Use `any` to avoid TS complaints about optional fields on a "Create" type
                   const value: any /* CreateLead */ = {
-                    first_name: values.first_name,
-                    last_name: values.last_name,
                     full_name: values.full_name,
                     email: values.email,
                     phone: values.phone || undefined,
@@ -1565,42 +1575,7 @@ export default function Home() {
                   <form onSubmit={handleSubmit}>
                     <div className="w-full">
                       <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        {/* First Name */}
-                        <div className="w-full">
-                          <p className="text-secondBlack  text-base leading-6 mb-2">
-                            First Name
-                          </p>
-                          <Field
-                            type="text"
-                            name="first_name"
-                            placeholder="Alexandre"
-                            className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
-                          />
-                          <ErrorMessage
-                            name="first_name"
-                            component="div"
-                            className="text-red-500 text-xs mt-1"
-                          />
-                        </div>
-
-                        {/* Last Name */}
-                        <div className="w-full">
-                          <p className="text-secondBlack  text-base leading-6 mb-2">
-                            Last Name
-                          </p>
-                          <Field
-                            type="text"
-                            name="last_name"
-                            placeholder="Dumas"
-                            className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
-                          />
-                          <ErrorMessage
-                            name="last_name"
-                            component="div"
-                            className="text-red-500 text-xs mt-1"
-                          />
-                        </div>
-
+                
                         {/* Full Name */}
                         <div className="w-full">
                           <p className="text-secondBlack  text-base leading-6 mb-2">
@@ -1710,23 +1685,59 @@ export default function Home() {
                         </div>
 
                         {/* State */}
-                        <div className="w-full">
-                          <p className="text-secondBlack  text-base leading-6 mb-2">
-                            State
-                          </p>
-                          <Field
-                            type="text"
-                            name="state"
-                            placeholder="Maharashtra"
-                            className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
-                          />
-                          <ErrorMessage
-                            name="state"
-                            component="div"
-                            className="text-red-500 text-xs mt-1"
-                          />
-                        </div>
-
+               <div className="w-full">
+  <p className="text-secondBlack text-base leading-6 mb-2">
+    Province
+  </p>
+  <Select
+    value={
+      provinceOptions.find(
+        (opt) => opt.id === values.lead_source_id
+      ) || null
+    }
+    onChange={(selected: any) =>
+      setFieldValue(
+        "lead_source_id",
+        selected ? selected.id : ""
+      )
+    }
+    onBlur={() => setFieldTouched("lead_source_id", true)}
+    getOptionLabel={(opt: any) => opt.name}
+    getOptionValue={(opt: any) => opt.id}
+    options={provinceOptions}
+    placeholder="Select Province"
+    isClearable
+    classNames={{
+      control: ({ isFocused }: any) =>
+        `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+          isFocused
+            ? "!border-primary-500"
+            : "!border-[#DFEAF2]"
+        }`,
+    }}
+    styles={{
+      menu: (base: any) => ({
+        ...base,
+        borderRadius: "4px",
+        boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+        backgroundColor: "#fff",
+      }),
+      option: (
+        base: any,
+        { isFocused, isSelected }: any
+      ) => ({
+        ...base,
+        backgroundColor: isSelected
+          ? "var(--primary-500)"
+          : isFocused
+          ? "var(--primary-100)"
+          : "#fff",
+        color: isSelected ? "#fff" : "#333",
+        cursor: "pointer",
+      }),
+    }}
+  />
+</div>
                         {/* Postal Code */}
                         <div className="w-full">
                           <p className="text-secondBlack  text-base leading-6 mb-2">
@@ -1763,23 +1774,7 @@ export default function Home() {
                           />
                         </div>
 
-                        {/* Lead Score */}
-                        <div className="w-full">
-                          <p className="text-secondBlack  text-base leading-6 mb-2">
-                            Lead Score
-                          </p>
-                          <Field
-                            type="number"
-                            name="lead_score"
-                            placeholder="e.g., 75"
-                            className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
-                          />
-                          <ErrorMessage
-                            name="lead_score"
-                            component="div"
-                            className="text-red-500 text-xs mt-1"
-                          />
-                        </div>
+  
 
                         {/* Lead Quality */}
                         <div className="w-full">
@@ -2213,7 +2208,7 @@ export default function Home() {
       setClearFilter(true);
       setUnAssignFilterPagination(true)
     } catch (error: any) {
-      toast.error("Lead is not Creatted");
+      toast.error("Lead is not Created");
     } finally {
       setIsLoading(false);
     }
@@ -2241,7 +2236,7 @@ export default function Home() {
       setClearFilter(true);
       setAssignFilterPagination(true)
     } catch (error: any) {
-      toast.error("Lead is not Creatted");
+      toast.error("Lead is not Created");
     } finally {
       setIsLoading(false);
     }
@@ -2251,31 +2246,6 @@ export default function Home() {
       <form onSubmit={handleSubmit}>
         <div className="w-full">
           <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            {/* First Name */}
-            <div className="w-full">
-              <p className="text-secondBlack  text-base leading-6 mb-2">
-                First Name
-              </p>
-              <Field
-                type="text"
-                name="first_name"
-                placeholder="Alexandre"
-                className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
-              />
-            </div>
-
-            {/* Last Name */}
-            <div className="w-full">
-              <p className="text-secondBlack  text-base leading-6 mb-2">
-                Last Name
-              </p>
-              <Field
-                type="text"
-                name="last_name"
-                placeholder="Dumas"
-                className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
-              />
-            </div>
 
             {/* Full Name */}
             <div className="w-full">
@@ -2585,8 +2555,6 @@ export default function Home() {
                 enableReinitialize
                 initialValues={{
                   id: editLeadData?.id ?? "",
-                  first_name: editLeadData?.first_name ?? "",
-                  last_name: editLeadData?.last_name ?? "",
                   full_name: editLeadData?.full_name ?? "",
                   email: editLeadData?.email ?? "",
                   phone: editLeadData?.phone ?? "",
@@ -2613,8 +2581,6 @@ export default function Home() {
                 onSubmit={(values, { setSubmitting, resetForm }) => {
                   const value: CreateLead = {
                     id: values.id,
-                    first_name: values.first_name,
-                    last_name: values.last_name,
                     full_name: values.full_name,
                     email: values.email,
                     phone: values.phone || undefined,
@@ -2709,41 +2675,8 @@ export default function Home() {
                       <form onSubmit={handleSubmit}>
                         <div className="w-full">
                           <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            {/* First Name */}
-                            <div className="w-full">
-                              <p className="text-secondBlack  text-base leading-6 mb-2">
-                                First Name
-                              </p>
-                              <Field
-                                type="text"
-                                name="first_name"
-                                placeholder="Alexandre"
-                                className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
-                              />
-                              <ErrorMessage
-                                name="first_name"
-                                component="div"
-                                className="text-red-500 text-xs mt-1"
-                              />
-                            </div>
+          
 
-                            {/* Last Name */}
-                            <div className="w-full">
-                              <p className="text-secondBlack  text-base leading-6 mb-2">
-                                Last Name
-                              </p>
-                              <Field
-                                type="text"
-                                name="last_name"
-                                placeholder="Dumas"
-                                className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
-                              />
-                              <ErrorMessage
-                                name="last_name"
-                                component="div"
-                                className="text-red-500 text-xs mt-1"
-                              />
-                            </div>
 
                             {/* Full Name */}
                             <div className="w-full">

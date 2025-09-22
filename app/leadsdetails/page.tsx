@@ -324,8 +324,6 @@ export default function Home() {
   });
   const CreateLeadsActivitySchema = Yup.object({
     conversation: Yup.string()
-      .trim()
-      .max(500, "Max 500 characters")
       .required("Conversation is required"),
     createdAt: Yup.string().nullable(), // optional
     disposition_id: Yup.string().required("Disposition is required"),
@@ -774,49 +772,49 @@ const downloadDocument = (src: string | Blob, fileName = "image.jpg") => {
                   }) ?? "--";
 
                 return (
-                  <div
-                    key={activity.id}
-                    className="w-full flex items-center justify-between gap-4 hover:bg-primary-100 py-2 px-2 rounded"
-                  >
-                    {/* Left: icon + occurred date/time */}
-                    <div className="flex items-center gap-2 shrink-0">
-                      <TbActivity className="bg-primary-500 text-white p-1 text-2xl rounded-full" />
-                      <div className="leading-5 text-sm">
-                        <p>{createdDate}</p>
-                        <p>{createdTime}</p>
-                      </div>
-                    </div>
+         <div
+  key={activity.id}
+  className="w-full flex justify-between gap-4 hover:bg-primary-100 py-2 px-2 rounded"
+>
+  {/* Left: icon + occurred date/time */}
+  <div className="flex gap-2 shrink-0">
+    <TbActivity className="bg-primary-500 text-white p-1 text-2xl rounded-full" />
+    <div className="leading-5 text-sm">
+      <p>{createdDate}</p>
+      <p>{createdTime}</p>
+    </div>
+  </div>
 
-                    {/* Middle: details */}
-                    <div className="flex-1 min-w-0">
-                      <p className="truncate">
-                        <span className="text-primary-600">
-                          {activity.disposition}:
-                        </span>{" "}
-                        {activity.conversation}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        Added by {activity.agent_name} on {createdDate}{" "}
-                        {createdTime}
-                      </p>
-                    </div>
+  {/* Middle: details */}
+  <div className="flex-1 min-w-0">
+    <p>
+      <span className="text-primary-600">{activity.disposition}:</span>{" "}
+      {activity.conversation}
+    </p>
+    <p className="text-xs text-gray-500">
+      Added by {activity.agent_name} on {createdDate} {createdTime}
+    </p>
+  </div>
 
-                    {/* Right: Edit button */}
-                    <button
-                      type="button"
-                      onClick={() => openActivityHistoryFlyout(activity)}
-                      className="shrink-0 py-1.5 px-3 bg-primary-500 text-white rounded text-sm hover:bg-primary-600"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => deleteActivityHistory(activity)}
-                      className="shrink-0 py-1.5 px-3 bg-primary-500 text-white rounded text-sm hover:bg-primary-600"
-                    >
-                      Delete
-                    </button>
-                  </div>
+  {/* Right: Action buttons */}
+  <div className=" space-x-2 shrink-0">
+    <button
+      type="button"
+      onClick={() => openActivityHistoryFlyout(activity)}
+      className="py-1.5 px-3 rounded text-sm bg-primary-500 text-white hover:bg-primary-600"
+    >
+      Edit
+    </button>
+    <button
+      type="button"
+      onClick={() => deleteActivityHistory(activity)}
+      className="py-1.5 px-3 rounded text-sm bg-red-500 text-white hover:bg-red-600"
+    >
+      Delete
+    </button>
+  </div>
+</div>
+
                 );
               })
             ) : (
@@ -1074,14 +1072,25 @@ const getIdFromName = (list: any[], name?: string | null) => {
                     {isEditFirstLead ? (
                       /* ---------- VIEW MODE (unchanged) ---------- */
                       <div className="w-full rounded bg-primary-600 px-4 py-6 mb-6">
-                        <div className=" flex text-white  gap-2 mb-5 capitalize">
-                          <FaStar />
-                          <div>
-                            <p className=" text-base font-medium leading-none">
+                        <div className=" flex justify-between text-white  mb-5 capitalize">
+                          <div className=" flex gap-2">
+                             <FaStar />
+                             <div>
+                             <p className=" text-base font-medium leading-none">
                               {data?.first_name || "-"} {data?.last_name || "-"}
                             </p>
-                            {data?.address?.country || "-"}
+                            <p>{data?.address?.country || "-"}</p>
+                             </div>
+
+                            
                           </div>
+                          <button
+                            type="button"
+                            onClick={() => setIsEditFirstLead(false)} // flip state
+                            className="px-4 py-0 rounded-[4px] bg-white text-secondBlack text-sm font-medium"
+                          >
+                            Edit
+                          </button>
                         </div>
 
                         <div className=" flex text-white items-center  gap-2 mb-3">
@@ -1130,13 +1139,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
 
                         {/* ✅ Edit button */}
                         <div className="flex justify-end pt-4">
-                          <button
-                            type="button"
-                            onClick={() => setIsEditFirstLead(false)} // flip state
-                            className="px-4 py-2 rounded-[4px] bg-white text-secondBlack text-sm font-medium"
-                          >
-                            Edit
-                          </button>
+
                         </div>
                       </div>
                     ) : (
@@ -1407,15 +1410,13 @@ const getIdFromName = (list: any[], name?: string | null) => {
                               className="px-3 py-3 md:p-3 border border-tableBorder font-semibold text-secondBlack text-base"
                               colSpan={2}
                             >
-                              Lead Properties
-                            </th>
-                               <th
+                              <div className=" flex justify-between items-center">
+                                <span>Lead Properties</span>
+                              <span
+                              className="px-4 py-2 rounded-[4px] bg-primary-600 text-white text-sm font-medium disabled:opacity-60 cursor-pointer"
                                onClick={()=>setIsLeadPropertyEdit(!isleadPropertyEdit)}
-                              scope="col"
-                              className="px-3 py-3 md:p-3 border border-tableBorder font-semibold text-secondBlack text-base"
-                              colSpan={2}
-                            >
-                              Edit
+                              >Edit</span>
+                              </div>
                             </th>
                           </tr>
                         </thead>
@@ -1518,6 +1519,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
       await AxiosProvider.post("/leads/update", values);
       toast.success("Lead is Updated");
       setHitApi(!hitApi);
+      setIsLeadPropertyEdit(!isleadPropertyEdit)
     } catch (error: any) {
       toast.error("Lead is not Updated");
     }
@@ -1549,14 +1551,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
                 >
                   Lead Properties (Edit)
                 </th>
-                <th
-                  scope="col"
-                  onClick={() => setIsLeadPropertyEdit(!isleadPropertyEdit)}
-                  className="px-3 py-3 md:p-3 border border-tableBorder font-semibold text-secondBlack text-base cursor-pointer"
-                  colSpan={2}
-                >
-                  Close
-                </th>
+
               </tr>
             </thead>
 
@@ -1576,12 +1571,14 @@ const getIdFromName = (list: any[], name?: string | null) => {
                     options={agent}
                     placeholder="Select Agent"
                     isClearable
-                    classNames={{
-                      control: ({ isFocused }: any) =>
-                        `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
-                          isFocused ? "!border-primary-500" : "!border-[#DFEAF2]"
-                        }`,
-                    }}
+classNames={{
+  control: ({ isFocused }: any) =>
+    `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[3px] 
+     !text-xs !leading-4 !font-normal !py-0.5 !px-1 
+     !bg-white !shadow-sm ${
+       isFocused ? "!border-primary-500" : "!border-[#DFEAF2]"
+     }`,
+}}
                     styles={{
                       menu: (base: any) => ({
                         ...base,
@@ -1646,12 +1643,14 @@ const getIdFromName = (list: any[], name?: string | null) => {
                     options={debtConsolidation}
                     placeholder="Select Debt Consolidation Status"
                     isClearable
-                    classNames={{
-                      control: ({ isFocused }: any) =>
-                        `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
-                          isFocused ? "!border-primary-500" : "!border-[#DFEAF2]"
-                        }`,
-                    }}
+classNames={{
+  control: ({ isFocused }: any) =>
+    `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[3px] 
+     !text-xs !leading-4 !font-normal !py-0.5 !px-1 
+     !bg-white !shadow-sm ${
+       isFocused ? "!border-primary-500" : "!border-[#DFEAF2]"
+     }`,
+}}
                     styles={{
                       menu: (base: any) => ({
                         ...base,
@@ -1696,12 +1695,14 @@ const getIdFromName = (list: any[], name?: string | null) => {
                     options={consolidationData}
                     placeholder="Select Consolidation Status"
                     isClearable
-                    classNames={{
-                      control: ({ isFocused }: any) =>
-                        `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
-                          isFocused ? "!border-primary-500" : "!border-[#DFEAF2]"
-                        }`,
-                    }}
+classNames={{
+  control: ({ isFocused }: any) =>
+    `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[3px] 
+     !text-xs !leading-4 !font-normal !py-0.5 !px-1 
+     !bg-white !shadow-sm ${
+       isFocused ? "!border-primary-500" : "!border-[#DFEAF2]"
+     }`,
+}}
                     styles={{
                       menu: (base: any) => ({
                         ...base,
@@ -1748,7 +1749,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
           <div className="flex items-center justify-end gap-3 pt-4">
             <button
               type="button"
-              onClick={() => setIsLeadPropertyEdit(false)}
+               onClick={() => setIsLeadPropertyEdit(!isleadPropertyEdit)}
               className="px-4 py-2 rounded-[4px] border border-[#DFEAF2] text-secondBlack text-sm font-medium bg-white"
             >
               Cancel
@@ -1971,7 +1972,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
     rows={5} // height without changing your classes
   />
   {touched.conversation && (errors as any).conversation ? (
-    <p className="text-red-500 absolute top-[85px] text-xs">
+    <p className="text-red-500 absolute top-[150px] text-xs">
       {(errors as any).conversation}
     </p>
   ) : null}
