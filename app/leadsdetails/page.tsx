@@ -1147,7 +1147,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
                         </div>
 
                         <div className=" flex text-white items-center  gap-2 mb-3">
-                           <p className="text-sm font-medium leading-none">Provinces:</p>
+                           <p className="text-sm font-medium leading-none">Province:</p>
                           <p className=" text-sm font-medium leading-none">
                             {data?.address?.state || "-"}
                           </p>
