@@ -244,7 +244,7 @@ useEffect(() => {
     setFlyoutOpen(false);
     //return;
     try {
-      await AxiosProvider.post("/assignlead/bulk", {
+      await AxiosProvider.post("/leads/assigned/bulk", {
         lead_ids: selectedIds,
         agent_id: selectedAgent.id,
       });
@@ -1628,7 +1628,10 @@ useEffect(() => {
                   lead_source_id: "",
                   debt_consolidation_status_id: "", // ✅ NEW
                   whatsapp_number: "", // ✅ NEW
+                    agent_id: "", // 👈 NEW
                   consolidated_credit_status_id: "",
+                   
+
                 }}
                 validationSchema={LeadSchema}
                 onSubmit={(values, { setSubmitting, resetForm }) => {
@@ -1652,6 +1655,7 @@ useEffect(() => {
                     debt_consolidation_status_id:
                       values.debt_consolidation_status_id,
                     whatsapp_number: values.whatsapp_number,
+                     agent_id: values.agent_id || undefined, // 👈 NEW
                     consolidated_credit_status_id:
                       values.consolidated_credit_status_id || undefined, // ✅ NEW
 
@@ -1985,6 +1989,52 @@ useEffect(() => {
                             className="text-red-500 text-xs mt-1"
                           />
                         </div>
+                        {/* Assign to Agent */}
+<div className="w-full">
+  <p className="text-secondBlack text-base leading-6 mb-2">
+    Assign to Agent
+  </p>
+  <Select
+    value={(agentList || []).find((opt: any) => String(opt.id) === String(values.agent_id)) || null}
+    onChange={(selected: any) => setFieldValue("agent_id", selected ? selected.id : "")}
+    onBlur={() => setFieldTouched("agent_id", true)}
+    getOptionLabel={(opt: any) => opt.name}
+    getOptionValue={(opt: any) => String(opt.id)}
+    options={agentList}
+    placeholder="Select Agent"
+    isClearable
+    classNames={{
+      control: ({ isFocused }: any) =>
+        `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+          isFocused ? "!border-primary-500" : "!border-[#DFEAF2]"
+        }`,
+    }}
+    styles={{
+      menu: (base: any) => ({
+        ...base,
+        borderRadius: "4px",
+        boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+        backgroundColor: "#fff",
+      }),
+      option: (base: any, { isFocused, isSelected }: any) => ({
+        ...base,
+        backgroundColor: isSelected
+          ? "var(--primary-500)"
+          : isFocused
+          ? "var(--primary-100)"
+          : "#fff",
+        color: isSelected ? "#fff" : "#333",
+        cursor: "pointer",
+      }),
+    }}
+  />
+  <ErrorMessage
+    name="agent_id"
+    component="div"
+    className="text-red-500 text-xs mt-1"
+  />
+</div>
+
 
                         {/* Debt Consolidation Status (Dropdown) */}
                         <div className="w-full">
