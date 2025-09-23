@@ -209,6 +209,7 @@ export default function Home() {
     DebtConsolidation[]
   >([]);
   const [isAgent, setIsAgent] = useState<boolean>(false);
+  const [isAgentBulkCheckAssign, setIsagentBulkCehckAssign] = useState<boolean>(false)
   const [agentList, setAgentList] = useState<Agent[]>([]);
   //console.log("ALL AGENTS",agentList)
   // 👉 holds the selected agent from dropdown
@@ -217,6 +218,48 @@ export default function Home() {
   const [currentLeadId, setCurrentLeadId] = useState<string>(null);
   const [leadSourceDisplay, setLeadSourceDisplay] = useState<any>(null);
   const [clearFilter, setClearFilter] = useState<boolean>(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+const toggleRow = (id: string, checked: boolean) => {
+  setSelectedIds(prev => (checked ? [...prev, id] : prev.filter(x => x !== id)));
+};
+
+// keep selection clean if the data changes
+useEffect(() => {
+  if (!notAssignData?.length) {
+    setSelectedIds([]);
+    return;
+  }
+  const valid = new Set(notAssignData.map((x: any) => x.id));
+  setSelectedIds(prev => prev.filter(id => valid.has(id)));
+}, [notAssignData]);
+
+// --- action click ---
+   const handleBulkAction = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedAgent) {
+      toast.error("Please select an agent");
+      return;
+    }
+    setFlyoutOpen(false);
+    //return;
+    try {
+      await AxiosProvider.post("/assignlead/bulk", {
+        lead_ids: selectedIds,
+        agent_id: selectedAgent.id,
+      });
+      toast.success("Lead is Updated");
+      setHitApi(!hitApi);
+      setSelectedAgent(null);
+    } catch (error: any) {
+      toast.error("Lead is not Updated");
+    }
+    // console.log("✅ Selected Agent Name:", selectedAgent.name);
+    //  console.log("✅ Selected Agent ID:", selectedAgent.id);
+
+    // Example: post to API
+    // await AxiosProvider.post("/assign-agent", { agent_id: selectedAgent.id });
+  };
 
   //  console.log("Debt Conolidation", debtConsolidation);
   //console.log("SELECTED DATA", selectedData);
@@ -379,6 +422,7 @@ export default function Home() {
     setIsFilter(false);
     setIsEditLead(false);
     setIsAgent(false);
+     setIsagentBulkCehckAssign(false)
   };
   const bulkLeads = () => {
     setFlyoutOpen(true);
@@ -387,6 +431,7 @@ export default function Home() {
     setIsFilter(false);
     setIsEditLead(false);
     setIsAgent(false);
+     setIsagentBulkCehckAssign(false)
   };
   const filterLeads = () => {
     setFlyoutOpen(true);
@@ -395,6 +440,7 @@ export default function Home() {
     setIsFilter(true);
     setIsEditLead(false);
     setIsAgent(false);
+     setIsagentBulkCehckAssign(false)
   };
   const editLead = (editData: CreateLead) => {
     setEditLeadData(editData);
@@ -404,6 +450,7 @@ export default function Home() {
     setIsBulkLeads(false);
     setIsFilter(false);
     setIsAgent(false);
+     setIsagentBulkCehckAssign(false)
   };
   const assignAgent = (leadId: string) => {
     setCurrentLeadId(leadId);
@@ -413,7 +460,18 @@ export default function Home() {
     setIsFilter(false);
     setIsEditLead(false);
     setIsAgent(true);
+    setIsagentBulkCehckAssign(false)
   };
+  const assignCheckBulklead = ()=>{
+    //setCurrentLeadId(leadId);
+    setFlyoutOpen(true);
+    setIsCreateLeads(false);
+    setIsBulkLeads(false);
+    setIsFilter(false);
+    setIsEditLead(false);
+    setIsAgent(false);
+    setIsagentBulkCehckAssign(true)
+  }
 
   const unAssignfetchData = async () => {
     setIsLoading(true);
@@ -703,6 +761,17 @@ export default function Home() {
                        <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 whitespace-nowrap">
                 <thead className="text-xs text-[#999999] bg-white">
                   <tr className="border border-tableBorder">
+                    <th
+                      scope="col"
+                      className="px-3 py-3 md:p-3 border border-tableBorder"
+                    >
+                      <div className="flex items-center gap-2">
+                        <RxAvatar className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <span className=" font-semibold text-secondBlack text-lg sm:text-base">
+                          Select
+                        </span>
+                      </div>
+                    </th>
                     {/* Name - Birth Date: Always Visible */}
                     <th
                       scope="col"
@@ -777,6 +846,13 @@ export default function Home() {
                         key={item?.id ?? index}
                         className="border border-tableBorder bg-white hover:bg-primary-100"
                       >
+                        <td className="px-3 py-2 border border-tableBorder text-center">
+  <input
+    type="checkbox"
+   checked={selectedIds.includes(item.id)}
+   onChange={(e) => toggleRow(item.id, e.target.checked)}
+  />
+</td>
                         {/* Full name */}
                         <td className="px-1 py-2 md:px-3 md:py-2 border-tableBorder flex items-center gap-2">
                           <div className="flex gap-2">
@@ -1192,6 +1268,20 @@ export default function Home() {
             {/* Search and filter table row */}
             <div className=" flex justify-end items-center mb-6  w-full mx-auto">
               <div className=" flex justify-center items-center gap-4">
+                {selectedIds.length > 0 && (
+  <div className="mb-3 flex items-center gap-2">
+    <button
+      onClick={()=>assignCheckBulklead()}
+      className="py-2 px-4 bg-black text-white rounded-lg hover:bg-gray-800 active:scale-[0.99] transition"
+      title="Perform bulk action"
+    >
+      Bulk Checked Assign to Agent ({selectedIds.length})
+    </button>
+    <span className="text-sm text-gray-600">
+      {selectedIds.length} selected
+    </span>
+  </div>
+)}
                 <div
                   className=" flex justify-center gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 group"
                   onClick={() => createLeads()}
@@ -1402,6 +1492,15 @@ export default function Home() {
                                 View Details
                               </span>
                             </button>
+                             {/* <button
+                              onClick={() => assignAgent(item.id)}
+                              className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"
+                            >
+                              <MdRemoveRedEye className="text-white w-4 h-4 hover:text-white" />
+                              <span className="text-xs sm:text-sm text-white hover:text-white">
+                                Assign to agent
+                              </span>
+                            </button> */}
                             <button
                               onClick={() => editLead(item)}
                               className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"
@@ -3159,6 +3258,74 @@ export default function Home() {
                   className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
                 >
                   Assign to Agent
+                </button>
+              </form>
+              {/* END FORM */}
+            </div>
+          )}
+          {isAgentBulkCheckAssign && (
+            <div className=" w-full min-h-auto">
+              {/* Flyout content here */}
+              <div className=" flex justify-between mb-4">
+                <p className=" text-primary-600 text-[26px] font-bold leading-9">
+                  Assign to Agent
+                </p>
+                <IoCloseOutline
+                  onClick={() => setFlyoutOpen(false)}
+                  className=" h-8 w-8 border border-[#E7E7E7] text-secondBlack rounded cursor-pointer"
+                />
+              </div>
+              <div className=" w-full border-b border-[#E7E7E7] mb-4"></div>
+              {/* FORM */}
+              <form onSubmit={handleBulkAction} className="w-full space-y-4">
+                {/* Agent Dropdown */}
+                <div className="w-full">
+                  <p className="text-secondBlack text-base leading-6 mb-2">
+                    Assign to Agent
+                  </p>
+                  <Select
+                    value={selectedAgent} // show selected agent
+                    onChange={(selected: any) => setSelectedAgent(selected)}
+                    options={agentList} // list from API
+                    getOptionLabel={(opt: Agent) => opt.name} // show agent name
+                    getOptionValue={(opt: Agent) => String(opt.id)} // use id as value
+                    placeholder="Select Agent"
+                    isClearable
+                    classNames={{
+                      control: ({ isFocused }: any) =>
+                        `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+                          isFocused
+                            ? "!border-primary-500"
+                            : "!border-[#DFEAF2]"
+                        }`,
+                    }}
+                    styles={{
+                      menu: (base: any) => ({
+                        ...base,
+                        borderRadius: "4px",
+                        boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+                        backgroundColor: "#fff",
+                      }),
+                      option: (base: any, { isFocused, isSelected }: any) => ({
+                        ...base,
+                        backgroundColor: isSelected
+                          ? "var(--primary-500)"
+                          : isFocused
+                          ? "var(--primary-100)"
+                          : "#fff",
+                        color: isSelected ? "#fff" : "#333",
+                        cursor: "pointer",
+                      }),
+                    }}
+                  />
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
+                >
+                  Assign to Agent Check Bulk
                 </button>
               </form>
               {/* END FORM */}
