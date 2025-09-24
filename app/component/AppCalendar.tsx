@@ -6,6 +6,7 @@ import { RxAvatar } from "react-icons/rx";
 import { HiOutlineBookOpen } from "react-icons/hi";
 import { toast } from "react-toastify";
 
+
 type Props = {
   leadId: string;
   reloadKey?: number;
@@ -41,6 +42,7 @@ export interface TaskData {
   timer_hours: number;
   timer_minutes: number;
   type: string; // string for now
+  start_at_ca:string;
 }
 
 export default function AppCalendar({
@@ -52,8 +54,10 @@ export default function AppCalendar({
   incomingTasks,
 }: Props) {
   const [tasks, setTasks] = useState<TaskData[]>([]);
+  //console.log("TTTTTTTTTTTTT",tasks)
   // Tracks tasks that were just marked complete in this session
   const [completedMap, setCompletedMap] = useState<Record<string, boolean>>({});
+
 
   useEffect(() => {
     setTasks(incomingTasks || []);
@@ -123,12 +127,12 @@ export default function AppCalendar({
 
   return (
     <div className="w-full overflow-x-auto custom-scrollbar">
-      <button
+      {/* <button
         onClick={() => openLeadTaskInFlyout()}
         className="bg-primary-600 hover:bg-primary-700 py-3 px-4 rounded-[4px] text-sm font-medium text-white mb-2"
       >
         Filter Task
-      </button>
+      </button> */}
 
       <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 whitespace-nowrap">
         <thead className="text-xs text-[#999999] bg-white">
@@ -194,7 +198,7 @@ export default function AppCalendar({
                   <td className="px-1 py-2 md:px-3 md:py-2 border-tableBorder">
                     <div className="flex items-center gap-2">
                       <p className="text-[#232323] text-sm sm:text-base">
-                        {t?.start_at_ist || "-"}
+                        {t?.start_at_ca || "-"}
                       </p>
                     </div>
                   </td>

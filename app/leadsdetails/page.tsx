@@ -269,7 +269,7 @@ export default function Home() {
   const [lead, setLead] = useState<Lead | null>(null);
   const [isTotpPopupOpen, setIsTotpPopupOpen] = useState<boolean>(false);
   const [data, setData] = useState<any>(null);
-  console.log("LEAD SINGLE DATA", data);
+  //console.log("LEAD SINGLE DATA", data);
   const [leadActivityData, setLeadActivityData] = useState<LeadActivity>();
   const [disposition, setDisposition] = useState<Disposition[]>([]);
   const [agent, setAgent] = useState<Agent[]>([]);
@@ -291,7 +291,7 @@ export default function Home() {
  // console.log("fetched single lead data", fetchLeadActivityData);
   const [reloadKey, setReloadKey] = useState(0);
   const [docs, setDocs] = useState<LeadDocument[]>([]); // start empty
-  console.log("DDDDDDDDDDDDOOOOOOOOOOOOOOCCCCCCCCSSSSSS",docs)
+  //console.log("DDDDDDDDDDDDOOOOOOOOOOOOOOCCCCCCCCSSSSSS",docs)
   const [activityHistoryData, setActivityHistoryData] =
     useState<ActivityHistory>(null);
   const [isEditFirstLead, setIsEditFirstLead] = useState<boolean>(true);
@@ -741,12 +741,12 @@ const downloadDocument = (src: string | Blob, fileName = "image.jpg") => {
         <>
           {/* Tab content 3 */}
           <div className="container mx-auto p-4">
-            <button
+            {/* <button
               onClick={() => openLeadActivityFlyOut()}
               className="bg-primary-600 hover:bg-primary-700 py-3 px-4 rounded-[4px] text-sm font-medium text-white mb-2"
             >
               Filter Activity
-            </button>
+            </button> */}
             {fetchLeadActivityData && fetchLeadActivityData.length > 0 ? (
               fetchLeadActivityData.map((activity) => {
                 const occurred = activity.occurred_at
@@ -888,12 +888,12 @@ const downloadDocument = (src: string | Blob, fileName = "image.jpg") => {
         <>
           {/* Tab content 4 */}
           <div className="space-y-3">
-            <button
+            {/* <button
               onClick={() => openLeadDocumentInFlyOut()}
               className="bg-primary-600 hover:bg-primary-700 py-3 px-4 rounded-[4px] text-sm font-medium text-white mb-2"
             >
               Filter Document
-            </button>
+            </button> */}
             {docs.length === 0 ? (
               <p className="text-sm text-gray-500">No documents found</p>
             ) : (
@@ -986,17 +986,22 @@ const downloadDocument = (src: string | Blob, fileName = "image.jpg") => {
     return copy;
   };
 
-  const formatDateTime = (d: Date) => {
-    const pad = (n: number) => String(n).padStart(2, "0");
-    let h = d.getHours();
-    const m = pad(d.getMinutes());
-    const ampm = h >= 12 ? "pm" : "am";
-    h = h % 12 || 12;
-    const yyyy = d.getFullYear();
-    const mm = pad(d.getMonth() + 1);
-    const dd = pad(d.getDate());
-    return `${yyyy}-${mm}-${dd} ${pad(h)}:${m}${ampm}`;
-  };
+const formatDateTime = (d: Date) => {
+  const pad = (n: number) => String(n).padStart(2, "0");
+
+  let h = d.getHours();
+  const m = pad(d.getMinutes());
+  const ampm = h >= 12 ? "pm" : "am";
+  h = h % 12 || 12; // convert 0 -> 12
+
+  const yyyy = d.getFullYear();
+  const mm = pad(d.getMonth() + 1); // month (01–12)
+  const dd = pad(d.getDate());      // day (01–31)
+
+  // ✅ Format: MM-dd-yyyy hh:mmam/pm
+  return `${mm}-${dd}-${yyyy} ${pad(h)}:${m}${ampm}`;
+};
+
 
   const defaultStart = roundToNext5();
   const defaultEnd = addMinutes(defaultStart, 30); // still 30 min gap
@@ -1099,7 +1104,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
                              <FaStar />
                              <div>
                              <p className=" text-base font-medium leading-none">
-                              {data?.first_name || "-"} {data?.last_name || "-"}
+                              {data?.full_name || "-"} 
                             </p>
                             <p>{data?.address?.country || "-"}</p>
                              </div>
@@ -1171,8 +1176,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
                          <Formik
     enableReinitialize
     initialValues={{
-      first_name: data?.first_name ?? "",
-      last_name: data?.last_name ?? "",
+      full_name: data?.full_name ?? "",
       country: data?.address?.country ?? "",
       email: data?.email ?? "",
       phone: data?.phone ?? "",
@@ -1183,8 +1187,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
       note: data?.note ?? "", // ✅ Added note
     }}
     validationSchema={Yup.object({
-      first_name: Yup.string().trim().required("First name is required"),
-      last_name: Yup.string().trim().required("Last name is required"),
+      full_name: Yup.string().trim().required("Full name is required"),
       email: Yup.string()
         .trim()
         .email("Invalid email")
@@ -1203,7 +1206,8 @@ const getIdFromName = (list: any[], name?: string | null) => {
           id: data?.id,
           ...values, // ✅ includes note
         };
-
+console.log("PPPPPPPPPPPPPPPPP",payload)
+//return;
         await AxiosProvider.post("/leads/update", payload);
         toast.success("Lead updated successfully");
         setIsEditFirstLead(true);
@@ -1219,39 +1223,24 @@ const getIdFromName = (list: any[], name?: string | null) => {
     {({ isSubmitting, values, setFieldValue, setFieldTouched  }) => (
       <Form className="w-full rounded bg-primary-600 px-4 py-6 mb-6">
         {/* Name row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-white">
+        <div className="grid grid-cols-1  text-white">
           <div>
             <label className="block text-sm font-medium text-white mb-1">
-              First Name <span className=" text-red-400">*</span>
+              Full Name <span className=" text-red-400">*</span>
             </label>
             <Field
-              name="first_name"
+              name="full_name"
               type="text"
-              className="w-full border-b border-white pl-0.5 text-sm leading-6 px-0 py-0 focus:outline-none bg-transparent mb-2"
+              className="w-full border-b border-white pl-0.5 text-sm leading-6 px-0 py-0 focus:outline-none bg-transparent mb-2 placeholder-white placeholder:opacity-[0.9]"
               placeholder="Enter first name"
             />
             <ErrorMessage
-              name="first_name"
+              name="full_name"
               component="p"
               className="text-red-500 text-xs mt-1"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-white mb-1">
-              Last Name <span className=" text-red-400">*</span>
-            </label>
-            <Field
-              name="last_name"
-              type="text"
-              className="w-full border-b border-white pl-0.5 text-sm leading-6 px-0 py-0 focus:outline-none bg-transparent mb-2"
-              placeholder="Enter last name"
-            />
-            <ErrorMessage
-              name="last_name"
-              component="p"
-              className="text-red-500 text-xs mt-1"
-            />
-          </div>
+
         </div>
 
         {/* Email / Phone */}
@@ -1263,7 +1252,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
             <Field
               name="email"
               type="email"
-              className="w-full border-b border-white pl-0.5 text-sm leading-6 px-0 py-0 focus:outline-none bg-transparent text-white mb-2"
+              className="w-full border-b border-white pl-0.5 text-sm leading-6 px-0 py-0 focus:outline-none bg-transparent text-white mb-2 placeholder-white placeholder:opacity-[0.9]"
               placeholder="name@example.com"
             />
             <ErrorMessage
@@ -1279,7 +1268,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
             <Field
               name="phone"
               type="text"
-              className="w-full border-b border-white pl-0.5 text-sm leading-6 px-0 py-0 focus:outline-none bg-transparent text-white mb-2"
+              className="w-full border-b border-white pl-0.5 text-sm leading-6 px-0 py-0 focus:outline-none bg-transparent text-white mb-2 placeholder-white placeholder:opacity-[0.9]"
               placeholder="Enter mobile number"
             />
             <ErrorMessage
@@ -1298,7 +1287,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
           <Field
             name="country"
             type="text"
-            className="w-full border-b border-white pl-0.5 text-sm leading-6 px-0 py-0 focus:outline-none bg-transparent text-white mb-2"
+            className="w-full border-b border-white pl-0.5 text-sm leading-6 px-0 py-0 focus:outline-none bg-transparent text-white mb-2 placeholder-white placeholder:opacity-[0.9]"
             placeholder="Country"
           />
           <ErrorMessage
@@ -1349,7 +1338,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
     <Field
       name="city"
       type="text"
-      className="w-full border-b border-white pl-0.5 text-sm leading-6 px-0 py-0 focus:outline-none bg-transparent text-white mb-2"
+      className="w-full border-b border-white pl-0.5 text-sm leading-6 px-0 py-0 focus:outline-none bg-transparent text-white mb-2 placeholder-white placeholder:opacity-[0.9]"
       placeholder="City"
     />
     <ErrorMessage name="city" component="p" className="text-red-500 text-xs mt-1" />
@@ -1449,7 +1438,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
             as="textarea"
             name="note"
             rows={3}
-            className="w-full border-b border-white pl-0.5 text-sm leading-6 px-0 py-0 focus:outline-none bg-transparent text-white mb-2"
+            className="w-full border-b border-white pl-0.5 text-sm leading-6 px-0 py-0 focus:outline-none bg-transparent text-white mb-2 placeholder-white placeholder:opacity-[0.9]"
             placeholder="Enter notes here"
           />
           <ErrorMessage
@@ -2102,14 +2091,13 @@ classNames={{
             <Formik
               initialValues={{
                 owner: data?.agent.id || "",
-                associated_lead: data?.first_name + " " + data?.last_name || "",
+                associated_lead:  data?.full_name || "",
                 subject:
                   (selectedDropDownTaskValue
                     ? selectedDropDownTaskValue + ": "
                     : "") +
-                  (data?.first_name || "") +
-                  " " +
-                  (data?.last_name || ""),
+                  "" +
+                  (data?.full_name || ""),
                 location: "",
                 description: "",
                 start_at: defaultStart, // schedule → From
@@ -2144,6 +2132,8 @@ classNames={{
                   location: values.location,
                   description: values.description || "",
                 };
+               // console.log("VVVVVVVVVVVVVVVVVVV",payload)
+               // return;
                 await CreateTaskActivity(payload);
                 setSubmitting(false);
               }}
@@ -2233,82 +2223,82 @@ classNames={{
                     </div>
 
                     {/* ===== Schedule (stacked: From, To-readonly) ===== */}
-                    <div className="w-full md:col-span-2">
-                      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-3">
-                        Schedule
-                      </p>
+              <div className="w-full md:col-span-2">
+  <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-3">
+    Schedule
+  </p>
 
-                      {/* From */}
-                      <div className="w-full relative mb-4">
-                        <p className="text-[#0A0A0A] font-medium text-sm leading-6 mb-2">
-                          From
-                        </p>
-                        <DatePicker
-                          selected={values.start_at}
-                          onChange={(date: Date | null) => {
-                            setFieldValue("start_at", date);
-                            if (date)
-                              setFieldValue("end_at", addMinutes(date, 30)); // 🔄 +30 min
-                          }}
-                          onBlur={() => setFieldTouched("start_at", true)}
-                          name="start_at"
-                          showTimeSelect
-                          timeFormat="h:mm aa"
-                          timeIntervals={5}
-                          dateFormat="yyyy-MM-dd h:mm aa"
-                          placeholderText="yyyy-mm-dd hh:mm am/pm"
-                          className="hover:shadow-hoverInputShadow focus-border-primary 
-                !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 
-                font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
-                          popperClassName="custom-datepicker"
-                          dayClassName={(date) => {
-                            const today = new Date().toDateString();
-                            const selectedDate = values.start_at
-                              ? new Date(values.start_at).toDateString()
-                              : null;
-                            if (today === date.toDateString())
-                              return "bg-[#FFF0F1] text-[#A3000E]";
-                            if (selectedDate === date.toDateString())
-                              return "bg-[#A3000E] text-white";
-                            return "hover:bg-[#FFCCD0] hover:text-[#A3000E]";
-                          }}
-                        />
-                        {touched.start_at && (errors as any).start_at ? (
-                          <p className="text-red-500 absolute top-[85px] text-xs">
-                            {(errors as any).start_at}
-                          </p>
-                        ) : null}
-                      </div>
+  {/* From */}
+  <div className="w-full relative mb-4">
+    <p className="text-[#0A0A0A] font-medium text-sm leading-6 mb-2">
+      From
+    </p>
+    <DatePicker
+      selected={values.start_at}
+      onChange={(date: Date | null) => {
+        setFieldValue("start_at", date);
+        if (date) setFieldValue("end_at", addMinutes(date, 30)); // 🔄 +30 min
+      }}
+      onBlur={() => setFieldTouched("start_at", true)}
+      name="start_at"
+      showTimeSelect
+      timeFormat="h:mma" // ✅ 11:55pm style
+      timeIntervals={5}
+      dateFormat="MM-dd-yyyy h:mma" // ✅ 09-26-2025 11:55pm
+      placeholderText="MM-dd-yyyy hh:mmam/pm"
+      className="hover:shadow-hoverInputShadow focus-border-primary 
+        !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 
+        font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
+      popperClassName="custom-datepicker"
+      dayClassName={(date) => {
+        const today = new Date().toDateString();
+        const selectedDate = values.start_at
+          ? new Date(values.start_at).toDateString()
+          : null;
+        if (today === date.toDateString())
+          return "bg-[#FFF0F1] text-[#A3000E]";
+        if (selectedDate === date.toDateString())
+          return "bg-[#A3000E] text-white";
+        return "hover:bg-[#FFCCD0] hover:text-[#A3000E]";
+      }}
+    />
+    {touched.start_at && (errors as any).start_at ? (
+      <p className="text-red-500 absolute top-[85px] text-xs">
+        {(errors as any).start_at}
+      </p>
+    ) : null}
+  </div>
 
-                      {/* To (read-only) */}
-                      <div className="w-full relative">
-                        <p className="text-[#0A0A0A] font-medium text-sm leading-6 mb-2">
-                          To
-                        </p>
-                        <DatePicker
-                          selected={values.end_at}
-                          onChange={() => {}}
-                          onBlur={() => setFieldTouched("end_at", true)}
-                          name="end_at"
-                          showTimeSelect
-                          timeFormat="h:mm aa"
-                          timeIntervals={5}
-                          dateFormat="yyyy-MM-dd h:mm aa"
-                          placeholderText="yyyy-mm-dd hh:mm am/pm"
-                          disabled
-                          className="hover:shadow-hoverInputShadow focus-border-primary 
-                !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 
-                font-medium placeholder-[#717171] py-4 px-4 bg-gray-50 text-firstBlack cursor-not-allowed"
-                          popperClassName="custom-datepicker"
-                          dayClassName={() => "pointer-events-none"}
-                        />
-                        {touched.end_at && (errors as any).end_at ? (
-                          <p className="text-red-500 absolute top-[85px] text-xs">
-                            {(errors as any).end_at}
-                          </p>
-                        ) : null}
-                      </div>
-                    </div>
+  {/* To (read-only) */}
+  <div className="w-full relative">
+    <p className="text-[#0A0A0A] font-medium text-sm leading-6 mb-2">
+      To
+    </p>
+    <DatePicker
+      selected={values.end_at}
+      onChange={() => {}}
+      onBlur={() => setFieldTouched("end_at", true)}
+      name="end_at"
+      showTimeSelect
+      timeFormat="h:mma" // ✅ 11:55pm style
+      timeIntervals={5}
+      dateFormat="MM-dd-yyyy h:mma" // ✅ 09-26-2025 11:55pm
+      placeholderText="MM-dd-yyyy hh:mmam/pm"
+      disabled
+      className="hover:shadow-hoverInputShadow focus-border-primary 
+        !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 
+        font-medium placeholder-[#717171] py-4 px-4 bg-gray-50 text-firstBlack cursor-not-allowed"
+      popperClassName="custom-datepicker"
+      dayClassName={() => "pointer-events-none"}
+    />
+    {touched.end_at && (errors as any).end_at ? (
+      <p className="text-red-500 absolute top-[85px] text-xs">
+        {(errors as any).end_at}
+      </p>
+    ) : null}
+  </div>
+</div>
+
                     {/* ===== /Schedule ===== */}
 
                     {/* Description (optional) */}
