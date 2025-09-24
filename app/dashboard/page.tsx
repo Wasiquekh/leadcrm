@@ -9,9 +9,35 @@ import LineChartComponent from "../component/LineChartComponent";
 import PieChartComponent from "../component/PieChartComponent";
 import CountUp from "react-countup";
 import { useAuthRedirect } from "../component/hooks/useAuthRedirect";
+import AxiosProvider from "../../provider/AxiosProvider";
+import { useEffect } from "react";
 
 export default function Home() {
   const isChecking = useAuthRedirect();
+
+    const fetchData = async () => {
+    //setIsLoading(true);
+    try {
+      const response = await AxiosProvider.post(
+        "/leads/task/agent/dashboard"
+      );
+       console.log('get all dasgboard data',response);
+      //const result = response.data.data.data;
+      //console.log("BBBBBBBBBBBBBBBB", result);
+      // console.log("###########", response.data.data.pagination.totalPages);
+     // setTotalPages(response.data.data.pagination.totalPages);
+    //  setData(result);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+     // setIsError(true);
+    }
+    //  finally {
+    //   setIsLoading(false);
+    // }
+  };
+  useEffect(() => {
+    fetchData();
+  }, []);
   if (isChecking) {
     return (
       <div className="h-screen flex flex-col gap-5 justify-center items-center bg-white">
