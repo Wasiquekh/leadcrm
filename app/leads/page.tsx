@@ -849,6 +849,7 @@ useEffect(() => {
                         <td className="px-3 py-2 border border-tableBorder text-center">
   <input
     type="checkbox"
+    className="accent-primary-600"
    checked={selectedIds.includes(item.id)}
    onChange={(e) => toggleRow(item.id, e.target.checked)}
   />
@@ -1266,22 +1267,35 @@ useEffect(() => {
           {/* ----------------Table----------------------- */}
           <div className="relative overflow-x-auto shadow-lastTransaction rounded-xl sm:rounded-3xl px-1 py-6 md:p-6 !bg-white  z-10">
             {/* Search and filter table row */}
-            <div className=" flex justify-end items-center mb-6  w-full mx-auto">
-              <div className=" flex justify-center items-center gap-4">
+            <div className=" flex justify-between items-center mb-6  w-full mx-auto">
+            <div>
                 {selectedIds.length > 0 && (
-  <div className="mb-3 flex items-center gap-2">
-    <button
-      onClick={()=>assignCheckBulklead()}
-      className="py-2 px-4 bg-black text-white rounded-lg hover:bg-gray-800 active:scale-[0.99] transition"
-      title="Perform bulk action"
-    >
-      Bulk Checked Assign to Agent ({selectedIds.length})
-    </button>
-    <span className="text-sm text-gray-600">
-      {selectedIds.length} selected
-    </span>
-  </div>
+                 <div className=" flex items-center ">
+              {/* <button
+                onClick={()=>assignCheckBulklead()}
+                className="flex justify-center gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 group"
+                title="Perform bulk action"
+              >
+                Bulk Checked Assign to Agent ({selectedIds.length})
+              </button> */}
+              {/* <span className="text-sm text-gray-600">
+                {selectedIds.length} selected
+              </span> */}
+             <div
+                  className=" flex justify-center gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 group"
+                 onClick={()=>assignCheckBulklead()}
+                >
+                  <FiFilter className=" w-5 h-5 text-white group-hover:text-white" />
+                  <p className=" text-white text-base font-medium group-hover:text-white">
+                    Assign Agent Bulk ({selectedIds.length})
+                  </p>
+
+                </div>
+            </div>
 )}
+              </div>
+              <div className=" flex justify-center items-center gap-4">
+
                 <div
                   className=" flex justify-center gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 group"
                   onClick={() => createLeads()}
