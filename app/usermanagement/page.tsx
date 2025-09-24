@@ -311,18 +311,18 @@ const blockUserData = async (item: User) => {
                       >
                         <td className="px-1 md:p-3 py-2 flex md:flex-row gap-2">
                           <div>
-                            <p className="text-[#232323] text-sm sm:text-base font-medium leading-normal capitalize truncate">
+                            <p className="text-[#232323] text-sm sm:text-base  leading-normal capitalize truncate">
                               {item?.name ?? "-"}
                             </p>
                           </div>
                         </td>
                         <td className="px-2 py-1 border border-tableBorder hidden md:table-cell">
-                          <p className="text-[#232323] text-sm sm:text-base font-medium leading-normal  truncate">
+                          <p className="text-[#232323] text-sm sm:text-base  leading-normal  truncate">
                             {item?.email ?? "-"}
                           </p>
                         </td>
                         <td className="px-2 py-1 border border-tableBorder hidden md:table-cell">
-                          <p className="text-[#232323] text-sm sm:text-base font-medium leading-normal capitalize truncate">
+                          <p className="text-[#232323] text-sm sm:text-base  leading-normal capitalize truncate">
                             {item?.mobile_number ?? "-"}
                           </p>
                         </td>
