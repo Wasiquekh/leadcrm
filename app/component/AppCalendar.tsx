@@ -12,6 +12,7 @@ type Props = {
   reloadKey?: number;
   hitApi: boolean;
   setHitApi: React.Dispatch<React.SetStateAction<boolean>>;
+  openEditTask: (task: TaskData) => void;
   openLeadTaskInFlyout: () => void;
   incomingTasks: TaskData[];
 };
@@ -50,6 +51,7 @@ export default function AppCalendar({
   reloadKey = 0,
   hitApi,
   setHitApi,
+  openEditTask,
   openLeadTaskInFlyout,
   incomingTasks,
 }: Props) {
@@ -254,7 +256,7 @@ export default function AppCalendar({
                 <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
                       <button
                         type="button"
-                        onClick={() => !locked && openLeadTaskInFlyout()}
+                        onClick={() => !locked && openEditTask(t)}
                         disabled={locked}
                         aria-disabled={locked}
                         title={locked ? "Task is completed" : "Edit task"}

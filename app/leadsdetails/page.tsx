@@ -49,7 +49,7 @@ import OtpInput from "react-otp-input";
 import { FiFilter } from "react-icons/fi";
 import { LuSquareActivity } from "react-icons/lu";
 import { IoCloseOutline } from "react-icons/io5";
-import AppCalendar from "../component/AppCalendar";
+import AppCalendar, { TaskData } from "../component/AppCalendar";
 import { useSearchParams } from "next/navigation";
 import { AiOutlineSearch } from "react-icons/ai";
 import { tasks } from "firebase-functions/v2";
@@ -314,8 +314,9 @@ export default function Home() {
  const [isDocumentEdit, setIsDocumentEdit] = useState<boolean>(false)
  const [documentEditObjectData, setDocumentEditObjectData] = useState<LeadDocument>(null);
  const [isTaskEdit, setIsTaskEdit] = useState<boolean>(false);
+ const [taskEditObject, setTaskEditObject] = useState<any>(null);
 
- console.log("MMMMMMMMMMMMMMMMMMM",documentEditObjectData)
+ console.log("MMMMMMMMMMMMMMMMMMM",taskEditObject)
 
 
   //console.log("", documentName);
@@ -557,7 +558,9 @@ export default function Home() {
      setFlyoutFilterOpen(true);
     setIsDocumentEdit(true);
   }
-  const openEditTask = ()=>{
+  const openEditTask = (task: TaskData)=>{
+    setTaskEditObject(task)
+   
      setFlyoutFilterOpen(true);
      setIsTaskEdit(true);
   }
@@ -952,6 +955,7 @@ const downloadDocument = (src: string | Blob, fileName = "image.jpg") => {
             reloadKey={reloadKey}
             hitApi={hitApi}
             setHitApi={setHitApi}
+            openEditTask={openEditTask}
             openLeadTaskInFlyout={openLeadTaskInFlyout}
             incomingTasks={fileteredTaskData}
             //filteredTaskData={fileteredTaskData}
@@ -3692,6 +3696,12 @@ classNames={{
       </div>
     </form>
   </div>
+        )}
+        {isTaskEdit && 
+        (
+          <>
+          <p>task edit</p>
+          </>
         )}
       </div>
 
