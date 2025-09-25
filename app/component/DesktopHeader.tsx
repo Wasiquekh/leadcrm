@@ -24,7 +24,7 @@ const DesktopHeader = () => {
         <div className=" hidden md:w-auto md:flex md:justify-end md:items-center md:gap-7 w-auto z-10">
           <input
             type="text"
-            placeholder="Search for something"
+            placeholder="Search for email, mobile"
             className=" bg-white w-64 h-[50px] rounded-[4px] px-6 border border-[#E7E7E7] hover:shadow-hoverInputShadow focus-border-primary  placeholder-[#8BA3CB] text-[15px] leading-normal"
           />
           {/* <div className=" w-[50px] h-[50px] bg-white rounded-full flex justify-center items-center">

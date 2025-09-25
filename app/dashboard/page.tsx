@@ -25,29 +25,67 @@ export interface AgentStats {
   pending_today: number;  // Number of tasks still pending today
   total_today: number;    // Total tasks assigned for today
 }
-
-
+export interface CardsData {
+  overdue: number;
+  today: {
+    cancelled: number;
+    done: number;
+    pending: number;
+    today_ca: string;
+    total: number;
+  };
+  upcoming: number;
+}
+export interface TodayTaskList {
+  id: string;
+  lead_id: string;
+  lead_name: string;
+  start_at: string;       // ISO date string e.g. "2025-09-25T18:15:00.000Z"
+  start_at_ca: string;    // formatted datetime e.g. "09-25-2025 02:15 PM"
+  start_date_ca: string;  // formatted date e.g. "09-25-2025"
+  status: string;         // e.g. "pending", "completed", ...
+  subject: string;        // e.g. "phonecall: bhotu12"
+  type: string;           // e.g. "followup"
+}
+export interface UpcomingTaskList {
+  id: string;
+  lead_id: string;
+  lead_name: string;
+  start_at: string;       // ISO date string e.g. "2025-09-25T18:15:00.000Z"
+  start_at_ca: string;    // formatted datetime e.g. "09-25-2025 02:15 PM"
+  start_date_ca: string;  // formatted date e.g. "09-25-2025"
+  status: string;         // e.g. "pending", "completed"
+  subject: string;        // e.g. "phonecall: bhotu12"
+  type: string;           // e.g. "followup"
+}
   const storage = new StorageManager();
   const userRole = storage.getUserRole();
 export default function Home() {
   const isChecking = useAuthRedirect();
   // -------------FOR AGENT-----------
-  const [todayTask, setTodayTask] = useState<any>(0);
-  const [upcoming, setUpComping] = useState<number>(0);
-  console.log("DDDDDDDDDDDDDDDDDDDDDD",upcoming)
+const [cards, setCards] = useState<CardsData | null>(null);
+const [todayTasksListData, setTodayTasksListData] = useState<TodayTaskList[]>([]);
+const [upcomingTasks, setUpcomingTasks] = useState<UpcomingTaskList[]>([]);
+ // console.log("DDDDDDDDDDDDDDDDDDDDDD",todayTasksListData)
   // -------------END FOR AGENT-----------
   const [isError, setIsError] = useState<boolean>(false);
 // FOR ADMIN
 const [teamTaskAdmin, setTeamTaskAdmin] = useState<AgentStats[]>([]);
 // END FOR ADMIN
   // USE EFFECT AGENT
-    const fetchData = async () => {
+    const fetchAgentData = async () => {
     //setIsLoading(true);
     try {
       const response = await AxiosProvider.post(
         "/leads/task/agent/dashboard"
       );
-       console.log('get all dasgboard data',response);
+      console.log('get all agent dasgboard data',response.data.data);
+       //setTodayTaskAgent(response.data.data.cards.today)
+      // setUpCompingAgent(response.data.data.cards.today.pending)
+      setCards(response.data.data.cards)
+      setTodayTasksListData(response.data.data.lists.pending_today)
+      setUpcomingTasks(response.data.data.lists.upcoming)
+       
 
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -57,9 +95,11 @@ const [teamTaskAdmin, setTeamTaskAdmin] = useState<AgentStats[]>([]);
     //   setIsLoading(false);
     // }
   };
+ {userRole === "Agent" &&
   useEffect(() => {
-    fetchData();
+    fetchAgentData();
   }, []);
+}
   // END USE EFFECT AGENT
 
       const fetchAdminData = async () => {
@@ -79,9 +119,15 @@ const [teamTaskAdmin, setTeamTaskAdmin] = useState<AgentStats[]>([]);
     //   setIsLoading(false);
     // }
   };
+
+  {userRole === "Admin" &&
   useEffect(() => {
     fetchAdminData();
   }, []);
+}
+	 const test = (lead_id: string) => {
+  window.open(`/leadsdetails?id=${lead_id}`, "_blank"); // "_blank" = new tab
+};
   if (isChecking) {
     return (
       <div className="h-screen flex flex-col gap-5 justify-center items-center bg-white">
@@ -107,41 +153,111 @@ const [teamTaskAdmin, setTeamTaskAdmin] = useState<AgentStats[]>([]);
           <DesktopHeader />
           {/* DASHBOARD CONTENT */}
           {userRole === "Agent" &&  (
-<div className="w-full mt-12">
-  <div className="grid grid-cols-2 gap-6">
-    {/* Tab 1 */}
-    <div className="flex flex-col items-center justify-center p-6 rounded-lg bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-md">
-      <p className="text-sm font-medium opacity-80">Task for Today</p>
-      <p className="mt-2 text-xl font-semibold">{todayTask}</p>
-      <button className="mt-3 px-4 py-1.5 text-sm font-medium bg-white text-primary-600 rounded hover:bg-gray-100 transition">
-        View
-      </button>
-    </div>
+            <><div className="w-full mt-12">
+              <div className="grid grid-cols-3 gap-6">
+                {/* Tab 1 */}
+                <div className="flex flex-col items-center justify-center p-6 rounded-lg bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-md">
+                  <p className="text-sm font-medium opacity-80">Task for Today</p>
+                  <p className="mt-2 text-xl font-semibold"> {cards?.today.total ?? 0}</p>
+                </div>
 
-    {/* Tab 2 */}
-    <div className="flex flex-col items-center justify-center p-6 rounded-lg bg-gradient-to-r from-pink-500 to-red-500 text-white shadow-md">
-      <p className="text-sm font-medium opacity-80">Upcoming</p>
-      <p className="mt-2 text-xl font-semibold">{upcoming}</p>
-      <Link href="/">
-            <button className="mt-3 px-4 py-1.5 text-sm font-medium bg-white text-pink-600 rounded hover:bg-gray-100 transition">
-        View
-      </button>
-      </Link>
+                {/* Tab 2 */}
+                <div className="flex flex-col items-center justify-center p-6 rounded-lg bg-gradient-to-r from-pink-500 to-red-500 text-white shadow-md">
+                  <p className="text-sm font-medium opacity-80">Upcoming</p>
+                  <p className="mt-2 text-xl font-semibold">{cards?.upcoming ?? 0}</p>
+                </div>
+                {/* Tab 3 */}
+                <div className="flex flex-col items-center justify-center p-6 rounded-lg bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-md">
+                  <p className="text-sm font-medium opacity-80">Overdue</p>
+                  <p className="mt-2 text-xl font-semibold">{cards?.overdue ?? 0}</p>
+                </div>
 
-    </div>
-        {/* Tab 3 */}
-    <div className="flex flex-col items-center justify-center p-6 rounded-lg bg-gradient-to-r from-pink-500 to-red-500 text-white shadow-md">
-      <p className="text-sm font-medium opacity-80">Task for Today</p>
-      <p className="mt-2 text-xl font-semibold">{todayTask}</p>
-      <Link href="/">
-            <button className="mt-3 px-4 py-1.5 text-sm font-medium bg-white text-pink-600 rounded hover:bg-gray-100 transition">
-        View
-      </button>
-      </Link>
 
+
+              </div>
+            </div>
+              {/* TABLE TASK FOR TODAY */}
+              <h1 className=" mt-5">Table Task for Today</h1>
+              <div className="overflow-x-auto rounded-lg shadow bg-white mt-2">
+                <table className="min-w-full text-sm text-left">
+                  <thead className="bg-gray-100 text-gray-700 font-semibold">
+                    <tr>
+                      <th className="p-3">Lead Name</th>
+                      <th className="p-3">Subject</th>
+                      <th className="p-3">Type</th>
+                      <th className="p-3">Status</th>
+                      <th className="p-3">Start At</th>
+                      <th className="p-3">Start Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {todayTasksListData.length > 0 ? (
+                      todayTasksListData.map((task) => (
+                        <tr key={task.id} className="border-t hover:bg-gray-50">
+                          <td
+                           onClick={() => test(task.lead_id)}
+                          className="p-3 cursor-pointer">{task.lead_name}</td>
+                          <td className="p-3">{task.subject}</td>
+                          <td className="p-3 capitalize">{task.type}</td>
+                          <td className="p-3 capitalize">{task.status}</td>
+                          <td className="p-3">{task.start_at_ca}</td>
+                          <td className="p-3">{task.start_date_ca}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td className="p-3 text-center text-gray-500" colSpan={6}>
+                          No tasks for today
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* TABLE FOR UPCOMING  */}
+               <h1 className=" mt-5">Table Upcoming Task</h1>
+               <div className="overflow-x-auto rounded-lg shadow bg-white mt-6">
+      <table className="min-w-full text-sm text-left">
+        <thead className="bg-gray-100 text-gray-700 font-semibold">
+          <tr>
+            <th className="p-3">Lead Name</th>
+            <th className="p-3">Subject</th>
+            <th className="p-3">Type</th>
+            <th className="p-3">Status</th>
+            <th className="p-3">Start At</th>
+            <th className="p-3">Start Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {upcomingTasks.length > 0 ? (
+            upcomingTasks.map((task) => (
+              <tr key={task.id} className="border-t hover:bg-gray-50">
+                <td
+               onClick={() => test(task.lead_id)}
+                className="p-3 cursor-pointer">{task.lead_name}</td>
+                <td className="p-3">{task.subject}</td>
+                <td className="p-3 capitalize">{task.type}</td>
+                <td className="p-3 capitalize">{task.status}</td>
+                <td className="p-3">{task.start_at_ca}</td>
+                <td className="p-3">{task.start_date_ca}</td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td className="p-3 text-center text-gray-500" colSpan={6}>
+                No upcoming tasks
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
     </div>
-  </div>
-</div>
+              
+              </>
+
+
+// CODE FOR ADMIN
           )}
 {userRole === "Admin" && (
            <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
@@ -241,487 +357,7 @@ const [teamTaskAdmin, setTeamTaskAdmin] = useState<AgentStats[]>([]);
 
 
             
-          <div className=" w-full flex flex-col md:flex-row md:justify-between mb-4 mt-12">
-            <div className=" w-full md:w-[69.5%]">
-              <div className="flex flex-col md:flex-row justify-between mb-5">
-                <div className="w-full md:w-[49.5%] shadow-dashboardShadow rounded-xl bg-white p-4 mb-5 md:mb-0 ">
-                  <div className="flex justify-between mb-3">
-                    <Image
-                      src="/images/maroonIcon.svg"
-                      alt="side desgin"
-                      width={50}
-                      height={50}
-                      className=""
-                    />
-                    <Image
-                      src="/images/tooltip.svg"
-                      alt="side desgin"
-                      width={30}
-                      height={30}
-                      className=""
-                    />
-                  </div>
-                  <p className="text-textGrey text-sm font-medium mb-3">
-                    Total Revenue
-                  </p>
-                  <p className="text-firstBlack text-[40px] font-bold mb-3">
-                    <CountUp
-                      start={0}
-                      end={154140}
-                      duration={2}
-                      separator=","
-                      decimals={2}
-                      prefix="$"
-                    />
-                  </p>
-                  <div className="flex gap-4 items-center mb-3">
-                    <Image
-                      src="/images/activity.svg"
-                      alt="side desgin"
-                      width={70}
-                      height={70}
-                      className=""
-                    />
-                    <p className="text-textGrey text-sm font-medium">
-                      Activity from July 1st to July 31th
-                    </p>
-                  </div>
-                  <div className=" border border-b-[#99B2C64A]"></div>
-                  <div className="flex gap-2 items-center py-5 px-2">
-                    <p className="text-base text-firstBlack font-semibold">
-                      View Report
-                    </p>
-                    <GoArrowRight />
-                  </div>
-                </div>
-                <div className="w-full md:w-[49.5%] shadow-dashboardShadow rounded-xl bg-white p-4 ">
-                  <div className="flex justify-between mb-3">
-                    <Image
-                      src="/images/yellowIcon.svg"
-                      alt="side desgin"
-                      width={50}
-                      height={50}
-                      className=""
-                    />
-                    <Image
-                      src="/images/tooltip.svg"
-                      alt="side desgin"
-                      width={30}
-                      height={30}
-                      className=""
-                    />
-                  </div>
-                  <p className="text-textGrey text-sm font-medium mb-3">
-                    Total Audience
-                  </p>
-                  <p className="text-firstBlack text-[40px] font-bold mb-3">
-                    <CountUp
-                      start={0}
-                      end={148.043}
-                      duration={2}
-                      separator=","
-                      decimals={2}
-                      prefix=""
-                    />
-                  </p>
-                  <div className="flex gap-4 items-center mb-3">
-                    <Image
-                      src="/images/activity.svg"
-                      alt="side desgin"
-                      width={70}
-                      height={70}
-                      className=""
-                    />
-                    <p className="text-textGrey text-sm font-medium">
-                      Activity from July 1st to July 31th
-                    </p>
-                  </div>
-                  <div className=" border border-b-[#99B2C64A]"></div>
-                  <div className="flex gap-2 items-center py-5 px-2">
-                    <p className="text-base text-firstBlack font-semibold">
-                      View Report
-                    </p>
-                    <GoArrowRight />
-                  </div>
-                </div>
-              </div>
-              <div className="shadow-dashboardShadow rounded-xl bg-white p-5 mb-5 md:mb-0">
-                <div className="flex flex-col md:flex-row justify-between">
-                  <p className="text-2xl font-bold text-firstBlack mb-2 md:mb-0">
-                    Advanced Insights
-                  </p>
-                  <div className="flex gap-5">
-                    <div className="flex p-2 px-3 items-center gap-2 border-[1.5px] border-[#F1F5F7] rounded-lg">
-                      <MdOutlineCircle className="w-3 text-[#8571F4]" />
-                      <p className=" text-textGrey text-sm font-medium">
-                        Total Views
-                      </p>
-                    </div>
-                    <div className="flex p-2 px-3 items-center gap-2 border-[1.5px] border-[#F1F5F7] rounded-lg">
-                      <MdOutlineCircle className="w-3 text-[#C686F8]" />
-                      <p className=" text-textGrey text-sm font-medium">
-                        Product Sales
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <LineChartComponent />
-                {/* <Image
-                                    src="/images/bars.svg"
-                                    alt="side desgin"
-                                    width={100}
-                                    height={100}
-                                    className=" w-full h-full"
-                                /> */}
-              </div>
-            </div>
-            <div className=" w-full md:w-[29.5%] bg-white rounded-xl shadow-dashboardShadow p-4">
-              <p className="text-firstBlack text-xl font-bold">Sales History</p>
-              <div className="relative overflow-x-auto">
-                <table className="w-full  text-left">
-                  <thead className=""></thead>
-                  <tbody>
-                    <tr className="bg-white border-b border-[#F1F5F7]">
-                      <td scope="row" className=" py-3 ">
-                        <span className="block text-base font-semibold text-firstBlack">
-                          Domain Purchase
-                        </span>
-                        <span className="block text-textGrey text-sm font-medium">
-                          Nigeria
-                        </span>
-                      </td>
-                      <td className="">
-                        <div className=" flex gap-1 items-center">
-                          <IoCheckmarkCircleSharp className="text-primary-500" />
-                          <p className=" text-textGrey text-sm font-medium">
-                            paid
-                          </p>
-                        </div>
-                      </td>
-                      <td className=" text-sm text-[#4B5675] font-semibold">
-                        $ 59,99
-                      </td>
-                    </tr>
-                    <tr className="bg-white border-b border-[#F1F5F7]">
-                      <td scope="row" className=" py-3 ">
-                        <span className="block text-base font-semibold text-firstBlack">
-                          Domain Purchase
-                        </span>
-                        <span className="block text-textGrey text-sm font-medium">
-                          Nigeria
-                        </span>
-                      </td>
-                      <td className="">
-                        <div className=" flex gap-1 items-center">
-                          <IoCheckmarkCircleSharp className="text-primary-500" />
-                          <p className=" text-textGrey text-sm font-medium">
-                            paid
-                          </p>
-                        </div>
-                      </td>
-                      <td className=" text-sm text-[#4B5675] font-semibold">
-                        $ 59,99
-                      </td>
-                    </tr>
-                    <tr className="bg-white border-b border-[#F1F5F7]">
-                      <td scope="row" className=" py-3 ">
-                        <span className="block text-base font-semibold text-firstBlack">
-                          Premium Package
-                        </span>
-                        <span className="block text-textGrey text-sm font-medium">
-                          Kenya
-                        </span>
-                      </td>
-                      <td className="">
-                        <div className=" flex gap-1 items-center">
-                          <IoCheckmarkCircleSharp className="text-primary-500" />
-                          <p className=" text-textGrey text-sm font-medium">
-                            paid
-                          </p>
-                        </div>
-                      </td>
-                      <td className=" text-sm text-[#4B5675] font-semibold">
-                        $ 59,99
-                      </td>
-                    </tr>
-                    <tr className="bg-white border-b border-[#F1F5F7]">
-                      <td scope="row" className=" py-3 ">
-                        <span className="block text-base font-semibold text-firstBlack">
-                          Domain Purchase
-                        </span>
-                        <span className="block text-textGrey text-sm font-medium">
-                          South Africa
-                        </span>
-                      </td>
-                      <td className="">
-                        <div className=" flex gap-1 items-center">
-                          <IoCheckmarkCircleSharp className="text-primary-500" />
-                          <p className=" text-textGrey text-sm font-medium">
-                            paid
-                          </p>
-                        </div>
-                      </td>
-                      <td className=" text-sm text-[#4B5675] font-semibold">
-                        $ 59,99
-                      </td>
-                    </tr>
-                    <tr className="bg-white border-b border-[#F1F5F7]">
-                      <td scope="row" className=" py-3 ">
-                        <span className="block text-base font-semibold text-firstBlack">
-                          Investment Guide
-                        </span>
-                        <span className="block text-textGrey text-sm font-medium">
-                          Ghana
-                        </span>
-                      </td>
-                      <td className="">
-                        <div className=" flex gap-1 items-center">
-                          <IoCheckmarkCircleSharp className="text-primary-500" />
-                          <p className=" text-textGrey text-sm font-medium">
-                            paid
-                          </p>
-                        </div>
-                      </td>
-                      <td className=" text-sm text-[#4B5675] font-semibold">
-                        $ 59,99
-                      </td>
-                    </tr>
-                    <tr className="bg-white border-b border-[#F1F5F7]">
-                      <td scope="row" className=" py-3 ">
-                        <span className="block text-base font-semibold text-firstBlack">
-                          Go To Market
-                        </span>
-                        <span className="block text-textGrey text-sm font-medium">
-                          Egypt
-                        </span>
-                      </td>
-                      <td className="">
-                        <div className=" flex gap-1 items-center">
-                          <IoCheckmarkCircleSharp className="text-primary-500" />
-                          <p className=" text-textGrey text-sm font-medium">
-                            paid
-                          </p>
-                        </div>
-                      </td>
-                      <td className=" text-sm text-[#4B5675] font-semibold">
-                        $ 59,99
-                      </td>
-                    </tr>
-                    <tr className="bg-white border-b border-[#F1F5F7]">
-                      <td scope="row" className=" py-3 ">
-                        <span className="block text-base font-semibold text-firstBlack">
-                          Website Design
-                        </span>
-                        <span className="block text-textGrey text-sm font-medium">
-                          Tanzania
-                        </span>
-                      </td>
-                      <td className="">
-                        <div className=" flex gap-1 items-center">
-                          <IoCheckmarkCircleSharp className="text-primary-500" />
-                          <p className=" text-textGrey text-sm font-medium">
-                            paid
-                          </p>
-                        </div>
-                      </td>
-                      <td className=" text-sm text-[#4B5675] font-semibold">
-                        $ 59,99
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <p className="text-center py-6 text-xl font-bold text-firstBlack">
-                Conversation Rate
-              </p>
-              <PieChartComponent />
-              {/* <Image
-                                src="/images/chart.svg"
-                                alt="side desgin"
-                                width={100}
-                                height={100}
-                                className=" w-full mb-5"
-                            /> */}
-
-              <div className=" flex gap-3 justify-center items-center mb-6">
-                <p className="text-[13px] font-semibold text-primary-500">
-                  +3,5%
-                </p>
-                <p className="text-firstBlack text-sm font-medium">
-                  latest activity
-                </p>
-              </div>
-              <div className="flex justify-between">
-                <div className="flex justify-center  p-2  items-center gap-1 border-[1.5px] border-firstBlack rounded-lg w-[32%]">
-                  <MdOutlineCircle className="w-3 text-[#CD95F9] " />
-                  <p className=" text-firstBlack text-sm font-medium">
-                    Audience
-                  </p>
-                </div>
-                <div className="flex justify-center  p-2  items-center gap-1 border-[1.5px] border-firstBlack rounded-lg w-[32%]">
-                  <MdOutlineCircle className="w-3 text-[#86F3A6] " />
-                  <p className=" text-firstBlack text-sm font-medium">
-                    Visitors
-                  </p>
-                </div>
-                <div className="flex justify-center  p-2  items-center gap-1 border-[1.5px] border-firstBlack rounded-lg w-[32%]">
-                  <MdOutlineCircle className="w-3 text-[#FBCFEE] " />
-                  <p className=" text-firstBlack text-sm font-medium">Sales</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="relative overflow-x-auto bg-white rounded-xl shadow-dashboardShadow p-4 ">
-            <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-              <thead className=" border border-[#F1F5F7] rounded text-textGrey text-[13px] font-semibold">
-                <tr>
-                  <th scope="col" className="px-6 py-3">
-                    No.
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    Name
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    Price
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    Status
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    Date
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    Rating
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    Details
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="bg-white border border-b-[#F1F5F7] text-[13px] font-medium text-firstBlack">
-                  <td className="px-6 py-4">01</td>
-                  <td className="px-6 py-4">Innovative Cover</td>
-                  <td className="px-6 py-4">$135,00</td>
-                  <td className="px-6 py-4">
-                    <div className="inline-flex items-center gap-1 border rounded font-semibold border-[#D9E1E7] py-2 px-3 w-auto">
-                      <IoCheckmarkCircleSharp className="text-primary-500" />
-                      View Details
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-1">
-                      <p className=" text-textGrey">11/02/2023</p>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <Image
-                      src="/images/cell.svg"
-                      alt="side desgin"
-                      width={100}
-                      height={100}
-                      className=""
-                    />
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="inline-block border rounded font-semibold border-[#D9E1E7] py-2 px-3 w-auto">
-                      View Details
-                    </div>
-                  </td>
-                </tr>
-                <tr className="bg-white border border-b-[#F1F5F7] text-[13px] font-medium text-firstBlack">
-                  <td className="px-6 py-4">02</td>
-                  <td className="px-6 py-4">Process Blueprint</td>
-                  <td className="px-6 py-4">$135,00</td>
-                  <td className="px-6 py-4">
-                    <div className="inline-flex items-center gap-1 border rounded font-semibold border-[#D9E1E7] py-2 px-3 w-auto">
-                      <IoCheckmarkCircleSharp className="text-primary-500" />
-                      View Details
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-1">
-                      <p className=" text-textGrey">11/02/2023</p>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <Image
-                      src="/images/cell.svg"
-                      alt="side desgin"
-                      width={100}
-                      height={100}
-                      className=""
-                    />
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="inline-block border rounded font-semibold border-[#D9E1E7] py-2 px-3 w-auto">
-                      View Details
-                    </div>
-                  </td>
-                </tr>
-                <tr className="bg-white border border-b-[#F1F5F7] text-[13px] font-medium text-firstBlack">
-                  <td className="px-6 py-4">03</td>
-                  <td className="px-6 py-4">Identity Designs</td>
-                  <td className="px-6 py-4">$135,00</td>
-                  <td className="px-6 py-4">
-                    <div className="inline-flex items-center gap-1 border rounded font-semibold border-[#D9E1E7] py-2 px-3 w-auto">
-                      <IoCheckmarkCircleSharp className="text-primary-500" />
-                      View Details
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-1">
-                      <p className=" text-textGrey">11/02/2023</p>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <Image
-                      src="/images/cell.svg"
-                      alt="side desgin"
-                      width={100}
-                      height={100}
-                      className=""
-                    />
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="inline-block border rounded font-semibold border-[#D9E1E7] py-2 px-3 w-auto">
-                      View Details
-                    </div>
-                  </td>
-                </tr>
-                <tr className="bg-white border border-b-[#F1F5F7] text-[13px] font-medium text-firstBlack">
-                  <td className="px-6 py-4">04</td>
-                  <td className="px-6 py-4">Artistic Cover</td>
-                  <td className="px-6 py-4">$135,00</td>
-                  <td className="px-6 py-4">
-                    <div className="inline-flex items-center gap-1 border rounded font-semibold border-[#D9E1E7] py-2 px-3 w-auto">
-                      <IoCheckmarkCircleSharp className="text-primary-500" />
-                      View Details
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-1">
-                      <p className=" text-textGrey">11/02/2023</p>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <Image
-                      src="/images/cell.svg"
-                      alt="side desgin"
-                      width={100}
-                      height={100}
-                      className=""
-                    />
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="inline-block border rounded font-semibold border-[#D9E1E7] py-2 px-3 w-auto">
-                      View Details
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+       
         </div>
       </div>
       <div className="absolute bottom-0 right-0">

@@ -576,10 +576,10 @@ useEffect(() => {
   //   }
   // };
 
-  const test = (id: string) => {
-   // console.log("IDDDDDDDDDDDDDDDDDDDDDD", id);
-    router.push(`/leadsdetails?id=${id}`);
-  };
+const test = (id: string) => {
+  window.open(`/leadsdetails?id=${id}`, "_blank"); // "_blank" = new tab
+};
+
   // if (isChecking) {
   //   return (
   //     <div className="h-screen flex flex-col gap-5 justify-center items-center bg-white">
@@ -1132,8 +1132,10 @@ useEffect(() => {
                                 className="box"
                               />
                             </div>
-                            <div>
-                              <p className="text-[#232323] text-sm sm:text-base font-medium leading-normal capitalize">
+                            <div className="cursor-pointer"
+                              onClick={() => test(item.id)}>
+                              <p
+                              className="text-[#232323] text-sm sm:text-base font-medium leading-normal capitalize">
                                 {item?.full_name ?? "-"}
                               </p>
                             </div>
@@ -1168,7 +1170,7 @@ useEffect(() => {
                         {/* Action */}
                         <td className="px-3 py-2 border border-tableBorder md:table-cell">
                           <div className="flex gap-1 md:gap-2 justify-center md:justify-start">
-                            <button
+                            {/* <button
                               onClick={() => test(item.id)}
                               className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"
                             >
@@ -1176,7 +1178,7 @@ useEffect(() => {
                               <span className="text-xs sm:text-sm text-white hover:text-white">
                                 View Details
                               </span>
-                            </button>
+                            </button> */}
                             <button
                               onClick={() => editLead(item)}
                               className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"
@@ -1465,8 +1467,10 @@ useEffect(() => {
                                 className="box"
                               />
                             </div>
-                            <div>
-                              <p className="text-[#232323] text-sm sm:text-base font-medium leading-normal capitalize">
+                            <div 
+                             onClick={() => test(item.id)}
+                            >
+                              <p className="text-[#232323] text-sm sm:text-base font-medium leading-normal capitalize cursor-pointer">
                                 {item?.full_name ?? "-"}
                               </p>
                             </div>
@@ -1497,7 +1501,7 @@ useEffect(() => {
                         {/* Action */}
                         <td className="px-3 py-2 border border-tableBorder md:table-cell">
                           <div className="flex gap-1 md:gap-2 justify-center md:justify-start">
-                            <button
+                            {/* <button
                               onClick={() => test(item.id)}
                               className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"
                             >
@@ -1505,7 +1509,7 @@ useEffect(() => {
                               <span className="text-xs sm:text-sm text-white hover:text-white">
                                 View Details
                               </span>
-                            </button>
+                            </button> */}
                              {/* <button
                               onClick={() => assignAgent(item.id)}
                               className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"

@@ -76,6 +76,7 @@ export default function AppCalendar({
           lead_id: leadId,
         });
         setTasks(res.data.data.task || []);
+        console.log("AAAAAAAAAAAAAAAAAAAA",res)
         // Rebuild completedMap from API payload too
         const init: Record<string, boolean> = {};
         (res.data?.data?.task || []).forEach((t: TaskData) => {
@@ -176,6 +177,14 @@ export default function AppCalendar({
                 </span>
               </div>
             </th>
+                        <th scope="col" className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+              <div className="flex items-center gap-2">
+                <HiOutlineBookOpen className="w-5 h-5 sm:w-6 sm:h-6" />
+                <span className="font-semibold text-secondBlack text-lg sm:text-base">
+                  Action
+                </span>
+              </div>
+            </th>
           </tr>
         </thead>
 
@@ -241,6 +250,9 @@ export default function AppCalendar({
                         {locked ? "Completed" : "Mark done"}
                       </span> */}
                     </label>
+                  </td>
+                <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+              <button>Edit</button>
                   </td>
                 </tr>
               );
