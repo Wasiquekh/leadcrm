@@ -3764,6 +3764,14 @@ classNames={{
       };
 
       console.log("UPDATE TASK PAYLOAD =>", payload);
+     try {
+      await AxiosProvider.post("/leads/tasks/edit", payload);
+      toast.success("Lead task is updated");
+      setHitApi(!hitApi);
+      closeFlyOut();
+    } catch (error: any) {
+      toast.error("Lead task is not updated");
+    }
       // TODO: call your update API here instead of console:
       // await UpdateTaskActivity(payload);
     } else {

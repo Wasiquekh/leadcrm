@@ -2392,7 +2392,7 @@ const test = (id: string) => {
     // e.g. setFilters(clean); fetchList(1, clean);
     try {
       const response = await AxiosProvider.post(
-        "/leads/filter?page=${page}&pageSize=${pageSize}",
+        `/leads/filter?page=${page}&pageSize=${pageSize}`,
         values
       );
       console.log("FILTERED VALUE", response.data.data.data);
