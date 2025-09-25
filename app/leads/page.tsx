@@ -1018,7 +1018,7 @@ useEffect(() => {
         <>
           {/* Tab content 3 */}
 
-                              <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 whitespace-nowrap">
+              <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 whitespace-nowrap">
                 <thead className="text-xs text-[#999999] bg-white">
                   <tr className="border border-tableBorder">
                     {/* Name - Birth Date: Always Visible */}

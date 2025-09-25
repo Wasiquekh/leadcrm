@@ -2235,9 +2235,6 @@ classNames={{
 
   {/* From */}
   <div className="w-full relative mb-4">
-    <p className="text-[#0A0A0A] font-medium text-sm leading-6 mb-2">
-      From
-    </p>
 <div className="w-full relative mb-4">
   <p className="text-[#0A0A0A] font-medium text-sm leading-6 mb-2">
     From

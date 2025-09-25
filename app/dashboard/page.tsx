@@ -3,7 +3,7 @@ import Image from "next/image";
 import LeftSideBar from "../component/LeftSideBar";
 import DesktopHeader from "../component/DesktopHeader";
 import { GoArrowRight } from "react-icons/go";
-import { MdOutlineCall, MdOutlineCircle, MdRemoveRedEye } from "react-icons/md";
+import { MdOutlineCall, MdOutlineCircle, MdOutlineFileDownloadDone, MdPendingActions, MdRemoveRedEye } from "react-icons/md";
 import { IoCheckmarkCircleSharp } from "react-icons/io5";
 import LineChartComponent from "../component/LineChartComponent";
 import PieChartComponent from "../component/PieChartComponent";
@@ -15,6 +15,7 @@ import Link from "next/link";
 import StorageManager from "../../provider/StorageManager";
 import { RxAvatar } from "react-icons/rx";
 import { LiaArrowCircleDownSolid } from "react-icons/lia";
+import { LuAlarmClock } from "react-icons/lu";
 
 export interface AgentStats {
   agent_id: string;       // Unique identifier for the agent (UUID)
@@ -162,7 +163,7 @@ const [teamTaskAdmin, setTeamTaskAdmin] = useState<AgentStats[]>([]);
                       className="px-2 py-1 border border-tableBorder hidden md:table-cell"
                     >
                       <div className="flex items-center gap-2">
-                        <MdOutlineCall className="w-5 h-5" />
+                        <MdOutlineFileDownloadDone  className="w-5 h-5" />
                         <div className="font-semibold text-firstBlack text-base leading-normal">
                           Done
                         </div>
@@ -173,7 +174,7 @@ const [teamTaskAdmin, setTeamTaskAdmin] = useState<AgentStats[]>([]);
                       className="px-2 py-1 border border-tableBorder hidden md:table-cell"
                     >
                       <div className="flex items-center gap-2">
-                        <MdOutlineCall className="w-5 h-5" />
+                        <MdPendingActions className="w-5 h-5" />
                         <div className="font-semibold text-firstBlack text-base leading-normal">
                           Pending
                         </div>
@@ -184,7 +185,7 @@ const [teamTaskAdmin, setTeamTaskAdmin] = useState<AgentStats[]>([]);
                       className="px-2 py-1 border border-tableBorder hidden md:table-cell"
                     >
                       <div className="flex items-center gap-2">
-                        <MdOutlineCall className="w-5 h-5" />
+                        <LuAlarmClock className="w-5 h-5" />
                         <div className="font-semibold text-firstBlack text-base leading-normal">
                         Overdue
                         </div>
