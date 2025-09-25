@@ -306,6 +306,7 @@ export default function Home() {
   const [fileteredTaskData, setFilteredTasKData] = useState<[]>([]);
  // console.log("DDDDDDDDDDDDDDDDDDLLLLLLLLLLLLLLLL", fileteredTaskData);
  const [isleadPropertyEdit, setIsLeadPropertyEdit] = useState<boolean>(true)
+ const [isDocumentEdit, setIsDocumentEdit] = useState<boolean>(false)
 
 
   //console.log("", documentName);
@@ -542,6 +543,10 @@ export default function Home() {
     setUpdateActivityHistory(true);
     setActivityHistoryData(activity);
   };
+  const openEditDocumentFlyOut = ()=>{
+     setFlyoutFilterOpen(true);
+    setIsDocumentEdit(true);
+  }
   const closeFlyOut = () => {
     setActivity(false);
     setTask(false);
@@ -551,6 +556,7 @@ export default function Home() {
     setIsActvityFilter(false);
     setIsTaskFilter(false);
     setIsDocumentFilter(false);
+     setIsDocumentEdit(false);
   };
   const handleChangepagination = (newPage: number) => {
     if (newPage > 0 && newPage <= totalPages) {
@@ -903,7 +909,7 @@ const downloadDocument = (src: string | Blob, fileName = "image.jpg") => {
                   className="grid grid-cols-[30%_70%] gap-4 border border-[#DFEAF2] rounded-[6px] p-3"
                 >
                   {/* Left Column: Notes */}
-                  <div className="flex items-start">
+                  <div className="flex items-center">
                     <p className="text-base text-secondBlack whitespace-pre-wrap capitalize">
                       {d.notes || "—"}
                     </p>
@@ -931,7 +937,7 @@ const downloadDocument = (src: string | Blob, fileName = "image.jpg") => {
                     >
                       Download
                     </a>
-
+<button onClick={()=>openEditDocumentFlyOut()}>Edit</button>
                    
                     <a
                       onClick={() => deleteDocument(d)}
@@ -1009,7 +1015,7 @@ const isSameDay = (a?: Date | null, b?: Date | null) =>
 
 
   const defaultStart = roundToNext5();
-  const defaultEnd = addMinutes(defaultStart, 30); // still 30 min gap
+  const defaultEnd = addMinutes(defaultStart, 15); // still 30 min gap
 
   // helpers (put inside the component)
 const findById = (list: any[], id: string | number) =>
@@ -2243,7 +2249,7 @@ classNames={{
     selected={values.start_at}
     onChange={(date: Date | null) => {
       setFieldValue("start_at", date);
-      if (date) setFieldValue("end_at", addMinutes(date, 30)); // 🔄 +30 min
+      if (date) setFieldValue("end_at", addMinutes(date, 15)); // 🔄 +30 min
     }}
     onBlur={() => setFieldTouched("start_at", true)}
     name="start_at"
@@ -3544,6 +3550,8 @@ classNames={{
             </Formik>
           </div>
         )}
+        {isDocumentEdit && 
+        (<h1>DOCUMENT EDIT</h1>)}
       </div>
 
       {/* FITLER FLYOUT END */}
