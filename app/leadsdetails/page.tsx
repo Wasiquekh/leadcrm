@@ -1001,6 +1001,11 @@ const formatDateTime = (d: Date) => {
   // ✅ Format: MM-dd-yyyy hh:mmam/pm
   return `${mm}-${dd}-${yyyy} ${pad(h)}:${m}${ampm}`;
 };
+const isSameDay = (a?: Date | null, b?: Date | null) =>
+  !!a && !!b &&
+  a.getFullYear() === b.getFullYear() &&
+  a.getMonth() === b.getMonth() &&
+  a.getDate() === b.getDate();
 
 
   const defaultStart = roundToNext5();
@@ -2233,35 +2238,54 @@ classNames={{
     <p className="text-[#0A0A0A] font-medium text-sm leading-6 mb-2">
       From
     </p>
-    <DatePicker
-      selected={values.start_at}
-      onChange={(date: Date | null) => {
-        setFieldValue("start_at", date);
-        if (date) setFieldValue("end_at", addMinutes(date, 30)); // 🔄 +30 min
-      }}
-      onBlur={() => setFieldTouched("start_at", true)}
-      name="start_at"
-      showTimeSelect
-      timeFormat="h:mma" // ✅ 11:55pm style
-      timeIntervals={5}
-      dateFormat="MM-dd-yyyy h:mma" // ✅ 09-26-2025 11:55pm
-      placeholderText="MM-dd-yyyy hh:mmam/pm"
-      className="hover:shadow-hoverInputShadow focus-border-primary 
-        !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 
-        font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
-      popperClassName="custom-datepicker"
-      dayClassName={(date) => {
-        const today = new Date().toDateString();
-        const selectedDate = values.start_at
-          ? new Date(values.start_at).toDateString()
-          : null;
-        if (today === date.toDateString())
-          return "bg-[#FFF0F1] text-[#A3000E]";
-        if (selectedDate === date.toDateString())
-          return "bg-[#A3000E] text-white";
-        return "hover:bg-[#FFCCD0] hover:text-[#A3000E]";
-      }}
-    />
+<div className="w-full relative mb-4">
+  <p className="text-[#0A0A0A] font-medium text-sm leading-6 mb-2">
+    From
+  </p>
+  <DatePicker
+    selected={values.start_at}
+    onChange={(date: Date | null) => {
+      setFieldValue("start_at", date);
+      if (date) setFieldValue("end_at", addMinutes(date, 30)); // 🔄 +30 min
+    }}
+    onBlur={() => setFieldTouched("start_at", true)}
+    name="start_at"
+    showTimeSelect
+    timeFormat="h:mma" // ✅ 11:55pm style
+    timeIntervals={5}
+    dateFormat="MM-dd-yyyy h:mma" // ✅ 09-26-2025 11:55pm
+    placeholderText="MM-dd-yyyy hh:mmam/pm"
+    className="hover:shadow-hoverInputShadow focus-border-primary !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
+    popperClassName="custom-datepicker"
+    dayClassName={(date) => {
+      const today = new Date().toDateString();
+      const selectedDate = values.start_at
+        ? new Date(values.start_at).toDateString()
+        : null;
+      if (today === date.toDateString())
+        return "bg-[#FFF0F1] text-[#A3000E]";
+      if (selectedDate === date.toDateString())
+        return "bg-[#A3000E] text-white";
+      return "hover:bg-[#FFCCD0] hover:text-[#A3000E]";
+    }}
+
+    /* 👇 ONLY THESE TWO ADDED — no UI/CSS changes */
+    minDate={new Date()}  // disable past days
+    filterTime={(time: Date) =>
+      isSameDay(values.start_at, new Date())
+        ? time.getTime() >= roundToNext5().getTime() // disable past times today
+        : true // all times allowed on future days
+    }
+  />
+  {touched.start_at && (errors as any).start_at ? (
+    <p className="text-red-500 absolute top-[85px] text-xs">
+      {(errors as any).start_at}
+    </p>
+  ) : null}
+</div>
+
+
+
     {touched.start_at && (errors as any).start_at ? (
       <p className="text-red-500 absolute top-[85px] text-xs">
         {(errors as any).start_at}

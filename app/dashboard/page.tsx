@@ -10,10 +10,17 @@ import PieChartComponent from "../component/PieChartComponent";
 import CountUp from "react-countup";
 import { useAuthRedirect } from "../component/hooks/useAuthRedirect";
 import AxiosProvider from "../../provider/AxiosProvider";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import StorageManager from "../../provider/StorageManager";
 
+  const storage = new StorageManager();
+  const userRole = storage.getUserRole();
 export default function Home() {
   const isChecking = useAuthRedirect();
+  const [todayTask, setTodayTask] = useState<any>("");
+  const [upcoming, setUpComping] = useState<number>(0);
+  console.log("DDDDDDDDDDDDDDDDDDDDDD",upcoming)
 
     const fetchData = async () => {
     //setIsLoading(true);
@@ -21,12 +28,8 @@ export default function Home() {
       const response = await AxiosProvider.post(
         "/leads/task/agent/dashboard"
       );
-       console.log('get all dasgboard data',response);
-      //const result = response.data.data.data;
-      //console.log("BBBBBBBBBBBBBBBB", result);
-      // console.log("###########", response.data.data.pagination.totalPages);
-     // setTotalPages(response.data.data.pagination.totalPages);
-    //  setData(result);
+      // console.log('get all dasgboard data',response);
+
     } catch (error) {
       console.error("Error fetching data:", error);
      // setIsError(true);
@@ -37,6 +40,25 @@ export default function Home() {
   };
   useEffect(() => {
     fetchData();
+  }, []);
+      const fetchAdminData = async () => {
+    //setIsLoading(true);
+    try {
+      const response = await AxiosProvider.post(
+        "/leads/admin/dashboard"
+      );
+       console.log('get all dasgboard data admin',response);
+
+    } catch (error) {
+      console.error("Error fetching data:", error);
+     // setIsError(true);
+    }
+    //  finally {
+    //   setIsLoading(false);
+    // }
+  };
+  useEffect(() => {
+    fetchAdminData();
   }, []);
   if (isChecking) {
     return (
@@ -62,6 +84,48 @@ export default function Home() {
           {/* Right section top row */}
           <DesktopHeader />
           {/* DASHBOARD CONTENT */}
+          {userRole === "Agent" &&  (
+<div className="w-full mt-12">
+  <div className="grid grid-cols-2 gap-6">
+    {/* Tab 1 */}
+    <div className="flex flex-col items-center justify-center p-6 rounded-lg bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-md">
+      <p className="text-sm font-medium opacity-80">Task for Today</p>
+      <p className="mt-2 text-xl font-semibold">{todayTask}</p>
+      <button className="mt-3 px-4 py-1.5 text-sm font-medium bg-white text-primary-600 rounded hover:bg-gray-100 transition">
+        View
+      </button>
+    </div>
+
+    {/* Tab 2 */}
+    <div className="flex flex-col items-center justify-center p-6 rounded-lg bg-gradient-to-r from-pink-500 to-red-500 text-white shadow-md">
+      <p className="text-sm font-medium opacity-80">Upcoming</p>
+      <p className="mt-2 text-xl font-semibold">{upcoming}</p>
+      <Link href="/">
+            <button className="mt-3 px-4 py-1.5 text-sm font-medium bg-white text-pink-600 rounded hover:bg-gray-100 transition">
+        View
+      </button>
+      </Link>
+
+    </div>
+        {/* Tab 3 */}
+    <div className="flex flex-col items-center justify-center p-6 rounded-lg bg-gradient-to-r from-pink-500 to-red-500 text-white shadow-md">
+      <p className="text-sm font-medium opacity-80">Task for Today</p>
+      <p className="mt-2 text-xl font-semibold">{todayTask}</p>
+      <Link href="/">
+            <button className="mt-3 px-4 py-1.5 text-sm font-medium bg-white text-pink-600 rounded hover:bg-gray-100 transition">
+        View
+      </button>
+      </Link>
+
+    </div>
+  </div>
+</div>
+          )}
+
+
+
+
+            
           <div className=" w-full flex flex-col md:flex-row md:justify-between mb-4 mt-12">
             <div className=" w-full md:w-[69.5%]">
               <div className="flex flex-col md:flex-row justify-between mb-5">
