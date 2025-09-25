@@ -3,7 +3,7 @@ import Image from "next/image";
 import LeftSideBar from "../component/LeftSideBar";
 import DesktopHeader from "../component/DesktopHeader";
 import { GoArrowRight } from "react-icons/go";
-import { MdOutlineCircle } from "react-icons/md";
+import { MdOutlineCall, MdOutlineCircle, MdRemoveRedEye } from "react-icons/md";
 import { IoCheckmarkCircleSharp } from "react-icons/io5";
 import LineChartComponent from "../component/LineChartComponent";
 import PieChartComponent from "../component/PieChartComponent";
@@ -13,15 +13,33 @@ import AxiosProvider from "../../provider/AxiosProvider";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import StorageManager from "../../provider/StorageManager";
+import { RxAvatar } from "react-icons/rx";
+import { LiaArrowCircleDownSolid } from "react-icons/lia";
+
+export interface AgentStats {
+  agent_id: string;       // Unique identifier for the agent (UUID)
+  agent_name: string;     // Name of the agent
+  done_today: number;     // Number of tasks completed today
+  overdue: number;        // Number of overdue tasks
+  pending_today: number;  // Number of tasks still pending today
+  total_today: number;    // Total tasks assigned for today
+}
+
 
   const storage = new StorageManager();
   const userRole = storage.getUserRole();
 export default function Home() {
   const isChecking = useAuthRedirect();
+  // -------------FOR AGENT-----------
   const [todayTask, setTodayTask] = useState<any>("");
   const [upcoming, setUpComping] = useState<number>(0);
   console.log("DDDDDDDDDDDDDDDDDDDDDD",upcoming)
-
+  // -------------END FOR AGENT-----------
+  const [isError, setIsError] = useState<boolean>(false);
+// FOR ADMIN
+const [teamTaskAdmin, setTeamTaskAdmin] = useState<AgentStats[]>([]);
+// END FOR ADMIN
+  // USE EFFECT AGENT
     const fetchData = async () => {
     //setIsLoading(true);
     try {
@@ -41,13 +59,16 @@ export default function Home() {
   useEffect(() => {
     fetchData();
   }, []);
+  // END USE EFFECT AGENT
+
       const fetchAdminData = async () => {
     //setIsLoading(true);
     try {
       const response = await AxiosProvider.post(
         "/leads/admin/dashboard"
       );
-       console.log('get all dasgboard data admin',response);
+      setTeamTaskAdmin(response.data.data.tables.team_tasks_by_agent);
+       console.log('get all dasgboard data admin',response.data.data.tables.team_tasks_by_agent);
 
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -121,7 +142,100 @@ export default function Home() {
   </div>
 </div>
           )}
+{userRole === "Admin" && (
+           <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                <thead className="text-xs text-[#999999]">
+                  <tr className="border border-tableBorder">
+                    <th
+                      scope="col"
+                      className="px-1 p-3 md:p-3 border border-tableBorder"
+                    >
+                      <div className="flex items-center gap-2">
+                        <RxAvatar className="w-5 h-5" />
+                        <div className="font-semibold text-firstBlack text-base leading-normal">
+                          Team
+                        </div>
+                      </div>
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-2 py-1 border border-tableBorder hidden md:table-cell"
+                    >
+                      <div className="flex items-center gap-2">
+                        <MdOutlineCall className="w-5 h-5" />
+                        <div className="font-semibold text-firstBlack text-base leading-normal">
+                          Done
+                        </div>
+                      </div>
+                    </th>
+                                        <th
+                      scope="col"
+                      className="px-2 py-1 border border-tableBorder hidden md:table-cell"
+                    >
+                      <div className="flex items-center gap-2">
+                        <MdOutlineCall className="w-5 h-5" />
+                        <div className="font-semibold text-firstBlack text-base leading-normal">
+                          Pending
+                        </div>
+                      </div>
+                    </th>
+                                        <th
+                      scope="col"
+                      className="px-2 py-1 border border-tableBorder hidden md:table-cell"
+                    >
+                      <div className="flex items-center gap-2">
+                        <MdOutlineCall className="w-5 h-5" />
+                        <div className="font-semibold text-firstBlack text-base leading-normal">
+                        Overdue
+                        </div>
+                      </div>
+                    </th>
+                  </tr>
+                </thead>
 
+                <tbody>
+                 
+                  {!teamTaskAdmin || teamTaskAdmin.length === 0 || isError ? (
+                    <tr>
+                      <td colSpan={8} className="text-center text-xl mt-5">
+                        <div className="mt-5">Data not found</div>
+                      </td>
+                    </tr>
+                  ) : (
+                    teamTaskAdmin.map((item: any, index: number) => (
+                      <tr
+                        key={item?.id ?? index}
+                        className="border border-tableBorder bg-white hover:bg-primary-100"
+                      >
+                        <td className="px-1 md:p-3 py-2 flex md:flex-row gap-2">
+                          <div>
+                            <p className="text-[#232323] text-sm sm:text-base  leading-normal capitalize truncate">
+                              {item?.agent_name ?? "-"}
+                            </p>
+                          </div>
+                        </td>
+                        <td className="px-2 py-1 border border-tableBorder hidden md:table-cell">
+                          <p className="text-[#232323] text-sm sm:text-base  leading-normal  truncate">
+                            {item?.done_today ?? "-"}
+                          </p>
+                        </td>
+                        <td className="px-2 py-1 border border-tableBorder hidden md:table-cell">
+                          <p className="text-[#232323] text-sm sm:text-base  leading-normal capitalize truncate">
+                            {item?.pending_today ?? "-"}
+                          </p>
+                        </td>
+                        <td className="px-2 py-1 border border-tableBorder hidden md:table-cell">
+                          <p className="text-[#232323] text-sm sm:text-base  leading-normal capitalize truncate">
+                            {item?.overdue ?? "-"}
+                          </p>
+                        </td>
+                       
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+)}
 
 
 
