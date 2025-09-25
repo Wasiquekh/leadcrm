@@ -37,6 +37,7 @@ import { toast } from "react-toastify";
 import Select from "react-select";
 import Swal from "sweetalert2";
 import Tabs from "../component/Tabs";
+import page from "../page";
 
 const axiosProvider = new AxiosProvider();
 
@@ -2392,7 +2393,8 @@ const test = (id: string) => {
     // e.g. setFilters(clean); fetchList(1, clean);
     try {
       const response = await AxiosProvider.post(
-        `/leads/filter?page=${page}&pageSize=${pageSize}`,
+         `/leads/filter?page=${page}&pageSize=${pageSize}`,
+       //  `/leads/filter`,
         values
       );
       console.log("FILTERED VALUE", response.data.data.data);
