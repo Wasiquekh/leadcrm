@@ -175,14 +175,19 @@ type UpdateLead = {
 export interface LeadDocument {
   id: string;
   file_name: string;
+  file_size: number;
   mime_type: string;
-  notes: string;
-  file_size: number; // bytes
-  storage_path: string; // e.g. "/uploads/doc/xxxx.png"
+  storage_path: string;
+  notes: string | null;
   is_image: boolean;
-  created_at: string; // ISO datetime
-  url: string;
-  download: string;
+  download: string; // presigned url
+  uploaded_by: string;
+  created_at: string;
+  updated_at: string;
+  created_at_ca: string;
+  updated_at_ca: string;
+  created_date_ca: string;
+  updated_date_ca: string;
 }
 export interface ActivityHistory {
   id: string;
@@ -307,6 +312,9 @@ export default function Home() {
  // console.log("DDDDDDDDDDDDDDDDDDLLLLLLLLLLLLLLLL", fileteredTaskData);
  const [isleadPropertyEdit, setIsLeadPropertyEdit] = useState<boolean>(true)
  const [isDocumentEdit, setIsDocumentEdit] = useState<boolean>(false)
+ const [documentEditObjectData, setDocumentEditObjectData] = useState<LeadDocument>(null);
+
+ //console.log("MMMMMMMMMMMMMMMMMMM",documentEditObjectData)
 
 
   //console.log("", documentName);
@@ -543,7 +551,8 @@ export default function Home() {
     setUpdateActivityHistory(true);
     setActivityHistoryData(activity);
   };
-  const openEditDocumentFlyOut = ()=>{
+  const openEditDocumentFlyOut = (d: LeadDocument)=>{
+    setDocumentEditObjectData(d)
      setFlyoutFilterOpen(true);
     setIsDocumentEdit(true);
   }
@@ -937,7 +946,7 @@ const downloadDocument = (src: string | Blob, fileName = "image.jpg") => {
                     >
                       Download
                     </a>
-<button onClick={()=>openEditDocumentFlyOut()}>Edit</button>
+<button onClick={()=>openEditDocumentFlyOut(d)}>Edit</button>
                    
                     <a
                       onClick={() => deleteDocument(d)}

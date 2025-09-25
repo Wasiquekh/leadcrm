@@ -151,7 +151,7 @@ const blockUserData = async (item: User) => {
       );
        console.log('get all user',response.data.data);
       const result = response.data.data.data;
-      //console.log("BBBBBBBBBBBBBBBB", result);
+      //console.log("BBBBBBBBBBBBBBBB", response);
       // console.log("###########", response.data.data.pagination.totalPages);
       setTotalPages(response.data.data.pagination.totalPages);
       setData(result);
