@@ -32,7 +32,7 @@ export interface AgentStats {
 export default function Home() {
   const isChecking = useAuthRedirect();
   // -------------FOR AGENT-----------
-  const [todayTask, setTodayTask] = useState<any>("");
+  const [todayTask, setTodayTask] = useState<any>(0);
   const [upcoming, setUpComping] = useState<number>(0);
   console.log("DDDDDDDDDDDDDDDDDDDDDD",upcoming)
   // -------------END FOR AGENT-----------
@@ -47,7 +47,7 @@ const [teamTaskAdmin, setTeamTaskAdmin] = useState<AgentStats[]>([]);
       const response = await AxiosProvider.post(
         "/leads/task/agent/dashboard"
       );
-      // console.log('get all dasgboard data',response);
+       console.log('get all dasgboard data',response);
 
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -69,7 +69,7 @@ const [teamTaskAdmin, setTeamTaskAdmin] = useState<AgentStats[]>([]);
         "/leads/admin/dashboard"
       );
       setTeamTaskAdmin(response.data.data.tables.team_tasks_by_agent);
-       console.log('get all dasgboard data admin',response.data.data.tables.team_tasks_by_agent);
+      // console.log('get all dasgboard data admin',response.data.data.tables.team_tasks_by_agent);
 
     } catch (error) {
       console.error("Error fetching data:", error);

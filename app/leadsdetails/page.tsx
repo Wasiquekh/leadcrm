@@ -314,7 +314,7 @@ export default function Home() {
  const [isDocumentEdit, setIsDocumentEdit] = useState<boolean>(false)
  const [documentEditObjectData, setDocumentEditObjectData] = useState<LeadDocument>(null);
 
- //console.log("MMMMMMMMMMMMMMMMMMM",documentEditObjectData)
+ console.log("MMMMMMMMMMMMMMMMMMM",documentEditObjectData)
 
 
   //console.log("", documentName);
@@ -615,6 +615,63 @@ export default function Home() {
       toast.error("Upload failed. Please try again.");
     }
   };
+  // ✅ Endpoint for update
+
+// Optional: tiny helper so we only compress images
+const isImageFile = (f?: File | null) => !!f && f.type?.startsWith("image/");
+const UPDATE_URL = "/leads/document/edit";
+
+const handleUpdateDocument = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+
+  if (!documentEditObjectData?.id) {
+    toast.error("No document selected to update.");
+    return;
+  }
+  if (!leadId) return;
+  const userID = storage.getUserId();
+  if (!userID) return;
+
+  const form = e.currentTarget;
+  const fileInput = form.elements.namedItem("file") as HTMLInputElement | null;
+  const file = fileInput?.files?.[0] ?? null;
+
+  const fd = new FormData();
+  fd.set("document_id", String(documentEditObjectData.id)); // 👈 correct key
+  fd.set("lead_id", String(leadId));
+  fd.set("uploaded_by", String(userID));
+  fd.set("notes", documentName);
+
+  if (file) {
+    const compressed = file.type.startsWith("image/")
+      ? await compressIfImage(file, {
+          maxWidth: 1600,
+          maxHeight: 1600,
+          quality: 0.72,
+          mimeType: "image/jpeg",
+          compressIfLargerThanBytes: 400 * 1024,
+        })
+      : file;
+    fd.set("file", compressed);
+  }
+
+  try {
+    await AxiosProvider.post(UPDATE_URL, fd, {
+      headers: { "Content-Type": "multipart/form-data" },
+      maxBodyLength: Infinity,
+    });
+    toast.success("Document updated successfully");
+    closeFlyOut();
+    setHitApi(!hitApi);
+    setDocumentName("");
+    form.reset();
+  } catch (err) {
+    console.error(err);
+    toast.error("Update failed. Please try again.");
+  }
+};
+
+
   const fetchLeadDocumentData = async () => {
     if (!leadId) return;
     try {
@@ -3560,7 +3617,76 @@ classNames={{
           </div>
         )}
         {isDocumentEdit && 
-        (<h1>DOCUMENT EDIT</h1>)}
+        (
+   <div className="w-full min-h-auto">
+    <div className="flex justify-between mb-4">
+      <p className="text-primary-600 text-[26px] font-bold leading-9">
+        Update Document
+      </p>
+      <IoCloseOutline
+        onClick={() => closeFlyOut()}
+        className="h-8 w-8 border border-[#E7E7E7] text-secondBlack rounded cursor-pointer"
+      />
+    </div>
+    <div className="w-full border-b border-[#E7E7E7] mb-4"></div>
+
+    <form onSubmit={handleUpdateDocument} encType="multipart/form-data">
+      <div className="w-full">
+        <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 md:justify-between mb-4 sm:mb-6">
+          {/* Document name */}
+          <div className="w-full">
+            <p className="text-secondBlack font-medium text-base leading-6 mb-2">
+              Document name
+            </p>
+            <input
+              type="text"
+              value={documentName || documentEditObjectData?.notes || ""}
+              onChange={(e) => setDocumentName(e.target.value)}
+              placeholder="Enter document name"
+              required
+              className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+            />
+          </div>
+
+          {/* Replace file */}
+          <div className="w-full">
+            <p className="text-secondBlack font-medium text-base leading-6 mb-2">
+              Replace file (optional)
+            </p>
+            <input
+              type="file"
+              name="file"
+              accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.pdf,.doc,.docx"
+              className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack bg-white"
+            />
+            {documentEditObjectData && (
+              <p className="text-xs text-gray-500 mt-2">
+                Current:{" "}
+                <a
+                  href={documentEditObjectData.download}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="underline text-primary-600"
+                >
+                  {documentEditObjectData.file_name}
+                </a>
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="mt-10 w-full flex flex-col gap-y-4 md:flex-row justify-between items-center">
+          <button
+            type="submit"
+            className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
+          >
+            Update Document
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+        )}
       </div>
 
       {/* FITLER FLYOUT END */}
