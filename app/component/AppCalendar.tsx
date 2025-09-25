@@ -252,8 +252,20 @@ export default function AppCalendar({
                     </label>
                   </td>
                 <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-              <button>Edit</button>
+                      <button
+                        type="button"
+                        onClick={() => !locked && openLeadTaskInFlyout()}
+                        disabled={locked}
+                        aria-disabled={locked}
+                        title={locked ? "Task is completed" : "Edit task"}
+                        className={`px-3 py-1 rounded-[4px] text-sm font-medium
+                          text-primary-700 hover:underline
+                          disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:no-underline`}
+                      >
+                        Edit
+                      </button>
                   </td>
+
                 </tr>
               );
             })

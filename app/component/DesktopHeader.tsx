@@ -8,11 +8,42 @@ import LeftSideBarMobile from "./LeftSideBarMobile";
 import DynamicBreadCrum from "./DynamicBreadCrum";
 
 import { usePathname } from "next/navigation";
+import AxiosProvider from "../../provider/AxiosProvider";
+import { toast } from "react-toastify";
 
 const DesktopHeader = () => {
   const [isFlyoutFilterOpen, setFlyoutFilterOpen] = useState<boolean>(false);
   const toggleFilterFlyout = () => setFlyoutFilterOpen(!isFlyoutFilterOpen);
   const pathname = usePathname();
+    const [query, setQuery] = useState("");
+      const handleSearch = async () => {
+    if (!query)
+    {
+      toast.error("Please enter email or mobile ");
+  return;
+    }
+    
+
+    // basic type check
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(query);
+    const isPhone = /^\d{10}$/.test(query);
+    if (!isEmail && !isPhone) {
+      toast.error("Enter a valid email or 10-digit mobile number");
+      return;
+    }
+
+    try {
+      const res = await AxiosProvider.get(
+        `/leads/search/dashboard?q=${query}`
+      );
+     // console.log("Search result:", res.data.data.data[0].id);
+      const searchId = res.data.data.data[0].id;
+      window.open(`/leadsdetails?id=${searchId}`, "_blank"); // "_blank" = new tab
+    } catch (err) {
+      console.error("Search failed:", err);
+       toast.error("Search failed try again");
+    }
+  };
   return (
     <>
       <div className=" w-full flex justify-between  items-center gap-7 md:mb-14">
@@ -22,11 +53,22 @@ const DesktopHeader = () => {
           <DynamicBreadCrum />
         </div>
         <div className=" hidden md:w-auto md:flex md:justify-end md:items-center md:gap-7 w-auto z-10">
-          <input
-            type="text"
-            placeholder="Search for email, mobile"
-            className=" bg-white w-64 h-[50px] rounded-[4px] px-6 border border-[#E7E7E7] hover:shadow-hoverInputShadow focus-border-primary  placeholder-[#8BA3CB] text-[15px] leading-normal"
-          />
+       <div className="flex gap-2">
+      <input
+        type="text"
+        placeholder="Search for email, mobile"
+        className="bg-white w-64 h-[50px] rounded-[4px] px-6 border border-[#E7E7E7] hover:shadow-hoverInputShadow focus:border-primary placeholder-[#8BA3CB] text-[15px] leading-normal"
+        value={query}
+        onChange={(e) => setQuery(e.target.value.trim())}
+      />
+      <button
+        type="button"
+        className="bg-primary text-white px-4 rounded bg-primary-500"
+        onClick={handleSearch}
+      >
+        Search
+      </button>
+    </div>
           {/* <div className=" w-[50px] h-[50px] bg-white rounded-full flex justify-center items-center">
             <CiSettings className=" text-[#718EBF] w-[25px] h-[25px]" />
           </div> */}

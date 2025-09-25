@@ -313,6 +313,7 @@ export default function Home() {
  const [isleadPropertyEdit, setIsLeadPropertyEdit] = useState<boolean>(true)
  const [isDocumentEdit, setIsDocumentEdit] = useState<boolean>(false)
  const [documentEditObjectData, setDocumentEditObjectData] = useState<LeadDocument>(null);
+ const [isTaskEdit, setIsTaskEdit] = useState<boolean>(false);
 
  console.log("MMMMMMMMMMMMMMMMMMM",documentEditObjectData)
 
@@ -556,6 +557,10 @@ export default function Home() {
      setFlyoutFilterOpen(true);
     setIsDocumentEdit(true);
   }
+  const openEditTask = ()=>{
+     setFlyoutFilterOpen(true);
+     setIsTaskEdit(true);
+  }
   const closeFlyOut = () => {
     setActivity(false);
     setTask(false);
@@ -566,6 +571,7 @@ export default function Home() {
     setIsTaskFilter(false);
     setIsDocumentFilter(false);
      setIsDocumentEdit(false);
+     setIsTaskEdit(false);
   };
   const handleChangepagination = (newPage: number) => {
     if (newPage > 0 && newPage <= totalPages) {
