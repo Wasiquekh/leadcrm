@@ -194,9 +194,9 @@ const [teamTaskAdmin, setTeamTaskAdmin] = useState<AgentStats[]>([]);
                     {todayTasksListData.length > 0 ? (
                       todayTasksListData.map((task) => (
                         <tr key={task.id} className="border-t hover:bg-gray-50">
-                          <td
+                          <td 
                            onClick={() => test(task.lead_id)}
-                          className="p-3 cursor-pointer">{task.lead_name}</td>
+                          className="p-3 cursor-pointer bg-primary-500"><p className=" text-white font-medium">{task.lead_name}</p></td>
                           <td className="p-3">{task.subject}</td>
                           <td className="p-3 capitalize">{task.type}</td>
                           <td className="p-3 capitalize">{task.status}</td>
@@ -235,7 +235,7 @@ const [teamTaskAdmin, setTeamTaskAdmin] = useState<AgentStats[]>([]);
               <tr key={task.id} className="border-t hover:bg-gray-50">
                 <td
                onClick={() => test(task.lead_id)}
-                className="p-3 cursor-pointer">{task.lead_name}</td>
+                className="p-3 cursor-pointer bg-primary-500"><p className="text-white font-medium">{task.lead_name}</p></td>
                 <td className="p-3">{task.subject}</td>
                 <td className="p-3 capitalize">{task.type}</td>
                 <td className="p-3 capitalize">{task.status}</td>
