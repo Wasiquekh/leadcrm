@@ -710,7 +710,7 @@ const test = (id: string) => {
   };
       const handleAssignPaginationFilter = (newPage: number) => {
     if (newPage > 0 && newPage <= assignTotalPages) {
-      setAssignPage(newPage);
+      setAssignPageFilter(newPage);
     }
   };
 
@@ -1221,7 +1221,7 @@ const test = (id: string) => {
                 <HiChevronDoubleLeft className=" w-6 h-auto" />
               </button>
               <span className="text-[#232323] text-sm">
-                Page  {assignPageFilter} of {assignTotalPagesFilter}
+               Assign leads filter pagination Page  {assignPageFilter} of {assignTotalPagesFilter}
               </span>
               <button
                  onClick={() => handleAssignPaginationFilter(assignPageFilter + 1)}
@@ -1233,7 +1233,7 @@ const test = (id: string) => {
             </div>
             ):
           (   
-                     <div className="flex justify-center items-center my-10 relative">
+            <div className="flex justify-center items-center my-10 relative">
               <button
                 onClick={() => handleAssignPagination(assignPage - 1)}
                 disabled={assignPage === 1}
@@ -1242,7 +1242,7 @@ const test = (id: string) => {
                 <HiChevronDoubleLeft className=" w-6 h-auto" />
               </button>
               <span className="text-[#232323] text-sm">
-                Page  {assignPage} of {assignTotalPages}
+                Assign leads pagination Page  {assignPage} of {assignTotalPages}
               </span>
               <button
                  onClick={() => handleAssignPagination(assignPage + 1)}
@@ -2404,7 +2404,7 @@ const creditDisplay = values.consolidated_credit_status_id
 
       try {
         const response = await AxiosProvider.post(
-          `/notassignedleads/filter?page=${UnAssignPageFilter}&pageSize=${globalPageSize}`,
+          `/notassignedleads/filter?page=${assignPageFilter}&pageSize=${globalPageSize}`,
           clean
         );
         console.log("NOT ASSIGN FILTERED VALUE", response);
@@ -2427,22 +2427,20 @@ const creditDisplay = values.consolidated_credit_status_id
         toast.error("Please fill at least one field before submitting.");
         return;
       }
-console.log("unassign filter valuessssss",clean)
+       console.log("unassign filter valuessssss",clean)
 //return;      
-
-
 
       try {
         const response = await AxiosProvider.post(
-          `/leads/filter?page=${page}&pageSize=${pageSize}`,
-           //  `/notassignedleads/filter?page=${UnAssignPageFilter}&pageSize=${globalPageSize}`,
+          `/leads/filter?page=${assignPageFilter}&pageSize=${globalPageSize}`,
        
           clean
         );
-        console.log("FILTERED VALUE", response.data.data.data);
+       // console.log("FILTERED VALUE", response.data.data.pagination.totalPages);
         setAssignLeadData(response.data.data.data);
         setFlyoutOpen(false);
         setClearFilter(true);
+        setAssignTotalPagesFilter(response.data.data.pagination.totalPages)
         setAssignFilterPagination(true);
       } catch (error: any) {
         console.log("assign filter error",error)

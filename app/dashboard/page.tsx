@@ -58,6 +58,17 @@ export interface UpcomingTaskList {
   subject: string;        // e.g. "phonecall: bhotu12"
   type: string;           // e.g. "followup"
 }
+export interface OverdueTask {
+  id: string;
+  lead_id: string;
+  lead_name: string;
+  start_at: string;       // UTC ISO date string
+  start_at_ca: string;    // formatted date-time
+  start_date_ca: string;  // formatted date
+  status: string;
+  subject: string;
+  type: string;
+}
   const storage = new StorageManager();
   const userRole = storage.getUserRole();
 export default function Home() {
@@ -66,7 +77,8 @@ export default function Home() {
 const [cards, setCards] = useState<CardsData | null>(null);
 const [todayTasksListData, setTodayTasksListData] = useState<TodayTaskList[]>([]);
 const [upcomingTasks, setUpcomingTasks] = useState<UpcomingTaskList[]>([]);
- // console.log("DDDDDDDDDDDDDDDDDDDDDD",todayTasksListData)
+const [overdueTaskData, setOverDueTaskData] = useState<OverdueTask[]>([])
+  console.log("OVER DUEEEEEE",overdueTaskData)
   // -------------END FOR AGENT-----------
   const [isError, setIsError] = useState<boolean>(false);
 // FOR ADMIN
@@ -85,6 +97,7 @@ const [teamTaskAdmin, setTeamTaskAdmin] = useState<AgentStats[]>([]);
       setCards(response.data.data.cards)
       setTodayTasksListData(response.data.data.lists.pending_today)
       setUpcomingTasks(response.data.data.lists.upcoming)
+      //setOverDueTaskData(response.data.data.lists)
        
 
     } catch (error) {
