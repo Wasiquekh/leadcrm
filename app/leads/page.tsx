@@ -1501,6 +1501,18 @@ handleUnassignFilter();
                         </span>
                       </div>
                     </th>
+                    	                      <th
+                      scope="col"
+                      className="px-3 py-2 border border-tableBorder hidden md:table-cell"
+                    >
+                      <div className="flex items-center gap-2">
+                        <SiHomeassistantcommunitystore className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <span className="font-semibold text-secondBlack text-lg sm:text-base">
+                          Agent
+                        </span>
+                      </div>
+                    </th>
+					
                     <th
                       scope="col"
                       className="px-3 py-2 border border-tableBorder md:table-cell"
@@ -1582,6 +1594,11 @@ handleUnassignFilter();
                         <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
                           <span className="text-[#232323] text-sm sm:text-base capitalize">
                             {item?.address.country ?? "-"}
+                          </span>
+                        </td>
+                        	                          <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+                          <span className="text-[#232323] text-sm sm:text-base capitalize">
+                            {item?.agent.name ?? "-"}
                           </span>
                         </td>
 
