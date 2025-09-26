@@ -151,7 +151,18 @@ type FilterValues = {
   consolidated_credit_status_id: string;
 };
 type LeadSourceOption = { id: string | number; name: string };
-
+    type FilterFormValues = {
+      full_name: string;
+      email: string;
+      phone: string;
+      lead_number: string;
+      city: string;
+      state: string;
+      agent_ids: string[];
+      lead_source_id: string;
+      debt_consolidation_status_id: string;
+      consolidated_credit_status_id: string;
+    };
 export default function Home() {
   // const isChecking = useAuthRedirect();
   const [isFlyoutOpen, setFlyoutOpen] = useState<boolean>(false);
@@ -220,6 +231,9 @@ export default function Home() {
   const [leadSourceDisplay, setLeadSourceDisplay] = useState<any>(null);
   const [clearFilter, setClearFilter] = useState<boolean>(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [assignFilteredData, setAssignFilteredData] = useState({});
+  const [unAssignFilteredData, setUnAssignFilteredData] = useState({});
+  //console.log("SSSSSSSSSSSSSSSSSSS",assignFilteredData)
 
 const toggleRow = (id: string, checked: boolean) => {
   setSelectedIds(prev => (checked ? [...prev, id] : prev.filter(x => x !== id)));
@@ -690,6 +704,77 @@ const test = (id: string) => {
     setAssignFilterPagination(false)
     
   };
+
+// HANDLE API TO UPDATE PAGINATION 
+    const handleAssignFilter = async () => {
+        if (!assignFilteredData || Object.keys(assignFilteredData).length === 0) return;
+    //  console.log("Assign values:", values);
+      // const clean = buildCleanPayload(values as FilterFormValues);
+      //       if (!hasAnyField(clean)) {
+      //   toast.error("Please fill at least one field before submitting.");
+      //   return;
+      // }
+      // setAssignFilteredData(values)
+     //  console.log("unassign filter valuessssss",clean)
+//return;      
+
+      try {
+        const response = await AxiosProvider.post(
+          `/leads/filter?page=${assignPageFilter}&pageSize=${globalPageSize}`,
+       
+          assignFilteredData
+        );
+       // console.log("FILTERED VALUE", response.data.data.pagination.totalPages);
+        setAssignLeadData(response.data.data.data);
+        setFlyoutOpen(false);
+        setClearFilter(true);
+        setAssignTotalPagesFilter(response.data.data.pagination.totalPages)
+        setAssignFilterPagination(true);
+      } catch (error: any) {
+        console.log("assign filter error",error)
+        toast.error("Lead is not Created");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+useEffect(()=>{
+handleAssignFilter()
+},[assignPageFilter])
+
+    const handleUnassignFilter = async () => {
+            if (!unAssignFilteredData || Object.keys(unAssignFilteredData).length === 0) return;
+     // console.log("NotAssign values:", values);
+     // const clean = buildCleanPayload(values as FilterFormValues);
+
+    //  if (!hasAnyField(clean)) {
+    //    toast.error("Please fill at least one field before submitting.");
+    //    return;
+    //  }
+      //setUnAssignFilteredData(values)
+
+      try {
+        const response = await AxiosProvider.post(
+          `/notassignedleads/filter?page=${assignPageFilter}&pageSize=${globalPageSize}`,
+          unAssignFilteredData
+        );
+        console.log("NOT ASSIGN FILTERED VALUE", response);
+        setUnAssignTotalPagesFilter(response.data.data.pagination.totalPages);
+        setNotAssignData(response.data.data.data);
+        setFlyoutOpen(false);
+        setClearFilter(true);
+        setUnAssignFilterPagination(true);
+      } catch (error: any) {
+        toast.error("Lead is not Created");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+useEffect(()=>{
+handleUnassignFilter();
+},[UnAssignPageFilter])
+
+// HANDLE API TO UPDATE PAGINATION
+
   // PAGINATION HANDLE CHANGES
 
       const handleUnAssignPagination = (newPage: number) => {
@@ -2402,6 +2487,7 @@ const creditDisplay = values.consolidated_credit_status_id
         toast.error("Please fill at least one field before submitting.");
         return;
       }
+      setUnAssignFilteredData(values)
 
       try {
         const response = await AxiosProvider.post(
@@ -2429,6 +2515,7 @@ const creditDisplay = values.consolidated_credit_status_id
         toast.error("Please fill at least one field before submitting.");
         return;
       }
+      setAssignFilteredData(values)
        console.log("unassign filter valuessssss",clean)
 //return;      
 
