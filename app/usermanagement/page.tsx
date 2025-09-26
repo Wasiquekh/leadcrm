@@ -65,6 +65,9 @@ export default function Home() {
   const { accessToken } = useContext(AppContext);
   const router = useRouter();
 
+    const storage = new StorageManager();
+    const userRole = storage.getUserRole();
+
   const toggleEditFlyout = () => {
     setIsEditFlyoutOpen(!isEditFlyoutOpen);
   };
@@ -196,7 +199,7 @@ const blockUserData = async (item: User) => {
           className="animate-pulse rounded"
         />
       </div>
-    );
+    ); 
   }
   return (
     <>
@@ -351,7 +354,17 @@ const blockUserData = async (item: User) => {
                                 Delete
                               </p>
                             </button>
-                            <button
+                            {item.role_name === "Admin" ?
+                             (                            <button
+                             // onClick={() => blockUserData(item)}
+                              className="py-[4px] px-3 bg-black flex gap-1 items-center rounded-full text-xs md:text-sm group hover:bg-primary-600 opacity-[0.5] cursor-not-allowed"
+                            >
+                              <RiDeleteBin6Line className="text-white w-4 h-4" />
+                              <p className="text-white hidden md:block">
+                                Block user
+                              </p>
+                            </button>):
+                            (                            <button
                               onClick={() => blockUserData(item)}
                               className="py-[4px] px-3 bg-black flex gap-1 items-center rounded-full text-xs md:text-sm group hover:bg-primary-600"
                             >
@@ -359,7 +372,9 @@ const blockUserData = async (item: User) => {
                               <p className="text-white hidden md:block">
                                 Block user
                               </p>
-                            </button>
+                            </button>)
+                          }
+
                           </div>
                         </td>
                       </tr>
