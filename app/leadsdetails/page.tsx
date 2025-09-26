@@ -49,7 +49,7 @@ import OtpInput from "react-otp-input";
 import { FiFilter } from "react-icons/fi";
 import { LuSquareActivity } from "react-icons/lu";
 import { IoCloseOutline } from "react-icons/io5";
-import AppCalendar from "../component/AppCalendar";
+import AppCalendar, { TaskData } from "../component/AppCalendar";
 import { useSearchParams } from "next/navigation";
 import { AiOutlineSearch } from "react-icons/ai";
 import { tasks } from "firebase-functions/v2";
@@ -314,8 +314,9 @@ export default function Home() {
  const [isDocumentEdit, setIsDocumentEdit] = useState<boolean>(false)
  const [documentEditObjectData, setDocumentEditObjectData] = useState<LeadDocument>(null);
  const [isTaskEdit, setIsTaskEdit] = useState<boolean>(false);
+ const [taskEditObject, setTaskEditObject] = useState<any>(null);
 
- console.log("MMMMMMMMMMMMMMMMMMM",documentEditObjectData)
+ console.log("MMMMMMMMMMMMMMMMMMM",taskEditObject)
 
 
   //console.log("", documentName);
@@ -557,7 +558,9 @@ export default function Home() {
      setFlyoutFilterOpen(true);
     setIsDocumentEdit(true);
   }
-  const openEditTask = ()=>{
+  const openEditTask = (task: TaskData)=>{
+    setTaskEditObject(task)
+   
      setFlyoutFilterOpen(true);
      setIsTaskEdit(true);
   }
@@ -952,6 +955,7 @@ const downloadDocument = (src: string | Blob, fileName = "image.jpg") => {
             reloadKey={reloadKey}
             hitApi={hitApi}
             setHitApi={setHitApi}
+            openEditTask={openEditTask}
             openLeadTaskInFlyout={openLeadTaskInFlyout}
             incomingTasks={fileteredTaskData}
             //filteredTaskData={fileteredTaskData}
@@ -3692,6 +3696,305 @@ classNames={{
       </div>
     </form>
   </div>
+        )}
+        {isTaskEdit && 
+        (
+          <>
+            <div className="w-full min-h-auto">
+    <div className="flex justify-between mb-4">
+      <p className="text-primary-600 text-[26px] font-bold leading-9">
+        Update Task
+      </p>
+      <IoCloseOutline
+        onClick={() => closeFlyOut()}
+        className="h-8 w-8 border border-[#E7E7E7] text-secondBlack rounded cursor-pointer"
+      />
+    </div>
+    <div className="w-full border-b border-[#E7E7E7] mb-4"></div>
+{/* FORMIK */}
+   <Formik
+  enableReinitialize
+  initialValues={{
+    // ------ shared ------
+    location: taskEditObject?.location ?? "",
+    description:
+      taskEditObject?.description ??
+      taskEditObject?.details ??
+      "",
+    start_at:
+      (taskEditObject?.start_at
+        ? new Date(taskEditObject.start_at)
+        : defaultStart) || defaultStart,
+    end_at:
+      (taskEditObject?.end_at
+        ? new Date(taskEditObject.end_at)
+        : (taskEditObject?.start_at
+            ? addMinutes(new Date(taskEditObject.start_at), 15)
+            : defaultEnd)) || defaultEnd,
+
+    // ------ create-only (ignored in edit UI) ------
+    owner: data?.agent?.id || "",
+    associated_lead: data?.full_name || "",
+    subject:
+      (selectedDropDownTaskValue ? selectedDropDownTaskValue + ": " : "") +
+      (data?.full_name || ""),
+  }}
+  validationSchema={Yup.object({
+    location: Yup.string().trim().required("Location is required"),
+    description: Yup.string().trim().optional(),
+    start_at: Yup.date().required("Start date is required"),
+    end_at: Yup.date()
+      .required("End date is required")
+      .test("after", "End must be after start", function (value) {
+        const { start_at } = this.parent as { start_at?: Date | null };
+        return start_at && value ? value > start_at : true;
+      }),
+  })}
+  onSubmit={async (values, { setSubmitting }) => {
+    const isEditing = !!taskEditObject;
+
+    if (isEditing) {
+      // ----- UPDATE payload -----
+      const payload = {
+        task_id: taskEditObject?.id,
+        location: values.location,
+        description: values.description || "",
+        start_at_text: values.start_at ? formatDateTime(values.start_at) : "",
+        end_at_text: values.end_at ? formatDateTime(values.end_at) : "",
+      };
+
+      console.log("UPDATE TASK PAYLOAD =>", payload);
+     try {
+      await AxiosProvider.post("/leads/tasks/edit", payload);
+      toast.success("Lead task is updated");
+      setHitApi(!hitApi);
+      closeFlyOut();
+    } catch (error: any) {
+      toast.error("Lead task is not updated");
+    }
+      // TODO: call your update API here instead of console:
+      // await UpdateTaskActivity(payload);
+    } else {
+      // ----- CREATE payload (your original) -----
+      const payload = {
+        lead_id: leadId,
+        assigned_agent_id: data?.agent?.id || "",
+        details: values.description || "",
+        subject: values.subject || "",
+        task_type: "followup",
+        start_at_text: values.start_at ? formatDateTime(values.start_at) : "",
+        end_at_text: values.end_at ? formatDateTime(values.end_at) : "",
+        location: values.location,
+        description: values.description || "",
+      };
+     // await CreateTaskActivity(payload);
+    }
+
+    setSubmitting(false);
+    closeFlyOut();
+  }}
+>
+  {({
+    values,
+    errors,
+    touched,
+    handleChange,
+    handleSubmit,
+    setFieldTouched,
+    setFieldValue,
+    isSubmitting,
+  }) => {
+    const isEditing = !!taskEditObject;
+
+    return (
+      <form onSubmit={handleSubmit} noValidate>
+        <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 md:justify-between mb-4 sm:mb-6">
+          {/* ====== CREATE-ONLY FIELDS ====== */}
+          {!isEditing && (
+            <>
+              {/* Owner (readonly: submit id, display name) */}
+              <div className="w-full relative">
+                <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+                  Owner
+                </p>
+                <input type="hidden" name="owner" value={data?.agent?.id} readOnly />
+                <input
+                  type="text"
+                  value={data?.agent?.name || ""}
+                  readOnly
+                  className="capitalize hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack bg-gray-50 cursor-not-allowed"
+                />
+              </div>
+
+              {/* Associated Lead (readonly) */}
+              <div className="w-full relative">
+                <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+                  Associated Lead
+                </p>
+                <input
+                  type="text"
+                  name="associated_lead"
+                  value={values.associated_lead}
+                  readOnly
+                  onBlur={() => setFieldTouched("associated_lead", true)}
+                  className="capitalize hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack bg-gray-50 cursor-not-allowed"
+                />
+              </div>
+
+              {/* Subject (readonly) */}
+              <div className="w-full relative md:col-span-2">
+                <p className="text-secondBlack font-medium text-base leading-6 mb-2">
+                  Subject
+                </p>
+                <input
+                  type="text"
+                  name="subject"
+                  value={values.subject}
+                  readOnly
+                  onBlur={() => setFieldTouched("subject", true)}
+                  placeholder="Subject"
+                  className="capitalize hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack bg-gray-50 cursor-not-allowed"
+                />
+              </div>
+            </>
+          )}
+
+          {/* ====== COMMON FIELDS (shown in BOTH, but these are the ONLY ones in EDIT) ====== */}
+
+          {/* Location (required) */}
+          <div className="w-full relative md:col-span-2">
+            <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+              Location
+            </p>
+            <input
+              type="text"
+              name="location"
+              value={values.location}
+              onChange={handleChange}
+              onBlur={() => setFieldTouched("location", true)}
+              placeholder="Enter location"
+              className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+            />
+            {touched.location && (errors as any).location ? (
+              <p className="text-red-500 mt-1 text-xs">
+                {(errors as any).location}
+              </p>
+            ) : null}
+          </div>
+
+          {/* ===== Schedule (From / To) ===== */}
+          <div className="w-full md:col-span-2">
+            <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-3">
+              Schedule
+            </p>
+
+            {/* From */}
+            <div className="w-full relative mb-4">
+              <p className="text-[#0A0A0A] font-medium text-sm leading-6 mb-2">
+                From
+              </p>
+              <DatePicker
+                selected={values.start_at}
+                onChange={(date: Date | null) => {
+                  setFieldValue("start_at", date);
+                  if (date) setFieldValue("end_at", addMinutes(date, 15)); // auto +15
+                }}
+                onBlur={() => setFieldTouched("start_at", true)}
+                name="start_at"
+                showTimeSelect
+                timeFormat="h:mma"
+                timeIntervals={5}
+                dateFormat="MM-dd-yyyy h:mma"
+                placeholderText="MM-dd-yyyy hh:mmam/pm"
+                className="hover:shadow-hoverInputShadow focus-border-primary !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
+                popperClassName="custom-datepicker"
+                dayClassName={(date) => {
+                  const today = new Date().toDateString();
+                  const selectedDate = values.start_at
+                    ? new Date(values.start_at).toDateString()
+                    : null;
+                  if (today === date.toDateString())
+                    return "bg-[#FFF0F1] text-[#A3000E]";
+                  if (selectedDate === date.toDateString())
+                    return "bg-[#A3000E] text-white";
+                  return "hover:bg-[#FFCCD0] hover:text-[#A3000E]";
+                }}
+                minDate={new Date()} // disable past days
+                filterTime={(time: Date) =>
+                  isSameDay(values.start_at ?? new Date(), new Date())
+                    ? time.getTime() >= roundToNext5().getTime()
+                    : true
+                }
+              />
+              {touched.start_at && (errors as any).start_at ? (
+                <p className="text-red-500 mt-1 text-xs">
+                  {(errors as any).start_at}
+                </p>
+              ) : null}
+            </div>
+
+            {/* To (read-only) */}
+            <div className="w-full relative">
+              <p className="text-[#0A0A0A] font-medium text-sm leading-6 mb-2">
+                To
+              </p>
+              <DatePicker
+                selected={values.end_at}
+                onChange={() => {}}
+                onBlur={() => setFieldTouched("end_at", true)}
+                name="end_at"
+                showTimeSelect
+                timeFormat="h:mma"
+                timeIntervals={5}
+                dateFormat="MM-dd-yyyy h:mma"
+                placeholderText="MM-dd-yyyy hh:mmam/pm"
+                disabled
+                className="hover:shadow-hoverInputShadow focus-border-primary !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 bg-gray-50 text-firstBlack cursor-not-allowed"
+                popperClassName="custom-datepicker"
+                dayClassName={() => "pointer-events-none"}
+              />
+              {touched.end_at && (errors as any).end_at ? (
+                <p className="text-red-500 mt-1 text-xs">
+                  {(errors as any).end_at}
+                </p>
+              ) : null}
+            </div>
+          </div>
+
+          {/* Description */}
+          <div className="w-full relative md:col-span-2">
+            <p className="text-secondBlack font-medium text-base leading-6 mb-2">
+              Description (optional)
+            </p>
+            <textarea
+              name="description"
+              value={values.description}
+              onChange={handleChange}
+              onBlur={() => setFieldTouched("description", true)}
+              placeholder="Add description (optional)"
+              rows={4}
+              className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-5 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack resize-y"
+            />
+          </div>
+        </div>
+
+        {/* Buttons */}
+        <div className="mt-10 w-full flex flex-col gap-y-4 md:flex-row justify-between items-center">
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
+          >
+            {taskEditObject ? "Save Changes" : "Create Task Activity"}
+          </button>
+        </div>
+      </form>
+    );
+  }}
+</Formik>
+
+  </div>
+          </>
         )}
       </div>
 
