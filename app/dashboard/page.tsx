@@ -97,7 +97,7 @@ const [teamTaskAdmin, setTeamTaskAdmin] = useState<AgentStats[]>([]);
       setCards(response.data.data.cards)
       setTodayTasksListData(response.data.data.lists.pending_today)
       setUpcomingTasks(response.data.data.lists.upcoming)
-      //setOverDueTaskData(response.data.data.lists)
+      setOverDueTaskData(response.data.data.lists.overdue)
        
 
     } catch (error) {
@@ -266,6 +266,48 @@ const [teamTaskAdmin, setTeamTaskAdmin] = useState<AgentStats[]>([]);
         </tbody>
       </table>
     </div>
+{/* TABLE FOR OVERDUE TASK */}
+<h1 className="mt-5">Table Overdue Task</h1>
+<div className="overflow-x-auto rounded-lg shadow bg-white mt-6">
+  <table className="min-w-full text-sm text-left">
+    <thead className="bg-gray-100 text-gray-700 font-semibold">
+      <tr>
+        <th className="p-3">Lead Name</th>
+        <th className="p-3">Subject</th>
+        <th className="p-3">Type</th>
+        <th className="p-3">Status</th>
+        <th className="p-3">Start At</th>
+        <th className="p-3">Start Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      {overdueTaskData.length > 0 ? (
+        overdueTaskData.map((task) => (
+          <tr key={task.id} className="border-t hover:bg-gray-50">
+            <td
+              onClick={() => test(task.lead_id)}
+              className="p-3 cursor-pointer bg-primary-500">
+              <p className="text-white font-medium">{task.lead_name}</p>
+            </td>
+            <td className="p-3">{task.subject}</td>
+            <td className="p-3 capitalize">{task.type}</td>
+            <td className="p-3 capitalize">{task.status}</td>
+            <td className="p-3">{task.start_at_ca}</td>
+            <td className="p-3">{task.start_date_ca}</td>
+          </tr>
+        ))
+      ) : (
+        <tr>
+          <td className="p-3 text-center text-gray-500" colSpan={6}>
+            No overdue tasks
+          </td>
+        </tr>
+      )}
+    </tbody>
+  </table>
+</div>
+
+
               
               </>
 
