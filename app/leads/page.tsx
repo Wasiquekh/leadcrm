@@ -333,10 +333,11 @@ useEffect(() => {
 
     try {
       await AxiosProvider.post("/leads", value);
-      toast.success("Lead is Creatted");
+      toast.success("Lead is Created");
       setHitApi(!hitApi);
     } catch (error: any) {
-      toast.error("Lead is not Creatted");
+      toast.error(error.response.data.msg);
+    //  console.log("lead create error",error.response.data.msg)
     } finally {
       setIsLoading(false);
     }
@@ -360,6 +361,9 @@ useEffect(() => {
   const handleUploadFile = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!excelFile) return toast.error("Please select a file");
+    if (!leadSourceDisplay?.id) {
+  return toast.error("Please select a Lead Source");
+}
 
     // If lead source is mandatory, uncomment:
     // if (!leadSourceDisplay?.id) return toast.error("Please select a Lead Source");
@@ -1413,7 +1417,7 @@ handleUnassignFilter();
                 >
                   <FiFilter className=" w-5 h-5 text-white group-hover:text-white" />
                   <p className=" text-white text-base font-medium group-hover:text-white">
-                    Filter Leads
+                    Search Leads
                   </p>
                 </div>
               </div>

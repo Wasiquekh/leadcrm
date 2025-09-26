@@ -336,12 +336,12 @@ const blockUserData = async (item: User) => {
                         </td>
                         <td className="px-2 py-1 border border-tableBorder">
                           <div className="flex gap-1 md:gap-2 justify-center md:justify-start">
-                            <button className="py-[4px] px-3 bg-primary-600 hover:bg-primary-800 active:bg-primary-900 group flex gap-1 items-center rounded-xl text-xs md:text-sm ">
+                            {/* <button className="py-[4px] px-3 bg-primary-600 hover:bg-primary-800 active:bg-primary-900 group flex gap-1 items-center rounded-xl text-xs md:text-sm ">
                               <MdRemoveRedEye className="text-white w-4 h-4 group-hover:text-white" />
                               <p className="text-white hidden md:block group-hover:text-white">
                                 View
                               </p>
-                            </button>
+                            </button> */}
                             <button
                               onClick={() => deleteUserData(item)}
                               className="py-[4px] px-3 bg-black flex gap-1 items-center rounded-full text-xs md:text-sm group hover:bg-primary-600"
