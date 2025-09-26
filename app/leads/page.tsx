@@ -709,7 +709,7 @@ const test = (id: string) => {
     }
   };
       const handleAssignPaginationFilter = (newPage: number) => {
-    if (newPage > 0 && newPage <= assignTotalPages) {
+    if (newPage > 0 && newPage <= assignPageFilter) {
       setAssignPageFilter(newPage);
     }
   };
@@ -2419,6 +2419,7 @@ const creditDisplay = values.consolidated_credit_status_id
         setIsLoading(false);
       }
     };
+    
 
     const handleAssignFilter = async () => {
       console.log("Assign values:", values);
