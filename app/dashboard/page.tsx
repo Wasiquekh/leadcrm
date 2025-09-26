@@ -95,11 +95,11 @@ const [teamTaskAdmin, setTeamTaskAdmin] = useState<AgentStats[]>([]);
     //   setIsLoading(false);
     // }
   };
- {userRole === "Agent" &&
+
   useEffect(() => {
     fetchAgentData();
   }, []);
-}
+
   // END USE EFFECT AGENT
 
       const fetchAdminData = async () => {
@@ -120,11 +120,11 @@ const [teamTaskAdmin, setTeamTaskAdmin] = useState<AgentStats[]>([]);
     // }
   };
 
-  {userRole === "Admin" &&
+
   useEffect(() => {
     fetchAdminData();
   }, []);
-}
+
 	 const test = (lead_id: string) => {
   window.open(`/leadsdetails?id=${lead_id}`, "_blank"); // "_blank" = new tab
 };
