@@ -27,7 +27,8 @@ import DesktopHeader from "../component/DesktopHeader";
 import { Tooltip } from "react-tooltip";
 import { FaEllipsisVertical } from "react-icons/fa6";
 import { useAuthRedirect } from "../component/hooks/useAuthRedirect";
-import { Formik, Form } from "formik";
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
 
 export interface User {
   id: string;
@@ -53,6 +54,7 @@ export interface EditUser {
   mobile_number: string;
   email: string;
   password: string;
+  role_name: string;
 }
 const axiosProvider = new AxiosProvider();
 const storage = new StorageManager();
@@ -74,7 +76,7 @@ export default function Home() {
   const router = useRouter();
   const [isFlyoutOpen, setFlyoutOpen] = useState<boolean>(false);
 
-const [editFormData, setEditFormData] = useState<EditUser | null>(null);
+const [editFormData, setEditFormData] = useState<any | null>(null);
 
 console.log("edit data object", editFormData)
     const storage = new StorageManager();
@@ -206,7 +208,8 @@ setEditFormData({
   name: item.name || "",
   mobile_number: item.mobile_number || "",
   email: item.email || "",
-  password: "",              // keep empty if you don't want to prefill password
+  password: "",  
+  role_name:item.role_name || "",            // keep empty if you don't want to prefill password
 });
   }
 
@@ -479,80 +482,107 @@ setEditFormData({
     <div className="w-full border-b border-[#E7E7E7] mb-4"></div>
     {/* FORM--------- */}
   {editFormData && (
-        <Formik
-          enableReinitialize
-          initialValues={editFormData}
-          onSubmit={handleSubmit}
+<Formik
+  enableReinitialize
+  initialValues={editFormData}
+  validationSchema={Yup.object({
+    user_id: Yup.string().required('User ID is required'),
+    name: Yup.string().required('Name is required'),
+    mobile_number: Yup.string()
+      .required('Mobile number is required')
+      .matches(/^\+91\d{10}$/, 'Mobile number must be in the format +91xxxxxxxxxx'),
+    email: Yup.string()
+      .required('Email is required')
+      .email('Invalid email format'),
+    role_name: Yup.string().required('Role is required'),
+  })}
+  onSubmit={handleSubmit}
+>
+  {({ values, handleChange, errors, touched }) => (
+    <Form className="grid grid-cols-2 gap-6 mt-6">
+      {/* Hidden user_id */}
+      <input type="hidden" name="user_id" value={values.user_id} />
+
+      {/* Name */}
+      <div className="w-full relative mb-3">
+        <p className="text-[#232323] text-base leading-normal mb-2">Your Name</p>
+        <input
+          type="text"
+          name="name"
+          value={values.name}
+          onChange={handleChange}
+          placeholder="Charlene Reed"
+          className={`hover:shadow-hoverInputShadow focus-border-primary w-full h-[50px] border ${errors.name && touched.name ? 'border-red-500' : '#DFEAF2'} rounded-[4px] text-[15px] placeholder-[#718EBF] pl-4 mb-2 text-firstBlack`}
+        />
+        {/* Error message */}
+        {errors.name && touched.name && typeof errors.name === 'string' && (
+          <div className="text-red-500 text-sm">{errors.name}</div>
+        )}
+      </div>
+
+      {/* Mobile Number */}
+      <div className="w-full relative mb-3">
+        <p className="text-[#232323] text-base leading-normal mb-2">Mobile Number</p>
+        <input
+          type="text"
+          name="mobile_number"
+          value={values.mobile_number}
+          onChange={handleChange}
+          placeholder="+91 9876543210"
+          className={`hover:shadow-hoverInputShadow focus-border-primary w-full h-[50px] border ${errors.mobile_number && touched.mobile_number ? 'border-red-500' : '#DFEAF2'} rounded-[4px] text-[15px] placeholder-[#718EBF] pl-4 mb-2 text-firstBlack`}
+        />
+        {/* Error message */}
+        {errors.mobile_number && touched.mobile_number && typeof errors.mobile_number === 'string' && (
+          <div className="text-red-500 text-sm">{errors.mobile_number}</div>
+        )}
+      </div>
+
+      {/* Email */}
+      <div className="w-full relative mb-3">
+        <p className="text-[#232323] text-base leading-normal mb-2">Email</p>
+        <input
+          type="email"
+          name="email"
+          value={values.email}
+          onChange={handleChange}
+          placeholder="youremail@example.com"
+          className={`hover:shadow-hoverInputShadow focus-border-primary w-full h-[50px] border ${errors.email && touched.email ? 'border-red-500' : '#DFEAF2'} rounded-[4px] text-[15px] placeholder-[#718EBF] pl-4 mb-2 text-firstBlack`}
+        />
+        {/* Error message */}
+        {errors.email && touched.email && typeof errors.email === 'string' && (
+          <div className="text-red-500 text-sm">{errors.email}</div>
+        )}
+      </div>
+
+      {/* User Role (read-only) */}
+      <div className="w-full relative mb-3">
+        <p className="text-[#232323] text-base leading-normal mb-2">Role</p>
+        <input
+          type="text"
+          value={values.role_name}
+          readOnly
+          className="w-full h-[50px] border border-[#DFEAF2] rounded-[4px] text-[15px] placeholder-[#718EBF] pl-4 mb-2 text-firstBlack bg-gray-100 outline-none"
+        />
+        {/* Error message */}
+        {errors.role_name && touched.role_name && typeof errors.role_name === 'string' && (
+          <div className="text-red-500 text-sm">{errors.role_name}</div>
+        )}
+      </div>
+
+      {/* Submit */}
+      <div className="col-span-2">
+        <button
+          type="submit"
+          className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded"
         >
-          {({ values, handleChange }) => (
-            <Form className="grid grid-cols-2 gap-6 mt-6">
-              {/* Hidden user_id */}
-              <input type="hidden" name="user_id" value={values.user_id} />
+          Save Changes
+        </button>
+      </div>
+    </Form>
+  )}
+</Formik>
 
-              {/* Name */}
-              <div className="w-full relative mb-3">
-                <p className="text-[#232323] text-base leading-normal mb-2">Your Name</p>
-                <input
-                  type="text"
-                  name="name"
-                  value={values.name}
-                  onChange={handleChange}
-                  placeholder="Charlene Reed"
-                  className="hover:shadow-hoverInputShadow focus-border-primary w-full h-[50px] border border-[#DFEAF2] rounded-[4px] text-[15px] placeholder-[#718EBF] pl-4 mb-2 text-firstBlack"
-                />
-              </div>
 
-              {/* Mobile Number */}
-              <div className="w-full relative mb-3">
-                <p className="text-[#232323] text-base leading-normal mb-2">Mobile Number</p>
-                <input
-                  type="text"
-                  name="mobile_number"
-                  value={values.mobile_number}
-                  onChange={handleChange}
-                  placeholder="+91 9876543210"
-                  className="hover:shadow-hoverInputShadow focus-border-primary w-full h-[50px] border border-[#DFEAF2] rounded-[4px] text-[15px] placeholder-[#718EBF] pl-4 mb-2 text-firstBlack"
-                />
-              </div>
-
-              {/* Email */}
-              <div className="w-full relative mb-3">
-                <p className="text-[#232323] text-base leading-normal mb-2">Email</p>
-                <input
-                  type="email"
-                  name="email"
-                  value={values.email}
-                  onChange={handleChange}
-                  placeholder="youremail@example.com"
-                  className="hover:shadow-hoverInputShadow focus-border-primary w-full h-[50px] border border-[#DFEAF2] rounded-[4px] text-[15px] placeholder-[#718EBF] pl-4 mb-2 text-firstBlack"
-                />
-              </div>
-
-              {/* Password */}
-              {/* <div className="w-full relative mb-3">
-                <p className="text-[#232323] text-base leading-normal mb-2">Password</p>
-                <input
-                  type="password"
-                  name="password"
-                  value={values.password}
-                  onChange={handleChange}
-                  placeholder="••••••••"
-                  className="hover:shadow-hoverInputShadow focus-border-primary w-full h-[50px] border border-[#DFEAF2] rounded-[4px] text-[15px] placeholder-[#718EBF] pl-4 mb-2 text-firstBlack"
-                />
-              </div> */}
-
-              {/* Submit */}
-              <div className="col-span-2">
-                <button
-                  type="submit"
-                  className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded"
-                >
-                  Save Changes
-                </button>
-              </div>
-            </Form>
-          )}
-        </Formik>
       )}
 
     {/* END FROM----------- */}
