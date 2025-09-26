@@ -41,7 +41,7 @@ const DesktopHeader = () => {
      window.open(`/leadsdetails?id=${searchId}`, "_blank"); // "_blank" = new tab
     } catch (err) {
       console.error("Search failed:", err);
-       toast.error("Search failed try again");
+       toast.error("No lead found");
     }
   };
   return (
@@ -75,7 +75,7 @@ const DesktopHeader = () => {
           <div className=" w-[50px] h-[50px] bg-white rounded-full flex justify-center items-center">
             <IoIosNotificationsOutline className=" text-[#FE5C73] w-[25px] h-[25px]" />
           </div>
-          <div className=" w-[50px] h-[50px]  rounded-full flex justify-center items-center z-10">
+          {/* <div className=" w-[50px] h-[50px]  rounded-full flex justify-center items-center z-10">
             <Image
               src="/images/dummy-image.jpg"
               alt="Orizon profile"
@@ -83,7 +83,7 @@ const DesktopHeader = () => {
               height={50}
               className="rounded-full border-2 border-primary-500"
             />
-          </div>
+          </div> */}
         </div>
         <RiMenu2Line
           onClick={toggleFilterFlyout}

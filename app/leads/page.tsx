@@ -1529,7 +1529,7 @@ handleUnassignFilter();
                         className="border border-tableBorder bg-white hover:bg-primary-100"
                       >
                         {/* Full name */}
-                        <td className="px-1 py-2 md:px-3 md:py-2 border-tableBorder flex items-center gap-2">
+                        <td className="px-1 py-2 md:px-3 md:py-2 border-tableBorder flex items-center gap-2 bg-primary-500">
                           <div className="flex gap-2">
                             <div className="md:hidden">
                               <FaEllipsisVertical
@@ -1557,7 +1557,7 @@ handleUnassignFilter();
                             <div 
                              onClick={() => test(item.id)}
                             >
-                              <p className="text-[#232323] text-sm sm:text-base font-medium leading-normal capitalize cursor-pointer">
+                              <p className="text-white text-sm sm:text-base font-medium leading-normal capitalize cursor-pointer">
                                 {item?.full_name ?? "-"}
                               </p>
                             </div>
