@@ -36,9 +36,9 @@ const DesktopHeader = () => {
       const res = await AxiosProvider.get(
         `/leads/search/dashboard?q=${query}`
       );
-     // console.log("Search result:", res.data.data.data[0].id);
-      const searchId = res.data.data.data[0].id;
-      window.open(`/leadsdetails?id=${searchId}`, "_blank"); // "_blank" = new tab
+    // console.log("Search result:", res.data.data.leads[0].id);
+      const searchId = res.data.data.leads[0].id;
+     window.open(`/leadsdetails?id=${searchId}`, "_blank"); // "_blank" = new tab
     } catch (err) {
       console.error("Search failed:", err);
        toast.error("Search failed try again");

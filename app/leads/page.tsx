@@ -504,7 +504,7 @@ useEffect(() => {
       const response = await AxiosProvider.get(
         `/leads/assigned?page=${assignPage}&pageSize=${globalPageSize}`
       );
-      // console.log("KKKKKKKKKKKKKKKKK", response.data.data.data);
+      console.log("KKKKKKKKKKKKKKKKK", response.data.data.data);
       setassignTotalPages(response.data.data.pagination.totalPages);
       const result = response.data.data.data;
       // console.log("ALL CRM USER", result);
@@ -2306,18 +2306,16 @@ const test = (id: string) => {
               </div>
               <div className=" w-full border-b border-[#E7E7E7] mb-4"></div>
               {/* FORM */}
-             <Formik
+<Formik
   enableReinitialize
   initialValues={{
-    first_name: "",
-    last_name: "",
     full_name: "",
     email: "",
     phone: "",
     lead_number: "",
     city: "",
     state: "",
-    agent_id: "",
+    agent_ids: [] as string[],
     lead_source_id: "",
     debt_consolidation_status_id: "",
     consolidated_credit_status_id: "",
@@ -2327,6 +2325,19 @@ const test = (id: string) => {
   }}
 >
   {({ handleSubmit, values, setFieldValue, setFieldTouched, isSubmitting }) => {
+    type FilterFormValues = {
+      full_name: string;
+      email: string;
+      phone: string;
+      lead_number: string;
+      city: string;
+      state: string;
+      agent_ids: string[];
+      lead_source_id: string;
+      debt_consolidation_status_id: string;
+      consolidated_credit_status_id: string;
+    };
+
     const norm = (v: any) => String(v ?? "").toLowerCase();
 
     const leadSourceDisplay = values.lead_source_id
@@ -2337,85 +2348,114 @@ const test = (id: string) => {
 
     const debtDisplay = values.debt_consolidation_status_id
       ? (debtConsolidation || []).find(
-          (o: any) =>
-            norm(o.id) === norm(values.debt_consolidation_status_id)
+          (o: any) => norm(o.id) === norm(values.debt_consolidation_status_id)
         ) || null
       : null;
-      const agentDisplay = values.agent_id
-  ? (agentList || []).find((o: any) => norm(o.id) === norm(values.agent_id)) || null
+
+    // ✅ Multi-select display objects for agents
+    const agentDisplay =
+      (values.agent_ids || [])
+        .map((id: any) =>
+          (agentList || []).find((o: any) => norm(o.id) === norm(id))
+        )
+        .filter(Boolean) || [];
+
+const creditDisplay = values.consolidated_credit_status_id
+  ? (consolidationData || []).find(
+      (o: any) => norm(o.id) === norm(values.consolidated_credit_status_id)
+    ) || null
   : null;
 
-    const creditDisplay = values.consolidated_credit_status_id
-      ? (consolidationData || []).find(
-          (o: any) =>
-            norm(o.id) === norm(values.consolidated_credit_status_id)
-        ) || null
-      : null;
 
-    // 🔹 handlers
-    const handleUnassignFilter = async () => {
-      console.log("NotAssign values:", values);
-       const clean = toCleanFilter(values);
-    if (Object.keys(clean).length === 0) {
-      toast.error("Please fill at least one field before submitting.");
-      return;
-    }
-    //console.log("FILTER VALUES (clean):", clean);
-    // e.g. setFilters(clean); fetchList(1, clean);
-    try {
-      const response = await AxiosProvider.post(
-        `/notassignedleads/filter?page=${UnAssignPageFilter}&pageSize=${globalPageSize}`,
-        values
-      );
-      console.log("NOT ASSIGN FILTERED VALUE", response);
-      setUnAssignTotalPagesFilter(response.data.data.pagination.totalPages)
-     setNotAssignData(response.data.data.data)
-      setFlyoutOpen(false);
-      //  toast.success("Lead is Creatted");
-      //setHitApi(!hitApi);
-      setClearFilter(true);
-      setUnAssignFilterPagination(true)
-    } catch (error: any) {
-      toast.error("Lead is not Created");
-    } finally {
-      setIsLoading(false);
-    }
+    // ---------- helpers (replace old toCleanFilter usage) ----------
+    const pruneEmpty = (obj: Record<string, any>) => {
+      const out: Record<string, any> = {};
+      Object.entries(obj).forEach(([k, v]) => {
+        if (Array.isArray(v)) {
+          const arr = v.filter((x) => x !== "" && x != null);
+          if (arr.length) out[k] = arr;
+        } else if (v !== "" && v != null) {
+          out[k] = v;
+        }
+      });
+      return out;
     };
 
-    const handleAssignFilter = async() => {
+    const buildCleanPayload = (v: FilterFormValues): Partial<FilterFormValues> => {
+      const base = {
+        ...v,
+        agent_ids: (v.agent_ids || []).filter(Boolean),
+      };
+      return pruneEmpty(base) as Partial<FilterFormValues>;
+    };
+
+    const hasAnyField = (payload: Record<string, any>) =>
+      Object.keys(payload).length > 0;
+
+    // ---------------- handlers ----------------
+    const handleUnassignFilter = async () => {
+      console.log("NotAssign values:", values);
+      const clean = buildCleanPayload(values as FilterFormValues);
+
+      if (!hasAnyField(clean)) {
+        toast.error("Please fill at least one field before submitting.");
+        return;
+      }
+
+      try {
+        const response = await AxiosProvider.post(
+          `/notassignedleads/filter?page=${UnAssignPageFilter}&pageSize=${globalPageSize}`,
+          clean
+        );
+        console.log("NOT ASSIGN FILTERED VALUE", response);
+        setUnAssignTotalPagesFilter(response.data.data.pagination.totalPages);
+        setNotAssignData(response.data.data.data);
+        setFlyoutOpen(false);
+        setClearFilter(true);
+        setUnAssignFilterPagination(true);
+      } catch (error: any) {
+        toast.error("Lead is not Created");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    const handleAssignFilter = async () => {
       console.log("Assign values:", values);
-     const clean = toCleanFilter(values);
-    if (Object.keys(clean).length === 0) {
-      toast.error("Please fill at least one field before submitting.");
-      return;
-    }
-    //console.log("FILTER VALUES (clean):", clean);
-    // e.g. setFilters(clean); fetchList(1, clean);
-    try {
-      const response = await AxiosProvider.post(
-         `/leads/filter?page=${page}&pageSize=${pageSize}`,
-       //  `/leads/filter`,
-        values
-      );
-      console.log("FILTERED VALUE", response.data.data.data);
-     setAssignLeadData(response.data.data.data)
-      setFlyoutOpen(false);
-      //  toast.success("Lead is Creatted");
-      //setHitApi(!hitApi);
-      setClearFilter(true);
-      setAssignFilterPagination(true)
-    } catch (error: any) {
-      toast.error("Lead is not Created");
-    } finally {
-      setIsLoading(false);
-    }
+      const clean = buildCleanPayload(values as FilterFormValues);
+            if (!hasAnyField(clean)) {
+        toast.error("Please fill at least one field before submitting.");
+        return;
+      }
+console.log("unassign filter valuessssss",clean)
+//return;      
+
+
+
+      try {
+        const response = await AxiosProvider.post(
+          `/leads/filter?page=${page}&pageSize=${pageSize}`,
+           //  `/notassignedleads/filter?page=${UnAssignPageFilter}&pageSize=${globalPageSize}`,
+       
+          clean
+        );
+        console.log("FILTERED VALUE", response.data.data.data);
+        setAssignLeadData(response.data.data.data);
+        setFlyoutOpen(false);
+        setClearFilter(true);
+        setAssignFilterPagination(true);
+      } catch (error: any) {
+        console.log("assign filter error",error)
+        toast.error("Lead is not Created");
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     return (
       <form onSubmit={handleSubmit}>
         <div className="w-full">
           <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-
             {/* Full Name */}
             <div className="w-full">
               <p className="text-secondBlack  text-base leading-6 mb-2">
@@ -2494,47 +2534,50 @@ const test = (id: string) => {
               />
             </div>
 
-            {/* Agent ID */}
-{/* Agent */}
-<div className="w-full">
-  <p className="text-secondBlack  text-base leading-6 mb-2">Agent</p>
-  <Select
-    value={agentDisplay}
-    onChange={(selected: any) =>
-      setFieldValue("agent_id", selected ? selected.id : "")
-    }
-    onBlur={() => setFieldTouched("agent_id", true)}
-    getOptionLabel={(opt: any) => opt.name}
-    getOptionValue={(opt: any) => String(opt.id)}
-    options={agentList}
-    placeholder="Select Agent"
-    isClearable
-    classNames={{
-      control: ({ isFocused }: any) =>
-        `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
-          isFocused ? "!border-primary-500" : "!border-[#DFEAF2]"}`
-    }}
-    styles={{
-      menu: (base: any) => ({
-        ...base,
-        borderRadius: "4px",
-        boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
-        backgroundColor: "#fff",
-      }),
-      option: (base: any, { isFocused, isSelected }: any) => ({
-        ...base,
-        backgroundColor: isSelected
-          ? "var(--primary-500)"
-          : isFocused
-          ? "var(--primary-100)"
-          : "#fff",
-        color: isSelected ? "#fff" : "#333",
-        cursor: "pointer",
-      }),
-    }}
-  />
-</div>
-
+            {/* Agents (Multi Select) */}
+            <div className="w-full">
+              <p className="text-secondBlack  text-base leading-6 mb-2">Agent</p>
+              <Select
+                value={agentDisplay}
+                onChange={(selected: any) =>
+                  setFieldValue(
+                    "agent_ids",
+                    selected ? selected.map((s: any) => s.id) : []
+                  )
+                }
+                onBlur={() => setFieldTouched("agent_ids", true)}
+                getOptionLabel={(opt: any) => opt.name}
+                getOptionValue={(opt: any) => String(opt.id)}
+                options={agentList}
+                placeholder="Select Agent"
+                isMulti
+                isClearable
+                classNames={{
+                  control: ({ isFocused }: any) =>
+                    `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+                      isFocused ? "!border-primary-500" : "!border-[#DFEAF2]"
+                    }`,
+                }}
+                styles={{
+                  menu: (base: any) => ({
+                    ...base,
+                    borderRadius: "4px",
+                    boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+                    backgroundColor: "#fff",
+                  }),
+                  option: (base: any, { isFocused, isSelected }: any) => ({
+                    ...base,
+                    backgroundColor: isSelected
+                      ? "var(--primary-500)"
+                      : isFocused
+                      ? "var(--primary-100)"
+                      : "#fff",
+                    color: isSelected ? "#fff" : "#333",
+                    cursor: "pointer",
+                  }),
+                }}
+              />
+            </div>
 
             {/* Lead Source */}
             <div className="w-full">
@@ -2678,15 +2721,16 @@ const test = (id: string) => {
         </div>
 
         <div className=" flex gap-2">
-          {userRole === "Admin" && 
-          (          <button
-            type="button"
-            disabled={isSubmitting}
-            onClick={handleUnassignFilter}
-            className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
-          >
-            Filter UnAssign leads
-          </button>)}
+          {userRole === "Admin" && (
+            <button
+              type="button"
+              disabled={isSubmitting}
+              onClick={handleUnassignFilter}
+              className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
+            >
+              Filter UnAssign leads
+            </button>
+          )}
 
           <button
             type="button"
@@ -2701,6 +2745,7 @@ const test = (id: string) => {
     );
   }}
 </Formik>
+
 
 
               {/* { END FROM } */}
