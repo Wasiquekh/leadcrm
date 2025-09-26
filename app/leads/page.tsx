@@ -519,6 +519,7 @@ useEffect(() => {
   }, [assignPage, hitApi]);
 
 
+
   const leadSource = async () => {
     try {
       const response = await AxiosProvider.get("/leadsources");
@@ -709,7 +710,7 @@ const test = (id: string) => {
     }
   };
       const handleAssignPaginationFilter = (newPage: number) => {
-    if (newPage > 0 && newPage <= assignPageFilter) {
+    if (newPage > 0 && newPage <= assignTotalPagesFilter) {
       setAssignPageFilter(newPage);
     }
   };
