@@ -69,6 +69,9 @@ import {
 } from "date-fns";
 import { compressIfImage } from "../component/imageCompression";
 import Swal from "sweetalert2";
+import { toZonedTime as utcToZonedTime, fromZonedTime as zonedTimeToUtc } from "date-fns-tz";
+
+
 
 
 interface Lead {
@@ -1048,51 +1051,80 @@ const downloadDocument = (src: string | Blob, fileName = "image.jpg") => {
     );
   }
   const handleSubmit = async () => {};
-  // Round a date up to the next 5-minute tick
-  const roundUpToNext5 = (d: Date) => {
-    const remainder = d.getMinutes() % 5;
-    return remainder === 0 ? d : addMinutes(d, 5 - remainder);
-  };
+ 
+
   // --------------------------- DATE
   // helpers
-  const roundToNext5 = (d = new Date()) => {
-    const copy = new Date(d);
-    const mins = copy.getMinutes();
-    const add = (5 - (mins % 5)) % 5;
-    copy.setMinutes(mins + add, 0, 0);
-    return copy;
-  };
+// ---- Timezone helpers (paste above your Formik) ----
 
-  const addMinutes = (d: Date, mins: number) => {
-    const copy = new Date(d);
-    copy.setMinutes(copy.getMinutes() + mins);
-    return copy;
-  };
 
+const CA_TZ = "America/Toronto"; // change if you need Vancouver/Edmonton, etc.
+
+// UTC -> Canada local (for showing in DatePicker)
+const toPickerLocal = (d: Date | null) => (d ? utcToZonedTime(d, CA_TZ) : null);
+
+// Canada local -> UTC (for saving/state)
+const fromPickerLocal = (d: Date | null) => (d ? zonedTimeToUtc(d, CA_TZ) : null);
+
+// "Now" in Canada tz
+const nowCA = () => utcToZonedTime(new Date(), CA_TZ);
+
+// Round UP to next 30-minute slot in Canada time
+const roundToNext30 = (d: Date = nowCA()) => {
+  const copy = new Date(d);
+  copy.setSeconds(0, 0);
+  const mins = copy.getMinutes();
+  const add = (30 - (mins % 30)) % 30;
+  copy.setMinutes(mins + add);
+  return copy; // Canada wall-clock
+};
+
+// Add minutes
+const addMinutes = (d: Date, mins: number) => {
+  const copy = new Date(d);
+  copy.setMinutes(copy.getMinutes() + mins);
+  return copy;
+};
+
+// Compare same day in Canada tz
+const isSameDay = (a?: Date | null, b?: Date | null) => {
+  if (!a || !b) return false;
+  const za = utcToZonedTime(a, CA_TZ);
+  const zb = utcToZonedTime(b, CA_TZ);
+  return (
+    za.getFullYear() === zb.getFullYear() &&
+    za.getMonth() === zb.getMonth() &&
+    za.getDate() === zb.getDate()
+  );
+};
+
+// Start of today (Canada tz) for minDate
+const startOfTodayCA = () => {
+  const n = nowCA();
+  return new Date(n.getFullYear(), n.getMonth(), n.getDate());
+};
+
+// ✅ Formatter used in your onSubmit payload (Canada local time)
 const formatDateTime = (d: Date) => {
+  const z = utcToZonedTime(d, CA_TZ); // render in CA TZ
   const pad = (n: number) => String(n).padStart(2, "0");
-
-  let h = d.getHours();
-  const m = pad(d.getMinutes());
+  let h = z.getHours();
+  const m = pad(z.getMinutes());
   const ampm = h >= 12 ? "pm" : "am";
-  h = h % 12 || 12; // convert 0 -> 12
-
-  const yyyy = d.getFullYear();
-  const mm = pad(d.getMonth() + 1); // month (01–12)
-  const dd = pad(d.getDate());      // day (01–31)
-
-  // ✅ Format: MM-dd-yyyy hh:mmam/pm
+  h = h % 12 || 12;
+  const yyyy = z.getFullYear();
+  const mm = pad(z.getMonth() + 1);
+  const dd = pad(z.getDate());
+  // MM-dd-yyyy hh:mmam/pm  (matches what you used)
   return `${mm}-${dd}-${yyyy} ${pad(h)}:${m}${ampm}`;
 };
-const isSameDay = (a?: Date | null, b?: Date | null) =>
-  !!a && !!b &&
-  a.getFullYear() === b.getFullYear() &&
-  a.getMonth() === b.getMonth() &&
-  a.getDate() === b.getDate();
+
+// ---------- Defaults for Formik initialValues (store UTC) ----------
+// Start at next 30-minute slot (Canada) -> UTC; End = Start + 30 minutes
+const defaultStart = fromPickerLocal(roundToNext30())!;
+const defaultEnd = addMinutes(defaultStart, 30);
 
 
-  const defaultStart = roundToNext5();
-  const defaultEnd = addMinutes(defaultStart, 15); // still 30 min gap
 
   // ---------END DATE HELPER------------
 
@@ -2313,60 +2345,64 @@ classNames={{
                     </div>
 
                     {/* ===== Schedule (stacked: From, To-readonly) ===== */}
-              <div className="w-full md:col-span-2">
+<div className="w-full md:col-span-2">
   <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-3">
     Schedule
   </p>
 
   {/* From */}
   <div className="w-full relative mb-4">
-<div className="w-full relative mb-4">
-  <p className="text-[#0A0A0A] font-medium text-sm leading-6 mb-2">
-    From
-  </p>
-  <DatePicker
-    selected={values.start_at}
-    onChange={(date: Date | null) => {
-      setFieldValue("start_at", date);
-      if (date) setFieldValue("end_at", addMinutes(date, 15)); // 🔄 +30 min
-    }}
-    onBlur={() => setFieldTouched("start_at", true)}
-    name="start_at"
-    showTimeSelect
-    timeFormat="h:mma" // ✅ 11:55pm style
-    timeIntervals={5}
-    dateFormat="MM-dd-yyyy h:mma" // ✅ 09-26-2025 11:55pm
-    placeholderText="MM-dd-yyyy hh:mmam/pm"
-    className="hover:shadow-hoverInputShadow focus-border-primary !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
-    popperClassName="custom-datepicker"
-    dayClassName={(date) => {
-      const today = new Date().toDateString();
-      const selectedDate = values.start_at
-        ? new Date(values.start_at).toDateString()
-        : null;
-      if (today === date.toDateString())
-        return "bg-[#FFF0F1] text-[#A3000E]";
-      if (selectedDate === date.toDateString())
-        return "bg-[#A3000E] text-white";
-      return "hover:bg-[#FFCCD0] hover:text-[#A3000E]";
-    }}
+    <div className="w-full relative mb-4">
+      <p className="text-[#0A0A0A] font-medium text-sm leading-6 mb-2">
+        From
+      </p>
+      <DatePicker
+        /* SHOW as Canada time */
+        selected={toPickerLocal(values.start_at)}
+        /* TAKE as Canada time -> store UTC */
+        onChange={(date: Date | null) => {
+          const utcStart = fromPickerLocal(date);
+          setFieldValue("start_at", utcStart);
+          // end should be +30 minutes from start
+          if (utcStart) setFieldValue("end_at", addMinutes(utcStart, 30));
+        }}
+        onBlur={() => setFieldTouched("start_at", true)}
+        name="start_at"
+        showTimeSelect
+        timeFormat="h:mma"
+        timeIntervals={30}              // ⬅️ 30-minute steps
+        dateFormat="MM-dd-yyyy h:mma"
+        placeholderText="MM-dd-yyyy hh:mmam/pm"
+        className="hover:shadow-hoverInputShadow focus-border-primary !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
+        popperClassName="custom-datepicker"
+        dayClassName={(date) => {
+          const todayCA = nowCA().toDateString();
+          const selectedCA = values.start_at
+            ? toPickerLocal(values.start_at)!.toDateString()
+            : null;
+          if (todayCA === date.toDateString())
+            return "bg-[#FFF0F1] text-[#A3000E]";
+          if (selectedCA === date.toDateString())
+            return "bg-[#A3000E] text-white";
+          return "hover:bg-[#FFCCD0] hover:text-[#A3000E]";
+        }}
 
-    /* 👇 ONLY THESE TWO ADDED — no UI/CSS changes */
-    minDate={new Date()}  // disable past days
-    filterTime={(time: Date) =>
-      isSameDay(values.start_at, new Date())
-        ? time.getTime() >= roundToNext5().getTime() // disable past times today
-        : true // all times allowed on future days
-    }
-  />
-  {touched.start_at && (errors as any).start_at ? (
-    <p className="text-red-500 absolute top-[85px] text-xs">
-      {(errors as any).start_at}
-    </p>
-  ) : null}
-</div>
-
-
+        /* Disable past days/times based on CANADA tz (behavior only) */
+        minDate={startOfTodayCA()}
+        filterTime={(time: Date) => {
+          const selectedStartCA = values.start_at ? toPickerLocal(values.start_at) : null;
+          const isToday = selectedStartCA ? isSameDay(selectedStartCA, nowCA()) : false;
+          const cutoff = roundToNext30(nowCA()); // ⬅️ next 30-min slot
+          const timeCA = toPickerLocal(time)!;
+          return isToday ? timeCA.getTime() >= cutoff.getTime() : true;
+        }}
+      />
+      {touched.start_at && (errors as any).start_at ? (
+        <p className="text-red-500 absolute top-[85px] text-xs">
+          {(errors as any).start_at}
+        </p>
+      ) : null}
+    </div>
 
     {touched.start_at && (errors as any).start_at ? (
       <p className="text-red-500 absolute top-[85px] text-xs">
@@ -2381,14 +2417,15 @@ classNames={{
       To
     </p>
     <DatePicker
-      selected={values.end_at}
+      /* SHOW end time as Canada time */
+      selected={toPickerLocal(values.end_at)}
       onChange={() => {}}
       onBlur={() => setFieldTouched("end_at", true)}
       name="end_at"
       showTimeSelect
-      timeFormat="h:mma" // ✅ 11:55pm style
-      timeIntervals={5}
-      dateFormat="MM-dd-yyyy h:mma" // ✅ 09-26-2025 11:55pm
+      timeFormat="h:mma"
+      timeIntervals={30}               // ⬅️ 30-minute display steps
+      dateFormat="MM-dd-yyyy h:mma"
       placeholderText="MM-dd-yyyy hh:mmam/pm"
       disabled
       className="hover:shadow-hoverInputShadow focus-border-primary 
@@ -2404,6 +2441,7 @@ classNames={{
     ) : null}
   </div>
 </div>
+
 
                     {/* ===== /Schedule ===== */}
 
@@ -3886,83 +3924,109 @@ classNames={{
           </div>
 
           {/* ===== Schedule (From / To) ===== */}
-          <div className="w-full md:col-span-2">
-            <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-3">
-              Schedule
-            </p>
+       <div className="w-full md:col-span-2">
+  <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-3">
+    Schedule
+  </p>
 
-            {/* From */}
-            <div className="w-full relative mb-4">
-              <p className="text-[#0A0A0A] font-medium text-sm leading-6 mb-2">
-                From
-              </p>
-              <DatePicker
-                selected={values.start_at}
-                onChange={(date: Date | null) => {
-                  setFieldValue("start_at", date);
-                  if (date) setFieldValue("end_at", addMinutes(date, 15)); // auto +15
-                }}
-                onBlur={() => setFieldTouched("start_at", true)}
-                name="start_at"
-                showTimeSelect
-                timeFormat="h:mma"
-                timeIntervals={5}
-                dateFormat="MM-dd-yyyy h:mma"
-                placeholderText="MM-dd-yyyy hh:mmam/pm"
-                className="hover:shadow-hoverInputShadow focus-border-primary !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
-                popperClassName="custom-datepicker"
-                dayClassName={(date) => {
-                  const today = new Date().toDateString();
-                  const selectedDate = values.start_at
-                    ? new Date(values.start_at).toDateString()
-                    : null;
-                  if (today === date.toDateString())
-                    return "bg-[#FFF0F1] text-[#A3000E]";
-                  if (selectedDate === date.toDateString())
-                    return "bg-[#A3000E] text-white";
-                  return "hover:bg-[#FFCCD0] hover:text-[#A3000E]";
-                }}
-                minDate={new Date()} // disable past days
-                filterTime={(time: Date) =>
-                  isSameDay(values.start_at ?? new Date(), new Date())
-                    ? time.getTime() >= roundToNext5().getTime()
-                    : true
-                }
-              />
-              {touched.start_at && (errors as any).start_at ? (
-                <p className="text-red-500 mt-1 text-xs">
-                  {(errors as any).start_at}
-                </p>
-              ) : null}
-            </div>
+  {/* From */}
+  <div className="w-full relative mb-4">
+    <div className="w-full relative mb-4">
+      <p className="text-[#0A0A0A] font-medium text-sm leading-6 mb-2">
+        From
+      </p>
+      <DatePicker
+        /* SHOW as Canada time */
+        selected={toPickerLocal(values.start_at)}
+        /* TAKE as Canada time -> store UTC */
+        onChange={(date: Date | null) => {
+          const utcStart = fromPickerLocal(date);
+          setFieldValue("start_at", utcStart);
+          // ⬅️ End should be +30 minutes from Start
+          if (utcStart) setFieldValue("end_at", addMinutes(utcStart, 30));
+        }}
+        onBlur={() => setFieldTouched("start_at", true)}
+        name="start_at"
+        showTimeSelect
+        timeFormat="h:mma"
+        timeIntervals={30}              // ⬅️ 30-minute picker steps
+        dateFormat="MM-dd-yyyy h:mma"
+        placeholderText="MM-dd-yyyy hh:mmam/pm"
+        className="hover:shadow-hoverInputShadow focus-border-primary !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
+        popperClassName="custom-datepicker"
+        dayClassName={(date) => {
+          const todayCA = nowCA().toDateString();
+          const selectedCA = values.start_at
+            ? toPickerLocal(values.start_at)!.toDateString()
+            : null;
+          if (todayCA === date.toDateString())
+            return "bg-[#FFF0F1] text-[#A3000E]";
+          if (selectedCA === date.toDateString())
+            return "bg-[#A3000E] text-white";
+          return "hover:bg-[#FFCCD0] hover:text-[#A3000E]";
+        }}
 
-            {/* To (read-only) */}
-            <div className="w-full relative">
-              <p className="text-[#0A0A0A] font-medium text-sm leading-6 mb-2">
-                To
-              </p>
-              <DatePicker
-                selected={values.end_at}
-                onChange={() => {}}
-                onBlur={() => setFieldTouched("end_at", true)}
-                name="end_at"
-                showTimeSelect
-                timeFormat="h:mma"
-                timeIntervals={5}
-                dateFormat="MM-dd-yyyy h:mma"
-                placeholderText="MM-dd-yyyy hh:mmam/pm"
-                disabled
-                className="hover:shadow-hoverInputShadow focus-border-primary !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 bg-gray-50 text-firstBlack cursor-not-allowed"
-                popperClassName="custom-datepicker"
-                dayClassName={() => "pointer-events-none"}
-              />
-              {touched.end_at && (errors as any).end_at ? (
-                <p className="text-red-500 mt-1 text-xs">
-                  {(errors as any).end_at}
-                </p>
-              ) : null}
-            </div>
-          </div>
+        /* Disable past based on Canada tz */
+        minDate={startOfTodayCA()}
+        filterTime={(time: Date) => {
+          const selectedStartCA = values.start_at
+            ? toPickerLocal(values.start_at)
+            : null;
+          const isToday = selectedStartCA
+            ? isSameDay(selectedStartCA, nowCA())
+            : false;
+
+          // cutoff = next 30-minute slot in CA time
+          const cutoff = roundToNext30(nowCA());
+          const timeCA = toPickerLocal(time)!;
+          return isToday ? timeCA.getTime() >= cutoff.getTime() : true;
+        }}
+      />
+      {touched.start_at && (errors as any).start_at ? (
+        <p className="text-red-500 absolute top-[85px] text-xs">
+          {(errors as any).start_at}
+        </p>
+      ) : null}
+    </div>
+
+    {touched.start_at && (errors as any).start_at ? (
+      <p className="text-red-500 absolute top-[85px] text-xs">
+        {(errors as any).start_at}
+      </p>
+    ) : null}
+  </div>
+
+  {/* To (read-only) */}
+  <div className="w-full relative">
+    <p className="text-[#0A0A0A] font-medium text-sm leading-6 mb-2">
+      To
+    </p>
+    <DatePicker
+      /* SHOW end time as Canada time */
+      selected={toPickerLocal(values.end_at)}
+      onChange={() => {}}
+      onBlur={() => setFieldTouched("end_at", true)}
+      name="end_at"
+      showTimeSelect
+      timeFormat="h:mma"
+      timeIntervals={30}               // ⬅️ 30-minute display steps
+      dateFormat="MM-dd-yyyy h:mma"
+      placeholderText="MM-dd-yyyy hh:mmam/pm"
+      disabled
+      className="hover:shadow-hoverInputShadow focus-border-primary 
+        !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 
+        font-medium placeholder-[#717171] py-4 px-4 bg-gray-50 text-firstBlack cursor-not-allowed"
+      popperClassName="custom-datepicker"
+      dayClassName={() => "pointer-events-none"}
+    />
+    {touched.end_at && (errors as any).end_at ? (
+      <p className="text-red-500 absolute top-[85px] text-xs">
+        {(errors as any).end_at}
+      </p>
+    ) : null}
+  </div>
+</div>
+
 
           {/* Description */}
           <div className="w-full relative md:col-span-2">

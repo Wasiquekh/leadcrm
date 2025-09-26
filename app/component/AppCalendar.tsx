@@ -215,10 +215,11 @@ export default function AppCalendar({
                   </td>
 
                   {/* Subject */}
-                  <td className="px-3 py-2 border border-tableBorder hidden md:table-cell capitalize">
-                    <span className="text-[#232323] text-sm sm:text-base">
+                  <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+                    <span className="text-[#232323] text-sm sm:text-base capitalize">
                       {t?.subject || "-"}
                     </span>
+                    <p>  {t?.details || "-"}</p>
                   </td>
 
                   {/* Status pill */}
