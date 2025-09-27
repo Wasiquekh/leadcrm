@@ -298,7 +298,7 @@ export default function Home() {
   const [fetchLeadActivityData, setFetchLeadaActivityData] = useState<
     LeadActivityData[]
   >([]);
- // console.log("fetched single lead data", fetchLeadActivityData);
+  //console.log("fetched single lead data 111111111111111111", fetchLeadActivityData);
   const [reloadKey, setReloadKey] = useState(0);
   const [docs, setDocs] = useState<LeadDocument[]>([]); // start empty
   //console.log("DDDDDDDDDDDDOOOOOOOOOOOOOOCCCCCCCCSSSSSS",docs)
