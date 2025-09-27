@@ -1517,7 +1517,7 @@ handleUnassignFilter();
                       </div>
                     </th>
 					
-                    <th
+                    {/* <th
                       scope="col"
                       className="px-3 py-2 border border-tableBorder md:table-cell"
                     >
@@ -1527,7 +1527,7 @@ handleUnassignFilter();
                           Action
                         </span>
                       </div>
-                    </th>
+                    </th> */}
                   </tr>
                 </thead>
 
@@ -1607,9 +1607,9 @@ handleUnassignFilter();
                         </td>
 
                         {/* Action */}
-                        <td className="px-3 py-2 border border-tableBorder md:table-cell">
+                        {/* <td className="px-3 py-2 border border-tableBorder md:table-cell">
                           <div className="flex gap-1 md:gap-2 justify-center md:justify-start">
-                            {/* <button
+                             <button
                               onClick={() => test(item.id)}
                               className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"
                             >
@@ -1617,8 +1617,8 @@ handleUnassignFilter();
                               <span className="text-xs sm:text-sm text-white hover:text-white">
                                 View Details
                               </span>
-                            </button> */}
-                             {/* <button
+                            </button> 
+                              <button
                               onClick={() => assignAgent(item.id)}
                               className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"
                             >
@@ -1626,7 +1626,7 @@ handleUnassignFilter();
                               <span className="text-xs sm:text-sm text-white hover:text-white">
                                 Assign to agent
                               </span>
-                            </button> */}
+                            </button> 
                             <button
                               onClick={() => editLead(item)}
                               className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"
@@ -1637,11 +1637,8 @@ handleUnassignFilter();
                               </span>
                             </button>
 
-                           
-                      
-                            
                           </div>
-                        </td>
+                        </td> */}
                       </tr>
                     ))
                   )}
