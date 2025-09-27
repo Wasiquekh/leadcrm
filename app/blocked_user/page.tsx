@@ -137,7 +137,7 @@ const blockUserData = async (item: User) => {
 };
 const unBlockUserData = async(id: string)=>{
         try {
-          await AxiosProvider.post("/userdelete", { id: id });
+          await AxiosProvider.post("/unblockuser", { user_id: id });
 
           toast.success("Successfully Deleted");
           setShouldRefetch((prev) => !prev);
