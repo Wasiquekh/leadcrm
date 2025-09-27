@@ -154,7 +154,7 @@ interface LeadActivityData {
   created_at: string; // ISO date string
   agent_name: string;
   agent_id: string;
-  
+  created_at_ca: string;
 }
 type UpdateLead = {
   id: string;
@@ -452,7 +452,7 @@ export default function Home() {
         }
       );
 
-      // console.log("Lead Activity", res.data.data.activities);
+      console.log("Lead Activity", res.data.data.activities);
       console.log(
         "Lead Activity pagination",
         res.data.data.pagination.totalPages
@@ -833,93 +833,77 @@ const downloadDocument = (src: string | Blob, fileName = "image.jpg") => {
             >
               Filter Activity
             </button> */}
-            {fetchLeadActivityData && fetchLeadActivityData.length > 0 ? (
-              fetchLeadActivityData.map((activity) => {
-                const occurred = activity.occurred_at
-                  ? new Date(activity.occurred_at)
-                  : null;
-                const created = activity.created_at
-                  ? new Date(activity.created_at)
-                  : null;
 
-                const occurredDate =
-                  occurred?.toLocaleDateString("en-GB", {
-                    day: "2-digit",
-                    month: "short",
-                    timeZone: "Asia/Kolkata",
-                  }) ?? "--";
-                const occurredTime =
-                  occurred?.toLocaleTimeString("en-US", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: true,
-                    timeZone: "Asia/Kolkata",
-                  }) ?? "--";
+{fetchLeadActivityData && fetchLeadActivityData.length > 0 ? (
+  fetchLeadActivityData.map((activity) => {
+    // Parse the occurred_at_ca string to a Date object
+    const occurredCa = activity.created_at_ca
+      ? new Date(activity.created_at_ca) // Parse the string into Date
+      : null;
 
-                const createdDate =
-                  created?.toLocaleDateString("en-GB", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                    timeZone: "Asia/Kolkata",
-                  }) ?? "--";
-                const createdTime =
-                  created?.toLocaleTimeString("en-US", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: true,
-                    timeZone: "Asia/Kolkata",
-                  }) ?? "--";
+    // Format the date as 'dd MMM yyyy hh:mm AM/PM' for Canada time zone
+    const formattedOccurredCa = occurredCa
+      ? new Intl.DateTimeFormat("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+          timeZone: "America/Toronto", // Canada time zone (adjust as needed)
+        }).format(occurredCa)
+      : "--";
 
-                return (
-         <div
-  key={activity.id}
-  className="w-full flex justify-between gap-4 hover:bg-primary-100 py-2 px-2 rounded"
->
-  {/* Left: icon + occurred date/time */}
-  <div className="flex gap-2 shrink-0">
-    <TbActivity className="bg-primary-500 text-white p-1 text-2xl rounded-full" />
-    <div className="leading-5 text-sm">
-      <p>{createdDate}</p>
-      <p>{createdTime}</p>
-    </div>
-  </div>
+    return (
+      <div
+        key={activity.id}
+        className="w-full flex justify-between gap-4 hover:bg-primary-100 py-2 px-2 rounded"
+      >
+        {/* Left: icon + occurred date/time */}
+        <div className="flex gap-2 shrink-0">
+          <TbActivity className="bg-primary-500 text-white p-1 text-2xl rounded-full" />
+          <div className="leading-5 text-sm">
+            <p>{formattedOccurredCa}</p> {/* Display the formatted created_at_ca */}
+          </div>
+        </div>
 
-  {/* Middle: details */}
-  <div className="flex-1 min-w-0">
-    <p>
-      <span className="text-primary-600">{activity.disposition}:</span>{" "}
-      {activity.conversation}
-    </p>
-    <p className="text-xs text-gray-500">
-      Added by {activity.agent_name} on {createdDate} {createdTime}
-    </p>
-  </div>
+        {/* Middle: details */}
+        <div className="flex-1 min-w-0">
+          <p>
+            <span className="text-primary-600">{activity.disposition}:</span>{" "}
+            {activity.conversation}
+          </p>
+          <p className="text-xs text-gray-500">
+            Added by {activity.agent_name} on {formattedOccurredCa}
+          </p>
+        </div>
 
-  {/* Right: Action buttons */}
-  <div className=" space-x-2 shrink-0">
-    <button
-      type="button"
-      onClick={() => openActivityHistoryFlyout(activity)}
-      className="py-1.5 px-3 rounded text-sm bg-primary-500 text-white hover:bg-primary-600"
-    >
-      Edit
-    </button>
-    <button
-      type="button"
-      onClick={() => deleteActivityHistory(activity)}
-      className="py-1.5 px-3 rounded text-sm bg-red-500 text-white hover:bg-red-600"
-    >
-      Delete
-    </button>
-  </div>
-</div>
+        {/* Right: Action buttons */}
+        <div className="space-x-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => openActivityHistoryFlyout(activity)}
+            className="py-1.5 px-3 rounded text-sm bg-primary-500 text-white hover:bg-primary-600"
+          >
+            Edit
+          </button>
+          <button
+            type="button"
+            onClick={() => deleteActivityHistory(activity)}
+            className="py-1.5 px-3 rounded text-sm bg-red-500 text-white hover:bg-red-600"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    );
+  })
+) : (
+  <p className="text-center text-gray-500 py-4">No data found</p>
+)}
 
-                );
-              })
-            ) : (
-              <p className="text-center text-gray-500 py-4">No data found</p>
-            )}
+
+
 
             {/* PAGINATION */}
             <div className="flex justify-center items-center my-10 relative">
