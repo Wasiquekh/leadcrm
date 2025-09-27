@@ -78,7 +78,7 @@ export default function AppCalendar({
           lead_id: leadId,
         });
         setTasks(res.data.data.task || []);
-        console.log("AAAAAAAAAAAAAAAAAAAA",res)
+       // console.log("AAAAAAAAAAAAAAAAAAAA",res)
         // Rebuild completedMap from API payload too
         const init: Record<string, boolean> = {};
         (res.data?.data?.task || []).forEach((t: TaskData) => {
