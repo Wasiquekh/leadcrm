@@ -250,10 +250,13 @@ type CreateLead = {
   consolidated_credit_status_id?: string;
 };
 
+const storage = new StorageManager();
+
+
 export default function Home() {
   const [isFlyoutFilterOpen, setFlyoutFilterOpen] = useState<boolean>(false);
   const isChecking = useAuthRedirect();
-  const storage = new StorageManager();
+
 
   const [isCustomerViewDetailOpen, setIsCustomerViewDetailOpen] =
     useState<boolean>(false);
@@ -279,7 +282,13 @@ export default function Home() {
   const [lead, setLead] = useState<Lead | null>(null);
   const [isTotpPopupOpen, setIsTotpPopupOpen] = useState<boolean>(false);
   const [data, setData] = useState<any>(null);
-  //console.log("LEAD SINGLE DATA", data);
+useEffect(() => {
+  if (data?.agent) {
+    console.log("Agent ID:", data.agent.id);
+    console.log("Agent Name:", data.agent.name);
+  }
+}, [data]);
+   //console.log("LEAD SINGLE DATA", data.agent.name);
   const [leadActivityData, setLeadActivityData] = useState<LeadActivity>();
   const [disposition, setDisposition] = useState<Disposition[]>([]);
   const [agent, setAgent] = useState<Agent[]>([]);
@@ -320,9 +329,8 @@ export default function Home() {
  const [documentEditObjectData, setDocumentEditObjectData] = useState<LeadDocument>(null);
  const [isTaskEdit, setIsTaskEdit] = useState<boolean>(false);
  const [taskEditObject, setTaskEditObject] = useState<any>(null);
-
- console.log("MMMMMMMMMMMMMMMMMMM",taskEditObject)
-
+ const [userRole,setUserRole] = useState(storage.getUserRole());
+ console.log("MMMMMMMMMMMMMMMMMMM",userRole)
 
   //console.log("", documentName);
   // console.log("lead activity edit data", activityHistoryData);
@@ -357,13 +365,14 @@ export default function Home() {
     return res.data;
   }
   // ✅ Initial Values
-  const INITIAL_VALUES = {
-    lead_id: leadId,
-    conversation: "",
-    occurred_at: "",
-    disposition_id: "",
-    agent_id: "",
-  };
+const INITIAL_VALUES = {
+  lead_id: leadId,
+  conversation: "",
+  occurred_at: "",
+  disposition_id: "",
+  agent_id: userRole === "Agent" ? data?.agent?.id : "",
+};
+
   const formInitialValues = activityHistoryData
     ? {
         id: activityHistoryData.id,
@@ -431,7 +440,7 @@ export default function Home() {
         lead_id: leadId,
       });
 
-      //console.log("lead data", res.data.data);
+     // console.log("lead dataOOOOOOOOOOOOOOOOOOOO", res.data.data);
       setData(res.data.data); // <-- if you want to store in state
     } catch (error: any) {
       console.error("Error fetching lead:", error);
@@ -2069,9 +2078,9 @@ classNames={{
   </div>
 
   {/* Agent */}
-  <div className="w-full relative">
+  {userRole === "Admin" ? (  <div className="w-full relative">
     <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
-      Agent
+      Agent  <span>{`(admin)`}</span>
     </p>
     <Select
       value={
@@ -2116,7 +2125,57 @@ classNames={{
         {(errors as any).agent_id}
       </p>
     ) : null}
-  </div>
+  </div>) 
+  : 
+   (  <div className="w-full relative">
+    <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+      Agent <span>{`(agent)`}</span>
+    </p>
+<Select
+  value={
+    (agent || []).find((opt: any) => opt.id === data?.agent?.id) || null
+  }
+  onChange={(selectedOption: any) =>
+    setFieldValue("agent_id", selectedOption ? selectedOption.id : "")
+  }
+  onBlur={() => setFieldTouched("agent_id", true)}
+  getOptionLabel={(opt: any) => opt.name}
+  getOptionValue={(opt: any) => opt.id}
+  options={agent}
+  placeholder="Select Agent"
+  isClearable
+  classNames={{
+    control: ({ isFocused }) =>
+      `onHoverBoxShadow !w/full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+        isFocused ? "!border-primary-500" : "!border-[#DFEAF2]"
+      }`,
+  }}
+  styles={{
+    menu: (base) => ({
+      ...base,
+      borderRadius: "4px",
+      boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+      backgroundColor: "#fff",
+    }),
+    option: (base, { isFocused, isSelected }) => ({
+      ...base,
+      backgroundColor: isSelected
+        ? "var(--primary-500)"
+        : isFocused
+        ? "var(--primary-100)"
+        : "#fff",
+      color: isSelected ? "#fff" : "#333",
+      cursor: "pointer",
+    }),
+  }}
+/>
+    {touched.agent_id && (errors as any).agent_id ? (
+      <p className="text-red-500 absolute top-[85px] text-xs">
+        {(errors as any).agent_id}
+      </p>
+    ) : null}
+  </div>)}
+
 
 
 {/* ===== Row 2: Conversation (full width textarea) ===== */}
