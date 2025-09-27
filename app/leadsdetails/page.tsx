@@ -693,7 +693,7 @@ const handleUpdateDocument = async (e: React.FormEvent<HTMLFormElement>) => {
         lead_id: leadId,
       });
 
-   console.log("lead document data", res.data.data.data);
+   console.log("lead document data22222222222", res.data.data.data);
       setDocs(res.data.data.data); // <-- if you want to store in state
     } catch (error: any) {
       console.error("Error fetching lead:", error);
@@ -833,76 +833,58 @@ const downloadDocument = (src: string | Blob, fileName = "image.jpg") => {
             >
               Filter Activity
             </button> */}
+      {fetchLeadActivityData && fetchLeadActivityData.length > 0 ? (
+        fetchLeadActivityData.map((activity) => {
+          // Simply display 'created_at_ca' as it is, no parsing or conversion
+          const formattedOccurredCa = activity.created_at_ca || '--';
 
-{fetchLeadActivityData && fetchLeadActivityData.length > 0 ? (
-  fetchLeadActivityData.map((activity) => {
-    // Parse the occurred_at_ca string to a Date object
-    const occurredCa = activity.created_at_ca
-      ? new Date(activity.created_at_ca) // Parse the string into Date
-      : null;
+          return (
+            <div
+              key={activity.id}
+              className="w-full flex justify-between gap-4 hover:bg-primary-100 py-2 px-2 rounded"
+            >
+              {/* Left: icon + occurred date/time */}
+              <div className="flex gap-2 shrink-0">
+                <TbActivity className="bg-primary-500 text-white p-1 text-2xl rounded-full" />
+                <div className="leading-5 text-sm">
+                  <p>{formattedOccurredCa}</p> {/* Display the 'created_at_ca' as is */}
+                </div>
+              </div>
 
-    // Format the date as 'dd MMM yyyy hh:mm AM/PM' for Canada time zone
-    const formattedOccurredCa = occurredCa
-      ? new Intl.DateTimeFormat("en-GB", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: true,
-          timeZone: "America/Toronto", // Canada time zone (adjust as needed)
-        }).format(occurredCa)
-      : "--";
+              {/* Middle: details */}
+              <div className="flex-1 min-w-0">
+                <p>
+                  <span className="text-primary-600">{activity.disposition}:</span>{" "}
+                  {activity.conversation}
+                </p>
+                <p className="text-xs text-gray-500">
+                  Added by {activity.agent_name} on {formattedOccurredCa}
+                </p>
+              </div>
 
-    return (
-      <div
-        key={activity.id}
-        className="w-full flex justify-between gap-4 hover:bg-primary-100 py-2 px-2 rounded"
-      >
-        {/* Left: icon + occurred date/time */}
-        <div className="flex gap-2 shrink-0">
-          <TbActivity className="bg-primary-500 text-white p-1 text-2xl rounded-full" />
-          <div className="leading-5 text-sm">
-            <p>{formattedOccurredCa}</p> {/* Display the formatted created_at_ca */}
-          </div>
-        </div>
-
-        {/* Middle: details */}
-        <div className="flex-1 min-w-0">
-          <p>
-            <span className="text-primary-600">{activity.disposition}:</span>{" "}
-            {activity.conversation}
-          </p>
-          <p className="text-xs text-gray-500">
-            Added by {activity.agent_name} on {formattedOccurredCa}
-          </p>
-        </div>
-
-        {/* Right: Action buttons */}
-        <div className="space-x-2 shrink-0">
-          <button
-            type="button"
-            onClick={() => openActivityHistoryFlyout(activity)}
-            className="py-1.5 px-3 rounded text-sm bg-primary-500 text-white hover:bg-primary-600"
-          >
-            Edit
-          </button>
-          <button
-            type="button"
-            onClick={() => deleteActivityHistory(activity)}
-            className="py-1.5 px-3 rounded text-sm bg-red-500 text-white hover:bg-red-600"
-          >
-            Delete
-          </button>
-        </div>
-      </div>
-    );
-  })
-) : (
-  <p className="text-center text-gray-500 py-4">No data found</p>
-)}
-
-
+              {/* Right: Action buttons */}
+              <div className="space-x-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => openActivityHistoryFlyout(activity)}
+                  className="py-1.5 px-3 rounded text-sm bg-primary-500 text-white hover:bg-primary-600"
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  onClick={() => deleteActivityHistory(activity)}
+                  className="py-1.5 px-3 rounded text-sm bg-red-500 text-white hover:bg-red-600"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          );
+        })
+      ) : (
+        <p className="text-center text-gray-500 py-4">No data found</p>
+      )}
 
 
             {/* PAGINATION */}
@@ -988,7 +970,7 @@ const downloadDocument = (src: string | Blob, fileName = "image.jpg") => {
                       </p>
                       <p className="text-xs text-gray-500">
                         {d.mime_type} · {fmtSize(d.file_size)} ·{" "}
-                        {new Date(d.created_at).toLocaleString()}
+                        {new Date(d.created_at_ca).toLocaleString()}
                       </p>
                     </div>
 
