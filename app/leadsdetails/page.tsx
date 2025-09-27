@@ -2396,7 +2396,7 @@ classNames={{
         name="start_at"
         showTimeSelect
         timeFormat="h:mma"
-        timeIntervals={30}              // ⬅️ 30-minute steps
+        timeIntervals={15}              // ⬅️ 30-minute steps
         dateFormat="MM-dd-yyyy h:mma"
         placeholderText="MM-dd-yyyy hh:mmam/pm"
         className="hover:shadow-hoverInputShadow focus-border-primary !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
@@ -2450,7 +2450,7 @@ classNames={{
       name="end_at"
       showTimeSelect
       timeFormat="h:mma"
-      timeIntervals={30}               // ⬅️ 30-minute display steps
+      timeIntervals={15}               // ⬅️ 30-minute display steps
       dateFormat="MM-dd-yyyy h:mma"
       placeholderText="MM-dd-yyyy hh:mmam/pm"
       disabled
