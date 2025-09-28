@@ -175,10 +175,10 @@ const [teamTaskAdmin, setTeamTaskAdmin] = useState<AgentStats[]>([]);
                 </div>
 
                 {/* Tab 2 */}
-                <div className="flex flex-col items-center justify-center p-6 rounded-lg bg-gradient-to-r from-pink-500 to-red-500 text-white shadow-md">
+                {/* <div className="flex flex-col items-center justify-center p-6 rounded-lg bg-gradient-to-r from-pink-500 to-red-500 text-white shadow-md">
                   <p className="text-sm font-medium opacity-80">Upcoming</p>
                   <p className="mt-2 text-xl font-semibold">{cards?.upcoming ?? 0}</p>
-                </div>
+                </div> */}
                 {/* Tab 3 */}
                 <div className="flex flex-col items-center justify-center p-6 rounded-lg bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-md">
                   <p className="text-sm font-medium opacity-80">Overdue</p>
@@ -229,7 +229,7 @@ const [teamTaskAdmin, setTeamTaskAdmin] = useState<AgentStats[]>([]);
               </div>
 
               {/* TABLE FOR UPCOMING  */}
-               <h1 className=" mt-5">Table Upcoming Task</h1>
+               {/* <h1 className=" mt-5">Table Upcoming Task</h1>
                <div className="overflow-x-auto rounded-lg shadow bg-white mt-6">
       <table className="min-w-full text-sm text-left">
         <thead className="bg-gray-100 text-gray-700 font-semibold">
@@ -265,7 +265,7 @@ const [teamTaskAdmin, setTeamTaskAdmin] = useState<AgentStats[]>([]);
           )}
         </tbody>
       </table>
-    </div>
+    </div> */}
 {/* TABLE FOR OVERDUE TASK */}
 <h1 className="mt-5">Table Overdue Task</h1>
 <div className="overflow-x-auto rounded-lg shadow bg-white mt-6">

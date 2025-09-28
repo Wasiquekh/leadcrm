@@ -10,13 +10,13 @@ import { FaGreaterThan } from "react-icons/fa6";
 import { FiFilter } from "react-icons/fi";
 import { HiOutlineBookOpen } from "react-icons/hi2";
 import { SiHomeassistantcommunitystore } from "react-icons/si";
-import { MdOutlineCall } from "react-icons/md";
+import { MdEdit, MdOutlineCall } from "react-icons/md";
 import { LiaArrowCircleDownSolid } from "react-icons/lia";
 import { MdRemoveRedEye } from "react-icons/md";
 import { IoCloseOutline } from "react-icons/io5";
 import { RxAvatar } from "react-icons/rx";
 import AxiosProvider from "../../provider/AxiosProvider";
-import { RiAccountCircleLine } from "react-icons/ri";
+import { RiAccountCircleLine, RiDeleteBin6Line } from "react-icons/ri";
 import { RxCross2 } from "react-icons/rx";
 import StorageManager from "../../provider/StorageManager";
 import { AppContext } from "../AppContext";
@@ -38,6 +38,7 @@ import Select from "react-select";
 import Swal from "sweetalert2";
 import Tabs from "../component/Tabs";
 import page from "../page";
+import { BiUserPin } from "react-icons/bi";
 
 const axiosProvider = new AxiosProvider();
 
@@ -1014,7 +1015,7 @@ handleUnassignFilter();
                               onClick={() => editLead(item)}
                               className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"
                             >
-                              <MdRemoveRedEye className="text-white w-4 h-4 hover:text-white" />
+                              <MdEdit className="text-white w-4 h-4 hover:text-white" />
                               <span className="text-xs sm:text-sm text-white hover:text-white">
                                 Edit
                               </span>
@@ -1024,7 +1025,7 @@ handleUnassignFilter();
                                 onClick={() => assignAgent(item.id)}
                                 className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"
                               >
-                                <MdRemoveRedEye className="text-white w-4 h-4 hover:text-white" />
+                                <BiUserPin className="text-white w-4 h-4 hover:text-white" />
                                 <span className="text-xs sm:text-sm text-white hover:text-white">
                                   Assign to agent
                                 </span>
@@ -1035,7 +1036,7 @@ handleUnassignFilter();
                                 onClick={() => deleteUserLead(item.id)}
                                 className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"
                               >
-                                <MdRemoveRedEye className="text-white w-4 h-4 hover:text-white" />
+                                <RiDeleteBin6Line className="text-white w-4 h-4 hover:text-white" />
                                 <span className="text-xs sm:text-sm text-white hover:text-white">
                                   Delete
                                 </span>
@@ -1272,7 +1273,7 @@ handleUnassignFilter();
                               onClick={() => editLead(item)}
                               className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"
                             >
-                              <MdRemoveRedEye className="text-white w-4 h-4 hover:text-white" />
+                              <MdEdit className="text-white w-4 h-4 hover:text-white" />
                               <span className="text-xs sm:text-sm text-white hover:text-white">
                                 Edit
                               </span>
@@ -1283,7 +1284,7 @@ handleUnassignFilter();
                                 onClick={() => deleteUserLead(item.id)}
                                 className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"
                               >
-                                <MdRemoveRedEye className="text-white w-4 h-4 hover:text-white" />
+                                <RiDeleteBin6Line className="text-white w-4 h-4 hover:text-white" />
                                 <span className="text-xs sm:text-sm text-white hover:text-white">
                                   Delete
                                 </span>

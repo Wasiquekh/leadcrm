@@ -155,6 +155,7 @@ interface LeadActivityData {
   agent_name: string;
   agent_id: string;
   created_at_ca: string;
+  edited: boolean;
 }
 type UpdateLead = {
   id: string;
@@ -330,7 +331,11 @@ useEffect(() => {
  const [isTaskEdit, setIsTaskEdit] = useState<boolean>(false);
  const [taskEditObject, setTaskEditObject] = useState<any>(null);
  const [userRole,setUserRole] = useState(storage.getUserRole());
- console.log("MMMMMMMMMMMMMMMMMMM",userRole)
+  const [isConversationExpanded, setIsConversationExpanded] = useState(false);
+  const [isActivityHistoryPagination, setIsActivityHistoryPaination] = useState<boolean>(true)
+  
+
+
 
   //console.log("", documentName);
   // console.log("lead activity edit data", activityHistoryData);
@@ -461,7 +466,7 @@ const INITIAL_VALUES = {
         }
       );
 
-      console.log("Lead Activity", res.data.data.activities);
+      //console.log("Lead Activity wwwwwwwwwwwwwwwwww", res.data.data.activities);
       console.log(
         "Lead Activity pagination",
         res.data.data.pagination.totalPages
@@ -829,6 +834,15 @@ const downloadDocument = (src: string | Blob, fileName = "image.jpg") => {
   { id: "saskatchewan", name: "Saskatchewan" },
   { id: "yukon", name: "Yukon" },
 ];
+  const maxLength = 100; // Set your desired maximum length
+
+  // Function to handle Show More/Show Less toggle
+  const toggleConversationExpansion = () => {
+    setIsConversationExpanded(!isConversationExpanded);
+  };
+  useEffect(()=>{
+setIsActivityHistoryPaination(true)
+  },[hitApi])
   const tabs = [
     {
       label: "Activity History",
@@ -836,12 +850,12 @@ const downloadDocument = (src: string | Blob, fileName = "image.jpg") => {
         <>
           {/* Tab content 3 */}
           <div className="container mx-auto p-4">
-            {/* <button
+            <button
               onClick={() => openLeadActivityFlyOut()}
               className="bg-primary-600 hover:bg-primary-700 py-3 px-4 rounded-[4px] text-sm font-medium text-white mb-2"
             >
               Filter Activity
-            </button> */}
+            </button>
       {fetchLeadActivityData && fetchLeadActivityData.length > 0 ? (
         fetchLeadActivityData.map((activity) => {
           // Simply display 'created_at_ca' as it is, no parsing or conversion
@@ -862,12 +876,23 @@ const downloadDocument = (src: string | Blob, fileName = "image.jpg") => {
 
               {/* Middle: details */}
               <div className="flex-1 min-w-0">
-                <p>
-                  <span className="text-primary-600">{activity.disposition}:</span>{" "}
-                  {activity.conversation}
-                </p>
+<p>
+  <span className="text-primary-600">{activity.disposition}:</span>{" "}
+  {activity.conversation.length > maxLength && !isConversationExpanded
+    ? activity.conversation.substring(0, maxLength) + "..."
+    : activity.conversation}
+</p>
+{activity.conversation.length > maxLength && (
+  <button
+    onClick={toggleConversationExpansion}
+    className="text-primary-600 underline text-sm"
+  >
+    {isConversationExpanded ? "Show less" : "Show more"}
+  </button>
+)}
+
                 <p className="text-xs text-gray-500">
-                  Added by {activity.agent_name} on {formattedOccurredCa}
+                  Added by {activity.agent_name} on {formattedOccurredCa} {activity.edited ?  "(Edited)" : ""}
                 </p>
               </div>
 
@@ -880,13 +905,15 @@ const downloadDocument = (src: string | Blob, fileName = "image.jpg") => {
                 >
                   Edit
                 </button>
-                <button
+                {userRole ===  "Admin" &&
+                 (                <button
                   type="button"
                   onClick={() => deleteActivityHistory(activity)}
                   className="py-1.5 px-3 rounded text-sm bg-red-500 text-white hover:bg-red-600"
                 >
                   Delete
-                </button>
+                </button>)}
+
               </div>
             </div>
           );
@@ -895,9 +922,10 @@ const downloadDocument = (src: string | Blob, fileName = "image.jpg") => {
         <p className="text-center text-gray-500 py-4">No data found</p>
       )}
 
-
             {/* PAGINATION */}
-            <div className="flex justify-center items-center my-10 relative">
+       
+{isActivityHistoryPagination && (     
+  <div className="flex justify-center items-center my-10 relative">
               <button
                 onClick={() => handleChangepagination(page - 1)}
                 disabled={page === 1}
@@ -915,7 +943,7 @@ const downloadDocument = (src: string | Blob, fileName = "image.jpg") => {
               >
                 <HiChevronDoubleRight className=" w-6 h-auto" />
               </button>
-            </div>
+            </div>)}
             {/* PAGINATION */}
           </div>
 
@@ -1029,30 +1057,34 @@ const downloadDocument = (src: string | Blob, fileName = "image.jpg") => {
   const handleSubmit = async () => {};
  
 
-  // --------------------------- DATE
-  // helpers
-// ---- Timezone helpers (paste above your Formik) ----
+  // --------------------------- DATE HELPer
 
+const CA_TZ = "America/Toronto"; // Eastern with DST
 
-const CA_TZ = "America/Toronto"; // change if you need Vancouver/Edmonton, etc.
+// Window + slot config
+const WORK_START_HOUR = 10;  // 10:00
+const WORK_END_HOUR = 21;    // 21:00 (hard day end)
+const START_LAST_MINUTES = 30; // last valid START = 20:30 (so end hits 21:00)
+const SLOT_MINUTES = 15;     // display step = 15 min
+const DURATION_MINUTES = 30; // schedule length = 30 min
 
-// UTC -> Canada local (for showing in DatePicker)
+// UTC -> Canada local (for showing)
 const toPickerLocal = (d: Date | null) => (d ? utcToZonedTime(d, CA_TZ) : null);
 
-// Canada local -> UTC (for saving/state)
+// Canada local -> UTC (for storing/state)
 const fromPickerLocal = (d: Date | null) => (d ? zonedTimeToUtc(d, CA_TZ) : null);
 
 // "Now" in Canada tz
 const nowCA = () => utcToZonedTime(new Date(), CA_TZ);
 
-// Round UP to next 30-minute slot in Canada time
-const roundToNext30 = (d: Date = nowCA()) => {
+// Round UP to next SLOT_MINUTES (Canada time)
+const roundUpToSlot = (d: Date = nowCA()) => {
   const copy = new Date(d);
   copy.setSeconds(0, 0);
   const mins = copy.getMinutes();
-  const add = (30 - (mins % 30)) % 30;
+  const add = (SLOT_MINUTES - (mins % SLOT_MINUTES)) % SLOT_MINUTES;
   copy.setMinutes(mins + add);
-  return copy; // Canada wall-clock
+  return copy;
 };
 
 // Add minutes
@@ -1062,7 +1094,7 @@ const addMinutes = (d: Date, mins: number) => {
   return copy;
 };
 
-// Compare same day in Canada tz
+// Same-day check in Canada tz
 const isSameDay = (a?: Date | null, b?: Date | null) => {
   if (!a || !b) return false;
   const za = utcToZonedTime(a, CA_TZ);
@@ -1080,9 +1112,33 @@ const startOfTodayCA = () => {
   return new Date(n.getFullYear(), n.getMonth(), n.getDate());
 };
 
-// ✅ Formatter used in your onSubmit payload (Canada local time)
+// Build a time on the same calendar day (Canada local)
+const atHM = (baseCA: Date, hour: number, minute = 0) =>
+  new Date(baseCA.getFullYear(), baseCA.getMonth(), baseCA.getDate(), hour, minute, 0, 0);
+
+// Daily bounds (Canada local)
+const windowStartCA = (dCA: Date) => atHM(dCA, WORK_START_HOUR, 0);                        // 10:00
+const windowEndCA = (dCA: Date) => atHM(dCA, WORK_END_HOUR, 0);                            // 21:00
+const windowLastStartCA = (dCA: Date) => atHM(dCA, WORK_END_HOUR, 0 - START_LAST_MINUTES); // 20:30
+
+// Next valid START within window (for defaults and today's earliest)
+const nextValidStartInWindowCA = (base: Date = nowCA()) => {
+  const today = new Date(base);
+  const wStart = windowStartCA(today);
+  const wLastStart = windowLastStartCA(today);
+
+  if (base < wStart) return wStart;                 // before 10:00 -> 10:00
+  if (base >= wLastStart) {                         // at/after 20:30 -> tomorrow 10:00
+    const tomorrow = addMinutes(atHM(today, 0), 24 * 60);
+    return windowStartCA(tomorrow);
+  }
+  const rounded = roundUpToSlot(base);              // inside window -> next slot
+  return rounded > wLastStart ? wLastStart : rounded;
+};
+
+// Formatter for payload (Canada local)
 const formatDateTime = (d: Date) => {
-  const z = utcToZonedTime(d, CA_TZ); // render in CA TZ
+  const z = utcToZonedTime(d, CA_TZ);
   const pad = (n: number) => String(n).padStart(2, "0");
   let h = z.getHours();
   const m = pad(z.getMinutes());
@@ -1091,16 +1147,13 @@ const formatDateTime = (d: Date) => {
   const yyyy = z.getFullYear();
   const mm = pad(z.getMonth() + 1);
   const dd = pad(z.getDate());
-  // MM-dd-yyyy hh:mmam/pm  (matches what you used)
   return `${mm}-${dd}-${yyyy} ${pad(h)}:${m}${ampm}`;
 };
 
 // ---------- Defaults for Formik initialValues (store UTC) ----------
-// Start at next 30-minute slot (Canada) -> UTC; End = Start + 30 minutes
-const defaultStart = fromPickerLocal(roundToNext30())!;
-const defaultEnd = addMinutes(defaultStart, 30);
-
-
+const defaultStartCA = nextValidStartInWindowCA();
+const defaultStart = fromPickerLocal(defaultStartCA)!;
+const defaultEnd = addMinutes(defaultStart, DURATION_MINUTES);
 
   // ---------END DATE HELPER------------
 
@@ -2142,9 +2195,10 @@ classNames={{
   onBlur={() => setFieldTouched("agent_id", true)}
   getOptionLabel={(opt: any) => opt.name}
   getOptionValue={(opt: any) => opt.id}
-  options={agent}
+  options={agent}        // ✅ keep this
   placeholder="Select Agent"
   isClearable
+  isDisabled             // ✅ use this to disable
   classNames={{
     control: ({ isFocused }) =>
       `onHoverBoxShadow !w/full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
@@ -2166,10 +2220,11 @@ classNames={{
         ? "var(--primary-100)"
         : "#fff",
       color: isSelected ? "#fff" : "#333",
-      cursor: "pointer",
+      cursor: "not-allowed",
     }),
   }}
 />
+
     {touched.agent_id && (errors as any).agent_id ? (
       <p className="text-red-500 absolute top-[85px] text-xs">
         {(errors as any).agent_id}
@@ -2372,6 +2427,7 @@ classNames={{
                     </div>
 
                     {/* ===== Schedule (stacked: From, To-readonly) ===== */}
+{/* ===== Schedule (paste this) ===== */}
 <div className="w-full md:col-span-2">
   <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-3">
     Schedule
@@ -2386,22 +2442,23 @@ classNames={{
       <DatePicker
         /* SHOW as Canada time */
         selected={toPickerLocal(values.start_at)}
-        /* TAKE as Canada time -> store UTC */
+
+        /* SET as Canada time -> store UTC and auto end = +30 */
         onChange={(date: Date | null) => {
           const utcStart = fromPickerLocal(date);
           setFieldValue("start_at", utcStart);
-          // end should be +30 minutes from start
           if (utcStart) setFieldValue("end_at", addMinutes(utcStart, 30));
         }}
         onBlur={() => setFieldTouched("start_at", true)}
         name="start_at"
         showTimeSelect
         timeFormat="h:mma"
-        timeIntervals={15}              // ⬅️ 30-minute steps
+        timeIntervals={15}                 // 15-min steps
         dateFormat="MM-dd-yyyy h:mma"
         placeholderText="MM-dd-yyyy hh:mmam/pm"
         className="hover:shadow-hoverInputShadow focus-border-primary !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
         popperClassName="custom-datepicker"
+
         dayClassName={(date) => {
           const todayCA = nowCA().toDateString();
           const selectedCA = values.start_at
@@ -2414,14 +2471,31 @@ classNames={{
           return "hover:bg-[#FFCCD0] hover:text-[#A3000E]";
         }}
 
-        /* Disable past days/times based on CANADA tz (behavior only) */
+        /* Disable past days */
         minDate={startOfTodayCA()}
-        filterTime={(time: Date) => {
-          const selectedStartCA = values.start_at ? toPickerLocal(values.start_at) : null;
-          const isToday = selectedStartCA ? isSameDay(selectedStartCA, nowCA()) : false;
-          const cutoff = roundToNext30(nowCA()); // ⬅️ next 30-min slot
-          const timeCA = toPickerLocal(time)!;
-          return isToday ? timeCA.getTime() >= cutoff.getTime() : true;
+
+        /* HIDE times outside 10:00am–8:30pm (start window), and hide today's past times */
+        filterTime={(candidate: Date) => {
+          const candCA = toPickerLocal(candidate)!;
+
+          // Window bounds for the candidate’s calendar day (Canada local)
+          const wStart = windowStartCA(candCA);          // 10:00
+          const wLastStart = windowLastStartCA(candCA);  // 20:30 (latest START)
+
+          // If this is not the selected day, DatePicker still calls with that day's clock,
+          // so compute earliest for that same day:
+          let earliest = wStart;
+
+          // Today: earliest is next 15-min slot within the window
+          if (isSameDay(candCA, nowCA())) {
+            const nextSlot = roundUpToSlot(nowCA());
+            if (nextSlot > wLastStart) return false;       // no slots left today
+            earliest = nextSlot < wStart ? wStart : nextSlot;
+          }
+
+          // Allow only [earliest, 20:30]
+          return candCA.getTime() >= earliest.getTime() &&
+                 candCA.getTime() <= wLastStart.getTime();
         }}
       />
       {touched.start_at && (errors as any).start_at ? (
@@ -2438,20 +2512,19 @@ classNames={{
     ) : null}
   </div>
 
-  {/* To (read-only) */}
+  {/* To (read-only, auto +30) */}
   <div className="w-full relative">
     <p className="text-[#0A0A0A] font-medium text-sm leading-6 mb-2">
       To
     </p>
     <DatePicker
-      /* SHOW end time as Canada time */
       selected={toPickerLocal(values.end_at)}
       onChange={() => {}}
       onBlur={() => setFieldTouched("end_at", true)}
       name="end_at"
       showTimeSelect
       timeFormat="h:mma"
-      timeIntervals={15}               // ⬅️ 30-minute display steps
+      timeIntervals={15}               // display 15-min grid
       dateFormat="MM-dd-yyyy h:mma"
       placeholderText="MM-dd-yyyy hh:mmam/pm"
       disabled
@@ -2578,240 +2651,296 @@ classNames={{
 
             {/* FORM */}
 
-            <Formik
-              enableReinitialize
-              initialValues={formInitialValues}
-              validationSchema={CreateLeadsActivitySchema}
-              onSubmit={async (values, { setSubmitting }) => {
-                console.log("Formik values (raw):", values);
-                const payload: UpdateActivityPayload = {
-                  id: values.id, // required for update
-                  lead_id: values.lead_id,
-                  conversation: values.conversation,
-                  occurred_at: values.occurred_at || undefined,
-                  disposition_id: values.disposition_id || undefined,
-                  agent_id: values.agent_id || undefined,
-                };
-                console.log("Update payload:", payload);
-                try {
-                  await UpdateLeadsActivity(payload);
-                  setReloadKey((k) => k + 1);
-                } catch (e) {
-                  console.error("API error:", e);
-                } finally {
-                  setSubmitting(false);
-                }
-              }}
-            >
-              {({
-                values,
-                errors,
-                touched,
-                handleChange,
-                handleSubmit,
-                setFieldValue,
-                setFieldTouched,
-                isSubmitting,
-              }) => (
-                <form onSubmit={handleSubmit} noValidate>
-                  {/* GRID: 2 inputs per row */}
-                  <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 md:justify-between mb-4 sm:mb-6">
-                    {/* Conversation (required) */}
-                    <div className="w-full relative">
-                      <p className="text-secondBlack font-medium text-base leading-6 mb-2">
-                        Conversation
-                      </p>
-                      <input
-                        type="text"
-                        name="conversation"
-                        value={values.conversation}
-                        onChange={handleChange}
-                        onBlur={() => setFieldTouched("conversation", true)}
-                        placeholder="Enter conversation"
-                        className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
-                      />
-                      {touched.conversation && (errors as any).conversation ? (
-                        <p className="text-red-500 absolute top-[85px] text-xs">
-                          {(errors as any).conversation}
-                        </p>
-                      ) : null}
-                    </div>
-
-                    {/* Occurred At (optional) */}
-                    <div className="w-full relative">
-                      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
-                        Created At
-                      </p>
-                      <DatePicker
-                        selected={
-                          values.occurred_at
-                            ? new Date(values.occurred_at)
-                            : null
-                        }
-                        onChange={(date: Date | null) =>
-                          setFieldValue(
-                            "occurred_at",
-                            date ? date.toISOString() : ""
-                          )
-                        }
-                        onBlur={() => setFieldTouched("occurred_at", true)}
-                        name="occurred_at"
-                        dateFormat="yyyy-MM-dd"
-                        placeholderText="yyyy-mm-dd"
-                        className="hover:shadow-hoverInputShadow focus-border-primary 
+<Formik
+  enableReinitialize
+  initialValues={formInitialValues}
+  validationSchema={CreateLeadsActivitySchema}
+  onSubmit={async (values, { setSubmitting }) => {
+    console.log("Formik values (raw):", values);
+    const payload: UpdateActivityPayload = {
+      id: values.id, // required for update
+      lead_id: values.lead_id,
+      conversation: values.conversation,
+      occurred_at: values.occurred_at || undefined,
+      disposition_id: values.disposition_id || undefined,
+      agent_id: values.agent_id || undefined,
+    };
+    console.log("Update payload:", payload);
+    try {
+      await UpdateLeadsActivity(payload);
+      setReloadKey((k) => k + 1);
+    } catch (e) {
+      console.error("API error:", e);
+    } finally {
+      setSubmitting(false);
+    }
+  }}
+>
+  {({
+    values,
+    errors,
+    touched,
+    handleChange,
+    handleSubmit,
+    setFieldValue,
+    setFieldTouched,
+    isSubmitting,
+  }) => (
+    <form onSubmit={handleSubmit} noValidate>
+      {/* GRID: 2 inputs per row */}
+      <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 md:justify-between mb-4 sm:mb-6">
+        {/* Occurred At (optional) */}
+        <div className="w-full relative">
+          <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+            Created At
+          </p>
+          <DatePicker
+            selected={
+              values.occurred_at ? new Date(values.occurred_at) : null
+            }
+            onChange={(date: Date | null) =>
+              setFieldValue("occurred_at", date ? date.toISOString() : "")
+            }
+            onBlur={() => setFieldTouched("occurred_at", true)}
+            name="occurred_at"
+            dateFormat="yyyy-MM-dd"
+            placeholderText="yyyy-mm-dd"
+            className="hover:shadow-hoverInputShadow focus-border-primary 
               !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 
               font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
-                        popperClassName="custom-datepicker"
-                        dayClassName={(date) => {
-                          const today = new Date().toDateString();
-                          const selectedDate = values.occurred_at
-                            ? new Date(values.occurred_at).toDateString()
-                            : null;
-                          if (today === date.toDateString())
-                            return "bg-[#FFF0F1] text-[#A3000E]";
-                          if (selectedDate === date.toDateString())
-                            return "bg-[#A3000E] text-white";
-                          return "hover:bg-[#FFCCD0] hover:text-[#A3000E]";
-                        }}
-                      />
-                      {touched.occurred_at && (errors as any).occurred_at ? (
-                        <p className="text-red-500 absolute top-[85px] text-xs">
-                          {(errors as any).occurred_at}
-                        </p>
-                      ) : null}
-                    </div>
+            popperClassName="custom-datepicker"
+            dayClassName={(date) => {
+              const today = new Date().toDateString();
+              const selectedDate = values.occurred_at
+                ? new Date(values.occurred_at).toDateString()
+                : null;
+              if (today === date.toDateString())
+                return "bg-[#FFF0F1] text-[#A3000E]";
+              if (selectedDate === date.toDateString())
+                return "bg-[#A3000E] text-white";
+              return "hover:bg-[#FFCCD0] hover:text-[#A3000E]";
+            }}
+          />
+          {touched.occurred_at && (errors as any).occurred_at ? (
+            <p className="text-red-500 absolute top-[85px] text-xs">
+              {(errors as any).occurred_at}
+            </p>
+          ) : null}
+        </div>
 
-                    {/* Disposition (required) */}
-                    <div className="w-full relative">
-                      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
-                        Disposition
-                      </p>
-                      <Select
-                        value={
-                          (disposition || []).find(
-                            (opt: any) =>
-                              String(opt.id) === String(values.disposition_id)
-                          ) || null
-                        }
-                        onChange={(selectedOption: any) =>
-                          setFieldValue(
-                            "disposition_id",
-                            selectedOption ? String(selectedOption.id) : ""
-                          )
-                        }
-                        onBlur={() => setFieldTouched("disposition_id", true)}
-                        getOptionLabel={(opt: any) => opt.name}
-                        getOptionValue={(opt: any) => String(opt.id)}
-                        options={disposition}
-                        placeholder="Select Disposition"
-                        isClearable
-                        classNames={{
-                          control: ({ isFocused }) =>
-                            `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
-                              isFocused
-                                ? "!border-primary-500"
-                                : "!border-[#DFEAF2]"
-                            }`,
-                        }}
-                        styles={{
-                          menu: (base) => ({
-                            ...base,
-                            borderRadius: "4px",
-                            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-                            backgroundColor: "#fff",
-                          }),
-                          option: (base, { isFocused, isSelected }) => ({
-                            ...base,
-                            backgroundColor: isSelected
-                              ? "var(--primary-500)"
-                              : isFocused
-                              ? "var(--primary-100)"
-                              : "#fff",
-                            color: isSelected ? "#fff" : "#333",
-                            cursor: "pointer",
-                          }),
-                        }}
-                      />
-                      {touched.disposition_id &&
-                      (errors as any).disposition_id ? (
-                        <p className="text-red-500 absolute top-[85px] text-xs">
-                          {(errors as any).disposition_id}
-                        </p>
-                      ) : null}
-                    </div>
+        {/* Disposition (required) */}
+        <div className="w-full relative">
+          <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+            Disposition
+          </p>
+          <Select
+            value={
+              (disposition || []).find(
+                (opt: any) => String(opt.id) === String(values.disposition_id)
+              ) || null
+            }
+            onChange={(selectedOption: any) =>
+              setFieldValue(
+                "disposition_id",
+                selectedOption ? String(selectedOption.id) : ""
+              )
+            }
+            onBlur={() => setFieldTouched("disposition_id", true)}
+            getOptionLabel={(opt: any) => opt.name}
+            getOptionValue={(opt: any) => String(opt.id)}
+            options={disposition}
+            placeholder="Select Disposition"
+            isClearable
+            classNames={{
+              control: ({ isFocused }) =>
+                `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+                  isFocused ? "!border-primary-500" : "!border-[#DFEAF2]"
+                }`,
+            }}
+            styles={{
+              menu: (base) => ({
+                ...base,
+                borderRadius: "4px",
+                boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+                backgroundColor: "#fff",
+              }),
+              option: (base, { isFocused, isSelected }) => ({
+                ...base,
+                backgroundColor: isSelected
+                  ? "var(--primary-500)"
+                  : isFocused
+                  ? "var(--primary-100)"
+                  : "#fff",
+                color: isSelected ? "#fff" : "#333",
+                cursor: "pointer",
+              }),
+            }}
+          />
+          {touched.disposition_id && (errors as any).disposition_id ? (
+            <p className="text-red-500 absolute top-[85px] text-xs">
+              {(errors as any).disposition_id}
+            </p>
+          ) : null}
+        </div>
 
-                    {/* Agent */}
-                    <div className="w-full relative">
-                      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
-                        Agent
-                      </p>
-                      <Select
-                        value={
-                          (agent || []).find(
-                            (opt: any) =>
-                              String(opt.id) === String(values.agent_id)
-                          ) || null
-                        }
-                        onChange={(selectedOption: any) =>
-                          setFieldValue(
-                            "agent_id",
-                            selectedOption ? String(selectedOption.id) : ""
-                          )
-                        }
-                        onBlur={() => setFieldTouched("agent_id", true)}
-                        getOptionLabel={(opt: any) => opt.name}
-                        getOptionValue={(opt: any) => String(opt.id)}
-                        options={agent}
-                        placeholder="Select Agent"
-                        isClearable
-                        classNames={{
-                          control: ({ isFocused }) =>
-                            `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
-                              isFocused
-                                ? "!border-primary-500"
-                                : "!border-[#DFEAF2]"
-                            }`,
-                        }}
-                        styles={{
-                          menu: (base) => ({
-                            ...base,
-                            borderRadius: "4px",
-                            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-                            backgroundColor: "#fff",
-                          }),
-                          option: (base, { isFocused, isSelected }) => ({
-                            ...base,
-                            backgroundColor: isSelected
-                              ? "var(--primary-500)"
-                              : isFocused
-                              ? "var(--primary-100)"
-                              : "#fff",
-                            color: isSelected ? "#fff" : "#333",
-                            cursor: "pointer",
-                          }),
-                        }}
-                      />
-                      {touched.agent_id && (errors as any).agent_id ? (
-                        <p className="text-red-500 absolute top-[85px] text-xs">
-                          {(errors as any).agent_id}
-                        </p>
-                      ) : null}
-                    </div>
-                  </div>
+        {/* Agent */}
 
-                  {/* Buttons */}
-                  <div className="mt-10 w-full flex flex-col gap-y-4 md:flex-row justify-between items-center ">
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className=" py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full  text-center hover:bg-primary-700 hover:text-white "
-                    >
-                      Update Lead Activity
-                    </button>
-                  </div>
-                </form>
-              )}
-            </Formik>
+
+  {userRole === "Admin" ? 
+  (   <div className="w-full relative">
+      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+        Agent
+      </p>
+      <Select
+        value={
+          (agent || []).find(
+            (opt: any) => String(opt.id) === String(values.agent_id)
+          ) || null
+        }
+        onChange={(selectedOption: any) =>
+          setFieldValue(
+            "agent_id",
+            selectedOption ? String(selectedOption.id) : ""
+          )
+        }
+        onBlur={() => setFieldTouched("agent_id", true)}
+        getOptionLabel={(opt: any) => opt.name}
+        getOptionValue={(opt: any) => String(opt.id)}
+        options={agent}
+        placeholder="Select Agent"
+        isClearable
+        classNames={{
+          control: ({ isFocused }) =>
+            `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+              isFocused ? "!border-primary-500" : "!border-[#DFEAF2]"
+            }`,
+        }}
+        styles={{
+          menu: (base) => ({
+            ...base,
+            borderRadius: "4px",
+            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+            backgroundColor: "#fff",
+          }),
+          option: (base, { isFocused, isSelected }) => ({
+            ...base,
+            backgroundColor: isSelected
+              ? "var(--primary-500)"
+              : isFocused
+              ? "var(--primary-100)"
+              : "#fff",
+            color: isSelected ? "#fff" : "#333",
+            cursor: "pointer",
+          }),
+        }}
+      />
+      {touched.agent_id && (errors as any).agent_id ? (
+        <p className="text-red-500 absolute top-[85px] text-xs">
+          {(errors as any).agent_id}
+        </p>
+      ) : null}
+    </div>) : (   
+     <div className="w-full relative">
+  <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+    Agent
+  </p>
+  <Select
+    value={
+      (agent || []).find(
+        (opt: any) => String(opt.id) === String(values.agent_id)
+      ) || null
+    }
+    onChange={(selectedOption: any) =>
+      setFieldValue(
+        "agent_id",
+        selectedOption ? String(selectedOption.id) : ""
+      )
+    }
+    onBlur={() => setFieldTouched("agent_id", true)}
+    getOptionLabel={(opt: any) => opt.name}
+    getOptionValue={(opt: any) => String(opt.id)}
+    options={agent}
+    placeholder="Select Agent"
+    isClearable
+    isDisabled={!!values.agent_id}  // Disable dropdown if agent_id has a value
+    classNames={{
+      control: ({ isFocused }) =>
+        `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+          isFocused ? "!border-primary-500" : "!border-[#DFEAF2]"
+        }`,
+    }}
+    styles={{
+      menu: (base) => ({
+        ...base,
+        borderRadius: "4px",
+        boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+        backgroundColor: "#fff",
+      }),
+      option: (base, { isFocused, isSelected }) => ({
+        ...base,
+        backgroundColor: isSelected
+          ? "var(--primary-500)"
+          : isFocused
+          ? "var(--primary-100)"
+          : "#fff",
+        color: isSelected ? "#fff" : "#333",
+        cursor: "pointer",
+      }),
+    }}
+  />
+  {touched.agent_id && (errors as any).agent_id ? (
+    <p className="text-red-500 absolute top-[85px] text-xs">
+      {(errors as any).agent_id}
+    </p>
+  ) : null}
+</div>
+
+  )}
+ 
+  
+   
+  
+
+
+      </div>
+
+      {/* Conversation (last row) */}
+      <div className="w-full relative md:col-span-2">
+        <p className="text-secondBlack font-medium text-base leading-6 mb-2">
+          Conversation
+        </p>
+        <textarea
+          name="conversation"
+          value={values.conversation}
+          onChange={handleChange}
+          onBlur={() => setFieldTouched("conversation", true)}
+          placeholder="Enter conversation"
+          rows={4}
+          className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+        />
+        {touched.conversation && (errors as any).conversation ? (
+          <p className="text-red-500 absolute top-[85px] text-xs">
+            {(errors as any).conversation}
+          </p>
+        ) : null}
+      </div>
+
+      {/* Buttons */}
+      <div className="mt-10 w-full flex flex-col gap-y-4 md:flex-row justify-between items-center ">
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className=" py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full  text-center hover:bg-primary-700 hover:text-white "
+        >
+          Update Lead Activity
+        </button>
+      </div>
+    </form>
+  )}
+</Formik>
+
+
+
 
             {/* {END FORM} */}
           </div>
@@ -2866,9 +2995,11 @@ classNames={{
                     //setHitApi(!hitApi);
                     //  setData()
                     setFetchLeadaActivityData(res.data.data.activities);
+                    setFlyoutFilterOpen(false)
+                    setIsActivityHistoryPaination(false)
                   } catch (error) {
                     console.error("Error deleting user:", error);
-                    toast.error("Task not Completed");
+                    toast.error("Not Filtered try again");
                   }
                   console.log("Filter Activity payload:", values);
                 }
@@ -3950,8 +4081,8 @@ classNames={{
             ) : null}
           </div>
 
-          {/* ===== Schedule (From / To) ===== */}
-       <div className="w-full md:col-span-2">
+{/* ===== Schedule (From / To) ===== */}
+<div className="w-full md:col-span-2">
   <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-3">
     Schedule
   </p>
@@ -3965,22 +4096,23 @@ classNames={{
       <DatePicker
         /* SHOW as Canada time */
         selected={toPickerLocal(values.start_at)}
-        /* TAKE as Canada time -> store UTC */
+
+        /* TAKE as Canada time -> store UTC and set end = start + 30 */
         onChange={(date: Date | null) => {
           const utcStart = fromPickerLocal(date);
           setFieldValue("start_at", utcStart);
-          // ⬅️ End should be +30 minutes from Start
           if (utcStart) setFieldValue("end_at", addMinutes(utcStart, 30));
         }}
         onBlur={() => setFieldTouched("start_at", true)}
         name="start_at"
         showTimeSelect
         timeFormat="h:mma"
-        timeIntervals={30}              // ⬅️ 30-minute picker steps
+        timeIntervals={15}                 // 15-min steps
         dateFormat="MM-dd-yyyy h:mma"
         placeholderText="MM-dd-yyyy hh:mmam/pm"
         className="hover:shadow-hoverInputShadow focus-border-primary !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
         popperClassName="custom-datepicker"
+
         dayClassName={(date) => {
           const todayCA = nowCA().toDateString();
           const selectedCA = values.start_at
@@ -3993,20 +4125,38 @@ classNames={{
           return "hover:bg-[#FFCCD0] hover:text-[#A3000E]";
         }}
 
-        /* Disable past based on Canada tz */
+        /* Disable past days */
         minDate={startOfTodayCA()}
-        filterTime={(time: Date) => {
-          const selectedStartCA = values.start_at
-            ? toPickerLocal(values.start_at)
-            : null;
-          const isToday = selectedStartCA
-            ? isSameDay(selectedStartCA, nowCA())
-            : false;
 
-          // cutoff = next 30-minute slot in CA time
-          const cutoff = roundToNext30(nowCA());
-          const timeCA = toPickerLocal(time)!;
-          return isToday ? timeCA.getTime() >= cutoff.getTime() : true;
+        /* HIDE times outside 10:00am–8:30pm, and hide today's past times */
+        filterTime={(candidate: Date) => {
+          const candCA = toPickerLocal(candidate)!;
+
+          // Build window bounds on the candidate's local day
+          const y = candCA.getFullYear();
+          const m = candCA.getMonth();
+          const d = candCA.getDate();
+          const wStart = new Date(y, m, d, 10, 0, 0, 0);   // 10:00 AM
+          const wLastStart = new Date(y, m, d, 20, 30, 0, 0); // 8:30 PM (latest start)
+
+          // Default earliest = 10:00
+          let earliest = wStart;
+
+          // If candidate is today (Canada), earliest is the next 15-min slot within window
+          const now = nowCA();
+          const isToday = now.getFullYear() === y && now.getMonth() === m && now.getDate() === d;
+          if (isToday) {
+            const next = new Date(now);
+            next.setSeconds(0, 0);
+            const mins = next.getMinutes();
+            next.setMinutes(mins + ((15 - (mins % 15)) % 15)); // round up to 15
+            if (next > wLastStart) return false;               // no slots left today
+            earliest = next < wStart ? wStart : next;
+          }
+
+          // Allow only [earliest, 20:30]
+          return candCA.getTime() >= earliest.getTime() &&
+                 candCA.getTime() <= wLastStart.getTime();
         }}
       />
       {touched.start_at && (errors as any).start_at ? (
@@ -4036,7 +4186,7 @@ classNames={{
       name="end_at"
       showTimeSelect
       timeFormat="h:mma"
-      timeIntervals={30}               // ⬅️ 30-minute display steps
+      timeIntervals={15}               // display grid at 15-min
       dateFormat="MM-dd-yyyy h:mma"
       placeholderText="MM-dd-yyyy hh:mmam/pm"
       disabled
@@ -4053,7 +4203,6 @@ classNames={{
     ) : null}
   </div>
 </div>
-
 
           {/* Description */}
           <div className="w-full relative md:col-span-2">
