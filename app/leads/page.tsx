@@ -1915,54 +1915,44 @@ handleUnassignFilter();
   <p className="text-secondBlack text-base leading-6 mb-2">
     Province
   </p>
-  <Select
-    value={
-      provinceOptions.find(
-        (opt) => opt.id === values.lead_source_id
-      ) || null
-    }
-    onChange={(selected: any) =>
-      setFieldValue(
-        "lead_source_id",
-        selected ? selected.id : ""
-      )
-    }
-    onBlur={() => setFieldTouched("lead_source_id", true)}
-    getOptionLabel={(opt: any) => opt.name}
-    getOptionValue={(opt: any) => opt.name}
-    options={provinceOptions}
-    placeholder="Select Province"
-    isClearable
-    classNames={{
-      control: ({ isFocused }: any) =>
-        `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
-          isFocused
-            ? "!border-primary-500"
-            : "!border-[#DFEAF2]"
-        }`,
-    }}
-    styles={{
-      menu: (base: any) => ({
-        ...base,
-        borderRadius: "4px",
-        boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
-        backgroundColor: "#fff",
-      }),
-      option: (
-        base: any,
-        { isFocused, isSelected }: any
-      ) => ({
-        ...base,
-        backgroundColor: isSelected
-          ? "var(--primary-500)"
-          : isFocused
-          ? "var(--primary-100)"
-          : "#fff",
-        color: isSelected ? "#fff" : "#333",
-        cursor: "pointer",
-      }),
-    }}
-  />
+<Select
+  value={
+    provinceOptions.find((opt) => opt.id === values.state) || null
+  }
+  onChange={(selected: any) =>
+    setFieldValue("state", selected ? selected.id : "")
+  }
+  onBlur={() => setFieldTouched("state", true)}
+  getOptionLabel={(opt: any) => opt.name}
+  getOptionValue={(opt: any) => opt.id}
+  options={provinceOptions}
+  placeholder="Select Province"
+  isClearable
+  classNames={{
+    control: ({ isFocused }: any) =>
+      `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+        isFocused ? "!border-primary-500" : "!border-[#DFEAF2]"
+      }`,
+  }}
+  styles={{
+    menu: (base: any) => ({
+      ...base,
+      borderRadius: "4px",
+      boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+      backgroundColor: "#fff",
+    }),
+    option: (base: any, { isFocused, isSelected }: any) => ({
+      ...base,
+      backgroundColor: isSelected
+        ? "var(--primary-500)"
+        : isFocused
+        ? "var(--primary-100)"
+        : "#fff",
+      color: isSelected ? "#fff" : "#333",
+      cursor: "pointer",
+    }),
+  }}
+/>
 </div>
                         {/* Postal Code */}
                         <div className="w-full">

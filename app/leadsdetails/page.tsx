@@ -251,6 +251,13 @@ type CreateLead = {
   consolidated_credit_status_id?: string;
 };
 
+const DISPO_AUTOFILL = new Set([
+  "Blank Call",
+  "Left A Voice Mail",
+  "Voice Mail Full",
+  "Voice Mail Not Set",
+  "No Answer",
+]);
 const storage = new StorageManager();
 
 
@@ -292,6 +299,10 @@ useEffect(() => {
    //console.log("LEAD SINGLE DATA", data.agent.name);
   const [leadActivityData, setLeadActivityData] = useState<LeadActivity>();
   const [disposition, setDisposition] = useState<Disposition[]>([]);
+useEffect(() => {
+  console.log("DISOSIOT NAME:", disposition);
+}, [disposition]);
+
   const [agent, setAgent] = useState<Agent[]>([]);
     const [consolidationData, setConsolidationData] = useState<Consolidation[]>([]);
   const [debtConsolidation, setDebtConsolidation] = useState<DebtConsolidation[]>([]);
@@ -369,10 +380,10 @@ useEffect(() => {
     closeFlyOut();
     return res.data;
   }
-  // ✅ Initial Values
+
 const INITIAL_VALUES = {
   lead_id: leadId,
-  conversation: "",
+  conversation:  "",
   occurred_at: "",
   disposition_id: "",
   agent_id: userRole === "Agent" ? data?.agent?.id : "",
@@ -843,6 +854,8 @@ const downloadDocument = (src: string | Blob, fileName = "image.jpg") => {
   useEffect(()=>{
 setIsActivityHistoryPaination(true)
   },[hitApi])
+  
+
   const tabs = [
     {
       label: "Activity History",
@@ -1258,7 +1271,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
                              <p className=" text-base font-medium leading-none">
                               {data?.full_name || "-"} 
                             </p>
-                            <p>{data?.address?.country || "-"}</p>
+                            {/* <p>{data?.address?.country || "-"}</p> */}
                              </div>
 
                             
@@ -1266,7 +1279,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
                           <button
                             type="button"
                             onClick={() => setIsEditFirstLead(false)} // flip state
-                            className="px-4 py-0 rounded-[4px] bg-white text-secondBlack text-sm font-medium"
+                            className="px-4 py-2 rounded-[4px] bg-white text-secondBlack text-sm font-medium"
                           >
                             Edit
                           </button>
@@ -1290,8 +1303,8 @@ const getIdFromName = (list: any[], name?: string | null) => {
                           <MdLocationPin />
                           <p className=" text-sm font-medium leading-none">
                             {data?.address?.line1 || "-"}{" "}
-                            {data?.address?.line2 || "-"}{" "}
-                            {data?.address?.city || "-"}{" "}
+                            {/* {data?.address?.line2 || "-"}{" "} */}
+                            {/* {data?.address?.city || "-"}{" "} */}
                             {data?.address?.state || "-"}
                           </p>
                         </div>
@@ -1432,7 +1445,7 @@ console.log("PPPPPPPPPPPPPPPPP",payload)
         </div>
 
         {/* Country */}
-        <div>
+        {/* <div>
           <label className="block text-sm font-medium text-white mb-1">
             Country
           </label>
@@ -1447,7 +1460,7 @@ console.log("PPPPPPPPPPPPPPPPP",payload)
             component="p"
             className="text-red-500 text-xs mt-1"
           />
-        </div>
+        </div> */}
 
         {/* Address lines */}
         <div>
@@ -1466,7 +1479,7 @@ console.log("PPPPPPPPPPPPPPPPP",payload)
             className="text-red-500 text-xs mt-1"
           />
         </div>
-        <div>
+        {/* <div>
           <label className="block text-sm font-medium text-white mb-1">
             Address Line 2
           </label>
@@ -1481,11 +1494,11 @@ console.log("PPPPPPPPPPPPPPPPP",payload)
             component="p"
             className="text-red-500 text-xs mt-1"
           />
-        </div>
+        </div> */}
 
         {/* City / State */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
- <div>
+        <div className="grid grid-cols-1 sm:grid-cols-1 gap-4">
+ {/* <div>
     <label className="block text-sm font-medium text-white mb-1">City</label>
     <Field
       name="city"
@@ -1494,7 +1507,7 @@ console.log("PPPPPPPPPPPPPPPPP",payload)
       placeholder="City"
     />
     <ErrorMessage name="city" component="p" className="text-red-500 text-xs mt-1" />
-  </div>
+  </div> */}
 
   {/* Province (stored in backend as "state") */}
   <div>
@@ -2081,24 +2094,20 @@ classNames={{
     <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
       Disposition
     </p>
-    <Select
-      value={
-        (disposition || []).find(
-          (opt: any) => opt.id === values.disposition_id
-        ) || null
-      }
-      onChange={(selectedOption: any) =>
-        setFieldValue(
-          "disposition_id",
-          selectedOption ? selectedOption.id : ""
-        )
-      }
-      onBlur={() => setFieldTouched("disposition_id", true)}
-      getOptionLabel={(opt: any) => opt.name}
-      getOptionValue={(opt: any) => opt.id}
-      options={disposition}
-      placeholder="Select Disposition"
-      isClearable
+<Select
+  value={(disposition || []).find((opt: any) => opt.id === values.disposition_id) || null}
+  onChange={(selectedOption: any) => {
+    const id = selectedOption ? selectedOption.id : "";
+    const name = selectedOption ? selectedOption.name : "";
+    setFieldValue("disposition_id", id);
+    setFieldValue("conversation", selectedOption && DISPO_AUTOFILL.has(name) ? name : "");
+  }}
+  onBlur={() => setFieldTouched("disposition_id", true)}
+  getOptionLabel={(opt: any) => opt.name}
+  getOptionValue={(opt: any) => opt.id}
+  options={disposition}
+  placeholder="Select Disposition"
+  isClearable
       classNames={{
         control: ({ isFocused }) =>
           `onHoverBoxShadow !w/full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
@@ -2975,7 +2984,7 @@ classNames={{
                 endDate: "",
                 lead_id: leadId,
               }}
-              onSubmit={async (values, { setSubmitting }) => {
+              onSubmit={async (values, { setSubmitting, resetForm }) => {
                 if (
                   !values.conversation &&
                   !values.disposition_id &&
@@ -2997,6 +3006,8 @@ classNames={{
                     setFetchLeadaActivityData(res.data.data.activities);
                     setFlyoutFilterOpen(false)
                     setIsActivityHistoryPaination(false)
+                    setIsActvityFilter(false)
+                    resetForm();
                   } catch (error) {
                     console.error("Error deleting user:", error);
                     toast.error("Not Filtered try again");
