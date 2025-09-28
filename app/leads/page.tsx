@@ -493,7 +493,7 @@ useEffect(() => {
   }
 
   const unAssignfetchData = async () => {
-    setIsLoading(true);
+   // setIsLoading(true);
     // setIsFilter(false);
     try {
       const response = await AxiosProvider.get(
@@ -506,8 +506,6 @@ useEffect(() => {
       setNotAssignData(result);
     } catch (error: any) {
       setIsError(true);
-    } finally {
-      setIsLoading(false);
     }
   };
 

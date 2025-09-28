@@ -1156,13 +1156,14 @@ const getIdFromName = (list: any[], name?: string | null) => {
                       <div
                         className="flex gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 min-w-32"
                         // onClick={() => openTaskFlyout()}
+                        onClick={() => handleSelect("meeting")}
                       >
                         <FaNotesMedical className="w-5 h-5 text-white" />
                         <p className="text-white text-base font-medium">Task</p>
                       </div>
 
                       {/* Dropdown */}
-                      <div className="absolute left-0 mt-2 w-40 rounded-[4px] border border-[#E7E7E7] bg-white shadow-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+                      {/* <div className="absolute left-0 mt-2 w-40 rounded-[4px] border border-[#E7E7E7] bg-white shadow-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
                         <ul className="flex flex-col">
                           {["meeting", "followup", "phonecall"].map((item) => (
                             <li
@@ -1174,7 +1175,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
                             </li>
                           ))}
                         </ul>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
 
