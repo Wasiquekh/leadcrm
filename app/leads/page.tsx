@@ -330,7 +330,8 @@ useEffect(() => {
     setIsLoading(true);
     // setIsFilter(false);
     setFlyoutOpen(false);
-    // console.log("4444444444444444", value);
+    //console.log("4444444444444444", value);
+   // return;
 
     try {
       await AxiosProvider.post("/leads", value);
@@ -1874,7 +1875,7 @@ handleUnassignFilter();
                         </div>
 
                         {/* Address Line 2 */}
-                        <div className="w-full">
+                        {/* <div className="w-full">
                           <p className="text-secondBlack  text-base leading-6 mb-2">
                             Address Line 2
                           </p>
@@ -1889,10 +1890,10 @@ handleUnassignFilter();
                             component="div"
                             className="text-red-500 text-xs mt-1"
                           />
-                        </div>
+                        </div> */}
 
                         {/* City */}
-                        <div className="w-full">
+                        {/* <div className="w-full">
                           <p className="text-secondBlack  text-base leading-6 mb-2">
                             City
                           </p>
@@ -1907,7 +1908,7 @@ handleUnassignFilter();
                             component="div"
                             className="text-red-500 text-xs mt-1"
                           />
-                        </div>
+                        </div> */}
 
                         {/* State */}
                <div className="w-full">
@@ -1928,7 +1929,7 @@ handleUnassignFilter();
     }
     onBlur={() => setFieldTouched("lead_source_id", true)}
     getOptionLabel={(opt: any) => opt.name}
-    getOptionValue={(opt: any) => opt.id}
+    getOptionValue={(opt: any) => opt.name}
     options={provinceOptions}
     placeholder="Select Province"
     isClearable
@@ -1982,7 +1983,7 @@ handleUnassignFilter();
                         </div>
 
                         {/* Country */}
-                        <div className="w-full">
+                        {/* <div className="w-full">
                           <p className="text-secondBlack  text-base leading-6 mb-2">
                             Country
                           </p>
@@ -1997,12 +1998,12 @@ handleUnassignFilter();
                             component="div"
                             className="text-red-500 text-xs mt-1"
                           />
-                        </div>
+                        </div> */}
 
   
 
                         {/* Lead Quality */}
-                        <div className="w-full">
+                        {/* <div className="w-full">
                           <p className="text-secondBlack  text-base leading-6 mb-2">
                             Lead Quality
                           </p>
@@ -2017,7 +2018,7 @@ handleUnassignFilter();
                             component="div"
                             className="text-red-500 text-xs mt-1"
                           />
-                        </div>
+                        </div> */}
 
                         {/* Best Time to Call */}
                         <div className="w-full">
@@ -3087,7 +3088,7 @@ const creditDisplay = values.consolidated_credit_status_id
                             </div>
 
                             {/* Address Line 2 */}
-                            <div className="w-full">
+                            {/* <div className="w-full">
                               <p className="text-secondBlack  text-base leading-6 mb-2">
                                 Address Line 2
                               </p>
@@ -3102,10 +3103,10 @@ const creditDisplay = values.consolidated_credit_status_id
                                 component="div"
                                 className="text-red-500 text-xs mt-1"
                               />
-                            </div>
+                            </div> */}
 
                             {/* City */}
-                            <div className="w-full">
+                            {/* <div className="w-full">
                               <p className="text-secondBlack  text-base leading-6 mb-2">
                                 City
                               </p>
@@ -3120,7 +3121,7 @@ const creditDisplay = values.consolidated_credit_status_id
                                 component="div"
                                 className="text-red-500 text-xs mt-1"
                               />
-                            </div>
+                            </div> */}
 
                             {/* State */}
                             <div className="w-full">
@@ -3159,7 +3160,7 @@ const creditDisplay = values.consolidated_credit_status_id
                             </div>
 
                             {/* Country */}
-                            <div className="w-full">
+                            {/* <div className="w-full">
                               <p className="text-secondBlack  text-base leading-6 mb-2">
                                 Country
                               </p>
@@ -3174,7 +3175,7 @@ const creditDisplay = values.consolidated_credit_status_id
                                 component="div"
                                 className="text-red-500 text-xs mt-1"
                               />
-                            </div>
+                            </div> */}
 
                             {/* Lead Score */}
                             <div className="w-full">
@@ -3195,7 +3196,7 @@ const creditDisplay = values.consolidated_credit_status_id
                             </div>
 
                             {/* Lead Quality */}
-                            <div className="w-full">
+                            {/* <div className="w-full">
                               <p className="text-secondBlack  text-base leading-6 mb-2">
                                 Lead Quality
                               </p>
@@ -3210,7 +3211,7 @@ const creditDisplay = values.consolidated_credit_status_id
                                 component="div"
                                 className="text-red-500 text-xs mt-1"
                               />
-                            </div>
+                            </div> */}
 
                             {/* Best Time to Call */}
                             <div className="w-full">
