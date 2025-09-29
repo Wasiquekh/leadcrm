@@ -27,6 +27,7 @@ import DesktopHeader from "../component/DesktopHeader";
 import { Tooltip } from "react-tooltip";
 import { FaEllipsisVertical } from "react-icons/fa6";
 import { useAuthRedirect } from "../component/hooks/useAuthRedirect";
+import { ImBlocked } from "react-icons/im";
 
 export interface User {
   id: string;
@@ -324,7 +325,7 @@ const unBlockUserData = async(id: string)=>{
                               onClick={() => unBlockUserData(item.id)}
                               className="py-[4px] px-3 bg-black flex gap-1 items-center rounded-full text-xs md:text-sm group hover:bg-primary-600"
                             >
-                              <RiDeleteBin6Line className="text-white w-4 h-4" />
+                              <ImBlocked className="text-white w-4 h-4" />
                               <p className="text-white hidden md:block">
                                 Unblock user
                               </p>
