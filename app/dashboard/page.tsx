@@ -56,8 +56,8 @@ export interface OverdueTask {
   lead_id: string;
   lead_name: string;
   start_at: string; // UTC ISO date string
-  start_at_ca: string; // formatted date-time
-  start_date_ca: string; // formatted date
+  start_at_est: string; // formatted date-time
+  start_date_est: string; // formatted date
   status: string;
   subject: string;
   type: string;
