@@ -165,7 +165,7 @@ type LeadSourceOption = { id: string | number; name: string };
       consolidated_credit_status_id: string;
     };
 export default function Home() {
-  // const isChecking = useAuthRedirect();
+   const isChecking = useAuthRedirect();
   const [isFlyoutOpen, setFlyoutOpen] = useState<boolean>(false);
   const [notAssignData, setNotAssignData] = useState<Lead[]>([]);
  // console.log("NOT ASSIGN DATAAAAAAAAA",notAssignData)

@@ -61,7 +61,7 @@ const storage = new StorageManager();
 const activityLogger = new UserActivityLogger();
 
 export default function Home() {
-  //  const isChecking = useAuthRedirect();
+    const isChecking = useAuthRedirect();
   const [data, setData] = useState<User[] | null>(null);
   const [page, setPage] = useState<number>(1);
   const [pageSize] = useState<number>(10);
