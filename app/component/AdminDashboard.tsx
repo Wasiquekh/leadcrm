@@ -12,9 +12,17 @@ const AdminDashboard = () => {
     total_today: 0,
   });
 
+  // State for agents' tasks data (team tasks by agent)
+  const [teamTasksByAgent, setTeamTasksByAgent] = useState<any[]>([]); // Holds the agents' task data
+  const [todayTasksByAgent, setTodayTasksByAgent] = useState<any[]>([]); // Holds today's tasks by agent
+  const [overdueTasksByAgent, setOverdueTasksByAgent] = useState<any[]>([]); // Holds overdue tasks by agent
+
   // State for loading and error handling
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
+
+  // State for controlling which agent's tasks are visible in the accordion
+  const [activeAgent, setActiveAgent] = useState<string | null>(null);
 
   // Function to fetch admin dashboard data
   const fetchAdminData = async () => {
@@ -22,7 +30,26 @@ const AdminDashboard = () => {
     try {
       const response = await AxiosProvider.post("/leads/admin/dashboard");
       console.log('Admin dashboard data fetched', response);
-      setCardsAdminData(response.data.data.cards.team_tasks);
+      
+      // Check if response is valid before setting the state
+      if (response.data && response.data.data && response.data.data.cards) {
+        setCardsAdminData(response.data.data.cards.team_tasks);
+      } else {
+        throw new Error('Invalid response structure');
+      }
+
+      // Get team tasks by agent data from 'tables'
+      const teamTasks = response.data.data.tables.team_tasks_by_agent || [];
+      setTeamTasksByAgent(teamTasks);
+
+      // Get today tasks by agent
+      const todayTasks = response.data.data.lists.today_tasks_by_agent || [];
+      setTodayTasksByAgent(todayTasks);
+
+      // Get overdue tasks by agent
+      const overdueTasks = response.data.data.lists.overdue_tasks_by_agent || [];
+      setOverdueTasksByAgent(overdueTasks);
+
     } catch (error) {
       console.error("Error fetching data:", error);
       setIsError(true);
@@ -31,7 +58,7 @@ const AdminDashboard = () => {
     }
   };
 
-  // Fetch admin data on component mount
+  // Fetch data on component mount
   useEffect(() => {
     fetchAdminData();
   }, []);
@@ -45,13 +72,17 @@ const AdminDashboard = () => {
     return <div>Error loading dashboard data. Please try again later.</div>;
   }
 
+  // Function to handle accordion toggle (clicking on an agent's name)
+  const handleAccordionToggle = (agentId: string) => {
+    setActiveAgent(activeAgent === agentId ? null : agentId);
+  };
+
   return (
     <div className="container my-4">
       <h3>Admin Dashboard</h3>
       
-      {/* Display cards in a grid layout */}
+      {/* Display Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
-        
         {/* Total Today Card */}
         <div className="bg-white p-4 rounded-lg shadow-md flex items-center justify-between">
           <div>
@@ -103,7 +134,105 @@ const AdminDashboard = () => {
             </svg>
           </div>
         </div>
+      </div>
 
+      {/* Team Tasks by Agent Table */}
+      <div className="mt-8">
+        <h4 className="text-xl font-semibold">Team Tasks by Agent</h4>
+        <table className="min-w-full mt-4 table-auto">
+          <thead>
+            <tr>
+              <th className="border-b px-4 py-2 text-left">Agent Name</th>
+              <th className="border-b px-4 py-2 text-left">Total Today</th>
+              <th className="border-b px-4 py-2 text-left">Pending Today</th>
+              <th className="border-b px-4 py-2 text-left">Done Today</th>
+              <th className="border-b px-4 py-2 text-left">Overdue</th>
+            </tr>
+          </thead>
+          <tbody>
+            {teamTasksByAgent.map((agent, idx) => (
+              <tr key={idx} className="hover:bg-gray-50">
+                <td className="border-b px-4 py-2">{agent.agent_name}</td>
+                <td className="border-b px-4 py-2">{agent.total_today}</td>
+                <td className="border-b px-4 py-2">{agent.pending_today}</td>
+                <td className="border-b px-4 py-2">{agent.done_today}</td>
+                <td className="border-b px-4 py-2">{agent.overdue}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Today Tasks by Agent (Accordion Section) */}
+      <div className="mt-6">
+        <h4 className="text-xl font-semibold">Today Tasks by Agent</h4>
+        <div className="mt-4">
+          {todayTasksByAgent.map((agent, index) => (
+            <div key={index}>
+              {/* Accordion Trigger */}
+              <button
+                className="w-full text-left bg-gray-100 p-3 rounded-lg border-b"
+                onClick={() => handleAccordionToggle(agent.agent_id)}
+              >
+                <span className="font-semibold">{agent.agent_name}</span>
+                <span className="float-right">
+                  {activeAgent === agent.agent_id ? '-' : '+'}
+                </span>
+              </button>
+
+              {/* Accordion Content */}
+              {activeAgent === agent.agent_id && (
+                <div className="bg-gray-50 p-4">
+                  {agent.tasks.map((task: any, idx: number) => (
+                    <div key={idx} className="border-b py-2">
+                      <p><strong>Lead Name:</strong> {task.lead_name}</p>
+                      <p><strong>Status:</strong> {task.status}</p>
+                      <p><strong>Due Date:</strong> {task.due_date}</p>
+                      <p><strong>Start Time:</strong> {task.start_at_est}</p>
+                      <p><strong>End Time:</strong> {task.end_at_est}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Overdue Tasks by Agent (Accordion Section) */}
+      <div className="mt-6">
+        <h4 className="text-xl font-semibold">Overdue Tasks by Agent</h4>
+        <div className="mt-4">
+          {overdueTasksByAgent.map((agent, index) => (
+            <div key={index}>
+              {/* Accordion Trigger */}
+              <button
+                className="w-full text-left bg-gray-100 p-3 rounded-lg border-b"
+                onClick={() => handleAccordionToggle(agent.agent_id)}
+              >
+                <span className="font-semibold">{agent.agent_name}</span>
+                <span className="float-right">
+                  {activeAgent === agent.agent_id ? '-' : '+'}
+                </span>
+              </button>
+
+              {/* Accordion Content */}
+              {activeAgent === agent.agent_id && (
+                <div className="bg-gray-50 p-4">
+                  {agent.tasks.map((task: any, idx: number) => (
+                    <div key={idx} className="border-b py-2">
+                      <p><strong>Lead Name:</strong> {task.lead_name}</p>
+                      <p><strong>Status:</strong> {task.status}</p>
+                      <p><strong>Due Date:</strong> {task.due_date}</p>
+                      <p><strong>Start Time:</strong> {task.start_at_est}</p>
+                      <p><strong>End Time:</strong> {task.end_at_est}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
