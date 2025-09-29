@@ -70,6 +70,7 @@ import {
 import { compressIfImage } from "../component/imageCompression";
 import Swal from "sweetalert2";
 import { toZonedTime as utcToZonedTime, fromZonedTime as zonedTimeToUtc } from "date-fns-tz";
+import { BiSkipNextCircle } from "react-icons/bi";
 
 
 
@@ -492,6 +493,22 @@ const INITIAL_VALUES = {
     fetchLeadActivity();
   }, [page, leadId, hitApi]);
 
+  // NEXT LEADS FUNCTION
+    const nextLeads = async () => {
+  
+    try {
+      const res = await AxiosProvider.get("/leads/random",{
+       
+      });
+
+      //console.log("NEXT LEADS RESPONSE", res.data.data.id);
+      
+        window.open(`/leadsdetails?id=${res.data.data.id}`, "_blank"); // "_blank" = new tab
+     // setData(res.data.data);
+    } catch (error: any) {
+      console.error("Error fetching lead:", error);
+    }
+  };
   // FETCH DISPOSITION
   const fetchDisposition = async () => {
     try {
@@ -1718,6 +1735,19 @@ console.log("PPPPPPPPPPPPPPPPP",payload)
                               {data?.whatsapp_number || "-"}
                             </td>
                           </tr>
+                          {userRole === "Admin" && (
+                            <>
+                            <tr className="border border-tableBorder bg-white hover:bg-primary-100 transition-colors">
+                            <td className="text-sm text-[#78829D] py-4 px-4">
+                              Lead Age
+                            </td>
+                            <td className="text-sm font-medium text-[#252F4A]  py-4 px-4">
+                              {data?.lead_age_days || "-"}
+                            </td>
+                          </tr>
+                            </>
+                          )}
+
                         </tbody>
                       </table>
                     </div>
@@ -2018,6 +2048,24 @@ classNames={{
                     />
                   </div>
                 </div>
+                {userRole === "Agent" && 
+                (
+                  <>
+                                  <div className="w-full flex justify-center border-b border-gray-200 mb-4">
+                </div>
+                    <div className="w-full flex justify-center ">
+                    <div
+                    onClick={()=>nextLeads()}
+                       className="flex w-auto gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700  "
+                      >
+                        <p className="text-white text-base font-medium">Next Random Leads</p>
+                         <BiSkipNextCircle className="w-5 h-5 text-white" />
+                      </div>
+                </div>
+                </>
+                )}
+
+
               </div>
             </div>
           </div>
