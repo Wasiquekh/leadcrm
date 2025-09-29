@@ -29,6 +29,7 @@ import { FaEllipsisVertical } from "react-icons/fa6";
 import { useAuthRedirect } from "../component/hooks/useAuthRedirect";
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
+import { ImBlocked } from "react-icons/im";
 
 export interface User {
   id: string;
@@ -61,7 +62,7 @@ const storage = new StorageManager();
 const activityLogger = new UserActivityLogger();
 
 export default function Home() {
-  //  const isChecking = useAuthRedirect();
+    const isChecking = useAuthRedirect();
   const [data, setData] = useState<User[] | null>(null);
   const [page, setPage] = useState<number>(1);
   const [pageSize] = useState<number>(10);
@@ -403,7 +404,7 @@ setEditFormData({
                              // onClick={() => blockUserData(item)}
                               className="py-[4px] px-3 bg-black flex gap-1 items-center rounded-full text-xs md:text-sm group hover:bg-primary-600 opacity-[0.5] cursor-not-allowed"
                             >
-                              <RiDeleteBin6Line className="text-white w-4 h-4" />
+                              <ImBlocked className="text-white w-4 h-4" />
                               <p className="text-white hidden md:block">
                                 Block user
                               </p>
@@ -412,7 +413,7 @@ setEditFormData({
                               onClick={() => blockUserData(item)}
                               className="py-[4px] px-3 bg-black flex gap-1 items-center rounded-full text-xs md:text-sm group hover:bg-primary-600"
                             >
-                              <RiDeleteBin6Line className="text-white w-4 h-4" />
+                              <ImBlocked className="text-white w-4 h-4" />
                               <p className="text-white hidden md:block">
                                 Block user
                               </p>

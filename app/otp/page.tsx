@@ -66,14 +66,11 @@ const userEmail = storage.getUserEmail();
     }
   };
 
-  // const accessTokenlocal = storage.getAccessToken();
-  // if (
-  //   accessTokenlocal !== null &&
-  //   accessTokenlocal !== "" &&
-  //   accessTokenlocal !== "null"
-  // ) {
-  //   router.replace("/dashboard");
-  // }
+
+    useEffect(() => {
+    const token = storage.getAccessToken();
+    if (token && token !== "null") router.replace("/dashboard");
+  }, []);
   return (
     <>
       <div className="bg-[#F5F5F5] hidden md:block">
