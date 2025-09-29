@@ -203,8 +203,8 @@ const test = (id: string) => {
                           className="border-b px-4 py-2 bg-primary-500 text-white cursor-pointer">{task.lead_name}</td>
                           <td className="border-b px-4 py-2">{task.status}</td>
                           <td className="border-b px-4 py-2">{task.due_date}</td>
-                          <td className="border-b px-4 py-2">{task.start_at_est}</td>
-                          <td className="border-b px-4 py-2">{task.end_at_est}</td>
+                          <td className="border-b px-4 py-2">{task.start_at_ca}</td>
+                          <td className="border-b px-4 py-2">{task.end_at_ca}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -254,8 +254,8 @@ const test = (id: string) => {
                           className="border-b px-4 py-2 bg-primary-500 text-white cursor-pointer">{task.lead_name}</td>
                           <td className="border-b px-4 py-2">{task.status}</td>
                           <td className="border-b px-4 py-2">{task.due_date}</td>
-                          <td className="border-b px-4 py-2">{task.start_at_est}</td>
-                          <td className="border-b px-4 py-2">{task.end_at_est}</td>
+                          <td className="border-b px-4 py-2">{task.start_at_ca}</td>
+                          <td className="border-b px-4 py-2">{task.end_at_ca}</td>
                         </tr>
                       ))}
                     </tbody>

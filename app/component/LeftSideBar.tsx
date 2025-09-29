@@ -39,7 +39,7 @@ const LeftSideBar: React.FC = () => {
     >
       {/* SIDE LEFT BAR TOP SECTION */}
       <div className="z-50 custom-scrollbar">
-        <Link href="/customer">
+        <Link href="/dashboard">
           <div className="flex items-center gap-4 mb-12 px-3 py-2">
             {/* Fixed-size icon box to prevent shift */}
             <div className="relative h-6 w-6 shrink-0">
