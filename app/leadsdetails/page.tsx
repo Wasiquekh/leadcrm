@@ -69,6 +69,11 @@ import {
 } from "date-fns";
 import { compressIfImage } from "../component/imageCompression";
 import Swal from "sweetalert2";
+import { toZonedTime as utcToZonedTime, fromZonedTime as zonedTimeToUtc } from "date-fns-tz";
+import { BiSkipNextCircle } from "react-icons/bi";
+
+
+
 
 interface Lead {
   id: string;
@@ -150,6 +155,8 @@ interface LeadActivityData {
   created_at: string; // ISO date string
   agent_name: string;
   agent_id: string;
+  created_at_ca: string;
+  edited: boolean;
 }
 type UpdateLead = {
   id: string;
@@ -245,10 +252,20 @@ type CreateLead = {
   consolidated_credit_status_id?: string;
 };
 
+const DISPO_AUTOFILL = new Set([
+  "Blank Call",
+  "Left A Voice Mail",
+  "Voice Mail Full",
+  "Voice Mail Not Set",
+  "No Answer",
+]);
+const storage = new StorageManager();
+
+
 export default function Home() {
   const [isFlyoutFilterOpen, setFlyoutFilterOpen] = useState<boolean>(false);
   const isChecking = useAuthRedirect();
-  const storage = new StorageManager();
+
 
   const [isCustomerViewDetailOpen, setIsCustomerViewDetailOpen] =
     useState<boolean>(false);
@@ -274,9 +291,19 @@ export default function Home() {
   const [lead, setLead] = useState<Lead | null>(null);
   const [isTotpPopupOpen, setIsTotpPopupOpen] = useState<boolean>(false);
   const [data, setData] = useState<any>(null);
-  //console.log("LEAD SINGLE DATA", data);
+useEffect(() => {
+  if (data?.agent) {
+    console.log("Agent ID:", data.agent.id);
+    console.log("Agent Name:", data.agent.name);
+  }
+}, [data]);
+   //console.log("LEAD SINGLE DATA", data.agent.name);
   const [leadActivityData, setLeadActivityData] = useState<LeadActivity>();
   const [disposition, setDisposition] = useState<Disposition[]>([]);
+useEffect(() => {
+  console.log("DISOSIOT NAME:", disposition);
+}, [disposition]);
+
   const [agent, setAgent] = useState<Agent[]>([]);
     const [consolidationData, setConsolidationData] = useState<Consolidation[]>([]);
   const [debtConsolidation, setDebtConsolidation] = useState<DebtConsolidation[]>([]);
@@ -293,7 +320,7 @@ export default function Home() {
   const [fetchLeadActivityData, setFetchLeadaActivityData] = useState<
     LeadActivityData[]
   >([]);
- // console.log("fetched single lead data", fetchLeadActivityData);
+  //console.log("fetched single lead data 111111111111111111", fetchLeadActivityData);
   const [reloadKey, setReloadKey] = useState(0);
   const [docs, setDocs] = useState<LeadDocument[]>([]); // start empty
   //console.log("DDDDDDDDDDDDOOOOOOOOOOOOOOCCCCCCCCSSSSSS",docs)
@@ -315,8 +342,11 @@ export default function Home() {
  const [documentEditObjectData, setDocumentEditObjectData] = useState<LeadDocument>(null);
  const [isTaskEdit, setIsTaskEdit] = useState<boolean>(false);
  const [taskEditObject, setTaskEditObject] = useState<any>(null);
+ const [userRole,setUserRole] = useState(storage.getUserRole());
+  const [isConversationExpanded, setIsConversationExpanded] = useState(false);
+  const [isActivityHistoryPagination, setIsActivityHistoryPaination] = useState<boolean>(true)
+  
 
- console.log("MMMMMMMMMMMMMMMMMMM",taskEditObject)
 
 
   //console.log("", documentName);
@@ -351,14 +381,15 @@ export default function Home() {
     closeFlyOut();
     return res.data;
   }
-  // ✅ Initial Values
-  const INITIAL_VALUES = {
-    lead_id: leadId,
-    conversation: "",
-    occurred_at: "",
-    disposition_id: "",
-    agent_id: "",
-  };
+
+const INITIAL_VALUES = {
+  lead_id: leadId,
+  conversation:  "",
+  occurred_at: "",
+  disposition_id: "",
+  agent_id: userRole === "Agent" ? data?.agent?.id : "",
+};
+
   const formInitialValues = activityHistoryData
     ? {
         id: activityHistoryData.id,
@@ -426,7 +457,7 @@ export default function Home() {
         lead_id: leadId,
       });
 
-      //console.log("lead data", res.data.data);
+     // console.log("lead dataOOOOOOOOOOOOOOOOOOOO", res.data.data);
       setData(res.data.data); // <-- if you want to store in state
     } catch (error: any) {
       console.error("Error fetching lead:", error);
@@ -447,7 +478,7 @@ export default function Home() {
         }
       );
 
-      // console.log("Lead Activity", res.data.data.activities);
+      //console.log("Lead Activity wwwwwwwwwwwwwwwwww", res.data.data.activities);
       console.log(
         "Lead Activity pagination",
         res.data.data.pagination.totalPages
@@ -462,6 +493,22 @@ export default function Home() {
     fetchLeadActivity();
   }, [page, leadId, hitApi]);
 
+  // NEXT LEADS FUNCTION
+    const nextLeads = async () => {
+  
+    try {
+      const res = await AxiosProvider.get("/leads/random",{
+       
+      });
+
+      //console.log("NEXT LEADS RESPONSE", res.data.data.id);
+      
+        window.open(`/leadsdetails?id=${res.data.data.id}`, "_blank"); // "_blank" = new tab
+     // setData(res.data.data);
+    } catch (error: any) {
+      console.error("Error fetching lead:", error);
+    }
+  };
   // FETCH DISPOSITION
   const fetchDisposition = async () => {
     try {
@@ -688,7 +735,7 @@ const handleUpdateDocument = async (e: React.FormEvent<HTMLFormElement>) => {
         lead_id: leadId,
       });
 
-   console.log("lead document data", res.data.data.data);
+   console.log("lead document data22222222222", res.data.data.data);
       setDocs(res.data.data.data); // <-- if you want to store in state
     } catch (error: any) {
       console.error("Error fetching lead:", error);
@@ -815,6 +862,17 @@ const downloadDocument = (src: string | Blob, fileName = "image.jpg") => {
   { id: "saskatchewan", name: "Saskatchewan" },
   { id: "yukon", name: "Yukon" },
 ];
+  const maxLength = 100; // Set your desired maximum length
+
+  // Function to handle Show More/Show Less toggle
+  const toggleConversationExpansion = () => {
+    setIsConversationExpanded(!isConversationExpanded);
+  };
+  useEffect(()=>{
+setIsActivityHistoryPaination(true)
+  },[hitApi])
+  
+
   const tabs = [
     {
       label: "Activity History",
@@ -822,102 +880,82 @@ const downloadDocument = (src: string | Blob, fileName = "image.jpg") => {
         <>
           {/* Tab content 3 */}
           <div className="container mx-auto p-4">
-            {/* <button
+            <button
               onClick={() => openLeadActivityFlyOut()}
               className="bg-primary-600 hover:bg-primary-700 py-3 px-4 rounded-[4px] text-sm font-medium text-white mb-2"
             >
               Filter Activity
-            </button> */}
-            {fetchLeadActivityData && fetchLeadActivityData.length > 0 ? (
-              fetchLeadActivityData.map((activity) => {
-                const occurred = activity.occurred_at
-                  ? new Date(activity.occurred_at)
-                  : null;
-                const created = activity.created_at
-                  ? new Date(activity.created_at)
-                  : null;
+            </button>
+      {fetchLeadActivityData && fetchLeadActivityData.length > 0 ? (
+        fetchLeadActivityData.map((activity) => {
+          // Simply display 'created_at_ca' as it is, no parsing or conversion
+          const formattedOccurredCa = activity.created_at_ca || '--';
 
-                const occurredDate =
-                  occurred?.toLocaleDateString("en-GB", {
-                    day: "2-digit",
-                    month: "short",
-                    timeZone: "Asia/Kolkata",
-                  }) ?? "--";
-                const occurredTime =
-                  occurred?.toLocaleTimeString("en-US", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: true,
-                    timeZone: "Asia/Kolkata",
-                  }) ?? "--";
+          return (
+            <div
+              key={activity.id}
+              className="w-full flex justify-between gap-4 hover:bg-primary-100 py-2 px-2 rounded"
+            >
+              {/* Left: icon + occurred date/time */}
+              <div className="flex gap-2 shrink-0">
+                <TbActivity className="bg-primary-500 text-white p-1 text-2xl rounded-full" />
+                <div className="leading-5 text-sm">
+                  <p>{formattedOccurredCa}</p> {/* Display the 'created_at_ca' as is */}
+                </div>
+              </div>
 
-                const createdDate =
-                  created?.toLocaleDateString("en-GB", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                    timeZone: "Asia/Kolkata",
-                  }) ?? "--";
-                const createdTime =
-                  created?.toLocaleTimeString("en-US", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: true,
-                    timeZone: "Asia/Kolkata",
-                  }) ?? "--";
+              {/* Middle: details */}
+              <div className="flex-1 min-w-0">
+<p>
+  <span className="text-primary-600">{activity.disposition}:</span>{" "}
+  {activity.conversation.length > maxLength && !isConversationExpanded
+    ? activity.conversation.substring(0, maxLength) + "..."
+    : activity.conversation}
+</p>
+{activity.conversation.length > maxLength && (
+  <button
+    onClick={toggleConversationExpansion}
+    className="text-primary-600 underline text-sm"
+  >
+    {isConversationExpanded ? "Show less" : "Show more"}
+  </button>
+)}
 
-                return (
-         <div
-  key={activity.id}
-  className="w-full flex justify-between gap-4 hover:bg-primary-100 py-2 px-2 rounded"
->
-  {/* Left: icon + occurred date/time */}
-  <div className="flex gap-2 shrink-0">
-    <TbActivity className="bg-primary-500 text-white p-1 text-2xl rounded-full" />
-    <div className="leading-5 text-sm">
-      <p>{createdDate}</p>
-      <p>{createdTime}</p>
-    </div>
-  </div>
+                <p className="text-xs text-gray-500">
+                  Added by {activity.agent_name} on {formattedOccurredCa} {activity.edited ?  "(Edited)" : ""}
+                </p>
+              </div>
 
-  {/* Middle: details */}
-  <div className="flex-1 min-w-0">
-    <p>
-      <span className="text-primary-600">{activity.disposition}:</span>{" "}
-      {activity.conversation}
-    </p>
-    <p className="text-xs text-gray-500">
-      Added by {activity.agent_name} on {createdDate} {createdTime}
-    </p>
-  </div>
+              {/* Right: Action buttons */}
+              <div className="space-x-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => openActivityHistoryFlyout(activity)}
+                  className="py-1.5 px-3 rounded text-sm bg-primary-500 text-white hover:bg-primary-600"
+                >
+                  Edit
+                </button>
+                {userRole ===  "Admin" &&
+                 (                <button
+                  type="button"
+                  onClick={() => deleteActivityHistory(activity)}
+                  className="py-1.5 px-3 rounded text-sm bg-red-500 text-white hover:bg-red-600"
+                >
+                  Delete
+                </button>)}
 
-  {/* Right: Action buttons */}
-  <div className=" space-x-2 shrink-0">
-    <button
-      type="button"
-      onClick={() => openActivityHistoryFlyout(activity)}
-      className="py-1.5 px-3 rounded text-sm bg-primary-500 text-white hover:bg-primary-600"
-    >
-      Edit
-    </button>
-    <button
-      type="button"
-      onClick={() => deleteActivityHistory(activity)}
-      className="py-1.5 px-3 rounded text-sm bg-red-500 text-white hover:bg-red-600"
-    >
-      Delete
-    </button>
-  </div>
-</div>
-
-                );
-              })
-            ) : (
-              <p className="text-center text-gray-500 py-4">No data found</p>
-            )}
+              </div>
+            </div>
+          );
+        })
+      ) : (
+        <p className="text-center text-gray-500 py-4">No data found</p>
+      )}
 
             {/* PAGINATION */}
-            <div className="flex justify-center items-center my-10 relative">
+       
+{isActivityHistoryPagination && (     
+  <div className="flex justify-center items-center my-10 relative">
               <button
                 onClick={() => handleChangepagination(page - 1)}
                 disabled={page === 1}
@@ -935,7 +973,7 @@ const downloadDocument = (src: string | Blob, fileName = "image.jpg") => {
               >
                 <HiChevronDoubleRight className=" w-6 h-auto" />
               </button>
-            </div>
+            </div>)}
             {/* PAGINATION */}
           </div>
 
@@ -999,7 +1037,7 @@ const downloadDocument = (src: string | Blob, fileName = "image.jpg") => {
                       </p>
                       <p className="text-xs text-gray-500">
                         {d.mime_type} · {fmtSize(d.file_size)} ·{" "}
-                        {new Date(d.created_at).toLocaleString()}
+                        {new Date(d.created_at_ca).toLocaleString()}
                       </p>
                     </div>
 
@@ -1047,51 +1085,107 @@ const downloadDocument = (src: string | Blob, fileName = "image.jpg") => {
     );
   }
   const handleSubmit = async () => {};
-  // Round a date up to the next 5-minute tick
-  const roundUpToNext5 = (d: Date) => {
-    const remainder = d.getMinutes() % 5;
-    return remainder === 0 ? d : addMinutes(d, 5 - remainder);
-  };
-  // --------------------------- DATE
-  // helpers
-  const roundToNext5 = (d = new Date()) => {
-    const copy = new Date(d);
-    const mins = copy.getMinutes();
-    const add = (5 - (mins % 5)) % 5;
-    copy.setMinutes(mins + add, 0, 0);
-    return copy;
-  };
+ 
 
-  const addMinutes = (d: Date, mins: number) => {
-    const copy = new Date(d);
-    copy.setMinutes(copy.getMinutes() + mins);
-    return copy;
-  };
+  // --------------------------- DATE HELPer
 
+const CA_TZ = "America/Toronto"; // Eastern with DST
+
+// Window + slot config
+const WORK_START_HOUR = 10;  // 10:00
+const WORK_END_HOUR = 21;    // 21:00 (hard day end)
+const START_LAST_MINUTES = 30; // last valid START = 20:30 (so end hits 21:00)
+const SLOT_MINUTES = 15;     // display step = 15 min
+const DURATION_MINUTES = 30; // schedule length = 30 min
+
+// UTC -> Canada local (for showing)
+const toPickerLocal = (d: Date | null) => (d ? utcToZonedTime(d, CA_TZ) : null);
+
+// Canada local -> UTC (for storing/state)
+const fromPickerLocal = (d: Date | null) => (d ? zonedTimeToUtc(d, CA_TZ) : null);
+
+// "Now" in Canada tz
+const nowCA = () => utcToZonedTime(new Date(), CA_TZ);
+
+// Round UP to next SLOT_MINUTES (Canada time)
+const roundUpToSlot = (d: Date = nowCA()) => {
+  const copy = new Date(d);
+  copy.setSeconds(0, 0);
+  const mins = copy.getMinutes();
+  const add = (SLOT_MINUTES - (mins % SLOT_MINUTES)) % SLOT_MINUTES;
+  copy.setMinutes(mins + add);
+  return copy;
+};
+
+// Add minutes
+const addMinutes = (d: Date, mins: number) => {
+  const copy = new Date(d);
+  copy.setMinutes(copy.getMinutes() + mins);
+  return copy;
+};
+
+// Same-day check in Canada tz
+const isSameDay = (a?: Date | null, b?: Date | null) => {
+  if (!a || !b) return false;
+  const za = utcToZonedTime(a, CA_TZ);
+  const zb = utcToZonedTime(b, CA_TZ);
+  return (
+    za.getFullYear() === zb.getFullYear() &&
+    za.getMonth() === zb.getMonth() &&
+    za.getDate() === zb.getDate()
+  );
+};
+
+// Start of today (Canada tz) for minDate
+const startOfTodayCA = () => {
+  const n = nowCA();
+  return new Date(n.getFullYear(), n.getMonth(), n.getDate());
+};
+
+// Build a time on the same calendar day (Canada local)
+const atHM = (baseCA: Date, hour: number, minute = 0) =>
+  new Date(baseCA.getFullYear(), baseCA.getMonth(), baseCA.getDate(), hour, minute, 0, 0);
+
+// Daily bounds (Canada local)
+const windowStartCA = (dCA: Date) => atHM(dCA, WORK_START_HOUR, 0);                        // 10:00
+const windowEndCA = (dCA: Date) => atHM(dCA, WORK_END_HOUR, 0);                            // 21:00
+const windowLastStartCA = (dCA: Date) => atHM(dCA, WORK_END_HOUR, 0 - START_LAST_MINUTES); // 20:30
+
+// Next valid START within window (for defaults and today's earliest)
+const nextValidStartInWindowCA = (base: Date = nowCA()) => {
+  const today = new Date(base);
+  const wStart = windowStartCA(today);
+  const wLastStart = windowLastStartCA(today);
+
+  if (base < wStart) return wStart;                 // before 10:00 -> 10:00
+  if (base >= wLastStart) {                         // at/after 20:30 -> tomorrow 10:00
+    const tomorrow = addMinutes(atHM(today, 0), 24 * 60);
+    return windowStartCA(tomorrow);
+  }
+  const rounded = roundUpToSlot(base);              // inside window -> next slot
+  return rounded > wLastStart ? wLastStart : rounded;
+};
+
+// Formatter for payload (Canada local)
 const formatDateTime = (d: Date) => {
+  const z = utcToZonedTime(d, CA_TZ);
   const pad = (n: number) => String(n).padStart(2, "0");
-
-  let h = d.getHours();
-  const m = pad(d.getMinutes());
+  let h = z.getHours();
+  const m = pad(z.getMinutes());
   const ampm = h >= 12 ? "pm" : "am";
-  h = h % 12 || 12; // convert 0 -> 12
-
-  const yyyy = d.getFullYear();
-  const mm = pad(d.getMonth() + 1); // month (01–12)
-  const dd = pad(d.getDate());      // day (01–31)
-
-  // ✅ Format: MM-dd-yyyy hh:mmam/pm
+  h = h % 12 || 12;
+  const yyyy = z.getFullYear();
+  const mm = pad(z.getMonth() + 1);
+  const dd = pad(z.getDate());
   return `${mm}-${dd}-${yyyy} ${pad(h)}:${m}${ampm}`;
 };
-const isSameDay = (a?: Date | null, b?: Date | null) =>
-  !!a && !!b &&
-  a.getFullYear() === b.getFullYear() &&
-  a.getMonth() === b.getMonth() &&
-  a.getDate() === b.getDate();
 
+// ---------- Defaults for Formik initialValues (store UTC) ----------
+const defaultStartCA = nextValidStartInWindowCA();
+const defaultStart = fromPickerLocal(defaultStartCA)!;
+const defaultEnd = addMinutes(defaultStart, DURATION_MINUTES);
 
-  const defaultStart = roundToNext5();
-  const defaultEnd = addMinutes(defaultStart, 15); // still 30 min gap
+  // ---------END DATE HELPER------------
 
   // helpers (put inside the component)
 const findById = (list: any[], id: string | number) =>
@@ -1145,13 +1239,14 @@ const getIdFromName = (list: any[], name?: string | null) => {
                       <div
                         className="flex gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 min-w-32"
                         // onClick={() => openTaskFlyout()}
+                        onClick={() => handleSelect("meeting")}
                       >
                         <FaNotesMedical className="w-5 h-5 text-white" />
                         <p className="text-white text-base font-medium">Task</p>
                       </div>
 
                       {/* Dropdown */}
-                      <div className="absolute left-0 mt-2 w-40 rounded-[4px] border border-[#E7E7E7] bg-white shadow-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+                      {/* <div className="absolute left-0 mt-2 w-40 rounded-[4px] border border-[#E7E7E7] bg-white shadow-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
                         <ul className="flex flex-col">
                           {["meeting", "followup", "phonecall"].map((item) => (
                             <li
@@ -1163,7 +1258,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
                             </li>
                           ))}
                         </ul>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
 
@@ -1193,7 +1288,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
                              <p className=" text-base font-medium leading-none">
                               {data?.full_name || "-"} 
                             </p>
-                            <p>{data?.address?.country || "-"}</p>
+                            {/* <p>{data?.address?.country || "-"}</p> */}
                              </div>
 
                             
@@ -1201,7 +1296,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
                           <button
                             type="button"
                             onClick={() => setIsEditFirstLead(false)} // flip state
-                            className="px-4 py-0 rounded-[4px] bg-white text-secondBlack text-sm font-medium"
+                            className="px-4 py-2 rounded-[4px] bg-white text-secondBlack text-sm font-medium"
                           >
                             Edit
                           </button>
@@ -1225,8 +1320,8 @@ const getIdFromName = (list: any[], name?: string | null) => {
                           <MdLocationPin />
                           <p className=" text-sm font-medium leading-none">
                             {data?.address?.line1 || "-"}{" "}
-                            {data?.address?.line2 || "-"}{" "}
-                            {data?.address?.city || "-"}{" "}
+                            {/* {data?.address?.line2 || "-"}{" "} */}
+                            {/* {data?.address?.city || "-"}{" "} */}
                             {data?.address?.state || "-"}
                           </p>
                         </div>
@@ -1367,7 +1462,7 @@ console.log("PPPPPPPPPPPPPPPPP",payload)
         </div>
 
         {/* Country */}
-        <div>
+        {/* <div>
           <label className="block text-sm font-medium text-white mb-1">
             Country
           </label>
@@ -1382,7 +1477,7 @@ console.log("PPPPPPPPPPPPPPPPP",payload)
             component="p"
             className="text-red-500 text-xs mt-1"
           />
-        </div>
+        </div> */}
 
         {/* Address lines */}
         <div>
@@ -1401,7 +1496,7 @@ console.log("PPPPPPPPPPPPPPPPP",payload)
             className="text-red-500 text-xs mt-1"
           />
         </div>
-        <div>
+        {/* <div>
           <label className="block text-sm font-medium text-white mb-1">
             Address Line 2
           </label>
@@ -1416,11 +1511,11 @@ console.log("PPPPPPPPPPPPPPPPP",payload)
             component="p"
             className="text-red-500 text-xs mt-1"
           />
-        </div>
+        </div> */}
 
         {/* City / State */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
- <div>
+        <div className="grid grid-cols-1 sm:grid-cols-1 gap-4">
+ {/* <div>
     <label className="block text-sm font-medium text-white mb-1">City</label>
     <Field
       name="city"
@@ -1429,7 +1524,7 @@ console.log("PPPPPPPPPPPPPPPPP",payload)
       placeholder="City"
     />
     <ErrorMessage name="city" component="p" className="text-red-500 text-xs mt-1" />
-  </div>
+  </div> */}
 
   {/* Province (stored in backend as "state") */}
   <div>
@@ -1640,6 +1735,19 @@ console.log("PPPPPPPPPPPPPPPPP",payload)
                               {data?.whatsapp_number || "-"}
                             </td>
                           </tr>
+                          {userRole === "Admin" && (
+                            <>
+                            <tr className="border border-tableBorder bg-white hover:bg-primary-100 transition-colors">
+                            <td className="text-sm text-[#78829D] py-4 px-4">
+                              Lead Age
+                            </td>
+                            <td className="text-sm font-medium text-[#252F4A]  py-4 px-4">
+                              {data?.lead_age_days || "-"}
+                            </td>
+                          </tr>
+                            </>
+                          )}
+
                         </tbody>
                       </table>
                     </div>
@@ -1940,6 +2048,24 @@ classNames={{
                     />
                   </div>
                 </div>
+                {userRole === "Agent" && 
+                (
+                  <>
+                                  <div className="w-full flex justify-center border-b border-gray-200 mb-4">
+                </div>
+                    <div className="w-full flex justify-center ">
+                    <div
+                    onClick={()=>nextLeads()}
+                       className="flex w-auto gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700  "
+                      >
+                        <p className="text-white text-base font-medium">Next Random Leads</p>
+                         <BiSkipNextCircle className="w-5 h-5 text-white" />
+                      </div>
+                </div>
+                </>
+                )}
+
+
               </div>
             </div>
           </div>
@@ -2016,24 +2142,20 @@ classNames={{
     <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
       Disposition
     </p>
-    <Select
-      value={
-        (disposition || []).find(
-          (opt: any) => opt.id === values.disposition_id
-        ) || null
-      }
-      onChange={(selectedOption: any) =>
-        setFieldValue(
-          "disposition_id",
-          selectedOption ? selectedOption.id : ""
-        )
-      }
-      onBlur={() => setFieldTouched("disposition_id", true)}
-      getOptionLabel={(opt: any) => opt.name}
-      getOptionValue={(opt: any) => opt.id}
-      options={disposition}
-      placeholder="Select Disposition"
-      isClearable
+<Select
+  value={(disposition || []).find((opt: any) => opt.id === values.disposition_id) || null}
+  onChange={(selectedOption: any) => {
+    const id = selectedOption ? selectedOption.id : "";
+    const name = selectedOption ? selectedOption.name : "";
+    setFieldValue("disposition_id", id);
+    setFieldValue("conversation", selectedOption && DISPO_AUTOFILL.has(name) ? name : "");
+  }}
+  onBlur={() => setFieldTouched("disposition_id", true)}
+  getOptionLabel={(opt: any) => opt.name}
+  getOptionValue={(opt: any) => opt.id}
+  options={disposition}
+  placeholder="Select Disposition"
+  isClearable
       classNames={{
         control: ({ isFocused }) =>
           `onHoverBoxShadow !w/full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
@@ -2067,9 +2189,9 @@ classNames={{
   </div>
 
   {/* Agent */}
-  <div className="w-full relative">
+  {userRole === "Admin" ? (  <div className="w-full relative">
     <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
-      Agent
+      Agent  <span>{`(admin)`}</span>
     </p>
     <Select
       value={
@@ -2114,7 +2236,59 @@ classNames={{
         {(errors as any).agent_id}
       </p>
     ) : null}
-  </div>
+  </div>) 
+  : 
+   (  <div className="w-full relative">
+    <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+      Agent <span>{`(agent)`}</span>
+    </p>
+<Select
+  value={
+    (agent || []).find((opt: any) => opt.id === data?.agent?.id) || null
+  }
+  onChange={(selectedOption: any) =>
+    setFieldValue("agent_id", selectedOption ? selectedOption.id : "")
+  }
+  onBlur={() => setFieldTouched("agent_id", true)}
+  getOptionLabel={(opt: any) => opt.name}
+  getOptionValue={(opt: any) => opt.id}
+  options={agent}        // ✅ keep this
+  placeholder="Select Agent"
+  isClearable
+  isDisabled             // ✅ use this to disable
+  classNames={{
+    control: ({ isFocused }) =>
+      `onHoverBoxShadow !w/full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+        isFocused ? "!border-primary-500" : "!border-[#DFEAF2]"
+      }`,
+  }}
+  styles={{
+    menu: (base) => ({
+      ...base,
+      borderRadius: "4px",
+      boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+      backgroundColor: "#fff",
+    }),
+    option: (base, { isFocused, isSelected }) => ({
+      ...base,
+      backgroundColor: isSelected
+        ? "var(--primary-500)"
+        : isFocused
+        ? "var(--primary-100)"
+        : "#fff",
+      color: isSelected ? "#fff" : "#333",
+      cursor: "not-allowed",
+    }),
+  }}
+/>
+
+    {touched.agent_id && (errors as any).agent_id ? (
+      <p className="text-red-500 absolute top-[85px] text-xs">
+        {(errors as any).agent_id}
+      </p>
+    ) : null}
+  </div>)}
+
 
 
 {/* ===== Row 2: Conversation (full width textarea) ===== */}
@@ -2310,60 +2484,83 @@ classNames={{
                     </div>
 
                     {/* ===== Schedule (stacked: From, To-readonly) ===== */}
-              <div className="w-full md:col-span-2">
+{/* ===== Schedule (paste this) ===== */}
+<div className="w-full md:col-span-2">
   <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-3">
     Schedule
   </p>
 
   {/* From */}
   <div className="w-full relative mb-4">
-<div className="w-full relative mb-4">
-  <p className="text-[#0A0A0A] font-medium text-sm leading-6 mb-2">
-    From
-  </p>
-  <DatePicker
-    selected={values.start_at}
-    onChange={(date: Date | null) => {
-      setFieldValue("start_at", date);
-      if (date) setFieldValue("end_at", addMinutes(date, 15)); // 🔄 +30 min
-    }}
-    onBlur={() => setFieldTouched("start_at", true)}
-    name="start_at"
-    showTimeSelect
-    timeFormat="h:mma" // ✅ 11:55pm style
-    timeIntervals={5}
-    dateFormat="MM-dd-yyyy h:mma" // ✅ 09-26-2025 11:55pm
-    placeholderText="MM-dd-yyyy hh:mmam/pm"
-    className="hover:shadow-hoverInputShadow focus-border-primary !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
-    popperClassName="custom-datepicker"
-    dayClassName={(date) => {
-      const today = new Date().toDateString();
-      const selectedDate = values.start_at
-        ? new Date(values.start_at).toDateString()
-        : null;
-      if (today === date.toDateString())
-        return "bg-[#FFF0F1] text-[#A3000E]";
-      if (selectedDate === date.toDateString())
-        return "bg-[#A3000E] text-white";
-      return "hover:bg-[#FFCCD0] hover:text-[#A3000E]";
-    }}
+    <div className="w-full relative mb-4">
+      <p className="text-[#0A0A0A] font-medium text-sm leading-6 mb-2">
+        From
+      </p>
+      <DatePicker
+        /* SHOW as Canada time */
+        selected={toPickerLocal(values.start_at)}
 
-    /* 👇 ONLY THESE TWO ADDED — no UI/CSS changes */
-    minDate={new Date()}  // disable past days
-    filterTime={(time: Date) =>
-      isSameDay(values.start_at, new Date())
-        ? time.getTime() >= roundToNext5().getTime() // disable past times today
-        : true // all times allowed on future days
-    }
-  />
-  {touched.start_at && (errors as any).start_at ? (
-    <p className="text-red-500 absolute top-[85px] text-xs">
-      {(errors as any).start_at}
-    </p>
-  ) : null}
-</div>
+        /* SET as Canada time -> store UTC and auto end = +30 */
+        onChange={(date: Date | null) => {
+          const utcStart = fromPickerLocal(date);
+          setFieldValue("start_at", utcStart);
+          if (utcStart) setFieldValue("end_at", addMinutes(utcStart, 30));
+        }}
+        onBlur={() => setFieldTouched("start_at", true)}
+        name="start_at"
+        showTimeSelect
+        timeFormat="h:mma"
+        timeIntervals={15}                 // 15-min steps
+        dateFormat="MM-dd-yyyy h:mma"
+        placeholderText="MM-dd-yyyy hh:mmam/pm"
+        className="hover:shadow-hoverInputShadow focus-border-primary !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
+        popperClassName="custom-datepicker"
 
+        dayClassName={(date) => {
+          const todayCA = nowCA().toDateString();
+          const selectedCA = values.start_at
+            ? toPickerLocal(values.start_at)!.toDateString()
+            : null;
+          if (todayCA === date.toDateString())
+            return "bg-[#FFF0F1] text-[#A3000E]";
+          if (selectedCA === date.toDateString())
+            return "bg-[#A3000E] text-white";
+          return "hover:bg-[#FFCCD0] hover:text-[#A3000E]";
+        }}
 
+        /* Disable past days */
+        minDate={startOfTodayCA()}
+
+        /* HIDE times outside 10:00am–8:30pm (start window), and hide today's past times */
+        filterTime={(candidate: Date) => {
+          const candCA = toPickerLocal(candidate)!;
+
+          // Window bounds for the candidate’s calendar day (Canada local)
+          const wStart = windowStartCA(candCA);          // 10:00
+          const wLastStart = windowLastStartCA(candCA);  // 20:30 (latest START)
+
+          // If this is not the selected day, DatePicker still calls with that day's clock,
+          // so compute earliest for that same day:
+          let earliest = wStart;
+
+          // Today: earliest is next 15-min slot within the window
+          if (isSameDay(candCA, nowCA())) {
+            const nextSlot = roundUpToSlot(nowCA());
+            if (nextSlot > wLastStart) return false;       // no slots left today
+            earliest = nextSlot < wStart ? wStart : nextSlot;
+          }
+
+          // Allow only [earliest, 20:30]
+          return candCA.getTime() >= earliest.getTime() &&
+                 candCA.getTime() <= wLastStart.getTime();
+        }}
+      />
+      {touched.start_at && (errors as any).start_at ? (
+        <p className="text-red-500 absolute top-[85px] text-xs">
+          {(errors as any).start_at}
+        </p>
+      ) : null}
+    </div>
 
     {touched.start_at && (errors as any).start_at ? (
       <p className="text-red-500 absolute top-[85px] text-xs">
@@ -2372,20 +2569,20 @@ classNames={{
     ) : null}
   </div>
 
-  {/* To (read-only) */}
+  {/* To (read-only, auto +30) */}
   <div className="w-full relative">
     <p className="text-[#0A0A0A] font-medium text-sm leading-6 mb-2">
       To
     </p>
     <DatePicker
-      selected={values.end_at}
+      selected={toPickerLocal(values.end_at)}
       onChange={() => {}}
       onBlur={() => setFieldTouched("end_at", true)}
       name="end_at"
       showTimeSelect
-      timeFormat="h:mma" // ✅ 11:55pm style
-      timeIntervals={5}
-      dateFormat="MM-dd-yyyy h:mma" // ✅ 09-26-2025 11:55pm
+      timeFormat="h:mma"
+      timeIntervals={15}               // display 15-min grid
+      dateFormat="MM-dd-yyyy h:mma"
       placeholderText="MM-dd-yyyy hh:mmam/pm"
       disabled
       className="hover:shadow-hoverInputShadow focus-border-primary 
@@ -2401,6 +2598,7 @@ classNames={{
     ) : null}
   </div>
 </div>
+
 
                     {/* ===== /Schedule ===== */}
 
@@ -2510,240 +2708,296 @@ classNames={{
 
             {/* FORM */}
 
-            <Formik
-              enableReinitialize
-              initialValues={formInitialValues}
-              validationSchema={CreateLeadsActivitySchema}
-              onSubmit={async (values, { setSubmitting }) => {
-                console.log("Formik values (raw):", values);
-                const payload: UpdateActivityPayload = {
-                  id: values.id, // required for update
-                  lead_id: values.lead_id,
-                  conversation: values.conversation,
-                  occurred_at: values.occurred_at || undefined,
-                  disposition_id: values.disposition_id || undefined,
-                  agent_id: values.agent_id || undefined,
-                };
-                console.log("Update payload:", payload);
-                try {
-                  await UpdateLeadsActivity(payload);
-                  setReloadKey((k) => k + 1);
-                } catch (e) {
-                  console.error("API error:", e);
-                } finally {
-                  setSubmitting(false);
-                }
-              }}
-            >
-              {({
-                values,
-                errors,
-                touched,
-                handleChange,
-                handleSubmit,
-                setFieldValue,
-                setFieldTouched,
-                isSubmitting,
-              }) => (
-                <form onSubmit={handleSubmit} noValidate>
-                  {/* GRID: 2 inputs per row */}
-                  <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 md:justify-between mb-4 sm:mb-6">
-                    {/* Conversation (required) */}
-                    <div className="w-full relative">
-                      <p className="text-secondBlack font-medium text-base leading-6 mb-2">
-                        Conversation
-                      </p>
-                      <input
-                        type="text"
-                        name="conversation"
-                        value={values.conversation}
-                        onChange={handleChange}
-                        onBlur={() => setFieldTouched("conversation", true)}
-                        placeholder="Enter conversation"
-                        className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
-                      />
-                      {touched.conversation && (errors as any).conversation ? (
-                        <p className="text-red-500 absolute top-[85px] text-xs">
-                          {(errors as any).conversation}
-                        </p>
-                      ) : null}
-                    </div>
-
-                    {/* Occurred At (optional) */}
-                    <div className="w-full relative">
-                      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
-                        Created At
-                      </p>
-                      <DatePicker
-                        selected={
-                          values.occurred_at
-                            ? new Date(values.occurred_at)
-                            : null
-                        }
-                        onChange={(date: Date | null) =>
-                          setFieldValue(
-                            "occurred_at",
-                            date ? date.toISOString() : ""
-                          )
-                        }
-                        onBlur={() => setFieldTouched("occurred_at", true)}
-                        name="occurred_at"
-                        dateFormat="yyyy-MM-dd"
-                        placeholderText="yyyy-mm-dd"
-                        className="hover:shadow-hoverInputShadow focus-border-primary 
+<Formik
+  enableReinitialize
+  initialValues={formInitialValues}
+  validationSchema={CreateLeadsActivitySchema}
+  onSubmit={async (values, { setSubmitting }) => {
+    console.log("Formik values (raw):", values);
+    const payload: UpdateActivityPayload = {
+      id: values.id, // required for update
+      lead_id: values.lead_id,
+      conversation: values.conversation,
+      occurred_at: values.occurred_at || undefined,
+      disposition_id: values.disposition_id || undefined,
+      agent_id: values.agent_id || undefined,
+    };
+    console.log("Update payload:", payload);
+    try {
+      await UpdateLeadsActivity(payload);
+      setReloadKey((k) => k + 1);
+    } catch (e) {
+      console.error("API error:", e);
+    } finally {
+      setSubmitting(false);
+    }
+  }}
+>
+  {({
+    values,
+    errors,
+    touched,
+    handleChange,
+    handleSubmit,
+    setFieldValue,
+    setFieldTouched,
+    isSubmitting,
+  }) => (
+    <form onSubmit={handleSubmit} noValidate>
+      {/* GRID: 2 inputs per row */}
+      <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 md:justify-between mb-4 sm:mb-6">
+        {/* Occurred At (optional) */}
+        <div className="w-full relative">
+          <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+            Created At
+          </p>
+          <DatePicker
+            selected={
+              values.occurred_at ? new Date(values.occurred_at) : null
+            }
+            onChange={(date: Date | null) =>
+              setFieldValue("occurred_at", date ? date.toISOString() : "")
+            }
+            onBlur={() => setFieldTouched("occurred_at", true)}
+            name="occurred_at"
+            dateFormat="yyyy-MM-dd"
+            placeholderText="yyyy-mm-dd"
+            className="hover:shadow-hoverInputShadow focus-border-primary 
               !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 
               font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
-                        popperClassName="custom-datepicker"
-                        dayClassName={(date) => {
-                          const today = new Date().toDateString();
-                          const selectedDate = values.occurred_at
-                            ? new Date(values.occurred_at).toDateString()
-                            : null;
-                          if (today === date.toDateString())
-                            return "bg-[#FFF0F1] text-[#A3000E]";
-                          if (selectedDate === date.toDateString())
-                            return "bg-[#A3000E] text-white";
-                          return "hover:bg-[#FFCCD0] hover:text-[#A3000E]";
-                        }}
-                      />
-                      {touched.occurred_at && (errors as any).occurred_at ? (
-                        <p className="text-red-500 absolute top-[85px] text-xs">
-                          {(errors as any).occurred_at}
-                        </p>
-                      ) : null}
-                    </div>
+            popperClassName="custom-datepicker"
+            dayClassName={(date) => {
+              const today = new Date().toDateString();
+              const selectedDate = values.occurred_at
+                ? new Date(values.occurred_at).toDateString()
+                : null;
+              if (today === date.toDateString())
+                return "bg-[#FFF0F1] text-[#A3000E]";
+              if (selectedDate === date.toDateString())
+                return "bg-[#A3000E] text-white";
+              return "hover:bg-[#FFCCD0] hover:text-[#A3000E]";
+            }}
+          />
+          {touched.occurred_at && (errors as any).occurred_at ? (
+            <p className="text-red-500 absolute top-[85px] text-xs">
+              {(errors as any).occurred_at}
+            </p>
+          ) : null}
+        </div>
 
-                    {/* Disposition (required) */}
-                    <div className="w-full relative">
-                      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
-                        Disposition
-                      </p>
-                      <Select
-                        value={
-                          (disposition || []).find(
-                            (opt: any) =>
-                              String(opt.id) === String(values.disposition_id)
-                          ) || null
-                        }
-                        onChange={(selectedOption: any) =>
-                          setFieldValue(
-                            "disposition_id",
-                            selectedOption ? String(selectedOption.id) : ""
-                          )
-                        }
-                        onBlur={() => setFieldTouched("disposition_id", true)}
-                        getOptionLabel={(opt: any) => opt.name}
-                        getOptionValue={(opt: any) => String(opt.id)}
-                        options={disposition}
-                        placeholder="Select Disposition"
-                        isClearable
-                        classNames={{
-                          control: ({ isFocused }) =>
-                            `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
-                              isFocused
-                                ? "!border-primary-500"
-                                : "!border-[#DFEAF2]"
-                            }`,
-                        }}
-                        styles={{
-                          menu: (base) => ({
-                            ...base,
-                            borderRadius: "4px",
-                            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-                            backgroundColor: "#fff",
-                          }),
-                          option: (base, { isFocused, isSelected }) => ({
-                            ...base,
-                            backgroundColor: isSelected
-                              ? "var(--primary-500)"
-                              : isFocused
-                              ? "var(--primary-100)"
-                              : "#fff",
-                            color: isSelected ? "#fff" : "#333",
-                            cursor: "pointer",
-                          }),
-                        }}
-                      />
-                      {touched.disposition_id &&
-                      (errors as any).disposition_id ? (
-                        <p className="text-red-500 absolute top-[85px] text-xs">
-                          {(errors as any).disposition_id}
-                        </p>
-                      ) : null}
-                    </div>
+        {/* Disposition (required) */}
+        <div className="w-full relative">
+          <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+            Disposition
+          </p>
+          <Select
+            value={
+              (disposition || []).find(
+                (opt: any) => String(opt.id) === String(values.disposition_id)
+              ) || null
+            }
+            onChange={(selectedOption: any) =>
+              setFieldValue(
+                "disposition_id",
+                selectedOption ? String(selectedOption.id) : ""
+              )
+            }
+            onBlur={() => setFieldTouched("disposition_id", true)}
+            getOptionLabel={(opt: any) => opt.name}
+            getOptionValue={(opt: any) => String(opt.id)}
+            options={disposition}
+            placeholder="Select Disposition"
+            isClearable
+            classNames={{
+              control: ({ isFocused }) =>
+                `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+                  isFocused ? "!border-primary-500" : "!border-[#DFEAF2]"
+                }`,
+            }}
+            styles={{
+              menu: (base) => ({
+                ...base,
+                borderRadius: "4px",
+                boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+                backgroundColor: "#fff",
+              }),
+              option: (base, { isFocused, isSelected }) => ({
+                ...base,
+                backgroundColor: isSelected
+                  ? "var(--primary-500)"
+                  : isFocused
+                  ? "var(--primary-100)"
+                  : "#fff",
+                color: isSelected ? "#fff" : "#333",
+                cursor: "pointer",
+              }),
+            }}
+          />
+          {touched.disposition_id && (errors as any).disposition_id ? (
+            <p className="text-red-500 absolute top-[85px] text-xs">
+              {(errors as any).disposition_id}
+            </p>
+          ) : null}
+        </div>
 
-                    {/* Agent */}
-                    <div className="w-full relative">
-                      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
-                        Agent
-                      </p>
-                      <Select
-                        value={
-                          (agent || []).find(
-                            (opt: any) =>
-                              String(opt.id) === String(values.agent_id)
-                          ) || null
-                        }
-                        onChange={(selectedOption: any) =>
-                          setFieldValue(
-                            "agent_id",
-                            selectedOption ? String(selectedOption.id) : ""
-                          )
-                        }
-                        onBlur={() => setFieldTouched("agent_id", true)}
-                        getOptionLabel={(opt: any) => opt.name}
-                        getOptionValue={(opt: any) => String(opt.id)}
-                        options={agent}
-                        placeholder="Select Agent"
-                        isClearable
-                        classNames={{
-                          control: ({ isFocused }) =>
-                            `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
-                              isFocused
-                                ? "!border-primary-500"
-                                : "!border-[#DFEAF2]"
-                            }`,
-                        }}
-                        styles={{
-                          menu: (base) => ({
-                            ...base,
-                            borderRadius: "4px",
-                            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-                            backgroundColor: "#fff",
-                          }),
-                          option: (base, { isFocused, isSelected }) => ({
-                            ...base,
-                            backgroundColor: isSelected
-                              ? "var(--primary-500)"
-                              : isFocused
-                              ? "var(--primary-100)"
-                              : "#fff",
-                            color: isSelected ? "#fff" : "#333",
-                            cursor: "pointer",
-                          }),
-                        }}
-                      />
-                      {touched.agent_id && (errors as any).agent_id ? (
-                        <p className="text-red-500 absolute top-[85px] text-xs">
-                          {(errors as any).agent_id}
-                        </p>
-                      ) : null}
-                    </div>
-                  </div>
+        {/* Agent */}
 
-                  {/* Buttons */}
-                  <div className="mt-10 w-full flex flex-col gap-y-4 md:flex-row justify-between items-center ">
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className=" py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full  text-center hover:bg-primary-700 hover:text-white "
-                    >
-                      Update Lead Activity
-                    </button>
-                  </div>
-                </form>
-              )}
-            </Formik>
+
+  {userRole === "Admin" ? 
+  (   <div className="w-full relative">
+      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+        Agent
+      </p>
+      <Select
+        value={
+          (agent || []).find(
+            (opt: any) => String(opt.id) === String(values.agent_id)
+          ) || null
+        }
+        onChange={(selectedOption: any) =>
+          setFieldValue(
+            "agent_id",
+            selectedOption ? String(selectedOption.id) : ""
+          )
+        }
+        onBlur={() => setFieldTouched("agent_id", true)}
+        getOptionLabel={(opt: any) => opt.name}
+        getOptionValue={(opt: any) => String(opt.id)}
+        options={agent}
+        placeholder="Select Agent"
+        isClearable
+        classNames={{
+          control: ({ isFocused }) =>
+            `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+              isFocused ? "!border-primary-500" : "!border-[#DFEAF2]"
+            }`,
+        }}
+        styles={{
+          menu: (base) => ({
+            ...base,
+            borderRadius: "4px",
+            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+            backgroundColor: "#fff",
+          }),
+          option: (base, { isFocused, isSelected }) => ({
+            ...base,
+            backgroundColor: isSelected
+              ? "var(--primary-500)"
+              : isFocused
+              ? "var(--primary-100)"
+              : "#fff",
+            color: isSelected ? "#fff" : "#333",
+            cursor: "pointer",
+          }),
+        }}
+      />
+      {touched.agent_id && (errors as any).agent_id ? (
+        <p className="text-red-500 absolute top-[85px] text-xs">
+          {(errors as any).agent_id}
+        </p>
+      ) : null}
+    </div>) : (   
+     <div className="w-full relative">
+  <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+    Agent
+  </p>
+  <Select
+    value={
+      (agent || []).find(
+        (opt: any) => String(opt.id) === String(values.agent_id)
+      ) || null
+    }
+    onChange={(selectedOption: any) =>
+      setFieldValue(
+        "agent_id",
+        selectedOption ? String(selectedOption.id) : ""
+      )
+    }
+    onBlur={() => setFieldTouched("agent_id", true)}
+    getOptionLabel={(opt: any) => opt.name}
+    getOptionValue={(opt: any) => String(opt.id)}
+    options={agent}
+    placeholder="Select Agent"
+    isClearable
+    isDisabled={!!values.agent_id}  // Disable dropdown if agent_id has a value
+    classNames={{
+      control: ({ isFocused }) =>
+        `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+          isFocused ? "!border-primary-500" : "!border-[#DFEAF2]"
+        }`,
+    }}
+    styles={{
+      menu: (base) => ({
+        ...base,
+        borderRadius: "4px",
+        boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+        backgroundColor: "#fff",
+      }),
+      option: (base, { isFocused, isSelected }) => ({
+        ...base,
+        backgroundColor: isSelected
+          ? "var(--primary-500)"
+          : isFocused
+          ? "var(--primary-100)"
+          : "#fff",
+        color: isSelected ? "#fff" : "#333",
+        cursor: "pointer",
+      }),
+    }}
+  />
+  {touched.agent_id && (errors as any).agent_id ? (
+    <p className="text-red-500 absolute top-[85px] text-xs">
+      {(errors as any).agent_id}
+    </p>
+  ) : null}
+</div>
+
+  )}
+ 
+  
+   
+  
+
+
+      </div>
+
+      {/* Conversation (last row) */}
+      <div className="w-full relative md:col-span-2">
+        <p className="text-secondBlack font-medium text-base leading-6 mb-2">
+          Conversation
+        </p>
+        <textarea
+          name="conversation"
+          value={values.conversation}
+          onChange={handleChange}
+          onBlur={() => setFieldTouched("conversation", true)}
+          placeholder="Enter conversation"
+          rows={4}
+          className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+        />
+        {touched.conversation && (errors as any).conversation ? (
+          <p className="text-red-500 absolute top-[85px] text-xs">
+            {(errors as any).conversation}
+          </p>
+        ) : null}
+      </div>
+
+      {/* Buttons */}
+      <div className="mt-10 w-full flex flex-col gap-y-4 md:flex-row justify-between items-center ">
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className=" py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full  text-center hover:bg-primary-700 hover:text-white "
+        >
+          Update Lead Activity
+        </button>
+      </div>
+    </form>
+  )}
+</Formik>
+
+
+
 
             {/* {END FORM} */}
           </div>
@@ -2778,7 +3032,7 @@ classNames={{
                 endDate: "",
                 lead_id: leadId,
               }}
-              onSubmit={async (values, { setSubmitting }) => {
+              onSubmit={async (values, { setSubmitting, resetForm }) => {
                 if (
                   !values.conversation &&
                   !values.disposition_id &&
@@ -2798,9 +3052,13 @@ classNames={{
                     //setHitApi(!hitApi);
                     //  setData()
                     setFetchLeadaActivityData(res.data.data.activities);
+                    setFlyoutFilterOpen(false)
+                    setIsActivityHistoryPaination(false)
+                    setIsActvityFilter(false)
+                    resetForm();
                   } catch (error) {
                     console.error("Error deleting user:", error);
-                    toast.error("Task not Completed");
+                    toast.error("Not Filtered try again");
                   }
                   console.log("Filter Activity payload:", values);
                 }
@@ -3882,84 +4140,128 @@ classNames={{
             ) : null}
           </div>
 
-          {/* ===== Schedule (From / To) ===== */}
-          <div className="w-full md:col-span-2">
-            <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-3">
-              Schedule
-            </p>
+{/* ===== Schedule (From / To) ===== */}
+<div className="w-full md:col-span-2">
+  <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-3">
+    Schedule
+  </p>
 
-            {/* From */}
-            <div className="w-full relative mb-4">
-              <p className="text-[#0A0A0A] font-medium text-sm leading-6 mb-2">
-                From
-              </p>
-              <DatePicker
-                selected={values.start_at}
-                onChange={(date: Date | null) => {
-                  setFieldValue("start_at", date);
-                  if (date) setFieldValue("end_at", addMinutes(date, 15)); // auto +15
-                }}
-                onBlur={() => setFieldTouched("start_at", true)}
-                name="start_at"
-                showTimeSelect
-                timeFormat="h:mma"
-                timeIntervals={5}
-                dateFormat="MM-dd-yyyy h:mma"
-                placeholderText="MM-dd-yyyy hh:mmam/pm"
-                className="hover:shadow-hoverInputShadow focus-border-primary !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
-                popperClassName="custom-datepicker"
-                dayClassName={(date) => {
-                  const today = new Date().toDateString();
-                  const selectedDate = values.start_at
-                    ? new Date(values.start_at).toDateString()
-                    : null;
-                  if (today === date.toDateString())
-                    return "bg-[#FFF0F1] text-[#A3000E]";
-                  if (selectedDate === date.toDateString())
-                    return "bg-[#A3000E] text-white";
-                  return "hover:bg-[#FFCCD0] hover:text-[#A3000E]";
-                }}
-                minDate={new Date()} // disable past days
-                filterTime={(time: Date) =>
-                  isSameDay(values.start_at ?? new Date(), new Date())
-                    ? time.getTime() >= roundToNext5().getTime()
-                    : true
-                }
-              />
-              {touched.start_at && (errors as any).start_at ? (
-                <p className="text-red-500 mt-1 text-xs">
-                  {(errors as any).start_at}
-                </p>
-              ) : null}
-            </div>
+  {/* From */}
+  <div className="w-full relative mb-4">
+    <div className="w-full relative mb-4">
+      <p className="text-[#0A0A0A] font-medium text-sm leading-6 mb-2">
+        From
+      </p>
+      <DatePicker
+        /* SHOW as Canada time */
+        selected={toPickerLocal(values.start_at)}
 
-            {/* To (read-only) */}
-            <div className="w-full relative">
-              <p className="text-[#0A0A0A] font-medium text-sm leading-6 mb-2">
-                To
-              </p>
-              <DatePicker
-                selected={values.end_at}
-                onChange={() => {}}
-                onBlur={() => setFieldTouched("end_at", true)}
-                name="end_at"
-                showTimeSelect
-                timeFormat="h:mma"
-                timeIntervals={5}
-                dateFormat="MM-dd-yyyy h:mma"
-                placeholderText="MM-dd-yyyy hh:mmam/pm"
-                disabled
-                className="hover:shadow-hoverInputShadow focus-border-primary !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 bg-gray-50 text-firstBlack cursor-not-allowed"
-                popperClassName="custom-datepicker"
-                dayClassName={() => "pointer-events-none"}
-              />
-              {touched.end_at && (errors as any).end_at ? (
-                <p className="text-red-500 mt-1 text-xs">
-                  {(errors as any).end_at}
-                </p>
-              ) : null}
-            </div>
-          </div>
+        /* TAKE as Canada time -> store UTC and set end = start + 30 */
+        onChange={(date: Date | null) => {
+          const utcStart = fromPickerLocal(date);
+          setFieldValue("start_at", utcStart);
+          if (utcStart) setFieldValue("end_at", addMinutes(utcStart, 30));
+        }}
+        onBlur={() => setFieldTouched("start_at", true)}
+        name="start_at"
+        showTimeSelect
+        timeFormat="h:mma"
+        timeIntervals={15}                 // 15-min steps
+        dateFormat="MM-dd-yyyy h:mma"
+        placeholderText="MM-dd-yyyy hh:mmam/pm"
+        className="hover:shadow-hoverInputShadow focus-border-primary !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
+        popperClassName="custom-datepicker"
+
+        dayClassName={(date) => {
+          const todayCA = nowCA().toDateString();
+          const selectedCA = values.start_at
+            ? toPickerLocal(values.start_at)!.toDateString()
+            : null;
+          if (todayCA === date.toDateString())
+            return "bg-[#FFF0F1] text-[#A3000E]";
+          if (selectedCA === date.toDateString())
+            return "bg-[#A3000E] text-white";
+          return "hover:bg-[#FFCCD0] hover:text-[#A3000E]";
+        }}
+
+        /* Disable past days */
+        minDate={startOfTodayCA()}
+
+        /* HIDE times outside 10:00am–8:30pm, and hide today's past times */
+        filterTime={(candidate: Date) => {
+          const candCA = toPickerLocal(candidate)!;
+
+          // Build window bounds on the candidate's local day
+          const y = candCA.getFullYear();
+          const m = candCA.getMonth();
+          const d = candCA.getDate();
+          const wStart = new Date(y, m, d, 10, 0, 0, 0);   // 10:00 AM
+          const wLastStart = new Date(y, m, d, 20, 30, 0, 0); // 8:30 PM (latest start)
+
+          // Default earliest = 10:00
+          let earliest = wStart;
+
+          // If candidate is today (Canada), earliest is the next 15-min slot within window
+          const now = nowCA();
+          const isToday = now.getFullYear() === y && now.getMonth() === m && now.getDate() === d;
+          if (isToday) {
+            const next = new Date(now);
+            next.setSeconds(0, 0);
+            const mins = next.getMinutes();
+            next.setMinutes(mins + ((15 - (mins % 15)) % 15)); // round up to 15
+            if (next > wLastStart) return false;               // no slots left today
+            earliest = next < wStart ? wStart : next;
+          }
+
+          // Allow only [earliest, 20:30]
+          return candCA.getTime() >= earliest.getTime() &&
+                 candCA.getTime() <= wLastStart.getTime();
+        }}
+      />
+      {touched.start_at && (errors as any).start_at ? (
+        <p className="text-red-500 absolute top-[85px] text-xs">
+          {(errors as any).start_at}
+        </p>
+      ) : null}
+    </div>
+
+    {touched.start_at && (errors as any).start_at ? (
+      <p className="text-red-500 absolute top-[85px] text-xs">
+        {(errors as any).start_at}
+      </p>
+    ) : null}
+  </div>
+
+  {/* To (read-only) */}
+  <div className="w-full relative">
+    <p className="text-[#0A0A0A] font-medium text-sm leading-6 mb-2">
+      To
+    </p>
+    <DatePicker
+      /* SHOW end time as Canada time */
+      selected={toPickerLocal(values.end_at)}
+      onChange={() => {}}
+      onBlur={() => setFieldTouched("end_at", true)}
+      name="end_at"
+      showTimeSelect
+      timeFormat="h:mma"
+      timeIntervals={15}               // display grid at 15-min
+      dateFormat="MM-dd-yyyy h:mma"
+      placeholderText="MM-dd-yyyy hh:mmam/pm"
+      disabled
+      className="hover:shadow-hoverInputShadow focus-border-primary 
+        !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 
+        font-medium placeholder-[#717171] py-4 px-4 bg-gray-50 text-firstBlack cursor-not-allowed"
+      popperClassName="custom-datepicker"
+      dayClassName={() => "pointer-events-none"}
+    />
+    {touched.end_at && (errors as any).end_at ? (
+      <p className="text-red-500 absolute top-[85px] text-xs">
+        {(errors as any).end_at}
+      </p>
+    ) : null}
+  </div>
+</div>
 
           {/* Description */}
           <div className="w-full relative md:col-span-2">

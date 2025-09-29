@@ -3,7 +3,7 @@ import Image from "next/image";
 import { RxAvatar } from "react-icons/rx";
 import { CiSettings } from "react-icons/ci";
 import { IoIosNotificationsOutline } from "react-icons/io";
-import { FaPlus } from "react-icons/fa6";
+import { FaLandMineOn, FaPlus } from "react-icons/fa6";
 import { MdOutlineCall } from "react-icons/md";
 import { LiaArrowCircleDownSolid } from "react-icons/lia";
 import { MdRemoveRedEye, MdModeEdit } from "react-icons/md";
@@ -27,6 +27,8 @@ import DesktopHeader from "../component/DesktopHeader";
 import { Tooltip } from "react-tooltip";
 import { FaEllipsisVertical } from "react-icons/fa6";
 import { useAuthRedirect } from "../component/hooks/useAuthRedirect";
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
 
 export interface User {
   id: string;
@@ -46,6 +48,14 @@ interface CurrentUserData {
   email: string;
   role: string;
 }
+export interface EditUser {
+  user_id: string;
+  name: string;
+  mobile_number: string;
+  email: string;
+  password: string;
+  role_name: string;
+}
 const axiosProvider = new AxiosProvider();
 const storage = new StorageManager();
 const activityLogger = new UserActivityLogger();
@@ -64,6 +74,13 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { accessToken } = useContext(AppContext);
   const router = useRouter();
+  const [isFlyoutOpen, setFlyoutOpen] = useState<boolean>(false);
+
+const [editFormData, setEditFormData] = useState<any | null>(null);
+
+console.log("edit data object", editFormData)
+    const storage = new StorageManager();
+    const userRole = storage.getUserRole();
 
   const toggleEditFlyout = () => {
     setIsEditFlyoutOpen(!isEditFlyoutOpen);
@@ -151,7 +168,7 @@ const blockUserData = async (item: User) => {
       );
        console.log('get all user',response.data.data);
       const result = response.data.data.data;
-      //console.log("BBBBBBBBBBBBBBBB", response);
+      console.log("BBBBBBBBBBBBBBBB", response);
       // console.log("###########", response.data.data.pagination.totalPages);
       setTotalPages(response.data.data.pagination.totalPages);
       setData(result);
@@ -184,6 +201,34 @@ const blockUserData = async (item: User) => {
   //     </div>
   //   );
   // }
+  const clickOnEditButton = (item: any)=>{
+setFlyoutOpen(true)
+setEditFormData({
+  user_id: item.id,          // 👈 convert id → user_id here
+  name: item.name || "",
+  mobile_number: item.mobile_number || "",
+  email: item.email || "",
+  password: "",  
+  role_name:item.role_name || "",            // keep empty if you don't want to prefill password
+});
+  }
+
+    const handleSubmit = async (values: EditUser) => {
+     console.log("AAAAAAAAAAAAAAAAAAAAA",values)
+    
+    try {
+      await AxiosProvider.post("/leads/user/edit", values);
+ 
+      
+     toast.success("User updated success")
+     setFlyoutOpen(false)
+           setShouldRefetch((prev) => !prev);
+     
+    } catch (err) {
+      console.error(err);
+      toast.error("User is not updated")
+    }
+  };
   if (isLoading) {
     return (
       <div className="h-screen flex flex-col gap-5 justify-center items-center">
@@ -196,7 +241,7 @@ const blockUserData = async (item: User) => {
           className="animate-pulse rounded"
         />
       </div>
-    );
+    ); 
   }
   return (
     <>
@@ -336,10 +381,12 @@ const blockUserData = async (item: User) => {
                         </td>
                         <td className="px-2 py-1 border border-tableBorder">
                           <div className="flex gap-1 md:gap-2 justify-center md:justify-start">
-                            <button className="py-[4px] px-3 bg-primary-600 hover:bg-primary-800 active:bg-primary-900 group flex gap-1 items-center rounded-xl text-xs md:text-sm ">
+                            <button
+                            onClick={()=>clickOnEditButton(item)}
+                            className="py-[4px] px-3 bg-primary-600 hover:bg-primary-800 active:bg-primary-900 group flex gap-1 items-center rounded-xl text-xs md:text-sm ">
                               <MdRemoveRedEye className="text-white w-4 h-4 group-hover:text-white" />
                               <p className="text-white hidden md:block group-hover:text-white">
-                                View
+                                Edit
                               </p>
                             </button>
                             <button
@@ -351,7 +398,17 @@ const blockUserData = async (item: User) => {
                                 Delete
                               </p>
                             </button>
-                            <button
+                            {item.role_name === "Admin" ?
+                             (                            <button
+                             // onClick={() => blockUserData(item)}
+                              className="py-[4px] px-3 bg-black flex gap-1 items-center rounded-full text-xs md:text-sm group hover:bg-primary-600 opacity-[0.5] cursor-not-allowed"
+                            >
+                              <RiDeleteBin6Line className="text-white w-4 h-4" />
+                              <p className="text-white hidden md:block">
+                                Block user
+                              </p>
+                            </button>):
+                            (                            <button
                               onClick={() => blockUserData(item)}
                               className="py-[4px] px-3 bg-black flex gap-1 items-center rounded-full text-xs md:text-sm group hover:bg-primary-600"
                             >
@@ -359,7 +416,9 @@ const blockUserData = async (item: User) => {
                               <p className="text-white hidden md:block">
                                 Block user
                               </p>
-                            </button>
+                            </button>)
+                          }
+
                           </div>
                         </td>
                       </tr>
@@ -400,6 +459,136 @@ const blockUserData = async (item: User) => {
          currentUserData={currentUserData}
         setShouldRefetch={setShouldRefetch}
       /> */}
+            {isFlyoutOpen && (
+        <div
+          className=" min-h-screen w-full bg-[#1f1d1d80] fixed top-0 left-0 right-0 z-[999]"
+          onClick={() => {
+            setFlyoutOpen(!isFlyoutOpen);
+          }}
+        ></div>
+      )}
+      <div className={`flyout ${isFlyoutOpen ? "open" : ""}`}>
+  <div className="w-full min-h-auto">
+    {/* Flyout content here */}
+    <div className="flex justify-between mb-4">
+      <p className="text-primary-600 text-[26px] font-bold leading-9">
+        Edit Leads
+      </p>
+      <IoCloseOutline
+        onClick={() => setFlyoutOpen(false)}
+        className="h-8 w-8 border border-[#E7E7E7] text-secondBlack rounded cursor-pointer"
+      />
+    </div>
+    <div className="w-full border-b border-[#E7E7E7] mb-4"></div>
+    {/* FORM--------- */}
+  {editFormData && (
+<Formik
+  enableReinitialize
+  initialValues={editFormData}
+  validationSchema={Yup.object({
+    user_id: Yup.string().required('User ID is required'),
+    name: Yup.string().required('Name is required'),
+    mobile_number: Yup.string()
+      .required('Mobile number is required')
+      .matches(/^\+91\d{10}$/, 'Mobile number must be in the format +91xxxxxxxxxx'),
+    email: Yup.string()
+      .required('Email is required')
+      .email('Invalid email format'),
+    role_name: Yup.string().required('Role is required'),
+  })}
+  onSubmit={handleSubmit}
+>
+  {({ values, handleChange, errors, touched }) => (
+    <Form className="grid grid-cols-2 gap-6 mt-6">
+      {/* Hidden user_id */}
+      <input type="hidden" name="user_id" value={values.user_id} />
+
+      {/* Name */}
+      <div className="w-full relative mb-3">
+        <p className="text-[#232323] text-base leading-normal mb-2">Your Name</p>
+        <input
+          type="text"
+          name="name"
+          value={values.name}
+          onChange={handleChange}
+          placeholder="Charlene Reed"
+          className={`hover:shadow-hoverInputShadow focus-border-primary w-full h-[50px] border ${errors.name && touched.name ? 'border-red-500' : '#DFEAF2'} rounded-[4px] text-[15px] placeholder-[#718EBF] pl-4 mb-2 text-firstBlack`}
+        />
+        {/* Error message */}
+        {errors.name && touched.name && typeof errors.name === 'string' && (
+          <div className="text-red-500 text-sm">{errors.name}</div>
+        )}
+      </div>
+
+      {/* Mobile Number */}
+      <div className="w-full relative mb-3">
+        <p className="text-[#232323] text-base leading-normal mb-2">Mobile Number</p>
+        <input
+          type="text"
+          name="mobile_number"
+          value={values.mobile_number}
+          onChange={handleChange}
+          placeholder="+91 9876543210"
+          className={`hover:shadow-hoverInputShadow focus-border-primary w-full h-[50px] border ${errors.mobile_number && touched.mobile_number ? 'border-red-500' : '#DFEAF2'} rounded-[4px] text-[15px] placeholder-[#718EBF] pl-4 mb-2 text-firstBlack`}
+        />
+        {/* Error message */}
+        {errors.mobile_number && touched.mobile_number && typeof errors.mobile_number === 'string' && (
+          <div className="text-red-500 text-sm">{errors.mobile_number}</div>
+        )}
+      </div>
+
+      {/* Email */}
+      <div className="w-full relative mb-3">
+        <p className="text-[#232323] text-base leading-normal mb-2">Email</p>
+        <input
+          type="email"
+          name="email"
+          value={values.email}
+          onChange={handleChange}
+          placeholder="youremail@example.com"
+          className={`hover:shadow-hoverInputShadow focus-border-primary w-full h-[50px] border ${errors.email && touched.email ? 'border-red-500' : '#DFEAF2'} rounded-[4px] text-[15px] placeholder-[#718EBF] pl-4 mb-2 text-firstBlack`}
+        />
+        {/* Error message */}
+        {errors.email && touched.email && typeof errors.email === 'string' && (
+          <div className="text-red-500 text-sm">{errors.email}</div>
+        )}
+      </div>
+
+      {/* User Role (read-only) */}
+      <div className="w-full relative mb-3">
+        <p className="text-[#232323] text-base leading-normal mb-2">Role</p>
+        <input
+          type="text"
+          value={values.role_name}
+          readOnly
+          className="w-full h-[50px] border border-[#DFEAF2] rounded-[4px] text-[15px] placeholder-[#718EBF] pl-4 mb-2 text-firstBlack bg-gray-100 outline-none"
+        />
+        {/* Error message */}
+        {errors.role_name && touched.role_name && typeof errors.role_name === 'string' && (
+          <div className="text-red-500 text-sm">{errors.role_name}</div>
+        )}
+      </div>
+
+      {/* Submit */}
+      <div className="col-span-2">
+        <button
+          type="submit"
+          className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded"
+        >
+          Save Changes
+        </button>
+      </div>
+    </Form>
+  )}
+</Formik>
+
+
+      )}
+
+    {/* END FROM----------- */}
+  </div>
+</div>
+
     </>
   );
 }

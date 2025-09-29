@@ -10,13 +10,13 @@ import { FaGreaterThan } from "react-icons/fa6";
 import { FiFilter } from "react-icons/fi";
 import { HiOutlineBookOpen } from "react-icons/hi2";
 import { SiHomeassistantcommunitystore } from "react-icons/si";
-import { MdOutlineCall } from "react-icons/md";
+import { MdEdit, MdOutlineCall } from "react-icons/md";
 import { LiaArrowCircleDownSolid } from "react-icons/lia";
 import { MdRemoveRedEye } from "react-icons/md";
 import { IoCloseOutline } from "react-icons/io5";
 import { RxAvatar } from "react-icons/rx";
 import AxiosProvider from "../../provider/AxiosProvider";
-import { RiAccountCircleLine } from "react-icons/ri";
+import { RiAccountCircleLine, RiDeleteBin6Line } from "react-icons/ri";
 import { RxCross2 } from "react-icons/rx";
 import StorageManager from "../../provider/StorageManager";
 import { AppContext } from "../AppContext";
@@ -38,6 +38,7 @@ import Select from "react-select";
 import Swal from "sweetalert2";
 import Tabs from "../component/Tabs";
 import page from "../page";
+import { BiUserPin } from "react-icons/bi";
 
 const axiosProvider = new AxiosProvider();
 
@@ -151,7 +152,18 @@ type FilterValues = {
   consolidated_credit_status_id: string;
 };
 type LeadSourceOption = { id: string | number; name: string };
-
+    type FilterFormValues = {
+      full_name: string;
+      email: string;
+      phone: string;
+      lead_number: string;
+      city: string;
+      state: string;
+      agent_ids: string[];
+      lead_source_id: string;
+      debt_consolidation_status_id: string;
+      consolidated_credit_status_id: string;
+    };
 export default function Home() {
   // const isChecking = useAuthRedirect();
   const [isFlyoutOpen, setFlyoutOpen] = useState<boolean>(false);
@@ -220,6 +232,9 @@ export default function Home() {
   const [leadSourceDisplay, setLeadSourceDisplay] = useState<any>(null);
   const [clearFilter, setClearFilter] = useState<boolean>(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [assignFilteredData, setAssignFilteredData] = useState({});
+  const [unAssignFilteredData, setUnAssignFilteredData] = useState({});
+  //console.log("SSSSSSSSSSSSSSSSSSS",assignFilteredData)
 
 const toggleRow = (id: string, checked: boolean) => {
   setSelectedIds(prev => (checked ? [...prev, id] : prev.filter(x => x !== id)));
@@ -315,14 +330,16 @@ useEffect(() => {
     setIsLoading(true);
     // setIsFilter(false);
     setFlyoutOpen(false);
-    // console.log("4444444444444444", value);
+    //console.log("4444444444444444", value);
+   // return;
 
     try {
       await AxiosProvider.post("/leads", value);
-      toast.success("Lead is Creatted");
+      toast.success("Lead is Created");
       setHitApi(!hitApi);
     } catch (error: any) {
-      toast.error("Lead is not Creatted");
+      toast.error(error.response.data.msg);
+    //  console.log("lead create error",error.response.data.msg)
     } finally {
       setIsLoading(false);
     }
@@ -346,6 +363,9 @@ useEffect(() => {
   const handleUploadFile = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!excelFile) return toast.error("Please select a file");
+    if (!leadSourceDisplay?.id) {
+  return toast.error("Please select a Lead Source");
+}
 
     // If lead source is mandatory, uncomment:
     // if (!leadSourceDisplay?.id) return toast.error("Please select a Lead Source");
@@ -475,7 +495,7 @@ useEffect(() => {
   }
 
   const unAssignfetchData = async () => {
-    setIsLoading(true);
+   // setIsLoading(true);
     // setIsFilter(false);
     try {
       const response = await AxiosProvider.get(
@@ -488,8 +508,6 @@ useEffect(() => {
       setNotAssignData(result);
     } catch (error: any) {
       setIsError(true);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -504,7 +522,7 @@ useEffect(() => {
       const response = await AxiosProvider.get(
         `/leads/assigned?page=${assignPage}&pageSize=${globalPageSize}`
       );
-      // console.log("KKKKKKKKKKKKKKKKK", response.data.data.data);
+      console.log("KKKKKKKKKKKKKKKKK", response.data.data.data);
       setassignTotalPages(response.data.data.pagination.totalPages);
       const result = response.data.data.data;
       // console.log("ALL CRM USER", result);
@@ -517,6 +535,7 @@ useEffect(() => {
   useEffect(() => {
     assignfetchData();
   }, [assignPage, hitApi]);
+
 
 
   const leadSource = async () => {
@@ -689,6 +708,77 @@ const test = (id: string) => {
     setAssignFilterPagination(false)
     
   };
+
+// HANDLE API TO UPDATE PAGINATION 
+    const handleAssignFilter = async () => {
+        if (!assignFilteredData || Object.keys(assignFilteredData).length === 0) return;
+    //  console.log("Assign values:", values);
+      // const clean = buildCleanPayload(values as FilterFormValues);
+      //       if (!hasAnyField(clean)) {
+      //   toast.error("Please fill at least one field before submitting.");
+      //   return;
+      // }
+      // setAssignFilteredData(values)
+     //  console.log("unassign filter valuessssss",clean)
+//return;      
+
+      try {
+        const response = await AxiosProvider.post(
+          `/leads/filter?page=${assignPageFilter}&pageSize=${globalPageSize}`,
+       
+          assignFilteredData
+        );
+       // console.log("FILTERED VALUE", response.data.data.pagination.totalPages);
+        setAssignLeadData(response.data.data.data);
+        setFlyoutOpen(false);
+        setClearFilter(true);
+        setAssignTotalPagesFilter(response.data.data.pagination.totalPages)
+        setAssignFilterPagination(true);
+      } catch (error: any) {
+        console.log("assign filter error",error)
+        toast.error("Lead is not Created");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+useEffect(()=>{
+handleAssignFilter()
+},[assignPageFilter])
+
+    const handleUnassignFilter = async () => {
+            if (!unAssignFilteredData || Object.keys(unAssignFilteredData).length === 0) return;
+     // console.log("NotAssign values:", values);
+     // const clean = buildCleanPayload(values as FilterFormValues);
+
+    //  if (!hasAnyField(clean)) {
+    //    toast.error("Please fill at least one field before submitting.");
+    //    return;
+    //  }
+      //setUnAssignFilteredData(values)
+
+      try {
+        const response = await AxiosProvider.post(
+          `/notassignedleads/filter?page=${assignPageFilter}&pageSize=${globalPageSize}`,
+          unAssignFilteredData
+        );
+        console.log("NOT ASSIGN FILTERED VALUE", response);
+        setUnAssignTotalPagesFilter(response.data.data.pagination.totalPages);
+        setNotAssignData(response.data.data.data);
+        setFlyoutOpen(false);
+        setClearFilter(true);
+        setUnAssignFilterPagination(true);
+      } catch (error: any) {
+        toast.error("Lead is not Created");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+useEffect(()=>{
+handleUnassignFilter();
+},[UnAssignPageFilter])
+
+// HANDLE API TO UPDATE PAGINATION
+
   // PAGINATION HANDLE CHANGES
 
       const handleUnAssignPagination = (newPage: number) => {
@@ -709,8 +799,8 @@ const test = (id: string) => {
     }
   };
       const handleAssignPaginationFilter = (newPage: number) => {
-    if (newPage > 0 && newPage <= assignTotalPages) {
-      setAssignPage(newPage);
+    if (newPage > 0 && newPage <= assignTotalPagesFilter) {
+      setAssignPageFilter(newPage);
     }
   };
 
@@ -926,7 +1016,7 @@ const test = (id: string) => {
                               onClick={() => editLead(item)}
                               className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"
                             >
-                              <MdRemoveRedEye className="text-white w-4 h-4 hover:text-white" />
+                              <MdEdit className="text-white w-4 h-4 hover:text-white" />
                               <span className="text-xs sm:text-sm text-white hover:text-white">
                                 Edit
                               </span>
@@ -936,7 +1026,7 @@ const test = (id: string) => {
                                 onClick={() => assignAgent(item.id)}
                                 className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"
                               >
-                                <MdRemoveRedEye className="text-white w-4 h-4 hover:text-white" />
+                                <BiUserPin className="text-white w-4 h-4 hover:text-white" />
                                 <span className="text-xs sm:text-sm text-white hover:text-white">
                                   Assign to agent
                                 </span>
@@ -947,7 +1037,7 @@ const test = (id: string) => {
                                 onClick={() => deleteUserLead(item.id)}
                                 className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"
                               >
-                                <MdRemoveRedEye className="text-white w-4 h-4 hover:text-white" />
+                                <RiDeleteBin6Line className="text-white w-4 h-4 hover:text-white" />
                                 <span className="text-xs sm:text-sm text-white hover:text-white">
                                   Delete
                                 </span>
@@ -1184,7 +1274,7 @@ const test = (id: string) => {
                               onClick={() => editLead(item)}
                               className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"
                             >
-                              <MdRemoveRedEye className="text-white w-4 h-4 hover:text-white" />
+                              <MdEdit className="text-white w-4 h-4 hover:text-white" />
                               <span className="text-xs sm:text-sm text-white hover:text-white">
                                 Edit
                               </span>
@@ -1195,7 +1285,7 @@ const test = (id: string) => {
                                 onClick={() => deleteUserLead(item.id)}
                                 className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"
                               >
-                                <MdRemoveRedEye className="text-white w-4 h-4 hover:text-white" />
+                                <RiDeleteBin6Line className="text-white w-4 h-4 hover:text-white" />
                                 <span className="text-xs sm:text-sm text-white hover:text-white">
                                   Delete
                                 </span>
@@ -1221,7 +1311,7 @@ const test = (id: string) => {
                 <HiChevronDoubleLeft className=" w-6 h-auto" />
               </button>
               <span className="text-[#232323] text-sm">
-                Page  {assignPageFilter} of {assignTotalPagesFilter}
+               Assign leads filter pagination Page  {assignPageFilter} of {assignTotalPagesFilter}
               </span>
               <button
                  onClick={() => handleAssignPaginationFilter(assignPageFilter + 1)}
@@ -1233,7 +1323,7 @@ const test = (id: string) => {
             </div>
             ):
           (   
-                     <div className="flex justify-center items-center my-10 relative">
+            <div className="flex justify-center items-center my-10 relative">
               <button
                 onClick={() => handleAssignPagination(assignPage - 1)}
                 disabled={assignPage === 1}
@@ -1242,7 +1332,7 @@ const test = (id: string) => {
                 <HiChevronDoubleLeft className=" w-6 h-auto" />
               </button>
               <span className="text-[#232323] text-sm">
-                Page  {assignPage} of {assignTotalPages}
+                Assign leads pagination Page  {assignPage} of {assignTotalPages}
               </span>
               <button
                  onClick={() => handleAssignPagination(assignPage + 1)}
@@ -1327,7 +1417,7 @@ const test = (id: string) => {
                 >
                   <FiFilter className=" w-5 h-5 text-white group-hover:text-white" />
                   <p className=" text-white text-base font-medium group-hover:text-white">
-                    Filter Leads
+                    Search Leads
                   </p>
                 </div>
               </div>
@@ -1415,7 +1505,19 @@ const test = (id: string) => {
                         </span>
                       </div>
                     </th>
-                    <th
+                    	                      <th
+                      scope="col"
+                      className="px-3 py-2 border border-tableBorder hidden md:table-cell"
+                    >
+                      <div className="flex items-center gap-2">
+                        <SiHomeassistantcommunitystore className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <span className="font-semibold text-secondBlack text-lg sm:text-base">
+                          Agent
+                        </span>
+                      </div>
+                    </th>
+					
+                    {/* <th
                       scope="col"
                       className="px-3 py-2 border border-tableBorder md:table-cell"
                     >
@@ -1425,7 +1527,7 @@ const test = (id: string) => {
                           Action
                         </span>
                       </div>
-                    </th>
+                    </th> */}
                   </tr>
                 </thead>
 
@@ -1443,7 +1545,7 @@ const test = (id: string) => {
                         className="border border-tableBorder bg-white hover:bg-primary-100"
                       >
                         {/* Full name */}
-                        <td className="px-1 py-2 md:px-3 md:py-2 border-tableBorder flex items-center gap-2">
+                        <td className="px-1 py-2 md:px-3 md:py-2 border-tableBorder flex items-center gap-2 bg-primary-500">
                           <div className="flex gap-2">
                             <div className="md:hidden">
                               <FaEllipsisVertical
@@ -1471,7 +1573,7 @@ const test = (id: string) => {
                             <div 
                              onClick={() => test(item.id)}
                             >
-                              <p className="text-[#232323] text-sm sm:text-base font-medium leading-normal capitalize cursor-pointer">
+                              <p className="text-white text-sm sm:text-base font-medium leading-normal capitalize cursor-pointer">
                                 {item?.full_name ?? "-"}
                               </p>
                             </div>
@@ -1498,11 +1600,16 @@ const test = (id: string) => {
                             {item?.address.country ?? "-"}
                           </span>
                         </td>
+                        	                          <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+                          <span className="text-[#232323] text-sm sm:text-base capitalize">
+                            {item?.agent.name ?? "-"}
+                          </span>
+                        </td>
 
                         {/* Action */}
-                        <td className="px-3 py-2 border border-tableBorder md:table-cell">
+                        {/* <td className="px-3 py-2 border border-tableBorder md:table-cell">
                           <div className="flex gap-1 md:gap-2 justify-center md:justify-start">
-                            {/* <button
+                             <button
                               onClick={() => test(item.id)}
                               className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"
                             >
@@ -1510,8 +1617,8 @@ const test = (id: string) => {
                               <span className="text-xs sm:text-sm text-white hover:text-white">
                                 View Details
                               </span>
-                            </button> */}
-                             {/* <button
+                            </button> 
+                              <button
                               onClick={() => assignAgent(item.id)}
                               className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"
                             >
@@ -1519,7 +1626,7 @@ const test = (id: string) => {
                               <span className="text-xs sm:text-sm text-white hover:text-white">
                                 Assign to agent
                               </span>
-                            </button> */}
+                            </button> 
                             <button
                               onClick={() => editLead(item)}
                               className="py-1 px-3 bg-black hover:bg-viewDetailHover active:bg-viewDetailPressed flex gap-2 items-center rounded-xl"
@@ -1530,11 +1637,8 @@ const test = (id: string) => {
                               </span>
                             </button>
 
-                           
-                      
-                            
                           </div>
-                        </td>
+                        </td> */}
                       </tr>
                     ))
                   )}
@@ -1771,7 +1875,7 @@ const test = (id: string) => {
                         </div>
 
                         {/* Address Line 2 */}
-                        <div className="w-full">
+                        {/* <div className="w-full">
                           <p className="text-secondBlack  text-base leading-6 mb-2">
                             Address Line 2
                           </p>
@@ -1786,10 +1890,10 @@ const test = (id: string) => {
                             component="div"
                             className="text-red-500 text-xs mt-1"
                           />
-                        </div>
+                        </div> */}
 
                         {/* City */}
-                        <div className="w-full">
+                        {/* <div className="w-full">
                           <p className="text-secondBlack  text-base leading-6 mb-2">
                             City
                           </p>
@@ -1804,61 +1908,51 @@ const test = (id: string) => {
                             component="div"
                             className="text-red-500 text-xs mt-1"
                           />
-                        </div>
+                        </div> */}
 
                         {/* State */}
                <div className="w-full">
   <p className="text-secondBlack text-base leading-6 mb-2">
     Province
   </p>
-  <Select
-    value={
-      provinceOptions.find(
-        (opt) => opt.id === values.lead_source_id
-      ) || null
-    }
-    onChange={(selected: any) =>
-      setFieldValue(
-        "lead_source_id",
-        selected ? selected.id : ""
-      )
-    }
-    onBlur={() => setFieldTouched("lead_source_id", true)}
-    getOptionLabel={(opt: any) => opt.name}
-    getOptionValue={(opt: any) => opt.id}
-    options={provinceOptions}
-    placeholder="Select Province"
-    isClearable
-    classNames={{
-      control: ({ isFocused }: any) =>
-        `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
-          isFocused
-            ? "!border-primary-500"
-            : "!border-[#DFEAF2]"
-        }`,
-    }}
-    styles={{
-      menu: (base: any) => ({
-        ...base,
-        borderRadius: "4px",
-        boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
-        backgroundColor: "#fff",
-      }),
-      option: (
-        base: any,
-        { isFocused, isSelected }: any
-      ) => ({
-        ...base,
-        backgroundColor: isSelected
-          ? "var(--primary-500)"
-          : isFocused
-          ? "var(--primary-100)"
-          : "#fff",
-        color: isSelected ? "#fff" : "#333",
-        cursor: "pointer",
-      }),
-    }}
-  />
+<Select
+  value={
+    provinceOptions.find((opt) => opt.id === values.state) || null
+  }
+  onChange={(selected: any) =>
+    setFieldValue("state", selected ? selected.id : "")
+  }
+  onBlur={() => setFieldTouched("state", true)}
+  getOptionLabel={(opt: any) => opt.name}
+  getOptionValue={(opt: any) => opt.id}
+  options={provinceOptions}
+  placeholder="Select Province"
+  isClearable
+  classNames={{
+    control: ({ isFocused }: any) =>
+      `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+        isFocused ? "!border-primary-500" : "!border-[#DFEAF2]"
+      }`,
+  }}
+  styles={{
+    menu: (base: any) => ({
+      ...base,
+      borderRadius: "4px",
+      boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+      backgroundColor: "#fff",
+    }),
+    option: (base: any, { isFocused, isSelected }: any) => ({
+      ...base,
+      backgroundColor: isSelected
+        ? "var(--primary-500)"
+        : isFocused
+        ? "var(--primary-100)"
+        : "#fff",
+      color: isSelected ? "#fff" : "#333",
+      cursor: "pointer",
+    }),
+  }}
+/>
 </div>
                         {/* Postal Code */}
                         <div className="w-full">
@@ -1879,7 +1973,7 @@ const test = (id: string) => {
                         </div>
 
                         {/* Country */}
-                        <div className="w-full">
+                        {/* <div className="w-full">
                           <p className="text-secondBlack  text-base leading-6 mb-2">
                             Country
                           </p>
@@ -1894,12 +1988,12 @@ const test = (id: string) => {
                             component="div"
                             className="text-red-500 text-xs mt-1"
                           />
-                        </div>
+                        </div> */}
 
   
 
                         {/* Lead Quality */}
-                        <div className="w-full">
+                        {/* <div className="w-full">
                           <p className="text-secondBlack  text-base leading-6 mb-2">
                             Lead Quality
                           </p>
@@ -1914,7 +2008,7 @@ const test = (id: string) => {
                             component="div"
                             className="text-red-500 text-xs mt-1"
                           />
-                        </div>
+                        </div> */}
 
                         {/* Best Time to Call */}
                         <div className="w-full">
@@ -2306,18 +2400,16 @@ const test = (id: string) => {
               </div>
               <div className=" w-full border-b border-[#E7E7E7] mb-4"></div>
               {/* FORM */}
-             <Formik
+<Formik
   enableReinitialize
   initialValues={{
-    first_name: "",
-    last_name: "",
     full_name: "",
     email: "",
     phone: "",
     lead_number: "",
     city: "",
     state: "",
-    agent_id: "",
+    agent_ids: [] as string[],
     lead_source_id: "",
     debt_consolidation_status_id: "",
     consolidated_credit_status_id: "",
@@ -2327,6 +2419,19 @@ const test = (id: string) => {
   }}
 >
   {({ handleSubmit, values, setFieldValue, setFieldTouched, isSubmitting }) => {
+    type FilterFormValues = {
+      full_name: string;
+      email: string;
+      phone: string;
+      lead_number: string;
+      city: string;
+      state: string;
+      agent_ids: string[];
+      lead_source_id: string;
+      debt_consolidation_status_id: string;
+      consolidated_credit_status_id: string;
+    };
+
     const norm = (v: any) => String(v ?? "").toLowerCase();
 
     const leadSourceDisplay = values.lead_source_id
@@ -2337,85 +2442,115 @@ const test = (id: string) => {
 
     const debtDisplay = values.debt_consolidation_status_id
       ? (debtConsolidation || []).find(
-          (o: any) =>
-            norm(o.id) === norm(values.debt_consolidation_status_id)
+          (o: any) => norm(o.id) === norm(values.debt_consolidation_status_id)
         ) || null
       : null;
-      const agentDisplay = values.agent_id
-  ? (agentList || []).find((o: any) => norm(o.id) === norm(values.agent_id)) || null
+
+    // ✅ Multi-select display objects for agents
+    const agentDisplay =
+      (values.agent_ids || [])
+        .map((id: any) =>
+          (agentList || []).find((o: any) => norm(o.id) === norm(id))
+        )
+        .filter(Boolean) || [];
+
+const creditDisplay = values.consolidated_credit_status_id
+  ? (consolidationData || []).find(
+      (o: any) => norm(o.id) === norm(values.consolidated_credit_status_id)
+    ) || null
   : null;
 
-    const creditDisplay = values.consolidated_credit_status_id
-      ? (consolidationData || []).find(
-          (o: any) =>
-            norm(o.id) === norm(values.consolidated_credit_status_id)
-        ) || null
-      : null;
 
-    // 🔹 handlers
-    const handleUnassignFilter = async () => {
-      console.log("NotAssign values:", values);
-       const clean = toCleanFilter(values);
-    if (Object.keys(clean).length === 0) {
-      toast.error("Please fill at least one field before submitting.");
-      return;
-    }
-    //console.log("FILTER VALUES (clean):", clean);
-    // e.g. setFilters(clean); fetchList(1, clean);
-    try {
-      const response = await AxiosProvider.post(
-        `/notassignedleads/filter?page=${UnAssignPageFilter}&pageSize=${globalPageSize}`,
-        values
-      );
-      console.log("NOT ASSIGN FILTERED VALUE", response);
-      setUnAssignTotalPagesFilter(response.data.data.pagination.totalPages)
-     setNotAssignData(response.data.data.data)
-      setFlyoutOpen(false);
-      //  toast.success("Lead is Creatted");
-      //setHitApi(!hitApi);
-      setClearFilter(true);
-      setUnAssignFilterPagination(true)
-    } catch (error: any) {
-      toast.error("Lead is not Created");
-    } finally {
-      setIsLoading(false);
-    }
+    // ---------- helpers (replace old toCleanFilter usage) ----------
+    const pruneEmpty = (obj: Record<string, any>) => {
+      const out: Record<string, any> = {};
+      Object.entries(obj).forEach(([k, v]) => {
+        if (Array.isArray(v)) {
+          const arr = v.filter((x) => x !== "" && x != null);
+          if (arr.length) out[k] = arr;
+        } else if (v !== "" && v != null) {
+          out[k] = v;
+        }
+      });
+      return out;
     };
 
-    const handleAssignFilter = async() => {
+    const buildCleanPayload = (v: FilterFormValues): Partial<FilterFormValues> => {
+      const base = {
+        ...v,
+        agent_ids: (v.agent_ids || []).filter(Boolean),
+      };
+      return pruneEmpty(base) as Partial<FilterFormValues>;
+    };
+
+    const hasAnyField = (payload: Record<string, any>) =>
+      Object.keys(payload).length > 0;
+
+    // ---------------- handlers ----------------
+    const handleUnassignFilter = async () => {
+      console.log("NotAssign values:", values);
+      const clean = buildCleanPayload(values as FilterFormValues);
+
+      if (!hasAnyField(clean)) {
+        toast.error("Please fill at least one field before submitting.");
+        return;
+      }
+      setUnAssignFilteredData(values)
+
+      try {
+        const response = await AxiosProvider.post(
+          `/notassignedleads/filter?page=${assignPageFilter}&pageSize=${globalPageSize}`,
+          clean
+        );
+        console.log("NOT ASSIGN FILTERED VALUE", response);
+        setUnAssignTotalPagesFilter(response.data.data.pagination.totalPages);
+        setNotAssignData(response.data.data.data);
+        setFlyoutOpen(false);
+        setClearFilter(true);
+        setUnAssignFilterPagination(true);
+      } catch (error: any) {
+        toast.error("Lead is not Created");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+
+    const handleAssignFilter = async () => {
       console.log("Assign values:", values);
-     const clean = toCleanFilter(values);
-    if (Object.keys(clean).length === 0) {
-      toast.error("Please fill at least one field before submitting.");
-      return;
-    }
-    //console.log("FILTER VALUES (clean):", clean);
-    // e.g. setFilters(clean); fetchList(1, clean);
-    try {
-      const response = await AxiosProvider.post(
-         `/leads/filter?page=${page}&pageSize=${pageSize}`,
-       //  `/leads/filter`,
-        values
-      );
-      console.log("FILTERED VALUE", response.data.data.data);
-     setAssignLeadData(response.data.data.data)
-      setFlyoutOpen(false);
-      //  toast.success("Lead is Creatted");
-      //setHitApi(!hitApi);
-      setClearFilter(true);
-      setAssignFilterPagination(true)
-    } catch (error: any) {
-      toast.error("Lead is not Created");
-    } finally {
-      setIsLoading(false);
-    }
+      const clean = buildCleanPayload(values as FilterFormValues);
+            if (!hasAnyField(clean)) {
+        toast.error("Please fill at least one field before submitting.");
+        return;
+      }
+      setAssignFilteredData(values)
+       console.log("unassign filter valuessssss",clean)
+//return;      
+
+      try {
+        const response = await AxiosProvider.post(
+          `/leads/filter?page=${assignPageFilter}&pageSize=${globalPageSize}`,
+       
+          clean
+        );
+       // console.log("FILTERED VALUE", response.data.data.pagination.totalPages);
+        setAssignLeadData(response.data.data.data);
+        setFlyoutOpen(false);
+        setClearFilter(true);
+        setAssignTotalPagesFilter(response.data.data.pagination.totalPages)
+        setAssignFilterPagination(true);
+      } catch (error: any) {
+        console.log("assign filter error",error)
+        toast.error("Lead is not Created");
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     return (
       <form onSubmit={handleSubmit}>
         <div className="w-full">
           <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-
             {/* Full Name */}
             <div className="w-full">
               <p className="text-secondBlack  text-base leading-6 mb-2">
@@ -2494,47 +2629,50 @@ const test = (id: string) => {
               />
             </div>
 
-            {/* Agent ID */}
-{/* Agent */}
-<div className="w-full">
-  <p className="text-secondBlack  text-base leading-6 mb-2">Agent</p>
-  <Select
-    value={agentDisplay}
-    onChange={(selected: any) =>
-      setFieldValue("agent_id", selected ? selected.id : "")
-    }
-    onBlur={() => setFieldTouched("agent_id", true)}
-    getOptionLabel={(opt: any) => opt.name}
-    getOptionValue={(opt: any) => String(opt.id)}
-    options={agentList}
-    placeholder="Select Agent"
-    isClearable
-    classNames={{
-      control: ({ isFocused }: any) =>
-        `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
-          isFocused ? "!border-primary-500" : "!border-[#DFEAF2]"}`
-    }}
-    styles={{
-      menu: (base: any) => ({
-        ...base,
-        borderRadius: "4px",
-        boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
-        backgroundColor: "#fff",
-      }),
-      option: (base: any, { isFocused, isSelected }: any) => ({
-        ...base,
-        backgroundColor: isSelected
-          ? "var(--primary-500)"
-          : isFocused
-          ? "var(--primary-100)"
-          : "#fff",
-        color: isSelected ? "#fff" : "#333",
-        cursor: "pointer",
-      }),
-    }}
-  />
-</div>
-
+            {/* Agents (Multi Select) */}
+            <div className="w-full">
+              <p className="text-secondBlack  text-base leading-6 mb-2">Agent</p>
+              <Select
+                value={agentDisplay}
+                onChange={(selected: any) =>
+                  setFieldValue(
+                    "agent_ids",
+                    selected ? selected.map((s: any) => s.id) : []
+                  )
+                }
+                onBlur={() => setFieldTouched("agent_ids", true)}
+                getOptionLabel={(opt: any) => opt.name}
+                getOptionValue={(opt: any) => String(opt.id)}
+                options={agentList}
+                placeholder="Select Agent"
+                isMulti
+                isClearable
+                classNames={{
+                  control: ({ isFocused }: any) =>
+                    `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
+                      isFocused ? "!border-primary-500" : "!border-[#DFEAF2]"
+                    }`,
+                }}
+                styles={{
+                  menu: (base: any) => ({
+                    ...base,
+                    borderRadius: "4px",
+                    boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+                    backgroundColor: "#fff",
+                  }),
+                  option: (base: any, { isFocused, isSelected }: any) => ({
+                    ...base,
+                    backgroundColor: isSelected
+                      ? "var(--primary-500)"
+                      : isFocused
+                      ? "var(--primary-100)"
+                      : "#fff",
+                    color: isSelected ? "#fff" : "#333",
+                    cursor: "pointer",
+                  }),
+                }}
+              />
+            </div>
 
             {/* Lead Source */}
             <div className="w-full">
@@ -2678,15 +2816,16 @@ const test = (id: string) => {
         </div>
 
         <div className=" flex gap-2">
-          {userRole === "Admin" && 
-          (          <button
-            type="button"
-            disabled={isSubmitting}
-            onClick={handleUnassignFilter}
-            className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
-          >
-            Filter UnAssign leads
-          </button>)}
+          {userRole === "Admin" && (
+            <button
+              type="button"
+              disabled={isSubmitting}
+              onClick={handleUnassignFilter}
+              className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
+            >
+              Filter UnAssign leads
+            </button>
+          )}
 
           <button
             type="button"
@@ -2701,6 +2840,7 @@ const test = (id: string) => {
     );
   }}
 </Formik>
+
 
 
               {/* { END FROM } */}
@@ -2938,7 +3078,7 @@ const test = (id: string) => {
                             </div>
 
                             {/* Address Line 2 */}
-                            <div className="w-full">
+                            {/* <div className="w-full">
                               <p className="text-secondBlack  text-base leading-6 mb-2">
                                 Address Line 2
                               </p>
@@ -2953,10 +3093,10 @@ const test = (id: string) => {
                                 component="div"
                                 className="text-red-500 text-xs mt-1"
                               />
-                            </div>
+                            </div> */}
 
                             {/* City */}
-                            <div className="w-full">
+                            {/* <div className="w-full">
                               <p className="text-secondBlack  text-base leading-6 mb-2">
                                 City
                               </p>
@@ -2971,7 +3111,7 @@ const test = (id: string) => {
                                 component="div"
                                 className="text-red-500 text-xs mt-1"
                               />
-                            </div>
+                            </div> */}
 
                             {/* State */}
                             <div className="w-full">
@@ -3010,7 +3150,7 @@ const test = (id: string) => {
                             </div>
 
                             {/* Country */}
-                            <div className="w-full">
+                            {/* <div className="w-full">
                               <p className="text-secondBlack  text-base leading-6 mb-2">
                                 Country
                               </p>
@@ -3025,7 +3165,7 @@ const test = (id: string) => {
                                 component="div"
                                 className="text-red-500 text-xs mt-1"
                               />
-                            </div>
+                            </div> */}
 
                             {/* Lead Score */}
                             <div className="w-full">
@@ -3046,7 +3186,7 @@ const test = (id: string) => {
                             </div>
 
                             {/* Lead Quality */}
-                            <div className="w-full">
+                            {/* <div className="w-full">
                               <p className="text-secondBlack  text-base leading-6 mb-2">
                                 Lead Quality
                               </p>
@@ -3061,7 +3201,7 @@ const test = (id: string) => {
                                 component="div"
                                 className="text-red-500 text-xs mt-1"
                               />
-                            </div>
+                            </div> */}
 
                             {/* Best Time to Call */}
                             <div className="w-full">

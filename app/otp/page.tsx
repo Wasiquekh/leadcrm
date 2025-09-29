@@ -53,7 +53,7 @@ const userEmail = storage.getUserEmail();
       await storage.saveAccessToken(res.data.data.token);
       await storage.saveUserId(res.data.data.system_user_id);
       toast.success("Login Successful");
-      router.push("/leads");
+      router.push("/dashboard");
       const activityLogger = new UserActivityLogger();
       await activityLogger.userLogin();
     } catch (error) {

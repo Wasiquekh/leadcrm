@@ -78,7 +78,7 @@ export default function AppCalendar({
           lead_id: leadId,
         });
         setTasks(res.data.data.task || []);
-        console.log("AAAAAAAAAAAAAAAAAAAA",res)
+       // console.log("AAAAAAAAAAAAAAAAAAAA",res)
         // Rebuild completedMap from API payload too
         const init: Record<string, boolean> = {};
         (res.data?.data?.task || []).forEach((t: TaskData) => {
@@ -215,10 +215,11 @@ export default function AppCalendar({
                   </td>
 
                   {/* Subject */}
-                  <td className="px-3 py-2 border border-tableBorder hidden md:table-cell capitalize">
-                    <span className="text-[#232323] text-sm sm:text-base">
+                  <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+                    <span className="text-[#232323] text-sm sm:text-base capitalize">
                       {t?.subject || "-"}
                     </span>
+                    <p>  {t?.details || "-"}</p>
                   </td>
 
                   {/* Status pill */}
