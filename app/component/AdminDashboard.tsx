@@ -76,7 +76,9 @@ const AdminDashboard = () => {
   const handleAccordionToggle = (agentId: string) => {
     setActiveAgent(activeAgent === agentId ? null : agentId);
   };
-
+const test = (id: string) => {
+  window.open(`/leadsdetails?id=${id}`, "_blank"); // "_blank" = new tab
+};
   return (
     <div className="container my-4">
       <h3>Admin Dashboard</h3>
@@ -163,7 +165,7 @@ const AdminDashboard = () => {
         </table>
       </div>
 
-      {/* Today Tasks by Agent (Accordion Section) */}
+      {/* Today Tasks by Agent (Accordion Section with Table for Tasks) */}
       <div className="mt-6">
         <h4 className="text-xl font-semibold">Today Tasks by Agent</h4>
         <div className="mt-4">
@@ -180,18 +182,33 @@ const AdminDashboard = () => {
                 </span>
               </button>
 
-              {/* Accordion Content */}
+              {/* Accordion Content (Table) */}
               {activeAgent === agent.agent_id && (
                 <div className="bg-gray-50 p-4">
-                  {agent.tasks.map((task: any, idx: number) => (
-                    <div key={idx} className="border-b py-2">
-                      <p><strong>Lead Name:</strong> {task.lead_name}</p>
-                      <p><strong>Status:</strong> {task.status}</p>
-                      <p><strong>Due Date:</strong> {task.due_date}</p>
-                      <p><strong>Start Time:</strong> {task.start_at_est}</p>
-                      <p><strong>End Time:</strong> {task.end_at_est}</p>
-                    </div>
-                  ))}
+                  <table className="min-w-full mt-4 table-auto">
+                    <thead>
+                      <tr>
+                        <th className="border-b px-4 py-2 text-left">Lead Name</th>
+                        <th className="border-b px-4 py-2 text-left">Status</th>
+                        <th className="border-b px-4 py-2 text-left">Due Date</th>
+                        <th className="border-b px-4 py-2 text-left">Start Time</th>
+                        <th className="border-b px-4 py-2 text-left">End Time</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {agent.tasks.map((task: any, idx: number) => (
+                        <tr key={idx}>
+                          <td
+                          onClick={()=>test(task.lead_id)}
+                          className="border-b px-4 py-2 bg-primary-500 text-white cursor-pointer">{task.lead_name}</td>
+                          <td className="border-b px-4 py-2">{task.status}</td>
+                          <td className="border-b px-4 py-2">{task.due_date}</td>
+                          <td className="border-b px-4 py-2">{task.start_at_est}</td>
+                          <td className="border-b px-4 py-2">{task.end_at_est}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </div>
@@ -199,7 +216,7 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Overdue Tasks by Agent (Accordion Section) */}
+      {/* Overdue Tasks by Agent (Accordion Section with Table for Tasks) */}
       <div className="mt-6">
         <h4 className="text-xl font-semibold">Overdue Tasks by Agent</h4>
         <div className="mt-4">
@@ -216,18 +233,33 @@ const AdminDashboard = () => {
                 </span>
               </button>
 
-              {/* Accordion Content */}
+              {/* Accordion Content (Table) */}
               {activeAgent === agent.agent_id && (
                 <div className="bg-gray-50 p-4">
-                  {agent.tasks.map((task: any, idx: number) => (
-                    <div key={idx} className="border-b py-2">
-                      <p><strong>Lead Name:</strong> {task.lead_name}</p>
-                      <p><strong>Status:</strong> {task.status}</p>
-                      <p><strong>Due Date:</strong> {task.due_date}</p>
-                      <p><strong>Start Time:</strong> {task.start_at_est}</p>
-                      <p><strong>End Time:</strong> {task.end_at_est}</p>
-                    </div>
-                  ))}
+                  <table className="min-w-full mt-4 table-auto">
+                    <thead>
+                      <tr>
+                        <th className="border-b px-4 py-2 text-left">Lead Name</th>
+                        <th className="border-b px-4 py-2 text-left">Status</th>
+                        <th className="border-b px-4 py-2 text-left">Due Date</th>
+                        <th className="border-b px-4 py-2 text-left">Start Time</th>
+                        <th className="border-b px-4 py-2 text-left">End Time</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {agent.tasks.map((task: any, idx: number) => (
+                        <tr key={idx}>
+                          <td 
+                           onClick={()=>test(task.lead_id)}
+                          className="border-b px-4 py-2 bg-primary-500 text-white cursor-pointer">{task.lead_name}</td>
+                          <td className="border-b px-4 py-2">{task.status}</td>
+                          <td className="border-b px-4 py-2">{task.due_date}</td>
+                          <td className="border-b px-4 py-2">{task.start_at_est}</td>
+                          <td className="border-b px-4 py-2">{task.end_at_est}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </div>
