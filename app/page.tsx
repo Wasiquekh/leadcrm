@@ -69,10 +69,10 @@ export default function LoginHome() {
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
-  useEffect(() => {
-    const token = storage.getAccessToken();
-    if (token && token !== "null") router.replace("/dashboard");
-  }, []);
+  // useEffect(() => {
+  //   const token = storage.getAccessToken();
+  //   if (token && token !== "null") router.replace("/dashboard");
+  // }, []);
   // const value = localStorage.getItem("accessToken");
   // value === null ?
   // console.log("OOOOOOOOOOOOOOO", value);
