@@ -9,21 +9,21 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          50: '#f1fcf4',
-          100: '#dff9e6',
-          200: '#c2f0ce',
-          300: '#91e4a8',
-          400: '#5ace7b',
-          500: '#34b359', 
-          600: '#279a48',// primary-600 shade
-          700: '#217439',
-          800: '#1f5c31',
-          900: '#1b4c2a',
+          50: '#ffffe7',
+          100: '#feffc1',
+          200: '#fffd86',
+          300: '#fff441',
+          400: '#ffe60d',
+          500: '#ffd700', // primary-500 shade
+          600: '#d19e00',
+          700: '#a67102',
+          800: '#89580a',
+          900: '##74480f',
         },
         viewDetailHover:'#00A32F',
         viewDetailPressed:'#145C29',
-        sideBarHoverbg:'#E5FCFF',
-        sideBarHoverbgPressed:'#C6F7FE',
+        sideBarHoverbg: '#fff441',       
+        sideBarHoverbgPressed: '#ffe60d',
         tabActiveColor:'#38B52B',
         tabHoverColor:'#3EF459',
         tabPressedColor:'#38B52B',
@@ -51,8 +51,14 @@ module.exports = {
       boxShadow: {
         loginBoxShadow: "1px 3px 3px 0px rgba(0, 0, 0, 0.25)",
         borderShadow: "0px 1px 1px 0px rgba(0, 0, 0, 0.25)",
-        lastTransaction: "0px 1px 4px 0px rgba(0, 0, 0, 0.25)",
-        lastTransactionList: "0px 0px 1px 0px rgba(0, 0, 0, 0.25)",
+lastTransaction: `
+  0px 2px 6px rgba(255, 255, 255, 0.15),
+  0px 0px 8px rgba(255, 215, 0, 0.25)
+`,
+
+
+
+        lastTransactionList: "0px 4px 12px rgba(51, 51, 51, 0.6)",
         hoverInputShadow: " 0px 0px 4px 0px rgba(0, 0, 0, 0.25)",
         dashboardShadow: "0px 1px 2px 0px rgba(0, 0, 0, 0.30), 0px 1px 3px 1px rgba(0, 0, 0, 0.15)",
       },
