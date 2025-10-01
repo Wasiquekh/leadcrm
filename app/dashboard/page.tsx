@@ -9,12 +9,15 @@ import Link from "next/link";
 import StorageManager from "../../provider/StorageManager";
 import React from "react";
 import AdminDashboard from "../component/AdminDashboard";
-import { MdOutlineDriveFolderUpload } from "react-icons/md";
+import { MdOutlineDriveFolderUpload, MdOutlineLocationCity, MdOutlinePhone } from "react-icons/md";
 import { FaSearchPlus } from "react-icons/fa";
 import { FiPlusCircle } from "react-icons/fi";
 import CreateLead from "../component/CreateLead";
-import { IoCloseOutline } from "react-icons/io5";
+import { IoCloseOutline, IoMailOpenOutline } from "react-icons/io5";
 import SearchLead from "../component/SearchLead";
+import { FaEllipsisVertical } from "react-icons/fa6";
+import { ImUserTie } from "react-icons/im";
+import { RxAvatar } from "react-icons/rx";
 
 export interface AgentStats {
   agent_id: string; // Unique identifier for the agent (UUID)
@@ -83,6 +86,7 @@ export default function Home() {
   const [isCreateLead, setIsCreateLead] = useState<boolean>(false);
   const [isSeachLead, setIsSearchLead] = useState<boolean>(false);
  const [searcheddata, setIsSearchData] = useState<any []>([]);
+ console.log("BBBBBBBBBBBBBBBBBBBBBBBBB",searcheddata)
 
 
   // -------------END FOR AGENT-----------
@@ -273,7 +277,95 @@ const closeFlyOut = ()=>{
 </div>
 
 {/* SEARED DATA */}
+      {/* -------------SEARCHED TABLE---------------- */}
+{searcheddata?.length > 0 && !isError ? (
+  <table className="w-full text-sm text-left text-white bg-black mt-6">
+    <thead className="text-xs text-[#999999] bg-primary-500">
+      <tr className="border border-tableBorder">
+        {/* Full Name */}
+        <th scope="col" className="px-3 py-3 md:p-3 border border-tableBorder">
+          <div className="flex items-center gap-2">
+            <RxAvatar className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            <span className="font-semibold text-white text-lg sm:text-base">Full Name</span>
+          </div>
+        </th>
 
+        {/* Email */}
+        <th scope="col" className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+          <div className="flex items-center gap-2">
+            <IoMailOpenOutline className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            <span className="font-semibold text-white text-lg sm:text-base">Email</span>
+          </div>
+        </th>
+
+        {/* Phone */}
+        <th scope="col" className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+          <div className="flex items-center gap-2">
+            <MdOutlinePhone className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            <span className="font-semibold text-white text-lg sm:text-base">Phone</span>
+          </div>
+        </th>
+
+        {/* Address */}
+        <th scope="col" className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+          <div className="flex items-center gap-2">
+            <MdOutlineLocationCity className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            <span className="font-semibold text-white text-lg sm:text-base">Address</span>
+          </div>
+        </th>
+
+        {/* Agent */}
+        <th scope="col" className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+          <div className="flex items-center gap-2">
+            <ImUserTie className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            <span className="font-semibold text-white text-lg sm:text-base">Agent</span>
+          </div>
+        </th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {searcheddata.map((item: any, index: number) => (
+        <tr key={item?.id ?? index} className="border border-tableBorder bg-black hover:bg-primary-600">
+          {/* Full name */}
+          <td
+            onClick={() => test(item?.id)}
+            className="px-1 py-2 md:px-3 md:py-2 border-tableBorder flex items-center gap-2 bg-primary-500 cursor-pointer"
+          >
+            <p className="text-white text-sm sm:text-base font-medium leading-normal capitalize">
+              {item?.full_name ?? "-"}
+            </p>
+          </td>
+
+          {/* Email */}
+          <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+            <span className="text-white text-sm sm:text-base">{item?.email ?? "-"}</span>
+          </td>
+
+          {/* Phone */}
+          <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+            <span className="text-white text-sm sm:text-base">{item?.phone ?? "-"}</span>
+          </td>
+
+          {/* Address (country) */}
+          <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+            <span className="text-white text-sm sm:text-base capitalize">{item?.address?.country ?? "-"}</span>
+          </td>
+
+          {/* Agent */}
+          <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+            <span className="text-white text-sm sm:text-base capitalize">{item?.agent?.name ?? "-"}</span>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+) : (
+  <div className="text-center text-xl mt-5 text-white">Data not found</div>
+)}
+
+
+{/* -------------END SEARCHED TABLE---------------- */}
 
             </>
           )}
@@ -293,7 +385,9 @@ const closeFlyOut = ()=>{
         />
       </div>
 
-{/* flyout */}
+
+
+{/* FLYOUT IS START */}
       {isFlyoutOpen && (
         <div
           className=" min-h-screen w-full bg-[#1f1d1d80] fixed top-0 left-0 right-0 z-[999]"
@@ -323,7 +417,7 @@ const closeFlyOut = ()=>{
          <div className="w-full min-h-auto p-4 bg-black text-white">
    {/* Flyout header */}
    <div className="flex justify-between mb-4">
-     <p className="text-primary-500 text-2xl font-bold leading-9">Create Leads</p>
+     <p className="text-primary-500 text-2xl font-bold leading-9">Search Leads</p>
      <IoCloseOutline
        onClick={() => closeFlyOut()}
        className="h-8 w-8 border border-gray-700 text-white rounded cursor-pointer"
@@ -333,6 +427,7 @@ const closeFlyOut = ()=>{
  
 <SearchLead setSearchedData={setIsSearchData} closeFlyOut={closeFlyOut} />
 
+
  </div>
           )}
 
@@ -340,6 +435,7 @@ const closeFlyOut = ()=>{
 
 
 {/* end flyout */}
+
 
     </>
   );

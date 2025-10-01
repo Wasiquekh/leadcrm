@@ -36,10 +36,48 @@ interface DebtConsolidation {
   created_at: string;
   updated_at: string | null;
 }
+export interface Lead {
+  id: string;
+  full_name: string;
+  email: string | null;
+  phone: string | null;
+  whatsapp_number: string | null;
+  lead_source: string | null;
+  lead_score: number | null;
+  lead_quality: string | null;
+  lead_age_days: number | string | null;   // sometimes "0 Days" string
+  lead_age_label: string | null;
+  best_time_to_call: string | null;
+
+  consolidated_credit_status: string | null;
+  debt_consolidation_status: string | null;
+
+  owner_name: string | null;
+
+  created_at: string;   // ISO string
+  created_at_ca?: string; // seen as "created_at_ca"
+  updated_at: string;
+
+  agent: {
+    id: string;
+    name: string;
+  } | null;
+
+  address: {
+    city: string | null;
+    country: string | null;
+    line1: string | null;
+    line2: string | null;
+    postal_code: string | null;
+    state: string | null;
+  } | null;
+}
 interface SearchLeadProps {
-  setSearchedData: React.Dispatch<React.SetStateAction<any[]>>; 
+  
+  setSearchedData: React.Dispatch<React.SetStateAction<any[]>>; // or Lead[]
   closeFlyOut: () => void;
 }
+
 const provinceOptions = [
   { id: "alberta", name: "Alberta" },
   { id: "british-columbia", name: "British Columbia" },
@@ -80,6 +118,15 @@ const SearchLead: React.FC<SearchLeadProps> = ({ setSearchedData, closeFlyOut })
   const [agentList, setAgentList] = useState<Agent[]>([]);
   const [debtConsolidation, setDebtConsolidation] = useState<DebtConsolidation[]>([]);
   const [consolidationData, setConsolidationData] = useState<Consolidation[]>([]);
+const [searchedLeadData, setSearchedLeadData] = useState<Lead []>([]);
+ 
+
+useEffect(()=>{
+  console.log("searchedLeadData changed:", searchedLeadData);
+},[searchedLeadData])
+ 
+
+
 
   // Fetch dropdown data
   useEffect(() => {
@@ -104,37 +151,46 @@ const SearchLead: React.FC<SearchLeadProps> = ({ setSearchedData, closeFlyOut })
     fetchAll();
   }, []);
 
-  /** Normalize empty string -> undefined for a clean payload */
+  /** Normalize: empty strings -> undefined; trim strings; keep arrays intact */
   const normalize = (obj: Record<string, any>) => {
     const out: Record<string, any> = {};
     Object.keys(obj).forEach((k) => {
       const v = obj[k];
-      if (v === "") out[k] = undefined;
-      else if (typeof v === "string") out[k] = v.trim() === "" ? undefined : v.trim();
-      else out[k] = v;
+      if (Array.isArray(v)) {
+        out[k] = v.length ? v : undefined;
+      } else if (v === "") {
+        out[k] = undefined;
+      } else if (typeof v === "string") {
+        out[k] = v.trim() === "" ? undefined : v.trim();
+      } else {
+        out[k] = v;
+      }
     });
     return out;
   };
 
-  /** -------- handleSearch: just logs to console for now -------- */
-  const handleSearch = async(rawValues: any) => {
+  /** Handle submit */
+  const handleSearch = async (rawValues: any) => {
     const payload = normalize(rawValues);
-    console.log("🔎 Search payload:", payload);
-        try {
-    const res =  await AxiosProvider.post("/leads/filter", payload);
-     // toast.success("Lead is Created");
-     console.log("dfdjdvjvjvjbjddj",res);
+   // console.log("🔎 Search payload:", payload);
 
-      closeFlyOut()
-     // setHitApi(!hitApi);
+    try {
+      const res = await AxiosProvider.post("/leads/filter", payload);
+   // console.log("LLLLLLLLLLLLLLLLLLLLLLLLLL",res.data.data.data)
+      const list = res.data.data.data;
+      
+      setSearchedLeadData(list)
+      setSearchedData(list);
+     
+     
+      closeFlyOut();
     } catch (error: any) {
-      toast.error(error.response.data.msg);
-    //  console.log("lead create error",error.response.data.msg)
-    } 
-    // later: call your API with `payload`
+      console.error(error);
+      toast.error(error?.response?.data?.msg ?? "Search failed");
+    }
   };
 
-  // Yup: require at least one field filled
+  // Yup: require at least one field (including agent_ids array)
   const SearchSchema = Yup.object()
     .shape({
       full_name: Yup.string().trim().optional(),
@@ -149,7 +205,7 @@ const SearchLead: React.FC<SearchLeadProps> = ({ setSearchedData, closeFlyOut })
         .optional(),
       state: Yup.string().optional(),
       lead_source_id: Yup.string().optional(),
-      agent_id: Yup.string().optional(),
+      agent_ids: Yup.array().of(Yup.string()).optional(), // <-- array of ids
       debt_consolidation_status_id: Yup.string().optional(),
       consolidated_credit_status_id: Yup.string().optional(),
     })
@@ -162,20 +218,22 @@ const SearchLead: React.FC<SearchLeadProps> = ({ setSearchedData, closeFlyOut })
         "whatsapp_number",
         "state",
         "lead_source_id",
-        "agent_id",
         "debt_consolidation_status_id",
         "consolidated_credit_status_id",
       ];
-      return keys.some((k) => {
+      const anyScalar = keys.some((k) => {
         const v = (values as any)[k];
         return v !== undefined && v !== null && String(v).trim() !== "";
       });
+      const anyAgents =
+        Array.isArray((values as any).agent_ids) && (values as any).agent_ids.length > 0;
+      return anyScalar || anyAgents;
     });
 
   return (
     <div className="w-full min-h-auto p-4 bg-black text-white rounded-md">
       <div className="flex items-center justify-between mb-4">
-        <p className="text-primary-500 text-2xl font-bold leading-9">Search Leads</p>
+        <p className="text-primary-500 text-2xl font-bold leading-9"></p>
       </div>
       <div className="w-full border-b border-gray-700 mb-4" />
 
@@ -187,13 +245,13 @@ const SearchLead: React.FC<SearchLeadProps> = ({ setSearchedData, closeFlyOut })
           whatsapp_number: "",
           state: "",
           lead_source_id: "",
-          agent_id: "",
+          agent_ids: [] as string[], // <-- array instead of single agent_id
           debt_consolidation_status_id: "",
           consolidated_credit_status_id: "",
         }}
         validationSchema={SearchSchema}
         onSubmit={(values, { setSubmitting }) => {
-          handleSearch(values);     // <-- your function here
+          handleSearch(values);
           setSubmitting(false);
         }}
       >
@@ -278,18 +336,21 @@ const SearchLead: React.FC<SearchLeadProps> = ({ setSearchedData, closeFlyOut })
                 />
               </div>
 
-              {/* Agent */}
+              {/* Agents (MULTI) */}
               <div>
-                <p className="text-white mb-2">Agent</p>
+                <p className="text-white mb-2">Agents</p>
                 <Select
-                  value={agentList.find((opt) => opt.id === values.agent_id) || null}
-                  onChange={(selected: any) => setFieldValue("agent_id", selected ? selected.id : "")}
-                  onBlur={() => setFieldTouched("agent_id", true)}
+                  isMulti
+                  value={agentList.filter((opt) => values.agent_ids.includes(opt.id))}
+                  onChange={(selected: any) => {
+                    const ids = (selected ?? []).map((o: any) => o.id);
+                    setFieldValue("agent_ids", ids);
+                  }}
+                  onBlur={() => setFieldTouched("agent_ids", true)}
                   getOptionLabel={(opt: any) => opt.name}
                   getOptionValue={(opt: any) => opt.id}
                   options={agentList}
-                  placeholder="Select Agent"
-                  isClearable
+                  placeholder="Select one or more agents"
                   styles={selectStyles}
                 />
               </div>
@@ -356,14 +417,11 @@ const SearchLead: React.FC<SearchLeadProps> = ({ setSearchedData, closeFlyOut })
               <button
                 type="reset"
                 className="px-5 py-3 bg-gray-800 border border-gray-700 rounded-[4px] text-white text-base font-medium hover:bg-gray-700"
+                onClick={() => setFieldValue("agent_ids", [])}
               >
                 Clear
               </button>
             </div>
-
-            <p className="text-xs text-gray-400">
-              {/* Tip: Enter any one field (e.g., email or phone) to run a search. */}
-            </p>
           </Form>
         )}
       </Formik>

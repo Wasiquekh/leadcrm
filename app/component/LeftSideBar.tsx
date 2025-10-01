@@ -76,8 +76,9 @@ const LeftSideBar: React.FC = () => {
             )}
           </div>
         </Link>
-
-        <Link href="/leads">
+{userRole === "Admin" && 
+(
+     <Link href="/leads">
           <div
             className={`mb-4 flex items-center gap-4 group px-3 py-2 rounded-[4px] relative cursor-pointer text-base leading-normal font-medium text-white hover:bg-sideBarHoverbg active:bg-sideBarHoverbgPressed hover:text-black ${
               pathname === "/leads" || pathname === "/leadsdetails"
@@ -93,6 +94,11 @@ const LeftSideBar: React.FC = () => {
             )}
           </div>
         </Link>
+)
+
+}
+     
+
         {userRole === "Admin" && (
           <Link href="/usermanagement">
             <div

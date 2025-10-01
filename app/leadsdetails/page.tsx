@@ -285,7 +285,10 @@ export default function Home() {
     storage.getDecryptedUserSecretKey()
   );
   const searchParams = useSearchParams();
-  const leadId = searchParams.get("id") ?? undefined;
+ const [leadId, setLeadId] = useState<string | undefined>(
+  searchParams.get("id") ?? undefined
+);
+
   // console.log("LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL", leadId);
   const [totp, setTotp] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -503,8 +506,9 @@ const INITIAL_VALUES = {
       });
 
       //console.log("NEXT LEADS RESPONSE", res.data.data.id);
+      setLeadId(res.data.data.id);
       
-        window.open(`/leadsdetails?id=${res.data.data.id}`, "_blank"); // "_blank" = new tab
+          //  window.open(`/leadsdetails?id=${res.data.data.id}`, "_blank", "noopener,noreferrer");
      // setData(res.data.data);
     } catch (error: any) {
       console.error("Error fetching lead:", error);
