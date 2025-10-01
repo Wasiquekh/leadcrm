@@ -361,7 +361,7 @@ const closeFlyOut = ()=>{
     </tbody>
   </table>
 ) : (
-  <div className="text-center text-xl mt-5 text-white">Data not found</div>
+  <div className="text-center text-xl mt-5 text-white"></div>
 )}
 
 

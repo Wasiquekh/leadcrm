@@ -231,11 +231,7 @@ useEffect(()=>{
     });
 
   return (
-    <div className="w-full min-h-auto p-4 bg-black text-white rounded-md">
-      <div className="flex items-center justify-between mb-4">
-        <p className="text-primary-500 text-2xl font-bold leading-9"></p>
-      </div>
-      <div className="w-full border-b border-gray-700 mb-4" />
+ 
 
       <Formik
         initialValues={{
@@ -425,7 +421,7 @@ useEffect(()=>{
           </Form>
         )}
       </Formik>
-    </div>
+   
   );
 };
 
