@@ -3,7 +3,7 @@ import Image from "next/image";
 import { RxAvatar } from "react-icons/rx";
 import { CiSettings } from "react-icons/ci";
 import { IoIosNotificationsOutline } from "react-icons/io";
-import { FaPlus } from "react-icons/fa6";
+import { FaPlus, FaRegAddressCard } from "react-icons/fa6";
 import { MdOutlineCall } from "react-icons/md";
 import { LiaArrowCircleDownSolid } from "react-icons/lia";
 import { MdRemoveRedEye, MdModeEdit } from "react-icons/md";
@@ -89,7 +89,7 @@ export default function Home() {
 
           toast.success("Successfully Deleted");
           setShouldRefetch((prev) => !prev);
-          await activityLogger.userDelete(userID);
+        //  await activityLogger.userDelete(userID);
         } catch (error) {
           console.error("Error deleting user:", error);
           toast.error("Failed to delete user");
@@ -128,7 +128,7 @@ const blockUserData = async (item: User) => {
 
         toast.success("User blocked successfully");
         setShouldRefetch((prev) => !prev);
-        await activityLogger.userDelete(userID);
+        //await activityLogger.userDelete(userID);
       } catch (error) {
         console.error("Error blocking user:", error);
         toast.error("Failed to block user");
@@ -215,19 +215,19 @@ const unBlockUserData = async(id: string)=>{
       <div className=" flex justify-end  min-h-screen">
         <LeftSideBar />
         {/* Main content right section */}
-        <div className="ml-[97px] w-full md:w-[90%] m-auto bg-[#fff] min-h-[500px]  rounded p-4 mt-0 ">
+        <div className="ml-[97px] w-full md:w-[90%] m-auto  min-h-[500px]  rounded p-4 mt-0 ">
           {/* left section top row */}
           <DesktopHeader />
           {/* right section top row */}
 
-          <div className="rounded-3xl shadow-lastTransaction bg-white py-6 px-1  md:p-6 z-10 relative">
+          <div className="rounded-3xl shadow-lastTransaction  py-6 px-1  md:p-6 z-10 relative">
             {/* Main content middle section */}
             <div className="w-full gap-4 flex justify-end items-center mt-0 mb-8 flex-wrap sm:flex-nowrap">
 
               <div className=" sm:w-auto">
                 <Link href="/useradd">
                   <button className="flex items-center gap-[10px]  h-12 px-3 py-[6px] rounded-[4px] shadow-borderShadow w-full sm:w-auto bg-primary-600 group hover:bg-primary-7  00">
-                    <FaPlus className="h-[20px] w-[20px] text-white group-hover:text-white" />
+                    <FaRegAddressCard className="h-[20px] w-[20px] text-white group-hover:text-white" />
                     <p className="text-white text-base leading-normal group-hover:text-white">
                       Create User
                     </p>
@@ -236,130 +236,107 @@ const unBlockUserData = async(id: string)=>{
               </div>
             </div>
             {/* ----------------Table----------------------- */}
-            <div className="relative overflow-x-auto  sm:rounded-lg">
-              <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                <thead className="text-xs text-[#999999]">
-                  <tr className="border border-tableBorder">
-                    <th
-                      scope="col"
-                      className="px-1 p-3 md:p-3 border border-tableBorder"
-                    >
-                      <div className="flex items-center gap-2">
-                        <RxAvatar className="w-5 h-5" />
-                        <div className="font-semibold text-firstBlack text-base leading-normal">
-                          Name
-                        </div>
-                      </div>
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-2 py-1 border border-tableBorder hidden md:table-cell"
-                    >
-                      <div className="flex items-center gap-2">
-                        <MdOutlineCall className="w-5 h-5" />
-                        <div className="font-semibold text-firstBlack text-base leading-normal">
-                          Email
-                        </div>
-                      </div>
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-2 py-1 border border-tableBorder hidden md:table-cell"
-                    >
-                      <div className="flex items-center gap-2">
-                        <MdOutlineCall className="w-5 h-5" />
-                        <div className="font-semibold text-firstBlack text-base leading-normal">
-                          Phone
-                        </div>
-                      </div>
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-2 py-1 border border-tableBorder"
-                    >
-                      <div className="flex items-center gap-2">
-                        <LiaArrowCircleDownSolid className="w-5 h-5" />
-                        <div className="font-semibold text-firstBlack text-base leading-normal">
-                          Action
-                        </div>
-                      </div>
-                    </th>
-                  </tr>
-                </thead>
+ <div className="relative overflow-x-auto sm:rounded-lg">
+  <table className="w-full text-sm text-left text-white bg-black">
+    <thead className="text-xs bg-primary-500 text-white">
+      <tr className="border border-tableBorder">
+        <th className="px-1 p-3 md:p-3 border border-tableBorder font-semibold text-white text-base">
+          <div className="flex items-center gap-2">
+            <RxAvatar className="w-5 h-5" />
+            <span className="font-semibold text-white text-sm sm:text-base">Name</span>
+          </div>
+        </th>
+        <th className="px-2 py-1 border border-tableBorder hidden md:table-cell">
+          <div className="flex items-center gap-2">
+            <MdOutlineCall className="w-5 h-5" />
+            <span className="font-semibold text-white text-sm sm:text-base">Email</span>
+          </div>
+        </th>
+        <th className="px-2 py-1 border border-tableBorder hidden md:table-cell">
+          <div className="flex items-center gap-2">
+            <MdOutlineCall className="w-5 h-5" />
+            <span className="font-semibold text-white text-sm sm:text-base">Phone</span>
+          </div>
+        </th>
+        <th className="px-2 py-1 border border-tableBorder">
+          <div className="flex items-center gap-2">
+            <LiaArrowCircleDownSolid className="w-5 h-5" />
+            <span className="font-semibold text-white text-sm sm:text-base">Action</span>
+          </div>
+        </th>
+      </tr>
+    </thead>
 
-                <tbody>
-                  {/* Row 1 */}
-                  {!data || data.length === 0 || isError ? (
-                    <tr>
-                      <td colSpan={8} className="text-center text-xl mt-5">
-                        <div className="mt-5">Data not found</div>
-                      </td>
-                    </tr>
-                  ) : (
-                    data.map((item: any, index: number) => (
-                      <tr
-                        key={item?.id ?? index}
-                        className="border border-tableBorder bg-white hover:bg-primary-100"
-                      >
-                        <td className="px-1 md:p-3 py-2 flex md:flex-row gap-2">
-                          <div>
-                            <p className="text-[#232323] text-sm sm:text-base font-medium leading-normal capitalize truncate">
-                              {item?.name ?? "-"}
-                            </p>
-                          </div>
-                        </td>
-                        <td className="px-2 py-1 border border-tableBorder hidden md:table-cell">
-                          <p className="text-[#232323] text-sm sm:text-base font-medium leading-normal  truncate">
-                            {item?.email ?? "-"}
-                          </p>
-                        </td>
-                        <td className="px-2 py-1 border border-tableBorder hidden md:table-cell">
-                          <p className="text-[#232323] text-sm sm:text-base font-medium leading-normal capitalize truncate">
-                            {item?.mobile_number ?? "-"}
-                          </p>
-                        </td>
-                        <td className="px-2 py-1 border border-tableBorder">
-                          <div className="flex gap-1 md:gap-2 justify-center md:justify-start">
+    <tbody>
+      {!data || data.length === 0 || isError ? (
+        <tr>
+          <td colSpan={4} className="text-center text-xl py-6 text-white">
+            Data not found
+          </td>
+        </tr>
+      ) : (
+        data.map((item: any, index: number) => (
+          <tr
+            key={item?.id ?? index}
+            className="border border-tableBorder bg-black hover:bg-primary-700 transition-colors"
+          >
+            <td className="px-1 md:p-3 py-2 flex md:flex-row gap-2">
+              <p className="text-white text-sm sm:text-base font-medium leading-normal capitalize truncate">
+                {item?.name ?? "-"}
+              </p>
+            </td>
+            <td className="px-2 py-1 border border-tableBorder hidden md:table-cell">
+              <p className="text-white text-sm sm:text-base font-medium leading-normal truncate">
+                {item?.email ?? "-"}
+              </p>
+            </td>
+            <td className="px-2 py-1 border border-tableBorder hidden md:table-cell">
+              <p className="text-white text-sm sm:text-base font-medium leading-normal truncate">
+                {item?.mobile_number ?? "-"}
+              </p>
+            </td>
+            <td className="px-2 py-1 border border-tableBorder">
+              <div className="flex gap-1 md:gap-2 justify-center md:justify-start">
+                <button
+                  onClick={() => unBlockUserData(item.id)}
+                  className="py-[4px] px-3 bg-primary-600 hover:bg-primary-700 flex gap-1 items-center rounded-full text-xs md:text-sm group"
+                >
+                  <ImBlocked className="text-white w-4 h-4" />
+                  <p className="text-white hidden md:block">Unblock user</p>
+                </button>
+              </div>
+            </td>
+          </tr>
+        ))
+      )}
+    </tbody>
+  </table>
+</div>
 
-                            <button
-                              onClick={() => unBlockUserData(item.id)}
-                              className="py-[4px] px-3 bg-black flex gap-1 items-center rounded-full text-xs md:text-sm group hover:bg-primary-600"
-                            >
-                              <ImBlocked className="text-white w-4 h-4" />
-                              <p className="text-white hidden md:block">
-                                Unblock user
-                              </p>
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+
           </div>
           {/* ----------------End table--------------------------- */}
           {/* Pagination Controls */}
-          <div className="flex justify-center items-center my-10 relative">
-            <button
-              onClick={() => handlePageChange(page - 1)}
-              disabled={page === 1}
-              className="px-2 py-2 mx-2 border rounded bg-primary-500 hover:bg-primary-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <HiChevronDoubleLeft className=" w-6 h-auto" />
-            </button>
-            <span className="text-firstBlack text-sm">
-              Page {page} of {totalPages}
-            </span>
-            <button
-              onClick={() => handlePageChange(page + 1)}
-              disabled={page === totalPages}
-              className="px-2 py-2 mx-2 border rounded bg-primary-500 hover:bg-primary-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <HiChevronDoubleRight className=" w-6 h-auto" />
-            </button>
-          </div>
+ <div className="flex justify-center items-center my-10 relative">
+  <button
+    onClick={() => handlePageChange(page - 1)}
+    disabled={page === 1}
+    className="px-2 py-2 mx-2 border rounded bg-primary-600 hover:bg-primary-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+  >
+    <HiChevronDoubleLeft className="w-6 h-auto" />
+  </button>
+  <span className="text-white text-sm">
+    Page {page} of {totalPages}
+  </span>
+  <button
+    onClick={() => handlePageChange(page + 1)}
+    disabled={page === totalPages}
+    className="px-2 py-2 mx-2 border rounded bg-primary-600 hover:bg-primary-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+  >
+    <HiChevronDoubleRight className="w-6 h-auto" />
+  </button>
+</div>
+
           {/* END PAGINATION */}
         </div>
       </div>

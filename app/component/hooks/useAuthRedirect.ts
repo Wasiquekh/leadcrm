@@ -36,6 +36,7 @@ export const useAuthRedirect = (): boolean => {
     }
 
     if (invalid) {
+      localStorage.clear();
       // Do NOT clear storage; just redirect.
       router.replace("/"); // change to "/login" if your login route is that
       setChecking(false);

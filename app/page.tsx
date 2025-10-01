@@ -71,7 +71,12 @@ export default function LoginHome() {
   };
   useEffect(() => {
     const token = storage.getAccessToken();
-    if (token && token !== "null") router.replace("/dashboard");
+    if (token && token !== "null") 
+      {
+      
+        router.replace("/dashboard");
+       
+      }
   }, []);
   // const value = localStorage.getItem("accessToken");
   // value === null ?

@@ -335,13 +335,13 @@ export default function Home() {
       <div className=" flex justify-end  min-h-screen">
         {/* Main content right section */}
         <LeftSideBar />
-        <div className="ml-[97px] w-full md:w-[90%] m-auto bg-[#fff] min-h-[500px]  rounded p-4 mt-0 ">
+        <div className="ml-[97px] w-full md:w-[90%] m-auto  min-h-[500px]  rounded p-4 mt-0 ">
           {/* left section top row */}
           <DesktopHeader />
           {/* right section top row */}
 
           {/* Main content middle section */}
-          <div className="rounded-3xl shadow-lastTransaction bg-white px-1 py-6 md:p-6 relative">
+          <div className="rounded-3xl shadow-lastTransaction  px-1 py-6 md:p-6 relative">
             {/* ----------------Table----------------------- */}
             <div className="relative overflow-x-auto  sm:rounded-lg">
               {/* Search and filter table row */}
@@ -388,162 +388,128 @@ export default function Home() {
                 )}
               </div>
 
-              <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                <thead className="text-xs text-[#999999]">
-                  <tr className="border border-tableBorder">
-                    <th scope="col" className="p-3 border border-tableBorder">
-                      <div className="flex items-center gap-2">
-                        <RxAvatar className="w-6 h-6" />
-                        <div className="font-medium text-firstBlack text-base leading-normal">
-                          Name and User Activity{" "}
-                        </div>
-                      </div>
-                    </th>
+<div className="relative overflow-x-auto sm:rounded-lg">
+  <table className="w-full text-sm text-left rtl:text-right text-white">
+    <thead className="text-xs bg-primary-500 text-white">
+      <tr className="border border-tableBorder">
+        <th scope="col" className="p-3 border border-tableBorder">
+          <div className="flex items-center gap-2">
+            <RxAvatar className="w-6 h-6" />
+            <div className="font-medium text-white text-base leading-normal">
+              Name and User Activity
+            </div>
+          </div>
+        </th>
+        <th scope="col" className="px-2 py-0 border border-tableBorder hidden sm:table-cell">
+          <div className="flex items-center gap-2 whitespace-nowrap">
+            <HiOutlineBookOpen className="w-6 h-6" />
+            <div className="font-medium text-white text-base leading-normal">
+              User&apos;s Name
+            </div>
+          </div>
+        </th>
+        <th scope="col" className="px-2 py-0 border border-tableBorder hidden sm:table-cell">
+          <div className="flex items-center gap-2">
+            <HiOutlineBookOpen className="w-6 h-6" />
+            <div className="font-medium text-white text-base leading-normal">
+              User&apos;s uuid
+            </div>
+          </div>
+        </th>
+        <th scope="col" className="px-2 py-0 border border-tableBorder hidden sm:table-cell">
+          <div className="flex items-center gap-2">
+            <HiOutlineBookOpen className="w-6 h-6" />
+            <div className="font-medium text-white text-base leading-normal">
+              Date
+            </div>
+          </div>
+        </th>
+        <th scope="col" className="px-2 py-0 border border-tableBorder hidden sm:table-cell">
+          <div className="flex items-center gap-2">
+            <HiOutlineBookOpen className="w-6 h-6" />
+            <div className="font-medium text-white text-base leading-normal">
+              Module
+            </div>
+          </div>
+        </th>
+        <th scope="col" className="px-2 py-0 border border-tableBorder hidden sm:table-cell">
+          <div className="flex items-center gap-2">
+            <HiOutlineBookOpen className="w-6 h-6" />
+            <div className="font-medium text-white text-base leading-normal">
+              Type
+            </div>
+          </div>
+        </th>
+      </tr>
+    </thead>
 
-                    <th
-                      scope="col"
-                      className="px-2 py-0 border border-tableBorder hidden sm:table-cell"
-                    >
-                      <div className="flex items-center gap-2 whitespace-nowrap">
-                        <HiOutlineBookOpen className="w-6 h-6" />
-                        <div className="font-medium text-firstBlack text-base leading-normal">
-                          User&apos;s Name
-                        </div>
-                      </div>
-                    </th>
+    <tbody>
+      {!data || data.length === 0 || isError ? (
+        <tr>
+          <td colSpan={8} className="text-center text-xl mt-5 py-6 text-white">
+            <div className="mt-2">Data not found</div>
+          </td>
+        </tr>
+      ) : (
+        data.map((item, index) => (
+          <tr
+            key={index}
+            className="border border-tableBorder bg-black hover:bg-primary-600"
+          >
+            <td className="px-2 py-2 border border-tableBorder">
+              <div className="flex">
+                <div className="md:hidden flex mr-1">
+                  <FaEllipsisVertical
+                    data-tooltip-id="my-tooltip"
+                    data-tooltip-html={`<div>
+                      <strong>Name and User Activity:</strong> <span style="text-transform: capitalize;">${item.user_activity}</span><br/>
+                      <strong>User's Name:</strong> ${item.user?.name ?? ""}<br/>
+                      <strong>User's uuid:</strong> ${item.uuid}<br/>
+                      <strong>Date:</strong> ${item.activity_timestamp}<br/>
+                      <strong>Module:</strong> ${item.module}<br/>
+                      <strong>Type:</strong> ${item.type}<br/>
+                    </div>`}
+                    className="text-white leading-normal capitalize relative top-1"
+                  />
+                  <Tooltip id="my-tooltip" place="right" float />
+                </div>
+                <div>
+                  <p className="text-white text-base leading-normal capitalize">
+                    {item.user?.id} {item.user_activity}
+                  </p>
+                </div>
+              </div>
+            </td>
 
-                    <th
-                      scope="col"
-                      className="px-2 py-0 border border-tableBorder hidden sm:table-cell"
-                    >
-                      <div className="flex items-center gap-2">
-                        <HiOutlineBookOpen className="w-6 h-6" />
-                        <div className="font-medium text-firstBlack text-base leading-normal">
-                          User&apos;s uuid
-                        </div>
-                      </div>
-                    </th>
+            <td className="px-2 py-2 border border-tableBorder hidden sm:table-cell">
+              <p className="text-white text-base leading-normal capitalize">{item.user?.name}</p>
+            </td>
 
-                    <th
-                      scope="col"
-                      className="px-2 py-0 border border-tableBorder hidden sm:table-cell"
-                    >
-                      <div className="flex items-center gap-2">
-                        <HiOutlineBookOpen className="w-6 h-6" />
-                        <div className="font-medium text-firstBlack text-base leading-normal">
-                          Date
-                        </div>
-                      </div>
-                    </th>
+            <td className="px-2 py-2 border border-tableBorder hidden sm:table-cell">
+              <p className="text-white text-base leading-normal">{item.user.id}</p>
+            </td>
 
-                    <th
-                      scope="col"
-                      className="px-2 py-0 border border-tableBorder hidden sm:table-cell"
-                    >
-                      <div className="flex items-center gap-2">
-                        <HiOutlineBookOpen className="w-6 h-6" />
-                        <div className="font-medium text-firstBlack text-base leading-normal">
-                          Module
-                        </div>
-                      </div>
-                    </th>
+            <td className="px-2 py-2 border border-tableBorder hidden sm:table-cell">
+              <p className="text-white text-base leading-normal">{item.activity_timestamp}</p>
+            </td>
 
-                    <th
-                      scope="col"
-                      className="px-2 py-0 border border-tableBorder hidden sm:table-cell"
-                    >
-                      <div className="flex items-center gap-2">
-                        <HiOutlineBookOpen className="w-6 h-6" />
-                        <div className="font-medium text-firstBlack text-base leading-normal">
-                          Type
-                        </div>
-                      </div>
-                    </th>
-                  </tr>
-                </thead>
+            <td className="px-2 py-2 border border-tableBorder hidden sm:table-cell">
+              <p className="text-white text-base leading-normal capitalize">{item.module}</p>
+            </td>
 
-                <tbody>
-                  {!data || data.length === 0 || isError ? (
-                    <tr>
-                      <td colSpan={8} className="text-center text-xl mt-5">
-                        <div className="mt-5">Data not found</div>
-                      </td>
-                    </tr>
-                  ) : (
-                    data.map((item, index) => (
-                      <tr
-                        className="border border-tableBorder bg-white hover:bg-primary-100"
-                        key={index}
-                      >
-                        <td className="px-2 py-2 border border-tableBorder">
-                          <div className="flex">
-                            <div className="md:hidden flex mr-1">
-                              <FaEllipsisVertical
-                                data-tooltip-id="my-tooltip"
-                                data-tooltip-html={`
-                                  <div>
-                                    <strong>Name and User Activity:</strong> <span style="text-transform: capitalize;">${
-                                      item.user_activity
-                                    }</span><br/>
-                                    <strong>User's Name:</strong> ${
-                                      item.user?.name ?? ""
-                                    }<br/>
-                                    <strong>User's uuid:</strong> ${
-                                      item.uuid
-                                    }<br/>
-                                    <strong>Date:</strong> ${
-                                      item.activity_timestamp
-                                    }<br/>
-                                    <strong>Module:</strong> ${item.module}<br/>
-                                    <strong>Type:</strong> ${item.type}<br/>
-                                  </div>
-                  `}
-                                className="text-black leading-normal capitalize relative top-1"
-                              />
-                              <Tooltip id="my-tooltip" place="right" float />
-                            </div>
-                            <div>
-                              <p className="text-[#232323] text-base leading-normal capitalize ">
-                                {item.user?.id} {item.user_activity}
-                              </p>
-                            </div>
-                          </div>
-                        </td>
+            <td className="px-2 py-2 border border-tableBorder hidden sm:table-cell">
+              <p className="text-white text-base leading-normal capitalize">{item.type}</p>
+            </td>
+          </tr>
+        ))
+      )}
+    </tbody>
+  </table>
+</div>
 
-                        <td className="px-2 py-2 border border-tableBorder hidden sm:table-cell">
-                          <p className="text-[#232323] text-base leading-normal capitalize">
-                            {item.user?.name}
-                          </p>
-                        </td>
 
-                        <td className="px-2 py-2 border border-tableBorder hidden sm:table-cell">
-                          <p className="text-[#232323] text-base leading-normal">
-                            {item.user.id}
-                          </p>
-                        </td>
 
-                        <td className="px-2 py-2 border border-tableBorder hidden sm:table-cell">
-                          <p className="text-[#232323] text-base leading-normal">
-                            {item.activity_timestamp}
-                          </p>
-                        </td>
 
-                        <td className="px-2 py-2 border border-tableBorder hidden sm:table-cell">
-                          <p className="text-[#232323] text-base leading-normal capitalize">
-                            {item.module}
-                          </p>
-                        </td>
-
-                        <td className="px-2 py-2 border border-tableBorder hidden sm:table-cell">
-                          <p className="text-[#232323] text-base leading-normal capitalize">
-                            {item.type}
-                          </p>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
             </div>
           </div>
           {/* ----------------End table--------------------------- */}
@@ -601,265 +567,182 @@ export default function Home() {
             onClick={() => setFlyoutFilterOpen(!isFlyoutFilterOpen)}
           ></div>
           {/* NOW MY FLYOUT */}
-          <div
-            className={`filterflyout ${isFlyoutFilterOpen ? "filteropen" : ""}`}
-          >
-            <div className="w-full min-h-auto">
-              {/* Header */}
-              <div className="flex justify-between mb-4 sm:mb-6 md:mb-8">
-                <p className="text-primary-600 text-[22px] sm:text-[24px] md:text-[26px] font-bold leading-8 sm:leading-9">
-                  User Filter
-                </p>
-                <IoCloseOutline
-                  onClick={toggleFilterFlyout}
-                  className="h-7 sm:h-8 w-7 sm:w-8 border border-[#E7E7E7] text-[#0A0A0A] rounded cursor-pointer"
-                />
-              </div>
-              <div className="w-full border-b border-[#E7E7E7] mb-4 sm:mb-6"></div>
+<div className={`filterflyout ${isFlyoutFilterOpen ? "filteropen" : ""}`}>
+  <div className="w-full min-h-auto bg-black p-4 text-white">
+    {/* Header */}
+    <div className="flex justify-between mb-4 sm:mb-6 md:mb-8">
+      <p className="text-primary-500 text-[22px] sm:text-[24px] md:text-[26px] font-bold leading-8 sm:leading-9">
+        User Filter
+      </p>
+      <IoCloseOutline
+        onClick={toggleFilterFlyout}
+        className="h-7 sm:h-8 w-7 sm:w-8 border border-gray-700 text-white rounded cursor-pointer"
+      />
+    </div>
 
-              {/* FORM */}
-              <form onSubmit={(e) => handleSubmit(e)}>
-                <div className="w-full">
-                  {/* User Name */}
-                  <div className="w-full flex flex-col md:flex-row gap-4 md:gap-6 lg:gap-8 mb-4 sm:mb-6">
-                    <div className="w-full">
-                      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
-                        User Name
-                      </p>
-                      <Select
-                        value={
-                          userOptions.find(
-                            (option) => option.value === filterData.uuId
-                          ) || null
-                        }
-                        onChange={(selectedOption) =>
-                          setFilterData((prev) => ({
-                            ...prev,
-                            uuId: selectedOption ? selectedOption.value : "",
-                          }))
-                        }
-                        options={userOptions}
-                        placeholder="Select User ID"
-                        isClearable
-                        classNames={{
-                          control: ({ isFocused }) =>
-                            `onHoverBoxShadow !w-full !border[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
-                              isFocused
-                                ? "!border-primary-500"
-                                : "!border-[#DFEAF2]"
-                            }`,
-                        }}
-                        styles={{
-                          menu: (base) => ({
-                            ...base,
-                            borderRadius: "4px",
-                            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-                            backgroundColor: "#fff",
-                          }),
-                          option: (base, { isFocused, isSelected }) => ({
-                            ...base,
-                            backgroundColor: isSelected
-                              ? "var(--primary-500)" // Active (selected) background color
-                              : isFocused
-                              ? "var(--primary-100)" // Hover background color
-                              : "#fff", // Default background
-                            color: isSelected ? "#fff" : "#333",
-                            cursor: "pointer",
-                          }),
-                        }}
-                      />
-                    </div>
-                  </div>
+    <div className="w-full border-b border-gray-700 mb-4 sm:mb-6"></div>
 
-                  {/* Date Filters */}
-                  <div className="w-full flex flex-col md:flex-row gap-4 md:justify-between mb-4 sm:mb-6">
-                    <div className="w-full md:w-[49%]">
-                      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
-                        Start Date
-                      </p>
-                      <DatePicker
-                        selected={
-                          filterData.startDate
-                            ? new Date(filterData.startDate)
-                            : null
-                        }
-                        onChange={(date: Date | null) =>
-                          handleDateChange(date, "startDate")
-                        }
-                        name="startDate"
-                        dateFormat="yyyy-MM-dd"
-                        placeholderText="yyyy-mm-dd"
-                        className="hover:shadow-hoverInputShadow focus-border-primary 
-             !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 
-             font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
-                        popperClassName="custom-datepicker"
-                        dayClassName={(date) => {
-                          const today = new Date().toDateString();
-                          const selectedDate = filterData.startDate
-                            ? new Date(filterData.startDate).toDateString()
-                            : null;
+<form onSubmit={(e) => handleSubmit(e)}>
+  <div className="w-full">
+    {/* User Name */}
+    <div className="w-full flex flex-col md:flex-row gap-4 md:gap-6 lg:gap-8 mb-4 sm:mb-6">
+      <div className="w-full">
+        <p className="text-white font-medium text-base leading-6 mb-2">User Name</p>
+        <Select
+          value={userOptions.find((option) => option.value === filterData.uuId) || null}
+          onChange={(selectedOption) =>
+            setFilterData((prev) => ({ ...prev, uuId: selectedOption ? selectedOption.value : "" }))
+          }
+          options={userOptions}
+          placeholder="Select User ID"
+          isClearable
+          classNames={{
+            control: ({ isFocused }) =>
+              `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                isFocused ? "!border-primary-500" : "!border-gray-700"
+              }`,
+            singleValue: () => "text-white",
+            placeholder: () => "text-gray-400",
+          }}
+          styles={{
+            menu: (base) => ({
+              ...base,
+              borderRadius: "4px",
+              boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+              backgroundColor: "#000",
+            }),
+            option: (base, { isFocused, isSelected }) => ({
+              ...base,
+              backgroundColor: isSelected
+                ? "var(--primary-500)"  // selected option bg
+                : isFocused
+                ? "var(--primary-100)"  // hovered option bg
+                : "#000",
+              color: isSelected
+                ? "#fff"                // selected text white
+                : isFocused
+                ? "#000"                // hovered text black
+                : "#fff",               // default option text white
+              cursor: "pointer",
+            }),
+          }}
+        />
+      </div>
+    </div>
 
-                          if (today === date.toDateString())
-                            return "bg-[#FFF0F1] text-[#A3000E]"; // Current date
-                          if (selectedDate === date.toDateString())
-                            return "bg-[#A3000E] text-white"; // Selected date
-                          return "hover:bg-[#FFCCD0] hover:text-[#A3000E]"; // Hover effect
-                        }}
-                      />
-                    </div>
-                    <div className="w-full md:w-[49%]">
-                      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
-                        End Date
-                      </p>
-                      <DatePicker
-                        selected={
-                          filterData.endDate
-                            ? new Date(filterData.endDate)
-                            : null
-                        }
-                        onChange={(date: Date | null) =>
-                          handleDateChange(date, "endDate")
-                        }
-                        name="endDate"
-                        dateFormat="yyyy-MM-dd"
-                        placeholderText="yyyy-mm-dd"
-                        className="hover:shadow-hoverInputShadow focus-border-primary 
-             !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 
-             font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
-                        popperClassName="custom-datepicker"
-                        dayClassName={(date) => {
-                          const today = new Date().toDateString();
-                          const selectedDate = filterData.endDate
-                            ? new Date(filterData.endDate).toDateString()
-                            : null;
+    {/* Date Filters */}
+    <div className="w-full flex flex-col md:flex-row gap-4 md:justify-between mb-4 sm:mb-6">
+      <div className="w-full md:w-[49%]">
+        <p className="text-white font-medium text-base leading-6 mb-2">Start Date</p>
+        <DatePicker
+          selected={filterData.startDate ? new Date(filterData.startDate) : null}
+          onChange={(date: Date | null) => handleDateChange(date, "startDate")}
+          name="startDate"
+          dateFormat="yyyy-MM-dd"
+          placeholderText="yyyy-mm-dd"
+          className="hover:shadow-hoverInputShadow focus-border-primary !w-full border border-gray-700 rounded-[4px] text-sm leading-4 font-medium placeholder-gray-400 py-4 px-4 bg-black text-white shadow-sm"
+          popperClassName="custom-datepicker"
+        />
+      </div>
+      <div className="w-full md:w-[49%]">
+        <p className="text-white font-medium text-base leading-6 mb-2">End Date</p>
+        <DatePicker
+          selected={filterData.endDate ? new Date(filterData.endDate) : null}
+          onChange={(date: Date | null) => handleDateChange(date, "endDate")}
+          name="endDate"
+          dateFormat="yyyy-MM-dd"
+          placeholderText="yyyy-mm-dd"
+          className="hover:shadow-hoverInputShadow focus-border-primary !w-full border border-gray-700 rounded-[4px] text-sm leading-4 font-medium placeholder-gray-400 py-4 px-4 bg-black text-white shadow-sm"
+          popperClassName="custom-datepicker"
+        />
+      </div>
+    </div>
 
-                          if (today === date.toDateString())
-                            return "bg-[#FFF0F1] text-[#A3000E]"; // Current date
-                          if (selectedDate === date.toDateString())
-                            return "bg-[#A3000E] text-white"; // Selected date
-                          return "hover:bg-[#FFCCD0] hover:text-[#A3000E]"; // Hover effect
-                        }}
-                      />
-                    </div>
-                  </div>
+    {/* Module & Type */}
+    <div className="w-full flex flex-col md:flex-row gap-4 md:justify-between mb-4 sm:mb-6">
+      <div className="w-full md:w-[49%]">
+        <p className="text-white font-medium text-base leading-6 mb-2">Module</p>
+        <Select
+          value={moduleOptions.find((option) => option.value === filterData.module) || null}
+          onChange={(selectedOption) =>
+            setFilterData((prev) => ({ ...prev, module: selectedOption ? selectedOption.value : "" }))
+          }
+          options={moduleOptions}
+          placeholder="Select Module"
+          isClearable
+          classNames={{
+            control: ({ isFocused }) =>
+              `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                isFocused ? "!border-primary-500" : "!border-gray-700"
+              }`,
+            singleValue: () => "text-white",
+            placeholder: () => "text-gray-400",
+          }}
+          styles={{
+            menu: (base) => ({ ...base, borderRadius: "4px", boxShadow: "0px 4px 10px rgba(0,0,0,0.1)", backgroundColor: "#000" }),
+            option: (base, { isFocused, isSelected }) => ({
+              ...base,
+              backgroundColor: isSelected ? "var(--primary-500)" : isFocused ? "var(--primary-100)" : "#000",
+              color: isSelected ? "#fff" : isFocused ? "#000" : "#fff",
+              cursor: "pointer",
+            }),
+          }}
+        />
+      </div>
 
-                  {/* Module & Type Select (Updated UI) */}
-                  <div className="w-full flex flex-col md:flex-row gap-4 md:justify-between mb-4 sm:mb-6">
-                    <div className="w-full md:w-[49%]">
-                      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
-                        Module
-                      </p>
-                      <Select
-                        value={
-                          moduleOptions.find(
-                            (option) => option.value === filterData.module
-                          ) || null
-                        }
-                        onChange={(selectedOption) =>
-                          setFilterData((prev) => ({
-                            ...prev,
-                            module: selectedOption ? selectedOption.value : "",
-                          }))
-                        }
-                        options={moduleOptions}
-                        placeholder="Select Module"
-                        isClearable
-                        classNames={{
-                          control: ({ isFocused }) =>
-                            `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
-                              isFocused
-                                ? "!border-primary-500"
-                                : "!border-[#DFEAF2]"
-                            }`,
-                        }}
-                        styles={{
-                          menu: (base) => ({
-                            ...base,
-                            borderRadius: "4px",
-                            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-                            backgroundColor: "#fff",
-                          }),
-                          option: (base, { isFocused, isSelected }) => ({
-                            ...base,
-                            backgroundColor: isSelected
-                              ? "var(--primary-500)" // Active (selected) background color
-                              : isFocused
-                              ? "var(--primary-100)" // Hover background color
-                              : "#fff", // Default background
-                            color: isSelected ? "#fff" : "#333",
-                            cursor: "pointer",
-                          }),
-                        }}
-                      />
-                    </div>
-                    <div className="w-full md:w-[49%]">
-                      <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
-                        Type
-                      </p>
-                      <Select
-                        value={
-                          typeOptions.find(
-                            (option) => option.value === filterData.type
-                          ) || null
-                        }
-                        onChange={(selectedOption) =>
-                          setFilterData((prev) => ({
-                            ...prev,
-                            type: selectedOption ? selectedOption.value : "",
-                          }))
-                        }
-                        options={typeOptions}
-                        placeholder="Select Type"
-                        isClearable
-                        classNames={{
-                          control: ({ isFocused }) =>
-                            `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
-                              isFocused
-                                ? "!border-primary-500"
-                                : "!border-[#DFEAF2]"
-                            }`,
-                        }}
-                        styles={{
-                          menu: (base) => ({
-                            ...base,
-                            borderRadius: "4px",
-                            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-                            backgroundColor: "#fff",
-                          }),
-                          option: (base, { isFocused, isSelected }) => ({
-                            ...base,
-                            backgroundColor: isSelected
-                              ? "var(--primary-500)" // Active (selected) background color
-                              : isFocused
-                              ? "var(--primary-100)" // Hover background color
-                              : "#fff", // Default background
-                            color: isSelected ? "#fff" : "#333",
-                            cursor: "pointer",
-                          }),
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
+      <div className="w-full md:w-[49%]">
+        <p className="text-white font-medium text-base leading-6 mb-2">Type</p>
+        <Select
+          value={typeOptions.find((option) => option.value === filterData.type) || null}
+          onChange={(selectedOption) =>
+            setFilterData((prev) => ({ ...prev, type: selectedOption ? selectedOption.value : "" }))
+          }
+          options={typeOptions}
+          placeholder="Select Type"
+          isClearable
+          classNames={{
+            control: ({ isFocused }) =>
+              `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                isFocused ? "!border-primary-500" : "!border-gray-700"
+              }`,
+            singleValue: () => "text-white",
+            placeholder: () => "text-gray-400",
+          }}
+          styles={{
+            menu: (base) => ({ ...base, borderRadius: "4px", boxShadow: "0px 4px 10px rgba(0,0,0,0.1)", backgroundColor: "#000" }),
+            option: (base, { isFocused, isSelected }) => ({
+              ...base,
+              backgroundColor: isSelected ? "var(--primary-500)" : isFocused ? "var(--primary-100)" : "#000",
+              color: isSelected ? "#fff" : isFocused ? "#000" : "#fff",
+              cursor: "pointer",
+            }),
+          }}
+        />
+      </div>
+    </div>
 
-                {/* BUTTONS */}
-                <div className="mt-8 md:mt-10 w-full flex flex-col md:flex-row md:justify-between items-center gap-y-4 md:gap-y-0">
-                  <div
-                    onClick={hadleClear}
-                    className="py-[13px] px-[26px] bg-primary-500 hover:bg-primary-600 w-full md:w-[49%] rounded-[4px] text-base font-medium leading-6 text-white cursor-pointer text-center hover:text-white"
-                  >
-                    Clear Data
-                  </div>
-                  <button
-                    type="submit"
-                    className="py-[13px] px-[26px] bg-primary-600 hover:bg-primary-500 rounded-[4px] w-full md:w-[49%] text-base font-medium leading-6 text-white text-center hover:bg-lightMaroon hover:text-white  "
-                  >
-                    Filter Now
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
+    {/* BUTTONS */}
+    <div className="mt-8 md:mt-10 w-full flex flex-col md:flex-row md:justify-between items-center gap-y-4 md:gap-y-0">
+      <div
+        onClick={hadleClear}
+        className="py-[13px] px-[26px] bg-primary-500 hover:bg-primary-600 w-full md:w-[49%] rounded-[4px] text-base font-medium leading-6 text-white cursor-pointer text-center hover:text-white"
+      >
+        Clear Data
+      </div>
+      <button
+        type="submit"
+        className="py-[13px] px-[26px] bg-primary-600 hover:bg-primary-500 rounded-[4px] w-full md:w-[49%] text-base font-medium leading-6 text-white text-center hover:bg-lightMaroon hover:text-white"
+      >
+        Filter Now
+      </button>
+    </div>
+  </div>
+</form>
+
+  </div>
+</div>
+
+
         </>
       )}
 

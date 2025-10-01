@@ -55,7 +55,7 @@ const userEmail = storage.getUserEmail();
       toast.success("Login Successful");
       router.push("/dashboard");
       const activityLogger = new UserActivityLogger();
-      await activityLogger.userLogin();
+     // await activityLogger.userLogin();
     } catch (error) {
       console.error("Network error:", error);
       toast.error("Invalid Code. Please try again.");

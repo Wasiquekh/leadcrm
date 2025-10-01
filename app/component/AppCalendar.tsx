@@ -5,6 +5,9 @@ import AxiosProvider from "../../provider/AxiosProvider";
 import { RxAvatar } from "react-icons/rx";
 import { HiOutlineBookOpen } from "react-icons/hi";
 import { toast } from "react-toastify";
+import { MdEdit, MdOutlineSubject } from "react-icons/md";
+import { FaRegCheckCircle, FaRegClock } from "react-icons/fa";
+import { IoSettingsOutline } from "react-icons/io5";
 
 
 type Props = {
@@ -129,152 +132,119 @@ export default function AppCalendar({
   };
 
   return (
-    <div className="w-full overflow-x-auto custom-scrollbar">
-      {/* <button
-        onClick={() => openLeadTaskInFlyout()}
-        className="bg-primary-600 hover:bg-primary-700 py-3 px-4 rounded-[4px] text-sm font-medium text-white mb-2"
-      >
-        Filter Task
-      </button> */}
+ <div className="relative overflow-x-auto w-full sm:rounded-lg bg-black text-white">
+  <table className="w-full text-sm text-left whitespace-nowrap">
+    <thead className="text-xs bg-primary-500 text-white">
+      <tr className="border border-tableBorder">
+        <th className="px-3 py-3 md:p-3 border border-tableBorder font-semibold text-white text-base">
+          <div className="flex items-center gap-2">
+            <RxAvatar className="w-5 h-5 sm:w-6 sm:h-6" />
+            <span>Name - Mail</span>
+          </div>
+        </th>
+        <th className="px-3 py-2 border border-tableBorder hidden md:table-cell font-semibold text-white text-base">
+          <div className="flex items-center gap-2">
+            <MdOutlineSubject  className="w-5 h-5 sm:w-6 sm:h-6" />
+            <span>Subject</span>
+          </div>
+        </th>
+        <th className="px-3 py-2 border border-tableBorder hidden md:table-cell font-semibold text-white text-base">
+          <div className="flex items-center gap-2">
+            <FaRegClock  className="w-5 h-5 sm:w-6 sm:h-6" />
+            <span>Status</span>
+          </div>
+        </th>
+        <th className="px-3 py-2 border border-tableBorder hidden md:table-cell font-semibold text-white text-base">
+          <div className="flex items-center gap-2">
+            <FaRegCheckCircle  className="w-5 h-5 sm:w-6 sm:h-6" />
+            <span>Done</span>
+          </div>
+        </th>
+        <th className="px-3 py-2 border border-tableBorder hidden md:table-cell font-semibold text-white text-base">
+          <div className="flex items-center gap-2">
+            <IoSettingsOutline  className="w-5 h-5 sm:w-6 sm:h-6" />
+            <span>Action</span>
+          </div>
+        </th>
+      </tr>
+    </thead>
 
-      <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 whitespace-nowrap">
-        <thead className="text-xs text-[#999999] bg-white">
-          <tr className="border border-tableBorder">
-            {/* Start Date */}
-            <th scope="col" className="px-3 py-3 md:p-3 border border-tableBorder">
-              <div className="flex items-center gap-2">
-                <RxAvatar className="w-5 h-5 sm:w-6 sm:h-6" />
-                <span className="font-semibold text-secondBlack text-lg sm:text-base">
-                  Start Date
-                </span>
-              </div>
-            </th>
-
-            {/* Subject */}
-            <th scope="col" className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-              <div className="flex items-center gap-2">
-                <HiOutlineBookOpen className="w-5 h-5 sm:w-6 sm:h-6" />
-                <span className="font-semibold text-secondBlack text-lg sm:text-base">
-                  Subject
-                </span>
-              </div>
-            </th>
-
-            {/* Status */}
-            <th scope="col" className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-              <div className="flex items-center gap-2">
-                <HiOutlineBookOpen className="w-5 h-5 sm:w-6 sm:h-6" />
-                <span className="font-semibold text-secondBlack text-lg sm:text-base">
-                  Status
-                </span>
-              </div>
-            </th>
-
-            {/* Done (checkbox) */}
-            <th scope="col" className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-              <div className="flex items-center gap-2">
-                <HiOutlineBookOpen className="w-5 h-5 sm:w-6 sm:h-6" />
-                <span className="font-semibold text-secondBlack text-lg sm:text-base">
-                  Done
-                </span>
-              </div>
-            </th>
-                        <th scope="col" className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-              <div className="flex items-center gap-2">
-                <HiOutlineBookOpen className="w-5 h-5 sm:w-6 sm:h-6" />
-                <span className="font-semibold text-secondBlack text-lg sm:text-base">
-                  Action
-                </span>
-              </div>
-            </th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {!tasks || tasks.length === 0 ? (
-            <tr>
-              <td colSpan={4} className="text-center text-xl mt-5 py-6">
-                <div className="mt-2">Data not found</div>
+    <tbody>
+      {!tasks || tasks.length === 0 ? (
+        <tr>
+          <td colSpan={5} className="text-center py-6 text-gray-400">
+            Data not found
+          </td>
+        </tr>
+      ) : (
+        tasks.map((t, index) => {
+          const locked = isTaskLocked(t);
+          return (
+            <tr
+              key={t?.id ?? index}
+              className="border border-tableBorder bg-black hover:bg-primary-600 transition-colors"
+            >
+              {/* Start Date */}
+              <td className="px-1 py-2 md:px-3 md:py-2 border-tableBorder">
+                <p className="text-white text-sm sm:text-base">{t?.start_at_ca || "-"}</p>
               </td>
-            </tr>
-          ) : (
-            tasks.map((t, index) => {
-              const locked = isTaskLocked(t);
-              return (
-                <tr
-                  key={t?.id ?? index}
-                  className="border border-tableBorder bg-white hover:bg-primary-100"
+
+              {/* Subject */}
+              <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+                <p className="text-white text-sm sm:text-base capitalize">{t?.subject || "-"}</p>
+                <p className="text-gray-300 text-xs">{t?.details || "-"}</p>
+              </td>
+
+              {/* Status pill */}
+              <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+                <span
+                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs border ${statusClasses(
+                    t?.status
+                  )}`}
                 >
-                  {/* Start Date */}
-                  <td className="px-1 py-2 md:px-3 md:py-2 border-tableBorder">
-                    <div className="flex items-center gap-2">
-                      <p className="text-[#232323] text-sm sm:text-base">
-                        {t?.start_at_ca || "-"}
-                      </p>
-                    </div>
-                  </td>
+                  {(t?.status || "-").toString().toLowerCase()}
+                </span>
+              </td>
 
-                  {/* Subject */}
-                  <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                    <span className="text-[#232323] text-sm sm:text-base capitalize">
-                      {t?.subject || "-"}
-                    </span>
-                    <p>  {t?.details || "-"}</p>
-                  </td>
+              {/* Done checkbox */}
+              <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+                <label className="inline-flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4 accent-primary-600 cursor-pointer disabled:cursor-not-allowed"
+                    checked={locked}
+                    disabled={locked}
+                    onChange={async (e) => {
+                      if (e.target.checked && !locked) {
+                        await completeTask(t.id);
+                      }
+                    }}
+                    aria-label="Mark task as completed"
+                  />
+                </label>
+              </td>
 
-                  {/* Status pill */}
-                  <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                    <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs border ${statusClasses(
-                        t?.status
-                      )}`}
-                    >
-                      {(t?.status || "-").toString().toLowerCase()}
-                    </span>
-                  </td>
+     {/* Action */}
+<td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+  <button
+    type="button"
+    onClick={() => !locked && openEditTask(t)}
+    disabled={locked}
+    className={`px-3 py-1 rounded-[4px] text-sm font-medium 
+      text-white hover:text-white hover:underline
+      disabled:opacity-40 disabled:cursor-not-allowed`}
+  >
+    {/* Edit */}
+    <MdEdit />
+  </button>
+</td>
+            </tr>
+          );
+        })
+      )}
+    </tbody>
+  </table>
+</div>
 
-                  {/* Done: one-way checkbox */}
-                  <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                    <label className="inline-flex items-center gap-2 ">
-                      <input
-                        type="checkbox"
-                        className="w-4 h-4 accent-primary-600 cursor-pointer disabled:cursor-not-allowed text-center"
-                        checked={locked}
-                        disabled={locked}
-                        onChange={async (e) => {
-                          // Only handle first-time check
-                          if (e.target.checked && !locked) {
-                            await completeTask(t.id);
-                          }
-                        }}
-                        aria-label="Mark task as completed"
-                      />
-                      {/* <span className="text-[#232323] text-sm sm:text-base select-none">
-                        {locked ? "Completed" : "Mark done"}
-                      </span> */}
-                    </label>
-                  </td>
-                <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                      <button
-                        type="button"
-                        onClick={() => !locked && openEditTask(t)}
-                        disabled={locked}
-                        aria-disabled={locked}
-                        title={locked ? "Task is completed" : "Edit task"}
-                        className={`px-3 py-1 rounded-[4px] text-sm font-medium
-                          text-primary-700 hover:underline
-                          disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:no-underline`}
-                      >
-                        Edit
-                      </button>
-                  </td>
-
-                </tr>
-              );
-            })
-          )}
-        </tbody>
-      </table>
-    </div>
   );
 }

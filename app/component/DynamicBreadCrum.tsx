@@ -17,7 +17,7 @@ const DynamicBreadCrum = () => {
     <div>
       {pathname === "/dashboard" && (
         <div className="flex  md:flex gap-2 w-auto items-center">
-          <p className="text-[#4B5675] text-sm font-medium leading-5">
+          <p className="text-white text-sm font-medium leading-5">
             Dashboard
           </p>
           <IoChevronForward className="text-[#99A1B7] w-3 h-3" />
@@ -26,7 +26,7 @@ const DynamicBreadCrum = () => {
           </p>
         </div>
       )}
-      {(pathname === "/customer" || pathname === "/customerdetails") && (
+      {/* {(pathname === "/customer" || pathname === "/customerdetails") && (
         <div className="flex  md:flex gap-2 w-auto items-center">
           <p className="text-[#4B5675] text-sm font-medium leading-5">
             Customers
@@ -46,8 +46,18 @@ const DynamicBreadCrum = () => {
             )}
           </p>
         </div>
+      )} */}
+      {pathname === "/leads" && (
+        <div className="flex  md:flex gap-2 w-auto items-center">
+          <p className="text-white text-sm font-medium leading-5">
+            Leads
+          </p>
+          <IoChevronForward className="text-white w-3 h-3" />
+          <p className="text-primary-600 text-sm leading-5 font-medium">
+            All lead
+          </p>
+        </div>
       )}
-
       {pathname === "/usermanagement" && (
         <div className="flex  md:flex gap-2 w-auto items-center">
           <p className="text-[#4B5675] text-sm font-medium leading-5">
