@@ -15,8 +15,8 @@ const axiosProvider = new AxiosProvider();
 export default function OtpHome() {
   const storage = new StorageManager();
   const router = useRouter();
-const userEmail = storage.getUserEmail();
-  
+  const userEmail = storage.getUserEmail();
+
 
   const [loading, setLoading] = useState<boolean>(false);
   const [qrCode, setQrCode] = useState<string | undefined>();
@@ -67,10 +67,10 @@ const userEmail = storage.getUserEmail();
   };
 
 
-    useEffect(() => {
-    const token = storage.getAccessToken();
-    if (token && token !== "null") router.replace("/dashboard");
-  }, []);
+  //   useEffect(() => {
+  //   const token = storage.getAccessToken();
+  //   if (token && token !== "null") router.replace("/dashboard");
+  // }, []);
   return (
     <>
       <div className="bg-[#F5F5F5] hidden md:block">

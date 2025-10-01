@@ -1967,7 +1967,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
                     onClick={()=>nextLeads()}
                        className="flex w-auto gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700  "
                       >
-                        <p className="text-white text-base font-medium">Next Random Leads</p>
+                        <p className="text-white text-base font-medium">Next Leads</p>
                          <BiSkipNextCircle className="w-5 h-5 text-white" />
                       </div>
                 </div>

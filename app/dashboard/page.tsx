@@ -17,12 +17,12 @@ import { IoCloseOutline } from "react-icons/io5";
 import SearchLead from "../component/SearchLead";
 
 export interface AgentStats {
-  agent_id: string;       // Unique identifier for the agent (UUID)
-  agent_name: string;     // Name of the agent
-  done_today: number;     // Number of tasks completed today
-  overdue: number;        // Number of overdue tasks
-  pending_today: number;  // Number of tasks still pending today
-  total_today: number;    // Total tasks assigned for today
+  agent_id: string; // Unique identifier for the agent (UUID)
+  agent_name: string; // Name of the agent
+  done_today: number; // Number of tasks completed today
+  overdue: number; // Number of overdue tasks
+  pending_today: number; // Number of tasks still pending today
+  total_today: number; // Total tasks assigned for today
 }
 export interface CardsData {
   overdue: number;
@@ -39,31 +39,31 @@ export interface TodayTaskList {
   id: string;
   lead_id: string;
   lead_name: string;
-  start_at: string;       // ISO date string e.g. "2025-09-25T18:15:00.000Z"
-  start_at_est: string;    // formatted datetime e.g. "09-25-2025 02:15 PM"
-  start_date_est: string;  // formatted date e.g. "09-25-2025"
-  status: string;         // e.g. "pending", "completed", ...
-  subject: string;        // e.g. "phonecall: bhotu12"
-  type: string;           // e.g. "followup"
+  start_at: string; // ISO date string e.g. "2025-09-25T18:15:00.000Z"
+  start_at_est: string; // formatted datetime e.g. "09-25-2025 02:15 PM"
+  start_date_est: string; // formatted date e.g. "09-25-2025"
+  status: string; // e.g. "pending", "completed", ...
+  subject: string; // e.g. "phonecall: bhotu12"
+  type: string; // e.g. "followup"
 }
 export interface UpcomingTaskList {
   id: string;
   lead_id: string;
   lead_name: string;
-  start_at: string;       // ISO date string e.g. "2025-09-25T18:15:00.000Z"
-  start_at_ca: string;    // formatted datetime e.g. "09-25-2025 02:15 PM"
-  start_date_ca: string;  // formatted date e.g. "09-25-2025"
-  status: string;         // e.g. "pending", "completed"
-  subject: string;        // e.g. "phonecall: bhotu12"
-  type: string;           // e.g. "followup"
+  start_at: string; // ISO date string e.g. "2025-09-25T18:15:00.000Z"
+  start_at_est: string; // formatted datetime e.g. "09-25-2025 02:15 PM"
+  start_date_est: string; // formatted date e.g. "09-25-2025"
+  status: string; // e.g. "pending", "completed"
+  subject: string; // e.g. "phonecall: bhotu12"
+  type: string; // e.g. "followup"
 }
 export interface OverdueTask {
   id: string;
   lead_id: string;
   lead_name: string;
-  start_at: string;       // UTC ISO date string
-  start_at_ca: string;    // formatted date-time
-  start_date_ca: string;  // formatted date
+  start_at: string; // UTC ISO date string
+  start_at_est: string; // formatted date-time
+  start_date_est: string; // formatted date
   status: string;
   subject: string;
   type: string;
@@ -71,7 +71,6 @@ export interface OverdueTask {
 
 const storage = new StorageManager();
 const userRole = storage.getUserRole();
-
 export default function Home() {
   const isChecking = useAuthRedirect();
   
@@ -258,8 +257,8 @@ const closeFlyOut = ()=>{
             <td className="p-3">{task.subject}</td>
             <td className="p-3 capitalize">{task.type}</td>
             <td className="p-3 capitalize">{task.status}</td>
-            <td className="p-3">{task.start_at_ca}</td>
-            <td className="p-3">{task.start_date_ca}</td>
+            <td className="p-3">{task.start_at_est}</td>
+            <td className="p-3">{task.start_date_est}</td>
           </tr>
         ))
       ) : (
