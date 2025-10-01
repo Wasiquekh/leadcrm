@@ -176,7 +176,7 @@ useEffect(()=>{
 
     try {
       const res = await AxiosProvider.post("/leads/filter", payload);
-   // console.log("LLLLLLLLLLLLLLLLLLLLLLLLLL",res.data.data.data)
+    console.log("LLLLLLLLLLLLLLLLLLLLLLLLLL",res.data.data)
       const list = res.data.data.data;
       
       setSearchedLeadData(list)
