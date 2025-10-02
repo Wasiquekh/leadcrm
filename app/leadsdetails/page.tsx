@@ -505,13 +505,14 @@ const INITIAL_VALUES = {
        
       });
 
-      //console.log("NEXT LEADS RESPONSE", res.data.data.id);
+      console.log("NEXT LEADS RESPONSE", res);
       setLeadId(res.data.data.id);
       
           //  window.open(`/leadsdetails?id=${res.data.data.id}`, "_blank", "noopener,noreferrer");
      // setData(res.data.data);
     } catch (error: any) {
       console.error("Error fetching lead:", error);
+      toast.error(error)
     }
   };
   // FETCH DISPOSITION
