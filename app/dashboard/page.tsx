@@ -23,6 +23,7 @@ import { FaEllipsisVertical } from "react-icons/fa6";
 import { ImUserTie } from "react-icons/im";
 import { RxAvatar } from "react-icons/rx";
 import { HiChevronDoubleLeft, HiChevronDoubleRight } from "react-icons/hi";
+import { toast } from "react-toastify";
 
 export interface AgentStats {
   agent_id: string; // Unique identifier for the agent (UUID)
@@ -138,28 +139,40 @@ export default function Home() {
     setIsCreateLead(false);
     setIsSearchLead(false);
   };
-  const fetchSearchedLeads = async (
-    filters: Record<string, any>,
-    pageNo: number
-  ) => {
-    try {
-      const res = await AxiosProvider.post(
-        `/leads/filter?page=${pageNo}`,
-        filters
-      );
-      const list = res?.data?.data?.data ?? [];
-      const totalPages = res?.data?.data?.pagination?.totalPages ?? 1;
-      setIsSearchData(list);
-      setTotalPage(totalPages);
-    } catch (e) {
-      console.error("Search fetch failed:", e);
+// Add a 3rd param to control toasting on demand
+const fetchSearchedLeads = async (
+  filters: Record<string, any>,
+  pageNo: number,
+  opts: { showToast?: boolean } = {}
+) => {
+  const { showToast = false } = opts;
+
+  try {
+    const res = await AxiosProvider.post(`/leads/filter?page=${pageNo}`, filters);
+    const list = res.data?.data?.data ?? [];
+    const totalPages = res?.data?.data?.pagination?.totalPages ?? 1;
+
+    if (list.length === 0) {
+      if (showToast) toast.info("No data found");
+      setIsSearchData([]);        // keep state consistent
+      setTotalPage(totalPages);   // still set total pages (usually 1)
+      return;                     // stop here
     }
-  };
-  useEffect(() => {
-    if (lastFilters) {
-      fetchSearchedLeads(lastFilters, page);
-    }
-  }, [page, lastFilters]);
+
+    setIsSearchData(list);
+    setTotalPage(totalPages);
+  } catch (e) {
+    console.error("Search fetch failed:", e);
+  }
+};
+
+useEffect(() => {
+  if (lastFilters) {
+    // Don't show toast when just changing pages
+    fetchSearchedLeads(lastFilters, page, { showToast: false });
+  }
+}, [page, lastFilters]);
+
 
   if (isChecking) {
     return (
@@ -213,6 +226,164 @@ export default function Home() {
               </div>
             </div>
           )}
+
+                        {/* SEARED DATA */}
+              {/* -------------SEARCHED TABLE---------------- */}
+              {searcheddata?.length > 0 && !isError ? (
+                <>
+                <table className="w-full text-sm text-left text-white bg-black mt-6">
+                  <thead className="text-xs text-[#999999] bg-primary-500">
+                    <tr className="border border-tableBorder">
+                      {/* Full Name */}
+                      <th
+                        scope="col"
+                        className="px-3 py-3 md:p-3 border border-tableBorder"
+                      >
+                        <div className="flex items-center gap-2">
+                          <RxAvatar className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                          <span className="font-semibold text-white text-lg sm:text-base">
+                            Full Name
+                          </span>
+                        </div>
+                      </th>
+
+                      {/* Email */}
+                      <th
+                        scope="col"
+                        className="px-3 py-2 border border-tableBorder hidden md:table-cell"
+                      >
+                        <div className="flex items-center gap-2">
+                          <IoMailOpenOutline className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                          <span className="font-semibold text-white text-lg sm:text-base">
+                            Email
+                          </span>
+                        </div>
+                      </th>
+
+                      {/* Phone */}
+                      <th
+                        scope="col"
+                        className="px-3 py-2 border border-tableBorder hidden md:table-cell"
+                      >
+                        <div className="flex items-center gap-2">
+                          <MdOutlinePhone className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                          <span className="font-semibold text-white text-lg sm:text-base">
+                            Phone
+                          </span>
+                        </div>
+                      </th>
+
+                      {/* Address */}
+                      <th
+                        scope="col"
+                        className="px-3 py-2 border border-tableBorder hidden md:table-cell"
+                      >
+                        <div className="flex items-center gap-2">
+                          <MdOutlineLocationCity className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                          <span className="font-semibold text-white text-lg sm:text-base">
+                            Address
+                          </span>
+                        </div>
+                      </th>
+
+                      {/* Agent */}
+                      <th
+                        scope="col"
+                        className="px-3 py-2 border border-tableBorder hidden md:table-cell"
+                      >
+                        <div className="flex items-center gap-2">
+                          <ImUserTie className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                          <span className="font-semibold text-white text-lg sm:text-base">
+                            Agent
+                          </span>
+                        </div>
+                      </th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {searcheddata.map((item: any, index: number) => (
+                      <tr
+                        key={item?.id ?? index}
+                        className="border border-tableBorder bg-black hover:bg-primary-600"
+                      >
+                        {/* Full name */}
+                        <td
+                          onClick={() => test(item?.id)}
+                          className="px-1 py-2 md:px-3 md:py-2 border-tableBorder flex items-center gap-2 bg-primary-500 cursor-pointer"
+                        >
+                          <p className="text-white text-sm sm:text-base font-medium leading-normal capitalize">
+                            {item?.full_name ?? "-"}
+                          </p>
+                        </td>
+
+                        {/* Email */}
+                        <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+                          <span className="text-white text-sm sm:text-base">
+                            {item?.email ?? "-"}
+                          </span>
+                        </td>
+
+                        {/* Phone */}
+                        <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+                          <span className="text-white text-sm sm:text-base">
+                            {item?.phone ?? "-"}
+                          </span>
+                        </td>
+
+                        {/* Address (country) */}
+                        <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+                          <span className="text-white text-sm sm:text-base capitalize">
+                            {item?.address?.country ?? "-"}
+                          </span>
+                        </td>
+
+                        {/* Agent */}
+                        <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+                          <span className="text-white text-sm sm:text-base capitalize">
+                            {item?.agent?.name ?? "-"}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                   <div className="flex justify-center items-center my-10 relative">
+                <button
+                  onClick={() => handlePagination(page - 1)}
+                  disabled={page === 1}
+                  className="px-2 py-2 mx-2 border rounded bg-primary-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <HiChevronDoubleLeft className="w-6 h-auto" />
+                </button>
+                <span className="text-white text-sm">
+                  Page {page} of {totalPage}
+                </span>
+                <button
+                  onClick={() => handlePagination(page + 1)}
+                  disabled={page === totalPage}
+                  className="px-2 py-2 mx-2 border rounded bg-primary-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <HiChevronDoubleRight className="w-6 h-auto" />
+                </button>
+              </div>
+                            
+           </>
+         
+              ) : (
+                
+  <div className="text-center text-xl mt-5 text-white">
+
+  </div>
+                
+              
+              )
+
+              }
+
+
+              {/* -------------END SEARCHED TABLE---------------- */}
+              
           {/* DASHBOARD CONTENT */}
           {userRole === "Agent" && (
             <>
@@ -334,151 +505,7 @@ export default function Home() {
                 </table>
               </div>
 
-              {/* SEARED DATA */}
-              {/* -------------SEARCHED TABLE---------------- */}
-              {searcheddata?.length > 0 && !isError ? (
-                <table className="w-full text-sm text-left text-white bg-black mt-6">
-                  <thead className="text-xs text-[#999999] bg-primary-500">
-                    <tr className="border border-tableBorder">
-                      {/* Full Name */}
-                      <th
-                        scope="col"
-                        className="px-3 py-3 md:p-3 border border-tableBorder"
-                      >
-                        <div className="flex items-center gap-2">
-                          <RxAvatar className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                          <span className="font-semibold text-white text-lg sm:text-base">
-                            Full Name
-                          </span>
-                        </div>
-                      </th>
 
-                      {/* Email */}
-                      <th
-                        scope="col"
-                        className="px-3 py-2 border border-tableBorder hidden md:table-cell"
-                      >
-                        <div className="flex items-center gap-2">
-                          <IoMailOpenOutline className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                          <span className="font-semibold text-white text-lg sm:text-base">
-                            Email
-                          </span>
-                        </div>
-                      </th>
-
-                      {/* Phone */}
-                      <th
-                        scope="col"
-                        className="px-3 py-2 border border-tableBorder hidden md:table-cell"
-                      >
-                        <div className="flex items-center gap-2">
-                          <MdOutlinePhone className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                          <span className="font-semibold text-white text-lg sm:text-base">
-                            Phone
-                          </span>
-                        </div>
-                      </th>
-
-                      {/* Address */}
-                      <th
-                        scope="col"
-                        className="px-3 py-2 border border-tableBorder hidden md:table-cell"
-                      >
-                        <div className="flex items-center gap-2">
-                          <MdOutlineLocationCity className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                          <span className="font-semibold text-white text-lg sm:text-base">
-                            Address
-                          </span>
-                        </div>
-                      </th>
-
-                      {/* Agent */}
-                      <th
-                        scope="col"
-                        className="px-3 py-2 border border-tableBorder hidden md:table-cell"
-                      >
-                        <div className="flex items-center gap-2">
-                          <ImUserTie className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                          <span className="font-semibold text-white text-lg sm:text-base">
-                            Agent
-                          </span>
-                        </div>
-                      </th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {searcheddata.map((item: any, index: number) => (
-                      <tr
-                        key={item?.id ?? index}
-                        className="border border-tableBorder bg-black hover:bg-primary-600"
-                      >
-                        {/* Full name */}
-                        <td
-                          onClick={() => test(item?.id)}
-                          className="px-1 py-2 md:px-3 md:py-2 border-tableBorder flex items-center gap-2 bg-primary-500 cursor-pointer"
-                        >
-                          <p className="text-white text-sm sm:text-base font-medium leading-normal capitalize">
-                            {item?.full_name ?? "-"}
-                          </p>
-                        </td>
-
-                        {/* Email */}
-                        <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                          <span className="text-white text-sm sm:text-base">
-                            {item?.email ?? "-"}
-                          </span>
-                        </td>
-
-                        {/* Phone */}
-                        <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                          <span className="text-white text-sm sm:text-base">
-                            {item?.phone ?? "-"}
-                          </span>
-                        </td>
-
-                        {/* Address (country) */}
-                        <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                          <span className="text-white text-sm sm:text-base capitalize">
-                            {item?.address?.country ?? "-"}
-                          </span>
-                        </td>
-
-                        {/* Agent */}
-                        <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                          <span className="text-white text-sm sm:text-base capitalize">
-                            {item?.agent?.name ?? "-"}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              ) : (
-                <div className="text-center text-xl mt-5 text-white"></div>
-              )}
-
-              <div className="flex justify-center items-center my-10 relative">
-                <button
-                  onClick={() => handlePagination(page - 1)}
-                  disabled={page === 1}
-                  className="px-2 py-2 mx-2 border rounded bg-primary-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <HiChevronDoubleLeft className="w-6 h-auto" />
-                </button>
-                <span className="text-white text-sm">
-                  Page {page} of {totalPage}
-                </span>
-                <button
-                  onClick={() => handlePagination(page + 1)}
-                  disabled={page === totalPage}
-                  className="px-2 py-2 mx-2 border rounded bg-primary-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <HiChevronDoubleRight className="w-6 h-auto" />
-                </button>
-              </div>
-
-              {/* -------------END SEARCHED TABLE---------------- */}
             </>
           )}
 
@@ -539,18 +566,19 @@ export default function Home() {
             </div>
             <div className="w-full border-b border-gray-700 mb-4"></div>
 
-            <SearchLead
-              setSearchedData={setIsSearchData}
-              closeFlyOut={closeFlyOut}
-              setPage={setPage}
-              setTotalPage={setTotalPage}
-              page={page}
-              onApplyFilters={(payload) => {
-                setLastFilters(payload); // remember filters
-                setPage(1); // start from page 1
-                fetchSearchedLeads(payload, 1); // fetch immediately
-              }}
-            />
+<SearchLead
+  setSearchedData={setIsSearchData}
+  closeFlyOut={closeFlyOut}
+  setPage={setPage}
+  setTotalPage={setTotalPage}
+  page={page}
+  onApplyFilters={(payload) => {
+    setLastFilters(payload);                  // remember filters
+    setPage(1);                               // start from first page
+    fetchSearchedLeads(payload, 1, { showToast: true }); // 👈 toast if empty
+  }}
+/>
+
           </div>
         )}
       </div>
