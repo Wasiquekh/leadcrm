@@ -18,6 +18,7 @@ import SearchLead from "../component/SearchLead";
 import { FaEllipsisVertical } from "react-icons/fa6";
 import { ImUserTie } from "react-icons/im";
 import { RxAvatar } from "react-icons/rx";
+import { HiChevronDoubleLeft, HiChevronDoubleRight } from "react-icons/hi";
 
 export interface AgentStats {
   agent_id: string; // Unique identifier for the agent (UUID)
@@ -85,8 +86,13 @@ export default function Home() {
   const [isFlyoutOpen, setFlyoutOpen] = useState<boolean>(false);
   const [isCreateLead, setIsCreateLead] = useState<boolean>(false);
   const [isSeachLead, setIsSearchLead] = useState<boolean>(false);
- const [searcheddata, setIsSearchData] = useState<any []>([]);
- console.log("BBBBBBBBBBBBBBBBBBBBBBBBB",searcheddata)
+const [searcheddata, setIsSearchData] = useState<any[]>([]);
+const [page, setPage] = useState<number>(1);
+const [totalPage, setTotalPage] = useState<number>(1);
+
+// NEW: remember the last applied filters from SearchLead
+const [lastFilters, setLastFilters] = useState<Record<string, any> | null>(null);
+ console.log("BBBBBBBBBBBBBBBBBBBBBBBBB",page)
 
 
   // -------------END FOR AGENT-----------
@@ -125,6 +131,24 @@ const closeFlyOut = ()=>{
   setIsCreateLead(false)
   setIsSearchLead(false)
 }
+const fetchSearchedLeads = async (filters: Record<string, any>, pageNo: number) => {
+  try {
+    const res = await AxiosProvider.post(`/leads/filter?page=${pageNo}`, filters);
+    const list = res?.data?.data?.data ?? [];
+    const totalPages = res?.data?.data?.pagination?.totalPages ?? 1;
+    setIsSearchData(list);
+    setTotalPage(totalPages);
+  } catch (e) {
+    console.error("Search fetch failed:", e);
+  }
+};
+useEffect(() => {
+  if (lastFilters) {
+    fetchSearchedLeads(lastFilters, page);
+  }
+}, [page, lastFilters]);
+
+
   if (isChecking) {
     return (
       <div className="h-screen flex flex-col gap-5 justify-center items-center bg-white">
@@ -138,7 +162,12 @@ const closeFlyOut = ()=>{
       </div>
     );
   }
-
+	      const handlePagination = (newPage: number) => {
+      
+    if (newPage > 0 && newPage <= totalPage) {
+      setPage(newPage);
+    }
+  };
   return (
     <>
       <div className="bg-black text-white">
@@ -361,9 +390,28 @@ const closeFlyOut = ()=>{
     </tbody>
   </table>
 ) : (
-  <div className="text-center text-xl mt-5 text-white">Data not found</div>
+  <div className="text-center text-xl mt-5 text-white"></div>
 )}
 
+    <div className="flex justify-center items-center my-10 relative">
+      <button
+        onClick={() => handlePagination(page - 1)}
+        disabled={page === 1}
+        className="px-2 py-2 mx-2 border rounded bg-primary-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <HiChevronDoubleLeft className="w-6 h-auto" />
+      </button>
+      <span className="text-white text-sm">
+        Page {page} of {totalPage}
+      </span>
+      <button
+        onClick={() => handlePagination(page + 1)}
+        disabled={page === totalPage}
+        className="px-2 py-2 mx-2 border rounded bg-primary-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <HiChevronDoubleRight className="w-6 h-auto" />
+      </button>
+    </div>
 
 {/* -------------END SEARCHED TABLE---------------- */}
 
@@ -425,7 +473,19 @@ const closeFlyOut = ()=>{
    </div>
    <div className="w-full border-b border-gray-700 mb-4"></div>
  
-<SearchLead setSearchedData={setIsSearchData} closeFlyOut={closeFlyOut} />
+<SearchLead
+  setSearchedData={setIsSearchData}
+  closeFlyOut={closeFlyOut}
+  setPage={setPage}
+  setTotalPage={setTotalPage}
+  page={page}
+  onApplyFilters={(payload) => {
+    setLastFilters(payload);   // remember filters
+    setPage(1);                // start from page 1
+    fetchSearchedLeads(payload, 1); // fetch immediately
+  }}
+/>
+
 
 
  </div>
