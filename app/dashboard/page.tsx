@@ -139,35 +139,40 @@ export default function Home() {
     setIsCreateLead(false);
     setIsSearchLead(false);
   };
-  const fetchSearchedLeads = async (
-    filters: Record<string, any>,
-    pageNo: number
-  ) => {
-    try {
-      const res = await AxiosProvider.post(
-        `/leads/filter?page=${pageNo}`,
-        filters
-      );
+// Add a 3rd param to control toasting on demand
+const fetchSearchedLeads = async (
+  filters: Record<string, any>,
+  pageNo: number,
+  opts: { showToast?: boolean } = {}
+) => {
+  const { showToast = false } = opts;
 
-    
+  try {
+    const res = await AxiosProvider.post(`/leads/filter?page=${pageNo}`, filters);
     const list = res.data?.data?.data ?? [];
+    const totalPages = res?.data?.data?.pagination?.totalPages ?? 1;
 
-    // if (list.length === 0) {
-    //   toast.info("No leads found");
-    //   return; 
-    // }
-      const totalPages = res?.data?.data?.pagination?.totalPages ?? 1;
-      setIsSearchData(list);
-      setTotalPage(totalPages);
-    } catch (e) {
-      console.error("Search fetch failed:", e);
+    if (list.length === 0) {
+      if (showToast) toast.info("No data found");
+      setIsSearchData([]);        // keep state consistent
+      setTotalPage(totalPages);   // still set total pages (usually 1)
+      return;                     // stop here
     }
-  };
-  useEffect(() => {
-    if (lastFilters) {
-      fetchSearchedLeads(lastFilters, page);
-    }
-  }, [page, lastFilters]);
+
+    setIsSearchData(list);
+    setTotalPage(totalPages);
+  } catch (e) {
+    console.error("Search fetch failed:", e);
+  }
+};
+
+useEffect(() => {
+  if (lastFilters) {
+    // Don't show toast when just changing pages
+    fetchSearchedLeads(lastFilters, page, { showToast: false });
+  }
+}, [page, lastFilters]);
+
 
   if (isChecking) {
     return (
@@ -561,18 +566,19 @@ export default function Home() {
             </div>
             <div className="w-full border-b border-gray-700 mb-4"></div>
 
-            <SearchLead
-              setSearchedData={setIsSearchData}
-              closeFlyOut={closeFlyOut}
-              setPage={setPage}
-              setTotalPage={setTotalPage}
-              page={page}
-              onApplyFilters={(payload) => {
-                setLastFilters(payload); // remember filters
-                setPage(1); // start from page 1
-                fetchSearchedLeads(payload, 1); // fetch immediately
-              }}
-            />
+<SearchLead
+  setSearchedData={setIsSearchData}
+  closeFlyOut={closeFlyOut}
+  setPage={setPage}
+  setTotalPage={setTotalPage}
+  page={page}
+  onApplyFilters={(payload) => {
+    setLastFilters(payload);                  // remember filters
+    setPage(1);                               // start from first page
+    fetchSearchedLeads(payload, 1, { showToast: true }); // 👈 toast if empty
+  }}
+/>
+
           </div>
         )}
       </div>
