@@ -341,7 +341,7 @@ export default function Home() {
           {/* right section top row */}
 
           {/* Main content middle section */}
-          <div className="rounded-3xl shadow-lastTransaction  px-1 py-6 md:p-6 relative">
+          <div className="rounded-3xl   px-1 py-6 md:p-6 relative mainContainerBg">
             {/* ----------------Table----------------------- */}
             <div className="relative overflow-x-auto  sm:rounded-lg">
               {/* Search and filter table row */}
@@ -390,7 +390,7 @@ export default function Home() {
 
 <div className="relative overflow-x-auto sm:rounded-lg">
   <table className="w-full text-sm text-left rtl:text-right text-white">
-    <thead className="text-xs bg-primary-500 text-white">
+    <thead className="text-xs talbleheaderBg text-white">
       <tr className="border border-tableBorder">
         <th scope="col" className="p-3 border border-tableBorder">
           <div className="flex items-center gap-2">
@@ -454,7 +454,7 @@ export default function Home() {
         data.map((item, index) => (
           <tr
             key={index}
-            className="border border-tableBorder bg-black hover:bg-primary-600"
+            className="border border-tableBorder  hover:bg-primary-600"
           >
             <td className="px-2 py-2 border border-tableBorder">
               <div className="flex">
@@ -568,7 +568,7 @@ export default function Home() {
           ></div>
           {/* NOW MY FLYOUT */}
 <div className={`filterflyout ${isFlyoutFilterOpen ? "filteropen" : ""}`}>
-  <div className="w-full min-h-auto bg-black p-4 text-white">
+  <div className="w-full min-h-auto  p-4 text-white">
     {/* Header */}
     <div className="flex justify-between mb-4 sm:mb-6 md:mb-8">
       <p className="text-primary-500 text-[22px] sm:text-[24px] md:text-[26px] font-bold leading-8 sm:leading-9">

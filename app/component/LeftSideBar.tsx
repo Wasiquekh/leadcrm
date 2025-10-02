@@ -33,7 +33,7 @@ const LeftSideBar: React.FC = () => {
     <div
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => setIsExpanded(false)}
-      className={`hidden  md:flex flex-col justify-between py-4 px-1 border-r-2 border-customBorder shadow-borderShadow mt-0 h-screen fixed top-0 left-0 transition-all duration-200 ease-in-out overflow-hidden text-white z-[1000] bg-black ${
+      className={`hidden  md:flex flex-col justify-between py-4 px-1 border-r-2 border-customBorder shadow-borderShadow mt-0 h-screen fixed top-0 left-0 transition-all duration-200 ease-in-out overflow-hidden text-white z-[1000] bg-[#232323] ${
         isExpanded ? "w-72" : "w-[57px]"
       }`}
     >

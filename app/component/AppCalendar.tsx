@@ -132,9 +132,9 @@ export default function AppCalendar({
   };
 
   return (
- <div className="relative overflow-x-auto w-full sm:rounded-lg bg-black text-white">
+ <div className="relative overflow-x-auto w-full sm:rounded-lg  text-white">
   <table className="w-full text-sm text-left whitespace-nowrap">
-    <thead className="text-xs bg-primary-500 text-white">
+    <thead className="text-xs talbleheaderBg text-white">
       <tr className="border border-tableBorder">
         <th className="px-3 py-3 md:p-3 border border-tableBorder font-semibold text-white text-base">
           <div className="flex items-center gap-2">
@@ -182,7 +182,7 @@ export default function AppCalendar({
           return (
             <tr
               key={t?.id ?? index}
-              className="border border-tableBorder bg-black hover:bg-primary-600 transition-colors"
+              className="border border-tableBorder  hover:bg-primary-600 transition-colors"
             >
               {/* Start Date */}
               <td className="px-1 py-2 md:px-3 md:py-2 border-tableBorder">

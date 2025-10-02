@@ -1022,7 +1022,7 @@ setIsActivityHistoryPaination(true)
       docs.map((d) => (
         <div
           key={d.id}
-          className="grid grid-cols-[30%_1fr] gap-4 border border-gray-700 rounded-[6px] p-3 bg-black hover:bg-primary-600 transition-colors"
+          className="grid grid-cols-[30%_1fr] gap-4  p-3 border border-white rounded hover:bg-primary-600 transition-colors"
         >
           {/* Left Column: Notes */}
           <div className="flex items-center">
@@ -1223,7 +1223,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
           {/* right section top row */}
           {/* </div> */}
           <div className=" w-full    flex justify-center relative">
-            <div className="w-full md:w-full min-h-[600px]  !rounded-3xl  shadow-lastTransaction">
+            <div className="w-full md:w-full min-h-[600px]  !rounded-3xl  mainContainerBg">
               <div className="py-4 px-2 md:p-6">
                 {/* Buttons */}
 
@@ -1664,9 +1664,9 @@ const getIdFromName = (list: any[], name?: string | null) => {
                     {/* LEAD PROPERTIES */}
                    {isleadPropertyEdit ? 
                    ( 
-               <div className="w-full">
+               <div className="w-full border border-white rounded overflow-hidden">
   <table className="w-full text-sm text-left text-white">
-    <thead className="text-xs bg-black border-b border-gray-700">
+    <thead className="text-xs ">
       <tr className="border border-gray-700">
         <th
           scope="col"
@@ -1703,7 +1703,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
       ].map((row, idx) => (
         <tr
           key={idx}
-          className="border border-gray-700 bg-black  transition-colors"
+          className="border border-gray-700   transition-colors"
         >
           <td className="text-sm text-gray-400 py-4 px-4">{row.label}</td>
           <td className="text-sm font-medium text-white py-4 px-4">
@@ -1763,7 +1763,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
 
       return (
         <Form>
-          <table className="w-full text-sm text-left bg-black text-white">
+          <table className="w-full text-sm text-left  text-white">
             <thead className="text-xs bg-primary-500 text-white">
               <tr className="border border-tableBorder">
                 <th
@@ -1778,7 +1778,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
 
             <tbody>
               {/* Agent -> Dropdown */}
-              <tr className="border border-tableBorder bg-black hover:bg-primary-600 transition-colors">
+              <tr className="border border-tableBorder  hover:bg-primary-600 transition-colors">
                 <td className="text-sm text-[#FFD700] py-4 px-4">Agent Name</td>
                 <td className="py-4 px-4">
                   <Select
@@ -1816,7 +1816,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
               </tr>
 
               {/* Best time to call -> Input */}
-              <tr className="border border-tableBorder bg-black hover:bg-primary-600 transition-colors">
+              <tr className="border border-tableBorder  hover:bg-primary-600 transition-colors">
                 <td className="text-sm text-[#FFD700] py-4 px-4">Best time to call</td>
                 <td className="py-4 px-4">
                   <Field
@@ -1830,7 +1830,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
               </tr>
 
               {/* Debt Consolidation Status -> Dropdown */}
-              <tr className="border border-tableBorder bg-black hover:bg-primary-600 transition-colors">
+              <tr className="border border-tableBorder  hover:bg-primary-600 transition-colors">
                 <td className="text-sm text-[#FFD700] py-4 px-4">Debt Consolidation Status</td>
                 <td className="py-4 px-4">
                   <Select
@@ -1870,7 +1870,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
               </tr>
 
               {/* Consolidation Status -> Dropdown */}
-              <tr className="border border-tableBorder bg-black hover:bg-primary-600 transition-colors">
+              <tr className="border border-tableBorder  hover:bg-primary-600 transition-colors">
                 <td className="text-sm text-[#FFD700] py-4 px-4">Consolidation Status</td>
                 <td className="py-4 px-4">
                   <Select
@@ -1910,7 +1910,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
               </tr>
 
               {/* WhatsApp -> Input */}
-              <tr className="border border-tableBorder bg-black hover:bg-primary-600 transition-colors">
+              <tr className="border border-tableBorder  hover:bg-primary-600 transition-colors">
                 <td className="text-sm text-[#FFD700] py-4 px-4">WHATSAPP</td>
                 <td className="py-4 px-4">
                   <Field
@@ -2011,7 +2011,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
 
       <div className={`filterflyout ${isFlyoutFilterOpen ? "filteropen" : ""}`}>
         {activity && (
-<div className="w-full min-h-auto bg-black text-white p-4">
+<div className="w-full min-h-auto  text-white p-4">
   {/* Flyout Header */}
   <div className="flex justify-between mb-4">
     <p className="text-primary-500 text-[26px] font-bold leading-9">
@@ -2180,7 +2180,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
 
         )}
         {task && (
-<div className="w-full min-h-auto bg-black text-white p-4">
+<div className="w-full min-h-auto  text-white p-4">
   {/* Flyout content */}
   <div className="flex justify-between mb-4">
     <p className="text-primary-500 text-[26px] font-bold leading-9">
@@ -2424,7 +2424,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
 
         )}
         {document && (
-        <div className="w-full min-h-auto bg-black text-white p-4">
+        <div className="w-full min-h-auto  text-white p-4">
   <div className="flex justify-between mb-4">
     <p className="text-primary-500 text-[26px] font-bold leading-9">
       Create Document
@@ -2483,7 +2483,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
 
         )}
         {updateAcitivityHistory && (
-         <div className="w-full min-h-auto bg-black text-white p-4">
+         <div className="w-full min-h-auto  text-white p-4">
   {/* Flyout header */}
   <div className="flex justify-between mb-4">
     <p className="text-primary-500 text-[26px] font-bold leading-9">
@@ -2674,7 +2674,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
 
         )}
         {isActivityFilter && (
-<div className="w-full min-h-auto bg-black text-white p-4">
+<div className="w-full min-h-auto  text-white p-4">
   <div className="flex justify-between mb-4">
     <p className="text-primary-500 text-[26px] font-bold leading-9">
       Filter Activity

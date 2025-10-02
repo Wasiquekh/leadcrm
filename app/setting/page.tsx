@@ -42,7 +42,7 @@ export default function Home() {
         {/* right section top row */}
         {/* </div> */}
         <div className="w-full  flex justify-center p-0 md:p-0 mt-6 md:mt-0">
-          <div className="w-full min-h-80 md:min-h-[600px]  rounded-3xl shadow-lastTransaction z-10">
+          <div className="w-full min-h-80 md:min-h-[600px]  rounded-3xl  z-10 mainContainerBg">
             <div className="p-3 md:p-6  flex w-full">
               <div className="flex flex-col md:flex-row gap-2 w-full">
                 <Link
