@@ -657,8 +657,9 @@ const test = (id: string) => {
     // await AxiosProvider.post("/assign-agent", { agent_id: selectedAgent.id });
   };
 
-const deleteUserLead = async (lead: CreateLead) => {
-  const userID = lead.id; // extract the actual ID
+const deleteUserLead = async (leadId: string) => {
+  //console.log("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD",leas)
+  const userID = leadId; // extract the actual ID
   console.log("LEAD DELETE ID", userID);
 
   Swal.fire({
