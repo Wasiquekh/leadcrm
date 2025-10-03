@@ -167,7 +167,7 @@ const AdminDashboard: React.FC = () => {
   if (isError) return <div className="p-4 text-red-400">Error: {isError}</div>;
 
   return (
-    <div className="container my-4 text-white bg-black">
+    <div className="container my-4 text-white ">
       <h3 className="text-2xl font-semibold mb-4">Admin Dashboard</h3>
 
       {/* Cards */}
@@ -193,7 +193,7 @@ const AdminDashboard: React.FC = () => {
         <div className="mt-4 overflow-x-auto rounded-lg border border-gray-800">
           <table className="min-w-full table-auto text-white">
             <thead>
-              <tr className="bg-gray-900">
+              <tr className="talbleheaderBg">
                 <th className="border-b px-4 py-2 text-left">Agent Name</th>
                 <th className="border-b px-4 py-2 text-left">Total Today</th>
                 <th className="border-b px-4 py-2 text-left">Pending Today</th>
@@ -210,7 +210,7 @@ const AdminDashboard: React.FC = () => {
                 </tr>
               )}
               {teamTasksByAgent.map((agent) => (
-                <tr key={agent.agent_id} className="hover:bg-gray-800">
+                <tr key={agent.agent_id} className="hover:bg-primary-500">
                   <td className="border-b px-4 py-2">{agent.agent_name}</td>
                   <td className="border-b px-4 py-2">{agent.total_today ?? 0}</td>
                   <td className="border-b px-4 py-2">{agent.pending_today ?? 0}</td>
@@ -236,7 +236,7 @@ const AdminDashboard: React.FC = () => {
             return (
               <div key={`today-${agent.agent_id}`} className="mb-3 overflow-hidden rounded-lg border border-gray-700">
                 <button
-                  className="w-full flex justify-between items-center bg-gray-900 hover:bg-gray-800 px-4 py-3 text-left text-white font-medium"
+                  className="w-full flex justify-between items-center talbleheaderBg hover:bg-primary-500 px-4 py-3 text-left text-white font-medium"
                   onClick={() => setActiveTodayAgent(isOpen ? null : agent.agent_id)}
                 >
                   <span>{agent.agent_name}</span>
@@ -244,11 +244,11 @@ const AdminDashboard: React.FC = () => {
                 </button>
 
                 {isOpen && (
-                  <div className="bg-gray-950 p-4">
+                  <div className=" p-4">
                     <div className="overflow-x-auto">
                       <table className="min-w-full text-sm text-white">
                         <thead>
-                          <tr className="bg-primary-500 text-left">
+                          <tr className="talbleheaderBg text-left">
                             <th className="px-4 py-2 border-b border-gray-700">Lead Name</th>
                             <th className="px-4 py-2 border-b border-gray-700">Status</th>
                             <th className="px-4 py-2 border-b border-gray-700">Due Date</th>
@@ -265,7 +265,7 @@ const AdminDashboard: React.FC = () => {
                             </tr>
                           )}
                           {tasks.map((task, idx) => (
-                            <tr key={`${agent.agent_id}-today-${task.lead_id}-${idx}`} className="hover:bg-gray-800 transition-colors duration-150">
+                            <tr key={`${agent.agent_id}-today-${task.lead_id}-${idx}`} className="hover:bg-primary-500 transition-colors duration-150">
                               <td
                                 onClick={() => openLead(task.lead_id)}
                                 className="px-4 py-2 border-b border-gray-800 bg-primary-600 text-white cursor-pointer rounded-l"
@@ -303,7 +303,7 @@ const AdminDashboard: React.FC = () => {
             return (
               <div key={`overdue-${agent.agent_id}`} className="mb-3 overflow-hidden rounded-lg border border-gray-700">
                 <button
-                  className="w-full flex justify-between items-center bg-gray-900 hover:bg-gray-800 px-4 py-3 text-left text-white font-medium"
+                  className="w-full flex justify-between items-center talbleheaderBg hover:bg-primary-500 px-4 py-3 text-left text-white font-medium"
                   onClick={() => setActiveOverdueAgent(isOpen ? null : agent.agent_id)}
                 >
                   <span>{agent.agent_name}</span>

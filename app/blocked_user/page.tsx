@@ -220,7 +220,7 @@ const unBlockUserData = async(id: string)=>{
           <DesktopHeader />
           {/* right section top row */}
 
-          <div className="rounded-3xl shadow-lastTransaction  py-6 px-1  md:p-6 z-10 relative">
+          <div className="rounded-3xl   py-6 px-1  md:p-6 z-10 relative mainContainerBg">
             {/* Main content middle section */}
             <div className="w-full gap-4 flex justify-end items-center mt-0 mb-8 flex-wrap sm:flex-nowrap">
 
@@ -238,7 +238,7 @@ const unBlockUserData = async(id: string)=>{
             {/* ----------------Table----------------------- */}
  <div className="relative overflow-x-auto sm:rounded-lg">
   <table className="w-full text-sm text-left text-white bg-black">
-    <thead className="text-xs bg-primary-500 text-white">
+    <thead className="text-xs talbleheaderBg text-white">
       <tr className="border border-tableBorder">
         <th className="px-1 p-3 md:p-3 border border-tableBorder font-semibold text-white text-base">
           <div className="flex items-center gap-2">
@@ -278,7 +278,7 @@ const unBlockUserData = async(id: string)=>{
         data.map((item: any, index: number) => (
           <tr
             key={item?.id ?? index}
-            className="border border-tableBorder bg-black hover:bg-primary-700 transition-colors"
+            className="border border-tableBorder hover:bg-primary-700 bg-[#414349]"
           >
             <td className="px-1 md:p-3 py-2 flex md:flex-row gap-2">
               <p className="text-white text-sm sm:text-base font-medium leading-normal capitalize truncate">

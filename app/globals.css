@@ -26,9 +26,18 @@
   --rejectBtn:#FE0000;
 }
 body {
-  background-color: black;
+  background-color: #232323;
   color: white;
 }
+.talbleheaderBg {
+ background-color:  #171717;
+}
+.mainContainerBg {
+  background-color: #414349;
+  background: #414349;
+box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.25);
+}
+
 /* globals.css or any imported CSS file */
 .custom-scrollbar::-webkit-scrollbar {
    height: 3px !important; /* Add this for horizontal scrollbar */
@@ -89,7 +98,7 @@ body:hover::-webkit-scrollbar-thumb,
   width: 600px;
   height: 100vh;
   overflow-y: auto;
-  background-color: #000;
+  background-color:#232323;
   padding-top: 43px;
   padding-bottom: 43px;
   padding-left: 24px;
@@ -109,7 +118,7 @@ body:hover::-webkit-scrollbar-thumb,
   width: 90%;
   height: 100vh;
   overflow-y: auto;
-  background-color: black;
+  background-color: #232323;
   padding-top: 43px;
   padding-bottom: 43px;
   padding-left: 24px;

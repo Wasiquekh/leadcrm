@@ -852,8 +852,8 @@ handleUnassignFilter();
       content: (
 <>
   {/* Tab content 3 */}
-  <table className="w-full text-sm text-left text-white bg-black whitespace-nowrap">
-    <thead className="text-xs text-[#999999] bg-primary-500">
+  <table className="w-full text-sm text-left text-white  whitespace-nowrap">
+    <thead className="text-xs text-[#999999] talbleheaderBg">
       <tr className="border border-tableBorder">
         <th scope="col" className="px-3 py-3 md:p-3 border border-tableBorder">
           <div className="flex items-center gap-2">
@@ -906,7 +906,7 @@ handleUnassignFilter();
         </tr>
       ) : (
         notAssignData.map((item: any, index: number) => (
-          <tr key={item?.id ?? index} className="border border-tableBorder bg-black hover:bg-[#0D1B3A]">
+          <tr key={item?.id ?? index} className="border border-tableBorder hover:bg-primary-600">
             <td className="px-3 py-2 border border-tableBorder text-center">
               <input
                 type="checkbox"
@@ -1044,8 +1044,8 @@ handleUnassignFilter();
       content: (
        <>
   {/* Tab content 3 */}
-  <table className="w-full text-sm text-left text-white bg-black whitespace-nowrap">
-    <thead className="text-xs text-[#999999] bg-primary-500">
+  <table className="w-full text-sm text-left text-white  whitespace-nowrap">
+    <thead className="text-xs text-[#999999] talbleheaderBg">
       <tr className="border border-tableBorder">
         {/* Name - Birth Date: Always Visible */}
         <th scope="col" className="px-3 py-3 md:p-3 border border-tableBorder">
@@ -1098,7 +1098,7 @@ handleUnassignFilter();
         </tr>
       ) : (
         assignLeadData.map((item: any, index: number) => (
-          <tr key={item?.id ?? index} className="border border-tableBorder bg-black hover:bg-primary-600">
+          <tr key={item?.id ?? index} className="border border-tableBorder  hover:bg-primary-600">
             {/* Full name */}
             <td
               onClick={() => test(item.id)}
@@ -1228,12 +1228,12 @@ handleUnassignFilter();
       <LeftSideBar />
       <div className=" flex justify-end  min-h-screen">
         {/* Main content right section */}
-        <div className=" ml-[97px] w-full md:w-[90%] m-auto bg-black min-h-[500px]  rounded p-4 mt-0 ">
+        <div className=" ml-[97px] w-full md:w-[90%] m-auto  min-h-[500px]  rounded p-4 mt-0 ">
           {/* left section top row */}
           <DesktopHeader />
           {/* Main content middle section */}
           {/* ----------------Table----------------------- */}
-          <div className="relative overflow-x-auto shadow-lastTransaction rounded-xl sm:rounded-3xl px-1 py-6 md:p-6   z-10">
+          <div className="relative overflow-x-auto shadow-lastTransaction rounded-xl sm:rounded-3xl px-1 py-6 md:p-6   z-10 mainContainerBg">
             {/* Search and filter table row */}
             <div className=" flex justify-between items-center mb-6  w-full mx-auto">
             <div>
@@ -1496,7 +1496,7 @@ handleUnassignFilter();
       <>
         <div className={`flyout ${isFlyoutOpen ? "open" : ""}`}>
           {isCreateLeads && (
-<div className="w-full min-h-auto p-4 bg-black text-white">
+<div className="w-full min-h-auto p-4  text-white">
   {/* Flyout header */}
   <div className="flex justify-between mb-4">
     <p className="text-primary-500 text-2xl font-bold leading-9">Create Leads</p>
@@ -1781,7 +1781,7 @@ handleUnassignFilter();
   )}
 
 {isBulkLeads && (
-  <div className="w-full min-h-auto p-4 bg-black text-white">
+  <div className="w-full min-h-auto p-4  text-white">
     {/* Flyout header */}
     <div className="flex justify-between mb-4">
       <p className="text-primary-500 text-2xl font-bold leading-9">Bulk Leads</p>
@@ -1803,7 +1803,7 @@ handleUnassignFilter();
             accept=".xlsx,.xls,.csv"
             name="file"
             onChange={(e) => setExcelFile(e.target.files?.[0] ?? null)}
-            className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-gray-700 rounded-[4px] text-sm leading-4 font-medium placeholder-gray-400 py-4 px-4 text-white bg-black"
+            className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-gray-700 rounded-[4px] text-sm leading-4 font-medium placeholder-gray-400 py-4 px-4 text-white !bg-black"
           />
         </div>
 
@@ -1855,7 +1855,7 @@ handleUnassignFilter();
 
 
   {isFilter && (
-<div className="w-full min-h-auto p-4 bg-black text-white">
+<div className="w-full min-h-auto p-4  text-white">
   {/* Flyout header */}
   <div className="flex justify-between mb-4">
     <p className="text-primary-500 text-2xl font-bold leading-9">Filter Leads</p>
@@ -2109,7 +2109,7 @@ handleUnassignFilter();
 
           )}
           {isEditLead && (
- <div className="w-full min-h-auto p-4 bg-black text-white">
+ <div className="w-full min-h-auto p-4 text-white">
   {/* Flyout header */}
   <div className="flex justify-between mb-4">
     <p className="text-primary-500 text-2xl font-bold leading-9">Edit Leads</p>
@@ -2413,7 +2413,7 @@ handleUnassignFilter();
 
           )}
           {isAgent && (
-<div className="w-full min-h-auto p-4 bg-black text-white">
+<div className="w-full min-h-auto p-4  text-white">
   {/* Flyout header */}
   <div className="flex justify-between mb-4">
     <p className="text-primary-500 text-2xl font-bold leading-9">Assign to Agent</p>

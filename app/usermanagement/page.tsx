@@ -8,7 +8,7 @@ import { MdOutlineCall } from "react-icons/md";
 import { LiaArrowCircleDownSolid } from "react-icons/lia";
 import { MdRemoveRedEye, MdModeEdit } from "react-icons/md";
 import { RiDeleteBin6Line } from "react-icons/ri";
-import { IoCloseOutline } from "react-icons/io5";
+import { IoCloseOutline, IoMailOpenOutline } from "react-icons/io5";
 import Link from "next/link";
 import { useEffect, useState, useContext } from "react";
 import AxiosProvider from "../../provider/AxiosProvider";
@@ -255,7 +255,7 @@ setEditFormData({
           <DesktopHeader />
           {/* right section top row */}
 
-          <div className="rounded-3xl shadow-lastTransaction  py-6 px-1  md:p-6 z-10 relative">
+          <div className="rounded-3xl   py-6 px-1  md:p-6 z-10 relative mainContainerBg">
             {/* Main content middle section */}
             <div className="w-full gap-4 flex justify-end items-center mt-0 mb-8 flex-wrap sm:flex-nowrap">
                             <div className=" sm:w-auto">
@@ -281,8 +281,8 @@ setEditFormData({
             </div>
             {/* ----------------Table----------------------- */}
 <div className="relative overflow-x-auto sm:rounded-lg">
-  <table className="w-full text-sm text-left text-white bg-black whitespace-nowrap">
-    <thead className="text-xs bg-primary-500 text-white">
+  <table className="w-full text-sm text-left text-white  whitespace-nowrap">
+    <thead className="text-xs talbleheaderBg text-white">
       <tr className="border border-tableBorder">
         <th className="px-1 py-3 md:p-3 border border-tableBorder">
           <div className="flex items-center gap-2">
@@ -294,7 +294,7 @@ setEditFormData({
         </th>
         <th className="px-2 py-1 border border-tableBorder hidden md:table-cell">
           <div className="flex items-center gap-2">
-            <MdOutlineCall className="w-5 h-5" />
+            <IoMailOpenOutline className="w-5 h-5" />
             <div className="font-semibold text-white text-base leading-normal">Email</div>
           </div>
         </th>
@@ -330,7 +330,7 @@ setEditFormData({
         data.map((item: any, index: number) => (
           <tr
             key={item?.id ?? index}
-            className="border border-tableBorder bg-black hover:bg-primary-600"
+            className="border border-tableBorder  hover:bg-primary-600"
           >
             {/* Name */}
             <td className="px-1 md:p-3 py-2 flex md:flex-row gap-2 ">
@@ -350,7 +350,7 @@ setEditFormData({
             {/* Role */}
             <td className="px-2 py-1 border border-tableBorder hidden md:table-cell">
               <button className="py-[4px] px-3 bg-primary-500 hover:bg-primary-600 active:bg-primary-700 group flex gap-1 items-center rounded-xl text-xs md:text-sm">
-                <MdRemoveRedEye className="text-white w-4 h-4" />
+                {/* <MdRemoveRedEye className="text-white w-4 h-4" /> */}
                 <p className="text-white hidden md:block">{item?.role_name ?? "-"}</p>
               </button>
             </td>
@@ -363,7 +363,7 @@ setEditFormData({
                   className="py-[4px] px-3 bg-primary-600 hover:bg-primary-700 active:bg-primary-800 flex gap-1 items-center rounded-xl text-xs md:text-sm"
                 >
                   <MdRemoveRedEye className="text-white w-4 h-4" />
-                  <p className="text-white hidden md:block">Edit</p>
+                  <p className="text-white hidden md:block"></p>
                 </button>
 
                 <button
@@ -371,7 +371,7 @@ setEditFormData({
                   className="py-[4px] px-3 bg-primary-500 hover:bg-primary-600 active:bg-primary-700 flex gap-1 items-center rounded-full text-xs md:text-sm"
                 >
                   <RiDeleteBin6Line className="text-white w-4 h-4" />
-                  <p className="text-white hidden md:block">Delete</p>
+                  <p className="text-white hidden md:block"></p>
                 </button>
 
                 {item.role_name === "Admin" ? (
@@ -379,7 +379,7 @@ setEditFormData({
                     className="py-[4px] px-3 bg-primary-500 opacity-50 cursor-not-allowed flex gap-1 items-center rounded-full text-xs md:text-sm"
                   >
                     <ImBlocked className="text-white w-4 h-4" />
-                    <p className="text-white hidden md:block">Block user</p>
+                    <p className="text-white hidden md:block"></p>
                   </button>
                 ) : (
                   <button
@@ -387,7 +387,7 @@ setEditFormData({
                     className="py-[4px] px-3 bg-primary-500 hover:bg-primary-600 active:bg-primary-700 flex gap-1 items-center rounded-full text-xs md:text-sm"
                   >
                     <ImBlocked className="text-white w-4 h-4" />
-                    <p className="text-white hidden md:block">Block user</p>
+                    <p className="text-white hidden md:block"></p>
                   </button>
                 )}
               </div>
@@ -443,7 +443,7 @@ setEditFormData({
         ></div>
       )}
       <div className={`flyout ${isFlyoutOpen ? "open" : ""}`}>
-<div className="w-full min-h-auto bg-black text-white p-4">
+<div className="w-full min-h-auto  text-white p-4">
   {/* Flyout content here */}
   <div className="flex justify-between mb-4">
     <p className="text-primary-500 text-[26px] font-bold leading-9">
