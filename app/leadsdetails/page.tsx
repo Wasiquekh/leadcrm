@@ -900,7 +900,7 @@ setIsActivityHistoryPaination(true)
         return (
           <div
             key={activity.id}
-            className="w-full flex justify-between gap-4 hover:bg-primary-800 py-2 px-2 rounded transition-colors"
+            className="w-full flex justify-between gap-4 hover:bg-primary-800 py-2 px-2 rounded transition-colors border-b border-[#E7E7E7] odd:bg-[#404040]"
           >
             {/* Left: icon + occurred date/time */}
             <div className="flex gap-2 shrink-0">
@@ -1667,7 +1667,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
                <div className="w-full border border-white rounded overflow-hidden">
   <table className="w-full text-sm text-left text-white">
     <thead className="text-xs ">
-      <tr className="border border-gray-700">
+      <tr className="border talbleheaderBg">
         <th
           scope="col"
           colSpan={2}
@@ -1703,7 +1703,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
       ].map((row, idx) => (
         <tr
           key={idx}
-          className="border border-gray-700   transition-colors"
+          className="border    transition-colors border-b border-[#E7E7E7] odd:bg-[#404040]"
         >
           <td className="text-sm text-gray-400 py-4 px-4">{row.label}</td>
           <td className="text-sm font-medium text-white py-4 px-4">

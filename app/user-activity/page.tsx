@@ -13,7 +13,7 @@ import { getToken } from "firebase/app-check";
 import AxiosProvider from "../../provider/AxiosProvider";
 import StorageManager from "../../provider/StorageManager";
 import LeftSideBar from "../component/LeftSideBar";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { HiChevronDoubleLeft } from "react-icons/hi";
 import { HiChevronDoubleRight } from "react-icons/hi";
 import { number, setLocale } from "yup";
@@ -29,18 +29,17 @@ import DesktopHeader from "../component/DesktopHeader";
 import { Tooltip } from "react-tooltip";
 import { FaEllipsisVertical } from "react-icons/fa6";
 import { useAuthRedirect } from "../component/hooks/useAuthRedirect";
+import { Formik, Field, Form, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
+
 
 
 const axiosProvider = new AxiosProvider();
 
 interface FilterData {
   uuId?: string;
-  userActivity?: string;
-  startDate: string | Date; // Allow both string and Date
-  endDate?: string;
   module?: string;
   type?: string;
-  name?: string;
 }
 
 interface UserActivity {
@@ -56,9 +55,13 @@ interface UserActivity {
   };
 }
 
-interface AllUserName {
-  name?: string;
-  uuid?: string;
+interface Agent {
+  id: string;
+  name: string;
+  email: string;
+  mobile_number: string;
+  created_at: string; // ISO date string
+  updated_at: string; // ISO date string
 }
 interface Option {
   value: string;
@@ -70,17 +73,21 @@ interface OptionType {
 }
 
 const moduleOptions: OptionType[] = [
-  { value: "System", label: "System" },
-  { value: "User Management", label: "User Management" },
-  { value: "Customer", label: "Customer" },
+  { value: "document_management", label: "Document Management" },
+  { value: "authentication", label: "Authentication" },
+  { value: "activity_management", label: "Activity Management" },
+  { value: "user_management", label: "User Management" },
+  { value: "leads", label: "Leads" },
+  { value: "task_management", label: "Task Management" },
 ];
 
 const typeOptions: OptionType[] = [
-  { value: "Login", label: "Login" },
-  { value: "Update", label: "Update" },
-  { value: "Delete", label: "Delete" },
-  { value: "Approved", label: "Approved" },
-  { value: "Rejected", label: "Rejected" },
+  { value: "update", label: "Update" },
+  { value: "create", label: "Create" },
+  { value: "login", label: "Login" },
+  { value: "delete", label: "Delete" },
+  { value: "block", label: "Block" },
+  { value: "unblock", label: "Unblock" },
 ];
 
 export default function Home() {
@@ -89,123 +96,56 @@ export default function Home() {
   const [isFlyoutFilterOpen, setFlyoutFilterOpen] = useState<boolean>(false);
   const [data, setData] = useState<UserActivity[]>([]);
   console.log("user activity dara", data);
-  const [dataUserName, setDataUserName] = useState<AllUserName[]>([]);
+ const [agentList, setAgentList] = useState<Agent[]>([]);
+   const [pageSize] = useState<number>(10);
   const [page, setPage] = useState<number>(1);
-  const [pageSize] = useState<number>(10);
   const [filterPage, setFilterPage] = useState<number>(1);
 
   const [totalPages, setTotalPages] = useState<number>(1);
-  const [totalPagesFilter, setTotalPagesFilter] = useState<number>(1);
-  const [filterData, setFilterData] = useState<FilterData>({
-    uuId: "",
-    userActivity: "",
-    startDate: "",
-    endDate: "",
-    module: "",
-    type: "",
-    name: "",
-  });
-  //console.log("+++++++++++++++", filterData);
+  const [totalFilterPages, setTotalFilterPages] = useState<number>(1);
+  // const [filterData, setFilterData] = useState<FilterData>({
+  //  uuId: "",
+  //   module: "",
+  //   type: "",
+  // });
+ // console.log("+++++++++++++++", filterData);
 
   const [isError, setIsError] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isFilter, setIsFilter] = useState<boolean>(false);
-  const [appliedFilters, setAppliedFilters] = useState<string[]>([]);
+  const [clearFilter, setIsClearFilter] = useState<boolean>(false);
+  const [hitApi, setHitApi] = useState<boolean>(false);
   const storage = new StorageManager();
   const userId = storage.getUserId();
 
   const router = useRouter();
 
   // Assuming `dataUserName` is an array of users
-  const userOptions = dataUserName.map((user) => ({
-    value: user.uuid,
+  const userOptions = agentList.map((user) => ({
+    value: user.id,
     label: user.name,
   }));
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFilterData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-  // Handle change for both startDate and endDate
-  const handleDateChange = (
-    date: Date | null,
-    field: "startDate" | "endDate"
-  ) => {
-    const formattedDate = date ? format(date, "yyyy-MM-dd") : ""; // Format date to 'yyyy-MM-dd'
-    setFilterData((prevData) => ({
-      ...prevData,
-      [field]: formattedDate, // Store formatted date
-    }));
-  };
 
-  // const getAllUserName = async () => {
-  //   // setIsLoading(true);
-  //   try {
-  //     const response = await axiosProvider.get("/getallusername"); //for name drop down
-  //     setDataUserName(response.data.data.users);
-  //     // console.log('GET USER DATA',response.data.data.users)
-  //   } catch (error: any) {
-  //     setIsError(true);
-  //     console.error("Error fetching data:", error);
-  //   }
-  // };
-  // useEffect(() => {
-  //   getAllUserName();
-  // }, []);
 
-  const filterDataValue = () => {
-    const filters: string[] = [];
-    if (filterData.uuId) filters.push(`uuid: ${filterData.uuId}`);
-    if (filterData.userActivity)
-      filters.push(`User Activity: ${filterData.name}`);
-    if (filterData.startDate)
-      filters.push(`Start Date: ${filterData.startDate}`);
-    if (filterData.endDate) filters.push(`End Date: ${filterData.endDate}`);
-    if (filterData.module) filters.push(`Module: ${filterData.module}`);
-    if (filterData.type) filters.push(`Type: ${filterData.type}`);
-    setAppliedFilters(filters);
-  };
 
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   setIsFilter(true);
-  //   e.preventDefault();
-  //   filterDataValue();
-  //   toggleFilterFlyout();
-  //   const filteredData = Object.fromEntries(
-  //     Object.entries(filterData).filter(([_, value]) => value !== "")
-  //   );
-  //   console.log("FILTERED DATA", filteredData);
-  //   if (Object.keys(filteredData).length === 0) {
-  //     setIsFilter(false);
-  //     setPage(1);
-  //     fetchData(page);
-  //   } else {
-  //     setIsFilter(true);
-  //     setFilterPage(1);
-  //     fetchFilteredUserActivities(filteredData, filterPage);
-  //   }
-  // };
+    const fetchAgent = async () => {
+      try {
+        const res = await AxiosProvider.get("/allagents");
+        // adjust this if your payload differs
+       const  result= res.data?.data?.data ?? [];
+        setAgentList(result);
+      } catch (error: any) {
+        console.error("Error fetching agents:", error);
+        setAgentList([]);
+      }
+    };
+  
+    useEffect(() => {
+      fetchAgent();
+    }, []);
 
-  // const fetchFilteredUserActivities = async (data: any, page: number) => {
-  //   setIsLoading(true);
-  //   try {
-  //     const response = await axiosProvider.post(
-  //       `/filteruseractivites?page=${page}&limit=${limit}`, // Use passed page value
-  //       data
-  //     );
-  //     const result = response.data.data.filteredActivities;
-  //     setData(result);
-  //     setTotalPagesFilter(response.data.data.totalPages);
-  //   } catch (error: any) {
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
+
   const toggleFlyout = () => setFlyoutOpen(!isFlyoutOpen);
   const toggleFilterFlyout = () => setFlyoutFilterOpen(!isFlyoutFilterOpen);
 
@@ -219,7 +159,7 @@ export default function Home() {
         );
 
         const result = response.data.data.data;
-        // console.log("888888888888888888", response.data.data.pagination.total);
+         console.log("888888888888888888", response);
         setData(result);
         // console.log(
         //   "888888888888888888",
@@ -236,81 +176,74 @@ export default function Home() {
     };
 
     fetchData();
-  }, [page]); // 👈 depends on `page`
+  }, [page,hitApi]); // 👈 depends on `page`
+
+
 
   const handlePageChange = (newPage: number) => {
     if (newPage > 0 && newPage <= totalPages) {
       setPage(newPage);
     }
   };
-  const handlePageChangeFilter = (newPage: number) => {
-    if (newPage > 0 && newPage <= totalPagesFilter) {
+
+    const  handlePageChangeFilter = (newPage: number) => {
+    if (newPage > 0 && newPage <= totalFilterPages) {
       setFilterPage(newPage);
-      const filteredData = Object.fromEntries(
-        Object.entries(filterData).filter(([_, value]) => value !== "")
-      );
-      // fetchFilteredUserActivities(filteredData, newPage);
+      
     }
   };
+  const clickedFilterClear = ()=>{
+    setIsClearFilter(false)
+    setHitApi(!hitApi)
+  }
+  
+const filterApiCall = async (values: { uuId: string; module: string; type: string }, filterPage: number) => {
+  try {
+    // Check if at least one field is filled
+    if (!values.uuId && !values.module && !values.type) {
+      toast.error('At least one field is required!');
+      return;
+    }
 
-  const hadleClear = () => {
-    setFilterData({
-      ...filterData,
-      uuId: "",
-      userActivity: "",
-      startDate: "",
-      endDate: "",
-      module: "",
-      type: "",
-      name: "",
-    });
-  };
-  const removeFilter = async (filter: string) => {
-    setAppliedFilters((prevFilters) => prevFilters.filter((f) => f !== filter));
+    const response = await AxiosProvider.post(
+      `/user-activity/filter?page=${filterPage}`, // Use passed page value
+      values
+    );
 
-    if (filter.startsWith("uuid")) {
-      filterData.uuId = "";
-    }
-    if (filter.startsWith("Start Date")) {
-      filterData.startDate = "";
-    }
-    if (filter.startsWith("End Date")) {
-      filterData.endDate = "";
-    }
-    if (filter.startsWith("Module")) {
-      filterData.module = "";
-    }
-    if (filter.startsWith("Type")) {
-      filterData.type = "";
-    }
-  }; // <-- Add this closing brace for removeFilter
+    console.log("Response Data:", response.data.data.pagination);
+    // Handle success data here
+    return response.data.data; // return the response data
 
-  //   if (appliedFilters.length === 0) {
-  //     fetchFilteredUserActivities(filterData, filterPage);
-  //   } else {
-  //     setPage(1);
-  //     fetchData(page);
-  //   }
-  // };
-  // const clearAllFilteredData = () => {
-  //   setAppliedFilters([]);
-  //   setPage(1);
-  //   fetchData(page);
-  // }
+  } catch (error) {
+    console.error('Error while filtering:', error);
+    toast.error('Error while fetching filtered data');
+  }
+};
+useEffect(()=>{
+const filterApiCall = async (values: { uuId: string; module: string; type: string }, filterPage: number) => {
+  try {
+    // Check if at least one field is filled
+    if (!values.uuId && !values.module && !values.type) {
+    //  toast.error('At least one field is required!');
+      return;
+    }
 
-  // if (isChecking) {
-  //   return (
-  //     <div className="h-screen flex flex-col gap-5 justify-center items-center bg-white">
-  //       <Image
-  //         src="/images/orizonIcon.svg"
-  //         alt="Loading"
-  //         width={150}
-  //         height={150}
-  //         className="animate-pulse rounded"
-  //       />
-  //     </div>
-  //   );
-  // }
+    const response = await AxiosProvider.post(
+      `/user-activity/filter?page=${filterPage}`, // Use passed page value
+      values
+    );
+
+    console.log("Response Data:", response.data.data.pagination);
+    // Handle success data here
+    return response.data.data; // return the response data
+
+  } catch (error) {
+    console.error('Error while filtering:', error);
+    toast.error('Error while fetching filtered data');
+  }
+};
+
+},[filterPage])
   if (isLoading) {
     return (
       <div className="h-screen flex flex-col gap-5 justify-center items-center">
@@ -326,9 +259,7 @@ export default function Home() {
     );
   }
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>): void {
-    throw new Error("Function not implemented.");
-  }
+
 
   return (
     <>
@@ -348,7 +279,7 @@ export default function Home() {
               <div className=" flex justify-end items-center mb-6  w-full mx-auto">
                 <div className=" flex justify-center items-center gap-4">
                   <div
-                    className=" flex items-center gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 group hover:bg-primary-600"
+                    className=" flex items-center gap-2 py-3 px-6 rounded-[12px] border border-[#E7E7E7] cursor-pointer bg-primary-600 group hover:bg-primary-700"
                     onClick={toggleFilterFlyout}
                   >
                     <FiFilter className=" w-4 h-4 text-white group-hover:text-white" />
@@ -359,7 +290,7 @@ export default function Home() {
                 </div>
               </div>
               {/* Show Applied Filters */}
-              <div className="w-[99%] mx-auto mb-3">
+              {/* <div className="w-[99%] mx-auto mb-3">
                 {appliedFilters.length > 0 && (
                   <div className="flex flex-wrap gap-x-3 gap-y-2 items-center">
                     <ul className="flex flex-wrap items-center gap-x-3 gap-y-2">
@@ -386,13 +317,36 @@ export default function Home() {
                     </ul>
                   </div>
                 )}
-              </div>
+              </div> */}
 
-<div className="relative overflow-x-auto sm:rounded-lg">
+<div className="relative overflow-x-auto sm:rounded">
+          {clearFilter && (
+                <button
+                  type="button"
+                  onClick={() => clickedFilterClear()}
+                  className="flex items-center gap-2 text-primary-600 text-sm font-medium transition-colors p-1 border border-primary-500 rounded overflow-hidden mb-3"
+                >
+                  <span>Clear Filter</span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2}
+                    stroke="currentColor"
+                    className="w-4 h-4"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+             )} 
   <table className="w-full text-sm text-left rtl:text-right text-white">
     <thead className="text-xs talbleheaderBg text-white">
-      <tr className="border border-tableBorder">
-        <th scope="col" className="p-3 border border-tableBorder">
+      <tr className=" ">
+        <th scope="col" className="p-3  ">
           <div className="flex items-center gap-2">
             <RxAvatar className="w-6 h-6" />
             <div className="font-medium text-white text-base leading-normal">
@@ -400,7 +354,7 @@ export default function Home() {
             </div>
           </div>
         </th>
-        <th scope="col" className="px-2 py-0 border border-tableBorder hidden sm:table-cell">
+        <th scope="col" className="px-2 py-0   hidden sm:table-cell">
           <div className="flex items-center gap-2 whitespace-nowrap">
             <HiOutlineBookOpen className="w-6 h-6" />
             <div className="font-medium text-white text-base leading-normal">
@@ -408,7 +362,7 @@ export default function Home() {
             </div>
           </div>
         </th>
-        <th scope="col" className="px-2 py-0 border border-tableBorder hidden sm:table-cell">
+        <th scope="col" className="px-2 py-0   hidden sm:table-cell">
           <div className="flex items-center gap-2">
             <HiOutlineBookOpen className="w-6 h-6" />
             <div className="font-medium text-white text-base leading-normal">
@@ -416,7 +370,7 @@ export default function Home() {
             </div>
           </div>
         </th>
-        <th scope="col" className="px-2 py-0 border border-tableBorder hidden sm:table-cell">
+        <th scope="col" className="px-2 py-0   hidden sm:table-cell">
           <div className="flex items-center gap-2">
             <HiOutlineBookOpen className="w-6 h-6" />
             <div className="font-medium text-white text-base leading-normal">
@@ -424,7 +378,7 @@ export default function Home() {
             </div>
           </div>
         </th>
-        <th scope="col" className="px-2 py-0 border border-tableBorder hidden sm:table-cell">
+        <th scope="col" className="px-2 py-0   hidden sm:table-cell">
           <div className="flex items-center gap-2">
             <HiOutlineBookOpen className="w-6 h-6" />
             <div className="font-medium text-white text-base leading-normal">
@@ -432,7 +386,7 @@ export default function Home() {
             </div>
           </div>
         </th>
-        <th scope="col" className="px-2 py-0 border border-tableBorder hidden sm:table-cell">
+        <th scope="col" className="px-2 py-0   hidden sm:table-cell">
           <div className="flex items-center gap-2">
             <HiOutlineBookOpen className="w-6 h-6" />
             <div className="font-medium text-white text-base leading-normal">
@@ -454,9 +408,9 @@ export default function Home() {
         data.map((item, index) => (
           <tr
             key={index}
-            className="border border-tableBorder  hover:bg-primary-600"
+            className="   hover:bg-primary-800 border-b border-[#E7E7E7] odd:bg-[#404040]"
           >
-            <td className="px-2 py-2 border border-tableBorder">
+            <td className="px-2 py-2  ">
               <div className="flex">
                 <div className="md:hidden flex mr-1">
                   <FaEllipsisVertical
@@ -481,23 +435,23 @@ export default function Home() {
               </div>
             </td>
 
-            <td className="px-2 py-2 border border-tableBorder hidden sm:table-cell">
+            <td className="px-2 py-2   hidden sm:table-cell">
               <p className="text-white text-base leading-normal capitalize">{item.user?.name}</p>
             </td>
 
-            <td className="px-2 py-2 border border-tableBorder hidden sm:table-cell">
+            <td className="px-2 py-2   hidden sm:table-cell">
               <p className="text-white text-base leading-normal">{item.user.id}</p>
             </td>
 
-            <td className="px-2 py-2 border border-tableBorder hidden sm:table-cell">
+            <td className="px-2 py-2   hidden sm:table-cell">
               <p className="text-white text-base leading-normal">{item.activity_timestamp}</p>
             </td>
 
-            <td className="px-2 py-2 border border-tableBorder hidden sm:table-cell">
+            <td className="px-2 py-2   hidden sm:table-cell">
               <p className="text-white text-base leading-normal capitalize">{item.module}</p>
             </td>
 
-            <td className="px-2 py-2 border border-tableBorder hidden sm:table-cell">
+            <td className="px-2 py-2   hidden sm:table-cell">
               <p className="text-white text-base leading-normal capitalize">{item.type}</p>
             </td>
           </tr>
@@ -524,11 +478,11 @@ export default function Home() {
                 <HiChevronDoubleLeft className=" w-6 h-auto" />
               </button>
               <span className="text-[#717171] text-sm">
-                Page {filterPage} of {totalPagesFilter}
+               Filter Page {filterPage} of {totalFilterPages}
               </span>
               <button
                 onClick={() => handlePageChangeFilter(filterPage + 1)}
-                disabled={filterPage === totalPagesFilter}
+                disabled={filterPage === totalFilterPages}
                 className="px-2 py-2 mx-2 border rounded bg-primary-500 hover:bg-primary-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <HiChevronDoubleRight className=" w-6 h-auto" />
@@ -571,7 +525,7 @@ export default function Home() {
   <div className="w-full min-h-auto  p-4 text-white">
     {/* Header */}
     <div className="flex justify-between mb-4 sm:mb-6 md:mb-8">
-      <p className="text-primary-500 text-[22px] sm:text-[24px] md:text-[26px] font-bold leading-8 sm:leading-9">
+      <p className="text-primary-600 text-[22px] sm:text-[24px] md:text-[26px] font-bold leading-8 sm:leading-9">
         User Filter
       </p>
       <IoCloseOutline
@@ -582,162 +536,135 @@ export default function Home() {
 
     <div className="w-full border-b border-gray-700 mb-4 sm:mb-6"></div>
 
-<form onSubmit={(e) => handleSubmit(e)}>
-  <div className="w-full">
-    {/* User Name */}
-    <div className="w-full flex flex-col md:flex-row gap-4 md:gap-6 lg:gap-8 mb-4 sm:mb-6">
-      <div className="w-full">
-        <p className="text-white font-medium text-base leading-6 mb-2">User Name</p>
-        <Select
-          value={userOptions.find((option) => option.value === filterData.uuId) || null}
-          onChange={(selectedOption) =>
-            setFilterData((prev) => ({ ...prev, uuId: selectedOption ? selectedOption.value : "" }))
-          }
-          options={userOptions}
-          placeholder="Select User ID"
-          isClearable
-          classNames={{
-            control: ({ isFocused }) =>
-              `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
-                isFocused ? "!border-primary-500" : "!border-gray-700"
-              }`,
-            singleValue: () => "text-white",
-            placeholder: () => "text-gray-400",
-          }}
-          styles={{
-            menu: (base) => ({
-              ...base,
-              borderRadius: "4px",
-              boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
-              backgroundColor: "#000",
-            }),
-            option: (base, { isFocused, isSelected }) => ({
-              ...base,
-              backgroundColor: isSelected
-                ? "var(--primary-500)"  // selected option bg
-                : isFocused
-                ? "var(--primary-100)"  // hovered option bg
-                : "#000",
-              color: isSelected
-                ? "#fff"                // selected text white
-                : isFocused
-                ? "#000"                // hovered text black
-                : "#fff",               // default option text white
-              cursor: "pointer",
-            }),
-          }}
-        />
-      </div>
-    </div>
 
-    {/* Date Filters */}
-    <div className="w-full flex flex-col md:flex-row gap-4 md:justify-between mb-4 sm:mb-6">
-      <div className="w-full md:w-[49%]">
-        <p className="text-white font-medium text-base leading-6 mb-2">Start Date</p>
-        <DatePicker
-          selected={filterData.startDate ? new Date(filterData.startDate) : null}
-          onChange={(date: Date | null) => handleDateChange(date, "startDate")}
-          name="startDate"
-          dateFormat="yyyy-MM-dd"
-          placeholderText="yyyy-mm-dd"
-          className="hover:shadow-hoverInputShadow focus-border-primary !w-full border border-gray-700 rounded-[4px] text-sm leading-4 font-medium placeholder-gray-400 py-4 px-4 bg-black text-white shadow-sm"
-          popperClassName="custom-datepicker"
-        />
-      </div>
-      <div className="w-full md:w-[49%]">
-        <p className="text-white font-medium text-base leading-6 mb-2">End Date</p>
-        <DatePicker
-          selected={filterData.endDate ? new Date(filterData.endDate) : null}
-          onChange={(date: Date | null) => handleDateChange(date, "endDate")}
-          name="endDate"
-          dateFormat="yyyy-MM-dd"
-          placeholderText="yyyy-mm-dd"
-          className="hover:shadow-hoverInputShadow focus-border-primary !w-full border border-gray-700 rounded-[4px] text-sm leading-4 font-medium placeholder-gray-400 py-4 px-4 bg-black text-white shadow-sm"
-          popperClassName="custom-datepicker"
-        />
-      </div>
-    </div>
+    <Formik
+      initialValues={{
+        uuId: '',
+        module: '',
+        type: '',
+      }}
+      validationSchema={Yup.object({
+        uuId: Yup.string(),
+        module: Yup.string(),
+        type: Yup.string(),
+      })}
+      onSubmit={async (values) => {
+        // Call the API outside of Formik
+        const result = await filterApiCall(values, filterPage);
 
-    {/* Module & Type */}
-    <div className="w-full flex flex-col md:flex-row gap-4 md:justify-between mb-4 sm:mb-6">
-      <div className="w-full md:w-[49%]">
-        <p className="text-white font-medium text-base leading-6 mb-2">Module</p>
-        <Select
-          value={moduleOptions.find((option) => option.value === filterData.module) || null}
-          onChange={(selectedOption) =>
-            setFilterData((prev) => ({ ...prev, module: selectedOption ? selectedOption.value : "" }))
-          }
-          options={moduleOptions}
-          placeholder="Select Module"
-          isClearable
-          classNames={{
-            control: ({ isFocused }) =>
-              `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
-                isFocused ? "!border-primary-500" : "!border-gray-700"
-              }`,
-            singleValue: () => "text-white",
-            placeholder: () => "text-gray-400",
-          }}
-          styles={{
-            menu: (base) => ({ ...base, borderRadius: "4px", boxShadow: "0px 4px 10px rgba(0,0,0,0.1)", backgroundColor: "#000" }),
-            option: (base, { isFocused, isSelected }) => ({
-              ...base,
-              backgroundColor: isSelected ? "var(--primary-500)" : isFocused ? "var(--primary-100)" : "#000",
-              color: isSelected ? "#fff" : isFocused ? "#000" : "#fff",
-              cursor: "pointer",
-            }),
-          }}
-        />
-      </div>
+        if (result) {
+          setIsFilter(true);
+          setData(result.data);
+          setTotalFilterPages(result.pagination.totalPages);
+          setIsClearFilter(true);
+        }
+      }}
+    >
+      {({ values, errors, touched, setFieldValue, handleSubmit }) => (
+        <Form onSubmit={handleSubmit}>
+          <div className="w-full">
+            {/* User Name */}
+            <div className="w-full flex flex-col md:flex-row gap-4 md:gap-6 lg:gap-8 mb-4 sm:mb-6">
+              <div className="w-full">
+                <p className="text-white font-medium text-base leading-6 mb-2">User Name</p>
+                <Field name="uuId">
+                  {({ field }) => (
+                    <Select
+                      {...field}
+                      value={userOptions.find((option) => option.value === values.uuId) || null}
+                      onChange={(selectedOption: any) =>
+                        setFieldValue('uuId', selectedOption ? selectedOption.value : '')
+                      }
+                      options={userOptions}
+                      placeholder="Select User ID"
+                      isClearable
+                      classNames={{
+                        control: ({ isFocused }) =>
+                          `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                            isFocused ? '!border-primary-500' : '!border-gray-700'
+                          }`,
+                        singleValue: () => 'text-white',
+                        placeholder: () => 'text-gray-400',
+                      }}
+                    />
+                  )}
+                </Field>
+                {errors.uuId && touched.uuId && <div className="text-red-500 text-sm">{errors.uuId}</div>}
+              </div>
+            </div>
 
-      <div className="w-full md:w-[49%]">
-        <p className="text-white font-medium text-base leading-6 mb-2">Type</p>
-        <Select
-          value={typeOptions.find((option) => option.value === filterData.type) || null}
-          onChange={(selectedOption) =>
-            setFilterData((prev) => ({ ...prev, type: selectedOption ? selectedOption.value : "" }))
-          }
-          options={typeOptions}
-          placeholder="Select Type"
-          isClearable
-          classNames={{
-            control: ({ isFocused }) =>
-              `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
-                isFocused ? "!border-primary-500" : "!border-gray-700"
-              }`,
-            singleValue: () => "text-white",
-            placeholder: () => "text-gray-400",
-          }}
-          styles={{
-            menu: (base) => ({ ...base, borderRadius: "4px", boxShadow: "0px 4px 10px rgba(0,0,0,0.1)", backgroundColor: "#000" }),
-            option: (base, { isFocused, isSelected }) => ({
-              ...base,
-              backgroundColor: isSelected ? "var(--primary-500)" : isFocused ? "var(--primary-100)" : "#000",
-              color: isSelected ? "#fff" : isFocused ? "#000" : "#fff",
-              cursor: "pointer",
-            }),
-          }}
-        />
-      </div>
-    </div>
+            {/* Module & Type */}
+            <div className="w-full flex flex-col md:flex-row gap-4 md:justify-between mb-4 sm:mb-6">
+              <div className="w-full md:w-[49%]">
+                <p className="text-white font-medium text-base leading-6 mb-2">Module</p>
+                <Field name="module">
+                  {({ field }) => (
+                    <Select
+                      {...field}
+                      value={moduleOptions.find((option) => option.value === values.module) || null}
+                      onChange={(selectedOption: any) =>
+                        setFieldValue('module', selectedOption ? selectedOption.value : '')
+                      }
+                      options={moduleOptions}
+                      placeholder="Select Module"
+                      isClearable
+                      classNames={{
+                        control: ({ isFocused }) =>
+                          `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                            isFocused ? '!border-primary-500' : '!border-gray-700'
+                          }`,
+                        singleValue: () => 'text-white',
+                        placeholder: () => 'text-gray-400',
+                      }}
+                    />
+                  )}
+                </Field>
+                {errors.module && touched.module && <div className="text-red-500 text-sm">{errors.module}</div>}
+              </div>
 
-    {/* BUTTONS */}
-    <div className="mt-8 md:mt-10 w-full flex flex-col md:flex-row md:justify-between items-center gap-y-4 md:gap-y-0">
-      <div
-        onClick={hadleClear}
-        className="py-[13px] px-[26px] bg-primary-500 hover:bg-primary-600 w-full md:w-[49%] rounded-[4px] text-base font-medium leading-6 text-white cursor-pointer text-center hover:text-white"
-      >
-        Clear Data
-      </div>
-      <button
-        type="submit"
-        className="py-[13px] px-[26px] bg-primary-600 hover:bg-primary-500 rounded-[4px] w-full md:w-[49%] text-base font-medium leading-6 text-white text-center hover:bg-lightMaroon hover:text-white"
-      >
-        Filter Now
-      </button>
-    </div>
-  </div>
-</form>
+              <div className="w-full md:w-[49%]">
+                <p className="text-white font-medium text-base leading-6 mb-2">Type</p>
+                <Field name="type">
+                  {({ field }) => (
+                    <Select
+                      {...field}
+                      value={typeOptions.find((option) => option.value === values.type) || null}
+                      onChange={(selectedOption: any) =>
+                        setFieldValue('type', selectedOption ? selectedOption.value : '')
+                      }
+                      options={typeOptions}
+                      placeholder="Select Type"
+                      isClearable
+                      classNames={{
+                        control: ({ isFocused }) =>
+                          `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                            isFocused ? '!border-primary-500' : '!border-gray-700'
+                          }`,
+                        singleValue: () => 'text-white',
+                        placeholder: () => 'text-gray-400',
+                      }}
+                    />
+                  )}
+                </Field>
+                {errors.type && touched.type && <div className="text-red-500 text-sm">{errors.type}</div>}
+              </div>
+            </div>
+
+            {/* BUTTONS */}
+            <div className="mt-8 md:mt-10 w-full flex flex-col md:flex-row md:justify-between items-center gap-y-4 md:gap-y-0">
+              <button
+                type="submit"
+                className="py-[13px] px-[26px] bg-primary-700 hover:bg-primary-800 w-full md:w-[49%] rounded-[4px] text-base font-medium leading-6 text-white text-center"
+              >
+                Filter Now
+              </button>
+            </div>
+          </div>
+        </Form>
+      )}
+    </Formik>
+
+
 
   </div>
 </div>

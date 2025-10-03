@@ -79,7 +79,7 @@ export default function LoginHome() {
 
   return (
     <>
-      <div className="bg-[#F5F5F5] hidden md:block">
+      {/* <div className="bg-[#F5F5F5] hidden md:block">
         <Image
           src="/images/orizon-login-bg.svg"
           alt="Orizon iconLogo bg"
@@ -122,8 +122,8 @@ export default function LoginHome() {
           height={52}
           className=" absolute  top-[90%] right-0 left-0 mx-auto"
         />
-      </div>
-      <div className="absolute top-0 bottom-0 left-0 right-0 mx-auto my-auto w-[90%] max-w-[500px] h-[587px] shadow-loginBoxShadow bg-white px-6 sm:px-12 py-10 sm:py-16 rounded-lg">
+      </div> */}
+      <div className="absolute top-0 bottom-0 left-0 right-0 mx-auto my-auto w-[90%] max-w-[500px] h-[587px] shadow-loginBoxShadow  px-6 sm:px-12 py-10 sm:py-16 rounded-lg mainContainerBg">
         <Image
           src="/images/orizonIcon.svg"
           alt="OrizonIcon"
@@ -131,7 +131,7 @@ export default function LoginHome() {
           height={52}
           className="mx-auto mb-5"
         />
-        <p className="font-bold text-lg sm:text-base leading-normal text-center text-black mb-6">
+        <p className="font-bold text-lg sm:text-base leading-normal text-center  mb-6">
           Login to LEAD CRM
         </p>
         <Formik
@@ -143,7 +143,7 @@ export default function LoginHome() {
             <Form className="w-full">
               <div className="w-full">
                 {/* Email Field */}
-                <p className="text-[#232323] text-base leading-normal mb-2">
+                <p className=" text-base leading-normal mb-2">
                   Email
                 </p>
                 <div className="relative">
@@ -152,7 +152,7 @@ export default function LoginHome() {
                     name="email"
                     autoComplete="username"
                     placeholder="Enter your User ID/Email"
-                    className="focus:outline-none w-full h-[50px] border border-[#DFEAF2] rounded-[4px] text-[15px] placeholder-[#718EBF] pl-4 mb-7 text-[#718EBF] hover:shadow-hoverInputShadow focus:border-primary-500"
+                    className="focus:outline-none w-full h-[50px] border border-[#DFEAF2] rounded-[4px] text-[15px]  pl-4 mb-7 hover:shadow-hoverInputShadow focus:border-primary-500 bg-black"
                   />
                   <ErrorMessage
                     name="email"
@@ -162,7 +162,7 @@ export default function LoginHome() {
                 </div>
 
                 {/* Password Field */}
-                <p className="text-[#232323] text-base leading-normal mb-2">
+                <p className=" text-base leading-normal mb-2">
                   Password
                 </p>
                 <div className="relative">
@@ -174,17 +174,17 @@ export default function LoginHome() {
                     }
                     autoComplete="current-password"
                     placeholder="Enter your password"
-                    className="focus:outline-none w-full h-[50px] border border-[#DFEAF2] rounded-[4px] text-[15px] placeholder-[#718EBF] pl-4 mb-8 text-[#718EBF] hover:shadow-hoverInputShadow focus:border-primary-500"
+                    className="focus:outline-none w-full h-[50px] border border-[#DFEAF2] rounded-[4px] text-[15px] pl-4 mb-8  hover:shadow-hoverInputShadow focus:border-primary-500 bg-black"
                   />
                   {showPassword ? (
                     <FaRegEye
                       onClick={togglePasswordVisibility}
-                      className="absolute top-4 right-4 text-[#718EBF] text-[15px] cursor-pointer"
+                      className="absolute top-4 right-4  text-[15px] cursor-pointer"
                     />
                   ) : (
                     <FaRegEyeSlash
                       onClick={togglePasswordVisibility}
-                      className="absolute top-4 right-4 text-[#718EBF] text-[15px] cursor-pointer"
+                      className="absolute top-4 right-4  text-[15px] cursor-pointer"
                     />
                   )}
                   <ErrorMessage
@@ -202,7 +202,7 @@ export default function LoginHome() {
                     id="terms"
                     className="mt-0.5 mr-2 w-4 h-4 accent-primary-600"
                   />
-                  <label htmlFor="terms" className="text-sm text-[#232323]">
+                  <label htmlFor="terms" className="text-sm ">
                     I agree to the{" "}
                     <a
                       href="/"

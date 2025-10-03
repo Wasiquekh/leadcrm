@@ -73,7 +73,7 @@ export default function OtpHome() {
   // }, []);
   return (
     <>
-      <div className="bg-[#F5F5F5] hidden md:block">
+      {/* <div className="bg-[#F5F5F5] hidden md:block">
         <Image
           src="/images/orizon-login-bg.svg"
           alt="Orizon iconLogo bg"
@@ -116,9 +116,9 @@ export default function OtpHome() {
           height={52}
           className=" absolute  top-[90%] right-0 left-0 mx-auto"
         />
-      </div>
+      </div> */}
 
-      <div className="absolute top-0 bottom-0 left-0 right-0 mx-auto my-auto w-[90%] max-w-[500px] h-[587px] shadow-loginBoxShadow bg-white px-6 sm:px-12 py-10 sm:py-16 rounded-lg">
+      <div className="absolute top-0 bottom-0 left-0 right-0 mx-auto my-auto w-[90%] max-w-[500px] h-[587px] shadow-loginBoxShadow  px-6 sm:px-12 py-10 sm:py-16 rounded-lg mainContainerBg">
         <Image
           src="/images/orizonIcon.svg"
           alt="OrizonIcon"
@@ -126,7 +126,7 @@ export default function OtpHome() {
           height={52}
           className="mx-auto mb-5"
         />
-        <p className="font-bold text-lg sm:text-base leading-normal text-center text-black mb-2">
+        <p className="font-bold text-lg sm:text-base leading-normal text-center  mb-2">
           Verify your email
         </p>
         {qrCode && (
@@ -138,7 +138,7 @@ export default function OtpHome() {
             className="mx-auto"
           />
         )}
-        <p className="text-[#232323] text-base leading-[26px] text-center mb-10 sm:mb-14">
+        <p className=" text-base leading-[26px] text-center mb-10 sm:mb-14">
           We&apos;ve sent you a one-time password (OTP). Please enter it below to confirm your account.
         </p>
         <form onSubmit={handleSubmit} className="w-full">
@@ -177,7 +177,7 @@ export default function OtpHome() {
                           prev?.focus();
                         }
                       }}
-                      className="!w-[14%] md:!w-[55px] h-12 sm:h-14 py-3 sm:py-4 text-center sm:px-5 border-b border-[#BDD1E0] text-black text-lg sm:text-xl font-semibold leading-normal focus:outline-none focus:border-b-2 focus-within:border-primary-500"
+                      className="!w-[14%] md:!w-[55px] h-12 sm:h-14 py-3 sm:py-4 text-center sm:px-5 border-b border-[#BDD1E0] text-white text-lg sm:text-xl font-semibold leading-normal focus:outline-none focus:border-b-2 focus-within:border-primary-500 bg-black"
                     />
                   );
                 }}

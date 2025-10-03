@@ -411,7 +411,8 @@ useEffect(() => {
       setLeadSourceDisplay(null);
       formEl.reset();
     } catch (err: any) {
-      toast.error(err?.message || "Bulk Lead is not uploaded");
+      //console.log("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",err)
+      toast.error("Bulk upload failed - all rows invalid");
     } finally {
       setIsLoading(false);
     }
@@ -854,15 +855,15 @@ handleUnassignFilter();
   {/* Tab content 3 */}
   <table className="w-full text-sm text-left text-white  whitespace-nowrap">
     <thead className="text-xs text-[#999999] talbleheaderBg">
-      <tr className="border border-tableBorder">
-        <th scope="col" className="px-3 py-3 md:p-3 border border-tableBorder">
+      <tr className=" ">
+        <th scope="col" className="px-3 py-3 md:p-3  ">
           <div className="flex items-center gap-2">
             <FaRegCheckCircle   className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             <span className="font-semibold text-white text-lg sm:text-base">Select</span>
           </div>
         </th>
         {/* Name - Birth Date: Always Visible */}
-        <th scope="col" className="px-3 py-3 md:p-3 border border-tableBorder">
+        <th scope="col" className="px-3 py-3 md:p-3  ">
           <div className="flex items-center gap-2">
             <RxAvatar className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             <span className="font-semibold text-white text-lg sm:text-base">Full Name</span>
@@ -870,25 +871,25 @@ handleUnassignFilter();
         </th>
 
         {/* Other columns: Hidden on mobile, visible from md: */}
-        <th scope="col" className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+        <th scope="col" className="px-3 py-2   hidden md:table-cell">
           <div className="flex items-center gap-2">
             <IoMailOpenOutline  className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             <span className="font-semibold text-white text-lg sm:text-base">Email</span>
           </div>
         </th>
-        <th scope="col" className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+        <th scope="col" className="px-3 py-2   hidden md:table-cell">
           <div className="flex items-center gap-2">
             <MdOutlinePhone  className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             <span className="font-semibold text-white text-lg sm:text-base">Phone</span>
           </div>
         </th>
-        <th scope="col" className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+        <th scope="col" className="px-3 py-2   hidden md:table-cell">
           <div className="flex items-center gap-2">
             <MdOutlineLocationCity  className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             <span className="font-semibold text-white text-lg sm:text-base">Address</span>
           </div>
         </th>
-        <th scope="col" className="px-3 py-2 border border-tableBorder md:table-cell">
+        <th scope="col" className="px-3 py-2   md:table-cell">
           <div className="flex items-center gap-2">
             <MdOutlineSettings  className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             <span className="font-semibold text-white text-lg sm:text-base">Action</span>
@@ -906,8 +907,8 @@ handleUnassignFilter();
         </tr>
       ) : (
         notAssignData.map((item: any, index: number) => (
-          <tr key={item?.id ?? index} className="border border-tableBorder hover:bg-primary-600">
-            <td className="px-3 py-2 border border-tableBorder text-center">
+          <tr key={item?.id ?? index} className="  hover:bg-primary-700 border-b border-[#E7E7E7] odd:bg-[#404040]">
+            <td className="px-3 py-2   text-center">
               <input
                 type="checkbox"
                 className="accent-primary-600"
@@ -917,7 +918,7 @@ handleUnassignFilter();
             </td>
 
             {/* Full name */}
-            <td className="px-1 py-2 md:px-3 md:py-2 border-tableBorder flex items-center gap-2">
+            <td className="px-1 py-2 md:px-3 md:py-3  flex items-center gap-2">
               <div className="flex gap-2">
                 <div className="md:hidden">
                   <FaEllipsisVertical
@@ -934,32 +935,32 @@ handleUnassignFilter();
                   <Tooltip id="my-tooltip" place="right" float className="box" />
                 </div>
                 <div>
-                  <p className="text-white text-sm sm:text-base font-medium leading-normal capitalize">{item?.full_name ?? "-"}</p>
+                  <p className=" text-sm sm:text-base font-medium leading-normal capitalize">{item?.full_name ?? "-"}</p>
                 </div>
               </div>
             </td>
 
             {/* Email */}
-            <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+            <td className="px-3 py-2   hidden md:table-cell">
               <span className="text-white text-sm sm:text-base">{item?.email ?? "-"}</span>
             </td>
 
             {/* Phone */}
-            <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+            <td className="px-3 py-2   hidden md:table-cell">
               <span className="text-white text-sm sm:text-base">{item?.phone ?? "-"}</span>
             </td>
 
             {/* Owner */}
-            <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+            <td className="px-3 py-2   hidden md:table-cell">
               <span className="text-white text-sm sm:text-base capitalize">{item?.address.country ?? "-"}</span>
             </td>
 
             {/* Action */}
-            <td className="px-3 py-2 border border-tableBorder md:table-cell">
+            <td className="px-3 py-2   md:table-cell">
               <div className="flex gap-1 md:gap-2 justify-center md:justify-start">
                 <button
                   onClick={() => editLead(item)}
-                  className="py-1 px-3 bg-primary-600 hover:bg-primary-700 active:bg-primary-800 flex gap-2 items-center rounded-xl"
+                  className="py-1 px-3 bg-black hover:bg-primary-800 active:bg-primary-800 flex gap-2 items-center rounded-xl"
                 >
                   <MdEdit className="text-white w-4 h-4 hover:text-white" />
                   {/* <span className="text-xs sm:text-sm text-white hover:text-white">Edit</span> */}
@@ -967,7 +968,7 @@ handleUnassignFilter();
                 {userRole === "Admin" && (
                   <button
                     onClick={() => assignAgent(item.id)}
-                    className="py-1 px-3 bg-primary-600 hover:bg-primary-700 active:bg-primary-800 flex gap-2 items-center rounded-xl"
+                    className="py-1 px-3 bg-black hover:bg-primary-800 active:bg-primary-800 flex gap-2 items-center rounded-xl"
                   >
                     <BiUserPin className="text-white w-4 h-4 hover:text-white" />
                     {/* <span className="text-xs sm:text-sm text-white hover:text-white">Assign to agent</span> */}
@@ -976,7 +977,7 @@ handleUnassignFilter();
                 {userRole === "Admin" && (
                   <button
                     onClick={() => deleteUserLead(item.id)}
-                    className="py-1 px-3 bg-primary-600 hover:bg-primary-700 active:bg-primary-800 flex gap-2 items-center rounded-xl"
+                    className="py-1 px-3 bg-black hover:bg-primary-800 active:bg-primary-800 flex gap-2 items-center rounded-xl"
                   >
                     <RiDeleteBin6Line className="text-white w-4 h-4 hover:text-white" />
                     {/* <span className="text-xs sm:text-sm text-white hover:text-white">Delete</span> */}
@@ -996,7 +997,7 @@ handleUnassignFilter();
       <button
         onClick={() => handleUnAssignPaginationFilter(UnAssignPageFilter - 1)}
         disabled={UnAssignPageFilter === 1}
-        className="px-2 py-2 mx-2 border rounded bg-primary-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+        className="px-2 py-2 mx-2 border rounded bg-primary-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <HiChevronDoubleLeft className="w-6 h-auto" />
       </button>
@@ -1006,7 +1007,7 @@ handleUnassignFilter();
       <button
         onClick={() => handleUnAssignPaginationFilter(UnAssignPageFilter + 1)}
         disabled={UnAssignPageFilter === UnAssignTotalPagesFilter}
-        className="px-2 py-2 mx-2 border rounded bg-primary-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+        className="px-2 py-2 mx-2 border rounded bg-primary-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <HiChevronDoubleRight className="w-6 h-auto" />
       </button>
@@ -1016,7 +1017,7 @@ handleUnassignFilter();
       <button
         onClick={() => handleUnAssignPagination(unAssignPage - 1)}
         disabled={unAssignPage === 1}
-        className="px-2 py-2 mx-2 border rounded bg-primary-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+        className="px-2 py-2 mx-2 border rounded bg-primary-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <HiChevronDoubleLeft className="w-6 h-auto" />
       </button>
@@ -1026,7 +1027,7 @@ handleUnassignFilter();
       <button
         onClick={() => handleUnAssignPagination(unAssignPage + 1)}
         disabled={unAssignPage === unAssignTotalPages}
-        className="px-2 py-2 mx-2 border rounded bg-primary-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+        className="px-2 py-2 mx-2 border rounded bg-primary-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <HiChevronDoubleRight className="w-6 h-auto" />
       </button>
@@ -1046,9 +1047,9 @@ handleUnassignFilter();
   {/* Tab content 3 */}
   <table className="w-full text-sm text-left text-white  whitespace-nowrap">
     <thead className="text-xs text-[#999999] talbleheaderBg">
-      <tr className="border border-tableBorder">
+      <tr className=" ">
         {/* Name - Birth Date: Always Visible */}
-        <th scope="col" className="px-3 py-3 md:p-3 border border-tableBorder">
+        <th scope="col" className="px-3 py-3 md:p-3  ">
           <div className="flex items-center gap-2">
                <RxAvatar className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             <span className="font-semibold text-white text-lg sm:text-base">Full Name</span>
@@ -1056,31 +1057,31 @@ handleUnassignFilter();
         </th>
 
         {/* Other columns: Hidden on mobile, visible from md: */}
-        <th scope="col" className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+        <th scope="col" className="px-3 py-2   hidden md:table-cell">
           <div className="flex items-center gap-2">
                    <IoMailOpenOutline  className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             <span className="font-semibold text-white text-lg sm:text-base">Email</span>
           </div>
         </th>
-        <th scope="col" className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+        <th scope="col" className="px-3 py-2   hidden md:table-cell">
           <div className="flex items-center gap-2">
    <MdOutlinePhone  className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             <span className="font-semibold text-white text-lg sm:text-base">Phone</span>
           </div>
         </th>
-        <th scope="col" className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+        <th scope="col" className="px-3 py-2   hidden md:table-cell">
           <div className="flex items-center gap-2">
            <MdOutlineLocationCity  className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             <span className="font-semibold text-white text-lg sm:text-base">Address</span>
           </div>
         </th>
-        <th scope="col" className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+        <th scope="col" className="px-3 py-2   hidden md:table-cell">
           <div className="flex items-center gap-2">
          <ImUserTie   className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             <span className="font-semibold text-white text-lg sm:text-base">Agent</span>
           </div>
         </th>
-        <th scope="col" className="px-3 py-2 border border-tableBorder md:table-cell">
+        <th scope="col" className="px-3 py-2   md:table-cell">
           <div className="flex items-center gap-2">
              <MdOutlineSettings  className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             <span className="font-semibold text-white text-lg sm:text-base">Action</span>
@@ -1098,11 +1099,11 @@ handleUnassignFilter();
         </tr>
       ) : (
         assignLeadData.map((item: any, index: number) => (
-          <tr key={item?.id ?? index} className="border border-tableBorder  hover:bg-primary-600">
+          <tr key={item?.id ?? index} className="  odd:bg-[#404040] hover:bg-primary-700 py-3 border-b border-[#E7E7E7]">
             {/* Full name */}
             <td
               onClick={() => test(item.id)}
-              className="px-1 py-2 md:px-3 md:py-2 border-tableBorder flex items-center gap-2 bg-primary-500 cursor-pointer"
+              className="px-1 py-2 md:px-3 md:py-3 flex items-center gap-2 text-primary-600 underline cursor-pointer"
             >
               <div className="flex gap-2">
                 <div className="md:hidden">
@@ -1120,7 +1121,7 @@ handleUnassignFilter();
                   <Tooltip id="my-tooltip" place="right" float className="box" />
                 </div>
                 <div className="cursor-pointer">
-                  <p className="text-white text-sm sm:text-base font-medium leading-normal capitalize">
+                  <p className="text-primary-600 text-sm sm:text-base font-medium leading-normal capitalize">
                     {item?.full_name ?? "-"}
                   </p>
                 </div>
@@ -1128,31 +1129,31 @@ handleUnassignFilter();
             </td>
 
             {/* Email */}
-            <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+            <td className="px-3 py-2   hidden md:table-cell">
               <span className="text-white text-sm sm:text-base">{item?.email ?? "-"}</span>
             </td>
 
             {/* Phone */}
-            <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+            <td className="px-3 py-2   hidden md:table-cell">
               <span className="text-white text-sm sm:text-base">{item?.phone ?? "-"}</span>
             </td>
 
             {/* Owner */}
-            <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+            <td className="px-3 py-2   hidden md:table-cell">
               <span className="text-white text-sm sm:text-base capitalize">{item?.address.country ?? "-"}</span>
             </td>
 
             {/* Agent */}
-            <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+            <td className="px-3 py-2   hidden md:table-cell">
               <span className="text-white text-sm sm:text-base capitalize">{item?.agent.name ?? "-"}</span>
             </td>
 
             {/* Action */}
-            <td className="px-3 py-2 border border-tableBorder md:table-cell">
+            <td className="px-3 py-2   md:table-cell">
               <div className="flex gap-1 md:gap-2 justify-center md:justify-start">
                 <button
                   onClick={() => editLead(item)}
-                  className="py-1 px-3 bg-primary-600 hover:bg-primary-700 active:bg-primary-800 flex gap-2 items-center rounded-xl"
+                  className="py-1 px-3 bg-black hover:bg-primary-800 active:bg-primary-800 flex gap-2 items-center rounded-xl"
                 >
                   <MdEdit className="text-white w-4 h-4 hover:text-white" />
                   {/* <span className="text-xs sm:text-sm text-white hover:text-white">Edit</span> */}
@@ -1161,7 +1162,7 @@ handleUnassignFilter();
                 {userRole === "Admin" && (
                   <button
                     onClick={() => deleteUserLead(item.id)}
-                    className="py-1 px-3 bg-primary-600 hover:bg-primary-700 active:bg-primary-800 flex gap-2 items-center rounded-xl"
+                    className="py-1 px-3 bg-black hover:bg-primary-800 active:bg-primary-800 flex gap-2 items-center rounded-xl"
                   >
                     <RiDeleteBin6Line className="text-white w-4 h-4 hover:text-white" />
                     {/* <span className="text-xs sm:text-sm text-white hover:text-white">Delete</span> */}
@@ -1181,7 +1182,7 @@ handleUnassignFilter();
       <button
         onClick={() => handleAssignPaginationFilter(assignPageFilter - 1)}
         disabled={assignPageFilter === 1}
-        className="px-2 py-2 mx-2 border rounded bg-primary-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+        className="px-2 py-2 mx-2 border rounded bg-primary-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <HiChevronDoubleLeft className="w-6 h-auto" />
       </button>
@@ -1191,7 +1192,7 @@ handleUnassignFilter();
       <button
         onClick={() => handleAssignPaginationFilter(assignPageFilter + 1)}
         disabled={assignPageFilter === assignTotalPagesFilter}
-        className="px-2 py-2 mx-2 border rounded bg-primary-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+        className="px-2 py-2 mx-2 border rounded bg-primary-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <HiChevronDoubleRight className="w-6 h-auto" />
       </button>
@@ -1201,7 +1202,7 @@ handleUnassignFilter();
       <button
         onClick={() => handleAssignPagination(assignPage - 1)}
         disabled={assignPage === 1}
-        className="px-2 py-2 mx-2 border rounded bg-primary-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+        className="px-2 py-2 mx-2 border rounded bg-primary-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <HiChevronDoubleLeft className="w-6 h-auto" />
       </button>
@@ -1211,7 +1212,7 @@ handleUnassignFilter();
       <button
         onClick={() => handleAssignPagination(assignPage + 1)}
         disabled={assignPage === assignTotalPages}
-        className="px-2 py-2 mx-2 border rounded bg-primary-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+        className="px-2 py-2 mx-2 border rounded bg-primary-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <HiChevronDoubleRight className="w-6 h-auto" />
       </button>
@@ -1265,7 +1266,7 @@ handleUnassignFilter();
               <div className=" flex justify-center items-center gap-4">
 
                 <div
-                  className=" flex justify-center gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 group"
+                  className=" flex justify-center gap-2 py-3 px-6 rounded-[12px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-700 active:bg-primary-700 group"
                   onClick={() => createLeads()}
                 >
                   <FiPlusCircle  className=" w-5 h-5 text-white group-hover:text-white" />
@@ -1276,7 +1277,7 @@ handleUnassignFilter();
 
                 {userRole === "Admin" && (
                   <div
-                    className=" flex justify-center  gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 group"
+                    className=" flex justify-center  gap-2 py-3 px-6 rounded-[12px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-700 active:bg-primary-700 group"
                     onClick={() => bulkLeads()}
                   >
                     <MdOutlineDriveFolderUpload  className=" w-5 h-5 text-white group-hover:text-white" />
@@ -1287,7 +1288,7 @@ handleUnassignFilter();
                 )}
 
                 <div
-                  className=" flex justify-center  gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 group"
+                  className=" flex justify-center  gap-2 py-3 px-6 rounded-[12px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-700 active:bg-primary-700 group"
                   onClick={() => filterLeads()}
                 >
                   <FaSearchPlus  className=" w-5 h-5 text-white group-hover:text-white" />
@@ -1333,9 +1334,9 @@ handleUnassignFilter();
         (
             <table className="w-full text-sm text-left text-white bg-black whitespace-nowrap">
   <thead className="text-xs bg-primary-500 text-white">
-    <tr className="border border-tableBorder">
+    <tr className=" ">
       {/* Full Name */}
-      <th className="px-3 py-3 md:p-3 border border-tableBorder">
+      <th className="px-3 py-3 md:p-3  ">
         <div className="flex items-center gap-2">
           <RxAvatar className="w-5 h-5 sm:w-6 sm:h-6" />
           <span className="font-semibold text-white text-lg sm:text-base">Full Name</span>
@@ -1343,7 +1344,7 @@ handleUnassignFilter();
       </th>
 
       {/* Email */}
-      <th className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+      <th className="px-3 py-2   hidden md:table-cell">
         <div className="flex items-center gap-2">
           <IoMailOpenOutline  className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
           <span className="font-semibold text-white text-lg sm:text-base">Email</span>
@@ -1351,7 +1352,7 @@ handleUnassignFilter();
       </th>
 
       {/* Phone */}
-      <th className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+      <th className="px-3 py-2   hidden md:table-cell">
         <div className="flex items-center gap-2">
             <MdOutlinePhone  className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
           <span className="font-semibold text-white text-lg sm:text-base">Phone</span>
@@ -1359,7 +1360,7 @@ handleUnassignFilter();
       </th>
 
       {/* Address */}
-      <th className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+      <th className="px-3 py-2   hidden md:table-cell">
         <div className="flex items-center gap-2">
           <MdOutlineLocationCity  className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
           <span className="font-semibold text-white text-lg sm:text-base">Address</span>
@@ -1367,7 +1368,7 @@ handleUnassignFilter();
       </th>
 
       {/* Agent */}
-      <th className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+      <th className="px-3 py-2   hidden md:table-cell">
         <div className="flex items-center gap-2">
             <ImUserTie   className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
           <span className="font-semibold text-white text-lg sm:text-base">Agent</span>
@@ -1385,32 +1386,32 @@ handleUnassignFilter();
       </tr>
     ) : (
       assignLeadData.map((item: any, index: number) => (
-        <tr key={item?.id ?? index} className="border border-tableBorder bg-black hover:bg-primary-600">
+        <tr key={item?.id ?? index} className="  bg-black hover:bg-primary-600">
           {/* Full Name */}
           <td
-            className="px-3 py-2 border border-tableBorder flex items-center gap-2 bg-primary-500 cursor-pointer"
+            className="px-3 py-2   flex items-center gap-2 bg-primary-500 cursor-pointer"
             onClick={() => test(item.id)}
           >
             <p className="text-white font-medium capitalize">{item?.full_name ?? "-"}</p>
           </td>
 
           {/* Email */}
-          <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+          <td className="px-3 py-2   hidden md:table-cell">
             <span className="text-white">{item?.email ?? "-"}</span>
           </td>
 
           {/* Phone */}
-          <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+          <td className="px-3 py-2   hidden md:table-cell">
             <span className="text-white">{item?.phone ?? "-"}</span>
           </td>
 
           {/* Address */}
-          <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+          <td className="px-3 py-2   hidden md:table-cell">
             <span className="text-white capitalize">{item?.address.country ?? "-"}</span>
           </td>
 
           {/* Agent */}
-          <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+          <td className="px-3 py-2   hidden md:table-cell">
             <span className="text-white capitalize">{item?.agent.name ?? "-"}</span>
           </td>
         </tr>
@@ -1659,7 +1660,7 @@ handleUnassignFilter();
                   backgroundColor: "#000",
                   color: isSelected ? "#ffd700" : "#fff",
                   cursor: "pointer",
-                  "&:hover": { backgroundColor: "#000", color: "#fff" },
+                  "&:hover": { backgroundColor: "#d19e00", color: "#000" },
                 }),
               }}
             />
@@ -1700,7 +1701,7 @@ handleUnassignFilter();
                   backgroundColor: "#000",
                   color: isSelected ? "#ffd700" : "#fff",
                   cursor: "pointer",
-                  "&:hover": { backgroundColor: "#000", color: "#fff" },
+                  "&:hover":{ backgroundColor: "#d19e00", color: "#000" },
                 }),
               }}
             />
@@ -1730,7 +1731,7 @@ handleUnassignFilter();
                   backgroundColor: "#000",
                   color: isSelected ? "#ffd700" : "#fff",
                   cursor: "pointer",
-                  "&:hover": { backgroundColor: "#000", color: "#fff" },
+                  "&:hover": { backgroundColor: "#d19e00", color: "#000" },
                 }),
               }}
             />
@@ -1759,7 +1760,7 @@ handleUnassignFilter();
                   backgroundColor: "#000",
                   color: isSelected ? "#ffd700" : "#fff",
                   cursor: "pointer",
-                  "&:hover": { backgroundColor: "#000", color: "#fff" },
+                  "&:hover": { backgroundColor: "#d19e00", color: "#000" },
                 }),
               }}
             />
@@ -1835,7 +1836,7 @@ handleUnassignFilter();
                 backgroundColor: "#000",
                 color: isSelected ? "#ffd700" : "#fff",
                 cursor: "pointer",
-                "&:hover": { backgroundColor: "#000", color: "#fff" },
+                "&:hover":{ backgroundColor: "#d19e00", color: "#000" },
               }),
             }}
           />
@@ -2343,19 +2344,33 @@ handleUnassignFilter();
               {/* Lead Source Dropdown */}
               <div className="w-full">
                 <p className="text-white text-base leading-6 mb-2">Lead Source</p>
-                <Select
-                  value={leadSourceDisplay}
-                  onChange={(selected: any) =>
-                    setFieldValue("lead_source_id", selected ? selected.id : "")
-                  }
-                  onBlur={() => setFieldTouched("lead_source_id", true)}
-                  getOptionLabel={(opt: any) => opt.name}
-                  getOptionValue={(opt: any) => String(opt.id)}
-                  options={leadSourceData}
-                  placeholder="Select Lead Source"
-                  isClearable
-                  styles={dropdownStyles}
-                />
+<Select
+  value={leadSourceDisplay}
+  onChange={(selected: any) =>
+    setFieldValue("lead_source_id", selected ? selected.id : "")
+  }
+  onBlur={() => setFieldTouched("lead_source_id", true)}
+  getOptionLabel={(opt: any) => opt.name}
+  getOptionValue={(opt: any) => String(opt.id)}
+  options={leadSourceData}
+  placeholder="Select Lead Source"
+  isClearable
+  styles={{
+    ...dropdownStyles,
+    menuList: (base) => ({
+      ...base,
+      backgroundColor: "#d19e00", // background for dropdown list
+      color: "#000",              // text color
+    }),
+    option: (base, state) => ({
+      ...base,
+      backgroundColor: state.isFocused ? "#c38d00" : "#d19e00", // hover effect
+      color: "#000",
+      cursor: "pointer",
+    }),
+  }}
+/>
+
               </div>
 
               {/* Debt Consolidation Status Dropdown */}
