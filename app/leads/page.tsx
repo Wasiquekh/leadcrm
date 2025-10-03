@@ -386,7 +386,7 @@ useEffect(() => {
       // console.log("LLLLLLLLLLLLLLLLLLLL", leadSourceDisplay);
 
       const res = await fetch(
-        "https://manageleadcrmbackend.dynsimulation.com/api/v1/managelead/leads/bulk/upload",
+        "https://manageleadcrmbackend-prod.dynsimulation.com/api/v1/managelead/leads/bulk/upload",
         {
           method: "POST",
           body: fd, // let the browser set multipart/form-data with boundary
