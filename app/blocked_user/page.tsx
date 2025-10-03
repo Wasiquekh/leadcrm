@@ -226,7 +226,7 @@ const unBlockUserData = async(id: string)=>{
 
               <div className=" sm:w-auto">
                 <Link href="/useradd">
-                  <button className="flex items-center gap-[10px]  h-12 px-3 py-[6px] rounded-[4px] shadow-borderShadow w-full sm:w-auto bg-primary-600 group hover:bg-primary-7  00">
+                  <button className="flex items-center gap-[10px]  h-12 px-3 py-[6px] rounded-[12px] shadow-borderShadow w-full sm:w-auto bg-primary-600 group hover:bg-primary-7  00">
                     <FaRegAddressCard className="h-[20px] w-[20px] text-white group-hover:text-white" />
                     <p className="text-white text-base leading-normal group-hover:text-white">
                       Create User
@@ -239,26 +239,26 @@ const unBlockUserData = async(id: string)=>{
  <div className="relative overflow-x-auto sm:rounded-lg">
   <table className="w-full text-sm text-left text-white bg-black">
     <thead className="text-xs talbleheaderBg text-white">
-      <tr className="border border-tableBorder">
-        <th className="px-1 p-3 md:p-3 border border-tableBorder font-semibold text-white text-base">
+      <tr className="  ">
+        <th className="px-1 p-3 md:p-3    font-semibold text-white text-base">
           <div className="flex items-center gap-2">
             <RxAvatar className="w-5 h-5" />
             <span className="font-semibold text-white text-sm sm:text-base">Name</span>
           </div>
         </th>
-        <th className="px-2 py-1 border border-tableBorder hidden md:table-cell">
+        <th className="px-2 py-1    hidden md:table-cell">
           <div className="flex items-center gap-2">
             <MdOutlineCall className="w-5 h-5" />
             <span className="font-semibold text-white text-sm sm:text-base">Email</span>
           </div>
         </th>
-        <th className="px-2 py-1 border border-tableBorder hidden md:table-cell">
+        <th className="px-2 py-1    hidden md:table-cell">
           <div className="flex items-center gap-2">
             <MdOutlineCall className="w-5 h-5" />
             <span className="font-semibold text-white text-sm sm:text-base">Phone</span>
           </div>
         </th>
-        <th className="px-2 py-1 border border-tableBorder">
+        <th className="px-2 py-1   ">
           <div className="flex items-center gap-2">
             <LiaArrowCircleDownSolid className="w-5 h-5" />
             <span className="font-semibold text-white text-sm sm:text-base">Action</span>
@@ -278,24 +278,24 @@ const unBlockUserData = async(id: string)=>{
         data.map((item: any, index: number) => (
           <tr
             key={item?.id ?? index}
-            className="border border-tableBorder hover:bg-primary-700 bg-[#414349]"
+            className="   hover:bg-primary-600 border-b border-[#E7E7E7] odd:bg-[#404040]"
           >
             <td className="px-1 md:p-3 py-2 flex md:flex-row gap-2">
               <p className="text-white text-sm sm:text-base font-medium leading-normal capitalize truncate">
                 {item?.name ?? "-"}
               </p>
             </td>
-            <td className="px-2 py-1 border border-tableBorder hidden md:table-cell">
+            <td className="px-2 py-1    hidden md:table-cell">
               <p className="text-white text-sm sm:text-base font-medium leading-normal truncate">
                 {item?.email ?? "-"}
               </p>
             </td>
-            <td className="px-2 py-1 border border-tableBorder hidden md:table-cell">
+            <td className="px-2 py-1    hidden md:table-cell">
               <p className="text-white text-sm sm:text-base font-medium leading-normal truncate">
                 {item?.mobile_number ?? "-"}
               </p>
             </td>
-            <td className="px-2 py-1 border border-tableBorder">
+            <td className="px-2 py-1   ">
               <div className="flex gap-1 md:gap-2 justify-center md:justify-start">
                 <button
                   onClick={() => unBlockUserData(item.id)}

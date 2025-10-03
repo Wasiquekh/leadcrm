@@ -135,32 +135,32 @@ export default function AppCalendar({
  <div className="relative overflow-x-auto w-full sm:rounded-lg  text-white">
   <table className="w-full text-sm text-left whitespace-nowrap">
     <thead className="text-xs talbleheaderBg text-white">
-      <tr className="border border-tableBorder">
-        <th className="px-3 py-3 md:p-3 border border-tableBorder font-semibold text-white text-base">
+      <tr className="  ">
+        <th className="px-3 py-3 md:p-3    font-semibold text-white text-base">
           <div className="flex items-center gap-2">
             <RxAvatar className="w-5 h-5 sm:w-6 sm:h-6" />
             <span>Name - Mail</span>
           </div>
         </th>
-        <th className="px-3 py-2 border border-tableBorder hidden md:table-cell font-semibold text-white text-base">
+        <th className="px-3 py-2    hidden md:table-cell font-semibold text-white text-base">
           <div className="flex items-center gap-2">
             <MdOutlineSubject  className="w-5 h-5 sm:w-6 sm:h-6" />
             <span>Subject</span>
           </div>
         </th>
-        <th className="px-3 py-2 border border-tableBorder hidden md:table-cell font-semibold text-white text-base">
+        <th className="px-3 py-2    hidden md:table-cell font-semibold text-white text-base">
           <div className="flex items-center gap-2">
             <FaRegClock  className="w-5 h-5 sm:w-6 sm:h-6" />
             <span>Status</span>
           </div>
         </th>
-        <th className="px-3 py-2 border border-tableBorder hidden md:table-cell font-semibold text-white text-base">
+        <th className="px-3 py-2    hidden md:table-cell font-semibold text-white text-base">
           <div className="flex items-center gap-2">
             <FaRegCheckCircle  className="w-5 h-5 sm:w-6 sm:h-6" />
             <span>Done</span>
           </div>
         </th>
-        <th className="px-3 py-2 border border-tableBorder hidden md:table-cell font-semibold text-white text-base">
+        <th className="px-3 py-2    hidden md:table-cell font-semibold text-white text-base">
           <div className="flex items-center gap-2">
             <IoSettingsOutline  className="w-5 h-5 sm:w-6 sm:h-6" />
             <span>Action</span>
@@ -182,7 +182,7 @@ export default function AppCalendar({
           return (
             <tr
               key={t?.id ?? index}
-              className="border border-tableBorder  hover:bg-primary-600 transition-colors"
+              className="    hover:bg-primary-600 transition-colors border-b border-[#E7E7E7] odd:bg-[#404040]"
             >
               {/* Start Date */}
               <td className="px-1 py-2 md:px-3 md:py-2 border-tableBorder">
@@ -190,13 +190,13 @@ export default function AppCalendar({
               </td>
 
               {/* Subject */}
-              <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+              <td className="px-3 py-2    hidden md:table-cell">
                 <p className="text-white text-sm sm:text-base capitalize">{t?.subject || "-"}</p>
                 <p className="text-gray-300 text-xs">{t?.details || "-"}</p>
               </td>
 
               {/* Status pill */}
-              <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+              <td className="px-3 py-2    hidden md:table-cell">
                 <span
                   className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs border ${statusClasses(
                     t?.status
@@ -207,7 +207,7 @@ export default function AppCalendar({
               </td>
 
               {/* Done checkbox */}
-              <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+              <td className="px-3 py-2    hidden md:table-cell">
                 <label className="inline-flex items-center gap-2">
                   <input
                     type="checkbox"
@@ -225,7 +225,7 @@ export default function AppCalendar({
               </td>
 
      {/* Action */}
-<td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+<td className="px-3 py-2    hidden md:table-cell">
   <button
     type="button"
     onClick={() => !locked && openEditTask(t)}

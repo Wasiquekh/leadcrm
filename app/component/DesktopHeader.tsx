@@ -10,6 +10,8 @@ import DynamicBreadCrum from "./DynamicBreadCrum";
 import { usePathname } from "next/navigation";
 import AxiosProvider from "../../provider/AxiosProvider";
 import { toast } from "react-toastify";
+import { LuSearchX } from "react-icons/lu";
+import { FaSearch } from "react-icons/fa";
 
 const DesktopHeader = () => {
   const [isFlyoutFilterOpen, setFlyoutFilterOpen] = useState<boolean>(false);
@@ -64,16 +66,16 @@ const DesktopHeader = () => {
 
       <button
         type="button"
-        className="bg-primary text-white px-4 rounded bg-primary-500"
+        className="bg-primary text-white px-4 rounded bg-primary-600"
         onClick={handleSearch}
       >
-        Search
+       <FaSearch />
       </button>
     </div>
           {/* <div className=" w-[50px] h-[50px] bg-white rounded-full flex justify-center items-center">
             <CiSettings className=" text-[#718EBF] w-[25px] h-[25px]" />
           </div> */}
-          <div className=" w-[50px] h-[50px] bg-primary-500 rounded-full flex justify-center items-center">
+          <div className=" w-[50px] h-[50px] bg-primary-600 rounded-full flex justify-center items-center">
             <IoIosNotificationsOutline className=" text-white w-[25px] h-[25px]" />
           </div>
           {/* <div className=" w-[50px] h-[50px]  rounded-full flex justify-center items-center z-10">
