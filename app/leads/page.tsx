@@ -1596,19 +1596,23 @@ handleUnassignFilter();
               options={provinceOptions}
               placeholder="Select Province"
               isClearable
+                classNames={{
+                control: ({ isFocused }: any) =>
+                  `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                    isFocused ? "!border-primary-500" : "!border-gray-700"
+                  }`,
+              }}
               styles={{
-                control: (base) => ({ ...base, backgroundColor: "#000", color: "#fff", borderColor: "#444", padding: "4px" }),
-                input: (base) => ({ ...base, color: "#fff" }),
-                singleValue: (base) => ({ ...base, color: "#fff" }),
-                placeholder: (base) => ({ ...base, color: "#fff" }),
-                menu: (base) => ({ ...base, backgroundColor: "#000", borderRadius: 4 }),
-                option: (base, { isSelected, isFocused }) => ({
+                menu: (base) => ({ ...base, borderRadius: 4, backgroundColor: "#000" }),
+                option: (base, { isFocused, isSelected }) => ({
                   ...base,
-                  backgroundColor: "#000",
-                  color: isSelected ? "#ffd700" : "#fff",
+                  backgroundColor: isSelected ? "var(--primary-600)" : isFocused ? "#222" : "#000",
+                  color: "#fff",
                   cursor: "pointer",
-                  "&:hover": { backgroundColor: "#000", color: "#fff" },
                 }),
+                singleValue: (base) => ({ ...base, color: "#fff" }),
+                input: (base) => ({ ...base, color: "#fff" }),
+                placeholder: (base) => ({ ...base, color: "#aaa" }),
               }}
             />
           </div>
@@ -1649,19 +1653,23 @@ handleUnassignFilter();
               options={leadSourceData}
               placeholder="Select Lead Source"
               isClearable
+                classNames={{
+                control: ({ isFocused }: any) =>
+                  `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                    isFocused ? "!border-primary-500" : "!border-gray-700"
+                  }`,
+              }}
               styles={{
-                control: (base) => ({ ...base, backgroundColor: "#000", color: "#fff", borderColor: "#444",padding: "4px" }),
-                input: (base) => ({ ...base, color: "#fff" }),
-                singleValue: (base) => ({ ...base, color: "#fff" }),
-                placeholder: (base) => ({ ...base, color: "#fff" }),
-                menu: (base) => ({ ...base, backgroundColor: "#000", borderRadius: 4 }),
-                option: (base, { isSelected, isFocused }) => ({
+                menu: (base) => ({ ...base, borderRadius: 4, backgroundColor: "#000" }),
+                option: (base, { isFocused, isSelected }) => ({
                   ...base,
-                  backgroundColor: "#000",
-                  color: isSelected ? "#ffd700" : "#fff",
+                  backgroundColor: isSelected ? "var(--primary-600)" : isFocused ? "#222" : "#000",
+                  color: "#fff",
                   cursor: "pointer",
-                  "&:hover": { backgroundColor: "#d19e00", color: "#000" },
                 }),
+                singleValue: (base) => ({ ...base, color: "#fff" }),
+                input: (base) => ({ ...base, color: "#fff" }),
+                placeholder: (base) => ({ ...base, color: "#aaa" }),
               }}
             />
           </div>
@@ -1690,19 +1698,23 @@ handleUnassignFilter();
               options={agentList}
               placeholder="Select Agent"
               isClearable
+                classNames={{
+                control: ({ isFocused }: any) =>
+                  `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                    isFocused ? "!border-primary-500" : "!border-gray-700"
+                  }`,
+              }}
               styles={{
-                control: (base) => ({ ...base, backgroundColor: "#000", color: "#fff", borderColor: "#444",padding: "4px" }),
-                input: (base) => ({ ...base, color: "#fff" }),
-                singleValue: (base) => ({ ...base, color: "#fff" }),
-                placeholder: (base) => ({ ...base, color: "#fff" }),
-                menu: (base) => ({ ...base, backgroundColor: "#000", borderRadius: 4 }),
-                option: (base, { isSelected, isFocused }) => ({
+                menu: (base) => ({ ...base, borderRadius: 4, backgroundColor: "#000" }),
+                option: (base, { isFocused, isSelected }) => ({
                   ...base,
-                  backgroundColor: "#000",
-                  color: isSelected ? "#ffd700" : "#fff",
+                  backgroundColor: isSelected ? "var(--primary-600)" : isFocused ? "#222" : "#000",
+                  color: "#fff",
                   cursor: "pointer",
-                  "&:hover":{ backgroundColor: "#d19e00", color: "#000" },
                 }),
+                singleValue: (base) => ({ ...base, color: "#fff" }),
+                input: (base) => ({ ...base, color: "#fff" }),
+                placeholder: (base) => ({ ...base, color: "#aaa" }),
               }}
             />
             <ErrorMessage name="agent_id" component="div" className="text-red-500 text-xs mt-1" />
@@ -1720,19 +1732,23 @@ handleUnassignFilter();
               options={debtConsolidation}
               placeholder="Select Debt Consolidation Status"
               isClearable
+                classNames={{
+                control: ({ isFocused }: any) =>
+                  `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                    isFocused ? "!border-primary-500" : "!border-gray-700"
+                  }`,
+              }}
               styles={{
-                control: (base) => ({ ...base, backgroundColor: "#000", color: "#fff", borderColor: "#444",padding: "4px" }),
-                input: (base) => ({ ...base, color: "#fff" }),
-                singleValue: (base) => ({ ...base, color: "#fff" }),
-                placeholder: (base) => ({ ...base, color: "#fff" }),
-                menu: (base) => ({ ...base, backgroundColor: "#000", borderRadius: 4 }),
-                option: (base, { isSelected, isFocused }) => ({
+                menu: (base) => ({ ...base, borderRadius: 4, backgroundColor: "#000" }),
+                option: (base, { isFocused, isSelected }) => ({
                   ...base,
-                  backgroundColor: "#000",
-                  color: isSelected ? "#ffd700" : "#fff",
+                  backgroundColor: isSelected ? "var(--primary-600)" : isFocused ? "#222" : "#000",
+                  color: "#fff",
                   cursor: "pointer",
-                  "&:hover": { backgroundColor: "#d19e00", color: "#000" },
                 }),
+                singleValue: (base) => ({ ...base, color: "#fff" }),
+                input: (base) => ({ ...base, color: "#fff" }),
+                placeholder: (base) => ({ ...base, color: "#aaa" }),
               }}
             />
           </div>
@@ -1749,19 +1765,23 @@ handleUnassignFilter();
               options={consolidationData}
               placeholder="Select Consolidated Credit Status"
               isClearable
+                classNames={{
+                control: ({ isFocused }: any) =>
+                  `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                    isFocused ? "!border-primary-500" : "!border-gray-700"
+                  }`,
+              }}
               styles={{
-                control: (base) => ({ ...base, backgroundColor: "#000", color: "#fff", borderColor: "#444",padding: "4px" }),
-                input: (base) => ({ ...base, color: "#fff" }),
-                singleValue: (base) => ({ ...base, color: "#fff" }),
-                placeholder: (base) => ({ ...base, color: "#fff" }),
-                menu: (base) => ({ ...base, backgroundColor: "#000", borderRadius: 4 }),
-                option: (base, { isSelected, isFocused }) => ({
+                menu: (base) => ({ ...base, borderRadius: 4, backgroundColor: "#000" }),
+                option: (base, { isFocused, isSelected }) => ({
                   ...base,
-                  backgroundColor: "#000",
-                  color: isSelected ? "#ffd700" : "#fff",
+                  backgroundColor: isSelected ? "var(--primary-600)" : isFocused ? "#222" : "#000",
+                  color: "#fff",
                   cursor: "pointer",
-                  "&:hover": { backgroundColor: "#d19e00", color: "#000" },
                 }),
+                singleValue: (base) => ({ ...base, color: "#fff" }),
+                input: (base) => ({ ...base, color: "#fff" }),
+                placeholder: (base) => ({ ...base, color: "#aaa" }),
               }}
             />
           </div>
@@ -1771,7 +1791,7 @@ handleUnassignFilter();
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full py-3 bg-primary-500 rounded-[4px] text-white text-base font-medium hover:bg-primary-600"
+          className="w-full py-3 bg-primary-600 rounded-[4px] text-white text-base font-medium hover:bg-primary-700"
         >
           {isSubmitting ? "Creating..." : "Create Leads"}
         </button>
@@ -1819,26 +1839,24 @@ handleUnassignFilter();
             options={leadSourceData}
             placeholder="Select Lead Source"
             isClearable
-            classNames={{
-              control: ({ isFocused }: any) =>
-                `w-full border border-gray-700 rounded-[4px] bg-black text-white text-sm font-medium py-1.5 px-2 shadow-sm ${
-                  isFocused ? "!border-primary-500" : ""
-                }`,
-            }}
-            styles={{
-              control: (base) => ({ ...base, backgroundColor: "#000", color: "#fff", borderColor: "#444", minHeight: "50px" }),
-              input: (base) => ({ ...base, color: "#fff" }),
-              singleValue: (base) => ({ ...base, color: "#fff" }),
-              placeholder: (base) => ({ ...base, color: "#fff" }),
-              menu: (base) => ({ ...base, backgroundColor: "#000", borderRadius: 4 }),
-              option: (base, { isSelected, isFocused }) => ({
-                ...base,
-                backgroundColor: "#000",
-                color: isSelected ? "#ffd700" : "#fff",
-                cursor: "pointer",
-                "&:hover":{ backgroundColor: "#d19e00", color: "#000" },
-              }),
-            }}
+                classNames={{
+                control: ({ isFocused }: any) =>
+                  `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                    isFocused ? "!border-primary-500" : "!border-gray-700"
+                  }`,
+              }}
+              styles={{
+                menu: (base) => ({ ...base, borderRadius: 4, backgroundColor: "#000" }),
+                option: (base, { isFocused, isSelected }) => ({
+                  ...base,
+                  backgroundColor: isSelected ? "var(--primary-600)" : isFocused ? "#222" : "#000",
+                  color: "#fff",
+                  cursor: "pointer",
+                }),
+                singleValue: (base) => ({ ...base, color: "#fff" }),
+                input: (base) => ({ ...base, color: "#fff" }),
+                placeholder: (base) => ({ ...base, color: "#aaa" }),
+              }}
           />
         </div>
       </div>
@@ -1846,7 +1864,7 @@ handleUnassignFilter();
       {/* Submit Button */}
       <button
         type="submit"
-        className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:bg-primary-600 w-full"
+        className="py-[13px] px-[26px] bg-primary-600 rounded-[4px] text-base font-medium leading-6 text-white hover:bg-primary-700 w-full"
       >
         Upload File
       </button>
@@ -2029,7 +2047,24 @@ handleUnassignFilter();
                 placeholder="Select Agent"
                 isMulti
                 isClearable
-                classNamePrefix="react-select"
+                                classNames={{
+                control: ({ isFocused }: any) =>
+                  `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                    isFocused ? "!border-primary-500" : "!border-gray-700"
+                  }`,
+              }}
+              styles={{
+                menu: (base) => ({ ...base, borderRadius: 4, backgroundColor: "#000" }),
+                option: (base, { isFocused, isSelected }) => ({
+                  ...base,
+                  backgroundColor: isSelected ? "var(--primary-600)" : isFocused ? "#222" : "#000",
+                  color: "#fff",
+                  cursor: "pointer",
+                }),
+                singleValue: (base) => ({ ...base, color: "#fff" }),
+                input: (base) => ({ ...base, color: "#fff" }),
+                placeholder: (base) => ({ ...base, color: "#aaa" }),
+              }}
               />
             </div>
 
@@ -2045,7 +2080,24 @@ handleUnassignFilter();
                 options={leadSourceData}
                 placeholder="Select Lead Source"
                 isClearable
-                classNamePrefix="react-select"
+                                classNames={{
+                control: ({ isFocused }: any) =>
+                  `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                    isFocused ? "!border-primary-500" : "!border-gray-700"
+                  }`,
+              }}
+              styles={{
+                menu: (base) => ({ ...base, borderRadius: 4, backgroundColor: "#000" }),
+                option: (base, { isFocused, isSelected }) => ({
+                  ...base,
+                  backgroundColor: isSelected ? "var(--primary-600)" : isFocused ? "#222" : "#000",
+                  color: "#fff",
+                  cursor: "pointer",
+                }),
+                singleValue: (base) => ({ ...base, color: "#fff" }),
+                input: (base) => ({ ...base, color: "#fff" }),
+                placeholder: (base) => ({ ...base, color: "#aaa" }),
+              }}
               />
             </div>
 
@@ -2061,7 +2113,24 @@ handleUnassignFilter();
                 options={debtConsolidation}
                 placeholder="Select Debt Consolidation Status"
                 isClearable
-                classNamePrefix="react-select"
+                                classNames={{
+                control: ({ isFocused }: any) =>
+                  `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                    isFocused ? "!border-primary-500" : "!border-gray-700"
+                  }`,
+              }}
+              styles={{
+                menu: (base) => ({ ...base, borderRadius: 4, backgroundColor: "#000" }),
+                option: (base, { isFocused, isSelected }) => ({
+                  ...base,
+                  backgroundColor: isSelected ? "var(--primary-600)" : isFocused ? "#222" : "#000",
+                  color: "#fff",
+                  cursor: "pointer",
+                }),
+                singleValue: (base) => ({ ...base, color: "#fff" }),
+                input: (base) => ({ ...base, color: "#fff" }),
+                placeholder: (base) => ({ ...base, color: "#aaa" }),
+              }}
               />
             </div>
 
@@ -2077,18 +2146,35 @@ handleUnassignFilter();
                 options={consolidationData}
                 placeholder="Select Consolidated Credit Status"
                 isClearable
-                classNamePrefix="react-select"
+                                classNames={{
+                control: ({ isFocused }: any) =>
+                  `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                    isFocused ? "!border-primary-500" : "!border-gray-700"
+                  }`,
+              }}
+              styles={{
+                menu: (base) => ({ ...base, borderRadius: 4, backgroundColor: "#000" }),
+                option: (base, { isFocused, isSelected }) => ({
+                  ...base,
+                  backgroundColor: isSelected ? "var(--primary-600)" : isFocused ? "#222" : "#000",
+                  color: "#fff",
+                  cursor: "pointer",
+                }),
+                singleValue: (base) => ({ ...base, color: "#fff" }),
+                input: (base) => ({ ...base, color: "#fff" }),
+                placeholder: (base) => ({ ...base, color: "#aaa" }),
+              }}
               />
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-4">
             {userRole === "Admin" && (
               <button
                 type="button"
                 disabled={isSubmitting}
                 onClick={handleUnassignFilter}
-                className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-white text-base font-medium hover:bg-primary-600 w-full"
+                className="py-[13px] px-[26px] bg-primary-600 rounded-[4px] text-white text-base font-medium hover:bg-primary-700 w-full"
               >
                 Filter UnAssign leads
               </button>
@@ -2097,7 +2183,7 @@ handleUnassignFilter();
               type="button"
               disabled={isSubmitting}
               onClick={handleAssignFilter}
-              className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-white text-base font-medium hover:bg-primary-600 w-full"
+              className="py-[13px] px-[26px] bg-primary-600 rounded-[4px] text-white text-base font-medium hover:bg-primary-700 w-full"
             >
               Filter Assign leads
             </button>
@@ -2216,29 +2302,7 @@ handleUnassignFilter();
                 norm(o.name) === norm((creditPrefill as any)?.name ?? creditPrefill)
             ) || null;
 
-        // Global dropdown styles
-        const dropdownStyles = {
-          control: (base: any) => ({
-            ...base,
-            backgroundColor: "#000",
-            color: "#fff",
-            borderColor: "#444",
-            minHeight: "50px",
-            padding: "4px",
-          }),
-          input: (base: any) => ({ ...base, color: "#fff" }),
-          singleValue: (base: any) => ({ ...base, color: "#fff" }),
-          placeholder: (base: any) => ({ ...base, color: "#fff" }),
-          menu: (base: any) => ({ ...base, backgroundColor: "#000", borderRadius: 4 }),
-          option: (base: any, { isSelected, isFocused }: any) => ({
-            ...base,
-            backgroundColor: "#000",
-            color: isSelected ? "#ffd700" : "#fff",
-            cursor: "pointer",
-            "&:hover": { backgroundColor: "#000", color: "#fff" },
-          }),
-        };
-
+ 
         return (
           <form onSubmit={handleSubmit}>
             <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -2355,20 +2419,24 @@ handleUnassignFilter();
   options={leadSourceData}
   placeholder="Select Lead Source"
   isClearable
-  styles={{
-    ...dropdownStyles,
-    menuList: (base) => ({
-      ...base,
-      backgroundColor: "#d19e00", // background for dropdown list
-      color: "#000",              // text color
-    }),
-    option: (base, state) => ({
-      ...base,
-      backgroundColor: state.isFocused ? "#c38d00" : "#d19e00", // hover effect
-      color: "#000",
-      cursor: "pointer",
-    }),
-  }}
+                classNames={{
+                control: ({ isFocused }: any) =>
+                  `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                    isFocused ? "!border-primary-500" : "!border-gray-700"
+                  }`,
+              }}
+              styles={{
+                menu: (base) => ({ ...base, borderRadius: 4, backgroundColor: "#000" }),
+                option: (base, { isFocused, isSelected }) => ({
+                  ...base,
+                  backgroundColor: isSelected ? "var(--primary-600)" : isFocused ? "#222" : "#000",
+                  color: "#fff",
+                  cursor: "pointer",
+                }),
+                singleValue: (base) => ({ ...base, color: "#fff" }),
+                input: (base) => ({ ...base, color: "#fff" }),
+                placeholder: (base) => ({ ...base, color: "#aaa" }),
+              }}
 />
 
               </div>
@@ -2387,7 +2455,24 @@ handleUnassignFilter();
                   options={debtConsolidation}
                   placeholder="Select Debt Consolidation Status"
                   isClearable
-                  styles={dropdownStyles}
+                                  classNames={{
+                control: ({ isFocused }: any) =>
+                  `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                    isFocused ? "!border-primary-500" : "!border-gray-700"
+                  }`,
+              }}
+              styles={{
+                menu: (base) => ({ ...base, borderRadius: 4, backgroundColor: "#000" }),
+                option: (base, { isFocused, isSelected }) => ({
+                  ...base,
+                  backgroundColor: isSelected ? "var(--primary-600)" : isFocused ? "#222" : "#000",
+                  color: "#fff",
+                  cursor: "pointer",
+                }),
+                singleValue: (base) => ({ ...base, color: "#fff" }),
+                input: (base) => ({ ...base, color: "#fff" }),
+                placeholder: (base) => ({ ...base, color: "#aaa" }),
+              }}
                 />
               </div>
 
@@ -2405,7 +2490,24 @@ handleUnassignFilter();
                   options={consolidationData}
                   placeholder="Select Consolidated Credit Status"
                   isClearable
-                  styles={dropdownStyles}
+                                  classNames={{
+                control: ({ isFocused }: any) =>
+                  `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                    isFocused ? "!border-primary-500" : "!border-gray-700"
+                  }`,
+              }}
+              styles={{
+                menu: (base) => ({ ...base, borderRadius: 4, backgroundColor: "#000" }),
+                option: (base, { isFocused, isSelected }) => ({
+                  ...base,
+                  backgroundColor: isSelected ? "var(--primary-600)" : isFocused ? "#222" : "#000",
+                  color: "#fff",
+                  cursor: "pointer",
+                }),
+                singleValue: (base) => ({ ...base, color: "#fff" }),
+                input: (base) => ({ ...base, color: "#fff" }),
+                placeholder: (base) => ({ ...base, color: "#aaa" }),
+              }}
                 />
               </div>
             </div>

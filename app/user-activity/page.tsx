@@ -561,106 +561,138 @@ const filterApiCall = async (values: { uuId: string; module: string; type: strin
       }}
     >
       {({ values, errors, touched, setFieldValue, handleSubmit }) => (
-        <Form onSubmit={handleSubmit}>
-          <div className="w-full">
-            {/* User Name */}
-            <div className="w-full flex flex-col md:flex-row gap-4 md:gap-6 lg:gap-8 mb-4 sm:mb-6">
-              <div className="w-full">
-                <p className="text-white font-medium text-base leading-6 mb-2">User Name</p>
-                <Field name="uuId">
-                  {({ field }) => (
-                    <Select
-                      {...field}
-                      value={userOptions.find((option) => option.value === values.uuId) || null}
-                      onChange={(selectedOption: any) =>
-                        setFieldValue('uuId', selectedOption ? selectedOption.value : '')
-                      }
-                      options={userOptions}
-                      placeholder="Select User ID"
-                      isClearable
-                      classNames={{
-                        control: ({ isFocused }) =>
-                          `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
-                            isFocused ? '!border-primary-500' : '!border-gray-700'
-                          }`,
-                        singleValue: () => 'text-white',
-                        placeholder: () => 'text-gray-400',
-                      }}
-                    />
-                  )}
-                </Field>
-                {errors.uuId && touched.uuId && <div className="text-red-500 text-sm">{errors.uuId}</div>}
-              </div>
-            </div>
+<Form onSubmit={handleSubmit}>
+  <div className="w-full">
+    {/* User Name */}
+    <div className="w-full flex flex-col md:flex-row gap-4 md:gap-6 lg:gap-8 mb-4 sm:mb-6">
+      <div className="w-full">
+        <p className="text-white font-medium text-base leading-6 mb-2">User Name</p>
+        <Field name="uuId">
+          {({ field }) => (
+            <Select
+              {...field}
+              value={userOptions.find((option) => option.value === values.uuId) || null}
+              onChange={(selectedOption: any) =>
+                setFieldValue('uuId', selectedOption ? selectedOption.value : '')
+              }
+              options={userOptions}
+              placeholder="Select User ID"
+              isClearable
+                classNames={{
+                control: ({ isFocused }: any) =>
+                  `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                    isFocused ? "!border-primary-500" : "!border-gray-700"
+                  }`,
+              }}
+              styles={{
+                menu: (base) => ({ ...base, borderRadius: 4, backgroundColor: "#000" }),
+                option: (base, { isFocused, isSelected }) => ({
+                  ...base,
+                  backgroundColor: isSelected ? "var(--primary-600)" : isFocused ? "#222" : "#000",
+                  color: "#fff",
+                  cursor: "pointer",
+                }),
+                singleValue: (base) => ({ ...base, color: "#fff" }),
+                input: (base) => ({ ...base, color: "#fff" }),
+                placeholder: (base) => ({ ...base, color: "#aaa" }),
+              }}
+            />
+          )}
+        </Field>
+        {errors.uuId && touched.uuId && <div className="text-red-500 text-sm">{errors.uuId}</div>}
+      </div>
+    </div>
 
-            {/* Module & Type */}
-            <div className="w-full flex flex-col md:flex-row gap-4 md:justify-between mb-4 sm:mb-6">
-              <div className="w-full md:w-[49%]">
-                <p className="text-white font-medium text-base leading-6 mb-2">Module</p>
-                <Field name="module">
-                  {({ field }) => (
-                    <Select
-                      {...field}
-                      value={moduleOptions.find((option) => option.value === values.module) || null}
-                      onChange={(selectedOption: any) =>
-                        setFieldValue('module', selectedOption ? selectedOption.value : '')
-                      }
-                      options={moduleOptions}
-                      placeholder="Select Module"
-                      isClearable
-                      classNames={{
-                        control: ({ isFocused }) =>
-                          `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
-                            isFocused ? '!border-primary-500' : '!border-gray-700'
-                          }`,
-                        singleValue: () => 'text-white',
-                        placeholder: () => 'text-gray-400',
-                      }}
-                    />
-                  )}
-                </Field>
-                {errors.module && touched.module && <div className="text-red-500 text-sm">{errors.module}</div>}
-              </div>
+    {/* Module & Type */}
+    <div className="w-full flex flex-col md:flex-row gap-4 md:justify-between mb-4 sm:mb-6">
+      <div className="w-full md:w-[49%]">
+        <p className="text-white font-medium text-base leading-6 mb-2">Module</p>
+        <Field name="module">
+          {({ field }) => (
+            <Select
+              {...field}
+              value={moduleOptions.find((option) => option.value === values.module) || null}
+              onChange={(selectedOption: any) =>
+                setFieldValue('module', selectedOption ? selectedOption.value : '')
+              }
+              options={moduleOptions}
+              placeholder="Select Module"
+              isClearable
+                classNames={{
+                control: ({ isFocused }: any) =>
+                  `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                    isFocused ? "!border-primary-500" : "!border-gray-700"
+                  }`,
+              }}
+              styles={{
+                menu: (base) => ({ ...base, borderRadius: 4, backgroundColor: "#000" }),
+                option: (base, { isFocused, isSelected }) => ({
+                  ...base,
+                  backgroundColor: isSelected ? "var(--primary-600)" : isFocused ? "#222" : "#000",
+                  color: "#fff",
+                  cursor: "pointer",
+                }),
+                singleValue: (base) => ({ ...base, color: "#fff" }),
+                input: (base) => ({ ...base, color: "#fff" }),
+                placeholder: (base) => ({ ...base, color: "#aaa" }),
+              }}
+            />
+          )}
+        </Field>
+        {errors.module && touched.module && <div className="text-red-500 text-sm">{errors.module}</div>}
+      </div>
 
-              <div className="w-full md:w-[49%]">
-                <p className="text-white font-medium text-base leading-6 mb-2">Type</p>
-                <Field name="type">
-                  {({ field }) => (
-                    <Select
-                      {...field}
-                      value={typeOptions.find((option) => option.value === values.type) || null}
-                      onChange={(selectedOption: any) =>
-                        setFieldValue('type', selectedOption ? selectedOption.value : '')
-                      }
-                      options={typeOptions}
-                      placeholder="Select Type"
-                      isClearable
-                      classNames={{
-                        control: ({ isFocused }) =>
-                          `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
-                            isFocused ? '!border-primary-500' : '!border-gray-700'
-                          }`,
-                        singleValue: () => 'text-white',
-                        placeholder: () => 'text-gray-400',
-                      }}
-                    />
-                  )}
-                </Field>
-                {errors.type && touched.type && <div className="text-red-500 text-sm">{errors.type}</div>}
-              </div>
-            </div>
+      <div className="w-full md:w-[49%]">
+        <p className="text-white font-medium text-base leading-6 mb-2">Type</p>
+        <Field name="type">
+          {({ field }) => (
+            <Select
+              {...field}
+              value={typeOptions.find((option) => option.value === values.type) || null}
+              onChange={(selectedOption: any) =>
+                setFieldValue('type', selectedOption ? selectedOption.value : '')
+              }
+              options={typeOptions}
+              placeholder="Select Type"
+              isClearable
+                classNames={{
+                control: ({ isFocused }: any) =>
+                  `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                    isFocused ? "!border-primary-500" : "!border-gray-700"
+                  }`,
+              }}
+              styles={{
+                menu: (base) => ({ ...base, borderRadius: 4, backgroundColor: "#000" }),
+                option: (base, { isFocused, isSelected }) => ({
+                  ...base,
+                  backgroundColor: isSelected ? "var(--primary-600)" : isFocused ? "#222" : "#000",
+                  color: "#fff",
+                  cursor: "pointer",
+                }),
+                singleValue: (base) => ({ ...base, color: "#fff" }),
+                input: (base) => ({ ...base, color: "#fff" }),
+                placeholder: (base) => ({ ...base, color: "#aaa" }),
+              }}
+            />
+          )}
+        </Field>
+        {errors.type && touched.type && <div className="text-red-500 text-sm">{errors.type}</div>}
+      </div>
+    </div>
 
-            {/* BUTTONS */}
-            <div className="mt-8 md:mt-10 w-full flex flex-col md:flex-row md:justify-between items-center gap-y-4 md:gap-y-0">
-              <button
-                type="submit"
-                className="py-[13px] px-[26px] bg-primary-700 hover:bg-primary-800 w-full md:w-[49%] rounded-[4px] text-base font-medium leading-6 text-white text-center"
-              >
-                Filter Now
-              </button>
-            </div>
-          </div>
-        </Form>
+    {/* BUTTONS */}
+    <div className="mt-8 md:mt-10 w-full flex flex-col md:flex-row md:justify-between items-center gap-y-4 md:gap-y-0">
+      <button
+        type="submit"
+        className="py-[13px] px-[26px] bg-primary-700 hover:bg-primary-800 w-full md:w-[49%] rounded-[4px] text-base font-medium leading-6 text-white text-center"
+      >
+        Filter Now
+      </button>
+    </div>
+  </div>
+</Form>
+
+
       )}
     </Formik>
 
