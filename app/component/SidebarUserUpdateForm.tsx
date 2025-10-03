@@ -174,7 +174,7 @@ const SidebarUserUpdateForm: React.FC<SidebarUserUpdateFormProps> = ({
                   toast.error(`Unexpected response: ${res.status}`);
                 }
                 // Create instance and log activity
-                await activityLogger.userUpdate(currentUserData.id);
+                //await activityLogger.userUpdate(currentUserData.id);
               } catch (error) {
                 console.error("Error during user update:", error);
                 if (error.response) {

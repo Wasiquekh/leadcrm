@@ -36,13 +36,13 @@ export default function Home() {
     <div className=" flex justify-end  min-h-screen">
       {/* Main content right section */}
       <LeftSideBar />
-      <div className="ml-[97px] w-full md:w-[90%] m-auto bg-[#fff] min-h-[500px]  rounded p-4 mt-0 ">
+      <div className="ml-[97px] w-full md:w-[90%] m-auto  min-h-[500px]  rounded p-4 mt-0 ">
         {/* left section top row */}
         <DesktopHeader />
         {/* right section top row */}
         {/* </div> */}
         <div className="w-full  flex justify-center p-0 md:p-0 mt-6 md:mt-0">
-          <div className="w-full min-h-80 md:min-h-[600px] bg-white rounded-3xl shadow-lastTransaction z-10">
+          <div className="w-full min-h-80 md:min-h-[600px]  rounded-3xl  z-10 mainContainerBg">
             <div className="p-3 md:p-6  flex w-full">
               <div className="flex flex-col md:flex-row gap-2 w-full">
                 <Link

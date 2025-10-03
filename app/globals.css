@@ -12,18 +12,30 @@
   /* --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255; */
-  --primary-100:#dff9e6;
-  --primary-200:#c2f0ce;
-  --primary-300:#91e4a8;
-  --primary-400:#5ace7b;
-  --primary-500:#34b359;
-  --primary-600:#279a48;
-  --primary-700:#217439;
-  --primary-800:#1f5c31;
-  --primary-900:#1b4c2a;
+  --primary-100:#feffc1;
+  --primary-200:#fffd86;
+  --primary-300:#fff441;
+  --primary-400:#ffe60d;
+  --primary-500:#ffd700;
+  --primary-600:#d19e00;
+  --primary-700:#a67102;
+  --primary-800:#89580a;
+  --primary-900:#74480f;
 
   --approveBtn:#38B52B;
   --rejectBtn:#FE0000;
+}
+body {
+  background-color: #232323;
+  color: white;
+}
+.talbleheaderBg {
+ background-color:  #171717;
+}
+.mainContainerBg {
+  background-color: #414349;
+  background: #414349;
+box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.25);
 }
 
 /* globals.css or any imported CSS file */
@@ -86,7 +98,7 @@ body:hover::-webkit-scrollbar-thumb,
   width: 600px;
   height: 100vh;
   overflow-y: auto;
-  background-color: white;
+  background-color:#232323;
   padding-top: 43px;
   padding-bottom: 43px;
   padding-left: 24px;
@@ -106,7 +118,7 @@ body:hover::-webkit-scrollbar-thumb,
   width: 90%;
   height: 100vh;
   overflow-y: auto;
-  background-color: white;
+  background-color: #232323;
   padding-top: 43px;
   padding-bottom: 43px;
   padding-left: 24px;
@@ -157,6 +169,9 @@ body:hover::-webkit-scrollbar-thumb,
 .animate-pulse {
   animation: pulse 1.5s infinite; /* Customize duration as needed */
 }
+/* DROP DOWN CSS */
+
+/* END DROP DOWN CSS */
 .react-tel-input .flag-dropdown {
   position: absolute !important;
   top: 0 !important;
@@ -177,14 +192,14 @@ body:hover::-webkit-scrollbar-thumb,
   margin-bottom: 0 !important;
   padding-left: 10px !important;
   margin-left: 0 !important;
-  background: #FFFFFF !important;
+  background: #000 !important;
   border: 1px solid #DFEAF2 !important;
   border-radius: 4px !important;
   line-height: 25px !important;
   height: 50px !important;
   width: 90.7% !important;
   outline: none !important;
-  color: #171717 !important;
+  color: #fff !important;
 }
 .react-tel-input .form-control:hover {
   box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.25);
@@ -222,7 +237,9 @@ body:hover::-webkit-scrollbar-thumb,
   border-color:  var(--primary-600) !important; /* Dark Maroon */
   outline: none!important;
 }
-
+.w-full.border.border-gray-700.rounded-\[4px\].bg-black.text-white.text-sm.font-medium.py-1\.5.px-2.shadow-sm.css-13cymwt-control {
+    background: black !important;
+}
 /* ------------------------------------- */
 /* DATE PICKER CSS */
 /* Header section (month/year title & arrows) */
@@ -348,3 +365,45 @@ text.recharts-text.recharts-cartesian-axis-tick-value {
     font-weight: 400 !important;
   }
 }
+
+/* REACT SELECT css */
+/* React-Select Global Styles for Dark Theme */
+/* Global styles for all react-select dropdowns */
+.react-select__control {
+  background-color: #000 !important; /* input bg */
+  color: #fff !important;            /* input text */
+  border-color: #444 !important;     /* input border */
+  min-height: 50px;                  /* match other input height */
+}
+
+.react-select__single-value {
+  color: #fff !important;
+}
+
+.react-select__placeholder {
+  color: #fff !important;
+}
+
+.react-select__menu {
+  background-color: #000 !important;  /* dropdown list bg */
+  border-radius: 4px;
+  z-index: 9999;
+}
+
+.react-select__option {
+  background-color: #000 !important;
+  color: #fff !important;
+  cursor: pointer;
+}
+
+.react-select__option--is-focused {
+  background-color: #fff441 !important;  /* hover bg */
+  color: #000 !important;                /* hover text */
+}
+
+.react-select__option--is-selected {
+  background-color: #ffd700 !important;  /* selected bg */
+  color: #000 !important;                /* selected text */
+}
+
+/* END REACT SELECT CSS */

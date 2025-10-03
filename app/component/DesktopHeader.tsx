@@ -47,20 +47,21 @@ const DesktopHeader = () => {
   return (
     <>
       <div className=" w-full flex justify-between  items-center gap-7 md:mb-14">
-        <div className="w-full h-24 bg-header-gradient opacity-20 absolute top-0 left-0 right-0 "></div>
+        <div className="w-full h-24 bg-[linear-gradient(206deg,#ffd700_28.85%,rgba(245,247,248,0)_89.55%)] p-6 rounded-lg text-white opacity-20 absolute top-0 left-0 right-0 "></div>
         {/* SEARCH INPUT WITH ICON */}
         <div className=" hidden md:block md:w-auto">
           <DynamicBreadCrum />
         </div>
         <div className=" hidden md:w-auto md:flex md:justify-end md:items-center md:gap-7 w-auto z-10">
        <div className="flex gap-2">
-      <input
-        type="text"
-        placeholder="Search for email, mobile"
-        className="bg-white w-64 h-[50px] rounded-[4px] px-6 border border-[#E7E7E7] hover:shadow-hoverInputShadow focus:border-primary placeholder-[#8BA3CB] text-[15px] leading-normal"
-        value={query}
-        onChange={(e) => setQuery(e.target.value.trim())}
-      />
+<input
+  type="text"
+  placeholder="Search for email, mobile"
+  className="bg-black w-64 h-[50px] rounded-[4px] px-6 border border-gray-700 hover:shadow-hoverInputShadow focus:border-primary placeholder-gray-400 text-white text-[15px] leading-normal outline-none"
+  value={query}
+  onChange={(e) => setQuery(e.target.value.trim())}
+/>
+
       <button
         type="button"
         className="bg-primary text-white px-4 rounded bg-primary-500"
@@ -72,8 +73,8 @@ const DesktopHeader = () => {
           {/* <div className=" w-[50px] h-[50px] bg-white rounded-full flex justify-center items-center">
             <CiSettings className=" text-[#718EBF] w-[25px] h-[25px]" />
           </div> */}
-          <div className=" w-[50px] h-[50px] bg-white rounded-full flex justify-center items-center">
-            <IoIosNotificationsOutline className=" text-[#FE5C73] w-[25px] h-[25px]" />
+          <div className=" w-[50px] h-[50px] bg-primary-500 rounded-full flex justify-center items-center">
+            <IoIosNotificationsOutline className=" text-white w-[25px] h-[25px]" />
           </div>
           {/* <div className=" w-[50px] h-[50px]  rounded-full flex justify-center items-center z-10">
             <Image
