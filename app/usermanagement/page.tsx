@@ -551,7 +551,7 @@ setEditFormData({
           <div className="col-span-2">
             <button
               type="submit"
-              className="bg-primary-500 hover:bg-primary-700 text-white px-6 py-2 rounded w-full"
+              className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded w-full"
             >
               Save Changes
             </button>
