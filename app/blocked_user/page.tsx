@@ -200,7 +200,7 @@ const unBlockUserData = async(id: string)=>{
     return (
       <div className="h-screen flex flex-col gap-5 justify-center items-center">
         <Image
-          src="/images/orizonIcon.svg"
+          src="/images/crmlogo.jpg"
           alt="Table image"
           width={500}
           height={500}
