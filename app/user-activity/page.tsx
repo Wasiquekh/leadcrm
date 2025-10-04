@@ -242,6 +242,7 @@ if (!values.uuId && !values.module && !values.type) {
       setIsFilter(true);
 		 setIsClearFilter(true);
 		  setTotalFilterPages(response.data.data.pagination.totalPages);
+      setFlyoutFilterOpen(!isFlyoutFilterOpen)
       // Handle success data here
        // return the response data
 

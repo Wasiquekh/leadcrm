@@ -3470,7 +3470,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
         <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 md:justify-between mb-4 sm:mb-6">
           {/* Document name */}
           <div className="w-full">
-            <p className="text-secondBlack font-medium text-base leading-6 mb-2">
+            <p className=" font-medium text-base leading-6 mb-2">
               Document name
             </p>
             <input
@@ -3479,20 +3479,20 @@ const getIdFromName = (list: any[], name?: string | null) => {
               onChange={(e) => setDocumentName(e.target.value)}
               placeholder="Enter document name"
               required
-              className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+              className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 bg-black"
             />
           </div>
 
           {/* Replace file */}
           <div className="w-full">
-            <p className="text-secondBlack font-medium text-base leading-6 mb-2">
+            <p className=" font-medium text-base leading-6 mb-2">
               Replace file (optional)
             </p>
             <input
               type="file"
               name="file"
               accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.pdf,.doc,.docx"
-              className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack bg-white"
+              className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4  bg-black"
             />
             {documentEditObjectData && (
               <p className="text-xs text-gray-500 mt-2">
@@ -3513,7 +3513,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
         <div className="mt-10 w-full flex flex-col gap-y-4 md:flex-row justify-between items-center">
           <button
             type="submit"
-            className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
+            className="py-[13px] px-[26px] bg-primary-600 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
           >
             Update Document
           </button>
@@ -3532,7 +3532,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
       </p>
       <IoCloseOutline
         onClick={() => closeFlyOut()}
-        className="h-8 w-8 border border-[#E7E7E7] text-secondBlack rounded cursor-pointer"
+        className="h-8 w-8 border border-[#E7E7E7]  rounded cursor-pointer"
       />
     </div>
     <div className="w-full border-b border-[#E7E7E7] mb-4"></div>
@@ -3688,7 +3688,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
 
           {/* Location (required) */}
           <div className="w-full relative md:col-span-2">
-            <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+            <p className=" font-medium text-base leading-6 mb-2">
               Location
             </p>
             <input
@@ -3698,7 +3698,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
               onChange={handleChange}
               onBlur={() => setFieldTouched("location", true)}
               placeholder="Enter location"
-              className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+              className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4  bg-black"
             />
             {touched.location && (errors as any).location ? (
               <p className="text-red-500 mt-1 text-xs">
@@ -3709,14 +3709,14 @@ const getIdFromName = (list: any[], name?: string | null) => {
 
 {/* ===== Schedule (From / To) ===== */}
 <div className="w-full md:col-span-2">
-  <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-3">
+  <p className=" font-medium text-base leading-6 mb-3">
     Schedule
   </p>
 
   {/* From */}
   <div className="w-full relative mb-4">
     <div className="w-full relative mb-4">
-      <p className="text-[#0A0A0A] font-medium text-sm leading-6 mb-2">
+      <p className=" font-medium text-sm leading-6 mb-2">
         From
       </p>
       <DatePicker
@@ -3736,7 +3736,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
         timeIntervals={15}                 // 15-min steps
         dateFormat="MM-dd-yyyy h:mma"
         placeholderText="MM-dd-yyyy hh:mmam/pm"
-        className="hover:shadow-hoverInputShadow focus-border-primary !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
+        className="hover:shadow-hoverInputShadow focus-border-primary !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 bg-black shadow-s"
         popperClassName="custom-datepicker"
 
         dayClassName={(date) => {
@@ -3801,7 +3801,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
 
   {/* To (read-only) */}
   <div className="w-full relative">
-    <p className="text-[#0A0A0A] font-medium text-sm leading-6 mb-2">
+    <p className=" font-medium text-sm leading-6 mb-2">
       To
     </p>
     <DatePicker
@@ -3818,7 +3818,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
       disabled
       className="hover:shadow-hoverInputShadow focus-border-primary 
         !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 
-        font-medium placeholder-[#717171] py-4 px-4 bg-gray-50 text-firstBlack cursor-not-allowed"
+        font-medium placeholder-[#717171] py-4 px-4 bg-black cursor-not-allowed"
       popperClassName="custom-datepicker"
       dayClassName={() => "pointer-events-none"}
     />
@@ -3832,7 +3832,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
 
           {/* Description */}
           <div className="w-full relative md:col-span-2">
-            <p className="text-secondBlack font-medium text-base leading-6 mb-2">
+            <p className=" font-medium text-base leading-6 mb-2">
               Description (optional)
             </p>
             <textarea
@@ -3842,7 +3842,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
               onBlur={() => setFieldTouched("description", true)}
               placeholder="Add description (optional)"
               rows={4}
-              className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-5 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack resize-y"
+              className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-5 font-medium placeholder-[#717171] py-4 px-4 bg-black resize-y"
             />
           </div>
         </div>
@@ -3852,7 +3852,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
+            className="py-[13px] px-[26px] bg-primary-600 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
           >
             {taskEditObject ? "Save Changes" : "Create Task Activity"}
           </button>
