@@ -467,18 +467,18 @@ const SearchLead: React.FC<SearchLeadProps> = ({
             </div>
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex gap-4">
             <button
               type="submit"
               disabled={isSubmitting || loading}
-              className="px-5 py-3 bg-primary-500 rounded-[4px] text-white text-base font-medium hover:bg-primary-600 disabled:opacity-50"
+              className="px-5 py-3 bg-primary-600 rounded-[4px] text-white text-base font-medium hover:bg-primary-700 disabled:opacity-50 w-full"
             >
               {(isSubmitting || loading) ? "Searching..." : "Search"}
             </button>
 
             <button
               type="reset"
-              className="px-5 py-3 bg-gray-800 border border-gray-700 rounded-[4px] text-white text-base font-medium hover:bg-gray-700"
+              className="px-5 py-3 bg-gray-800 border border-gray-700 rounded-[4px] text-white text-base font-medium hover:bg-gray-700 w-full"
               onClick={() => {
                 // nothing special; parent will clear if needed
               }}
