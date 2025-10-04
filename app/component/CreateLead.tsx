@@ -264,24 +264,24 @@ const handleCreateLead = async(payload: any)=>{
             options={provinceOptions}
             placeholder="Select Province"
             isClearable
-            styles={{
-              control: (base) => ({
-                ...base,
-                backgroundColor: "#000",
-                color: "#fff",
-                borderColor: "#444",
-                padding: "4px",
-              }),
-              singleValue: (base) => ({ ...base, color: "#fff" }),
-              input: (base) => ({ ...base, color: "#fff" }),
-              placeholder: (base) => ({ ...base, color: "#bbb" }),
-              menu: (base) => ({ ...base, backgroundColor: "#000" }),
-              option: (base, { isFocused, isSelected }) => ({
-                ...base,
-                backgroundColor: isSelected ? "#222" : isFocused ? "#333" : "#000",
-                color: "#fff",
-              }),
-            }}
+                classNames={{
+                control: ({ isFocused }: any) =>
+                  `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                    isFocused ? "!border-primary-500" : "!border-gray-700"
+                  }`,
+              }}
+              styles={{
+                menu: (base) => ({ ...base, borderRadius: 4, backgroundColor: "#000" }),
+                option: (base, { isFocused, isSelected }) => ({
+                  ...base,
+                  backgroundColor: isSelected ? "var(--primary-600)" : isFocused ? "#222" : "#000",
+                  color: "#fff",
+                  cursor: "pointer",
+                }),
+                singleValue: (base) => ({ ...base, color: "#fff" }),
+                input: (base) => ({ ...base, color: "#fff" }),
+                placeholder: (base) => ({ ...base, color: "#aaa" }),
+              }}
           />
         </div>
 
@@ -319,24 +319,24 @@ const handleCreateLead = async(payload: any)=>{
             options={leadSourceData}
             placeholder="Select Lead Source"
             isClearable
-            styles={{
-              control: (base) => ({
-                ...base,
-                backgroundColor: "#000",
-                color: "#fff",
-                borderColor: "#444",
-                padding: "4px",
-              }),
-              singleValue: (base) => ({ ...base, color: "#fff" }),
-              input: (base) => ({ ...base, color: "#fff" }),
-              placeholder: (base) => ({ ...base, color: "#bbb" }),
-              menu: (base) => ({ ...base, backgroundColor: "#000" }),
-              option: (base, { isFocused, isSelected }) => ({
-                ...base,
-                backgroundColor: isSelected ? "#222" : isFocused ? "#333" : "#000",
-                color: "#fff",
-              }),
-            }}
+                classNames={{
+                control: ({ isFocused }: any) =>
+                  `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                    isFocused ? "!border-primary-500" : "!border-gray-700"
+                  }`,
+              }}
+              styles={{
+                menu: (base) => ({ ...base, borderRadius: 4, backgroundColor: "#000" }),
+                option: (base, { isFocused, isSelected }) => ({
+                  ...base,
+                  backgroundColor: isSelected ? "var(--primary-600)" : isFocused ? "#222" : "#000",
+                  color: "#fff",
+                  cursor: "pointer",
+                }),
+                singleValue: (base) => ({ ...base, color: "#fff" }),
+                input: (base) => ({ ...base, color: "#fff" }),
+                placeholder: (base) => ({ ...base, color: "#aaa" }),
+              }}
           />
         </div>
 
@@ -363,24 +363,24 @@ const handleCreateLead = async(payload: any)=>{
             options={agentList}
             placeholder="Select Agent"
             isClearable
-            styles={{
-              control: (base) => ({
-                ...base,
-                backgroundColor: "#000",
-                color: "#fff",
-                borderColor: "#444",
-                padding: "4px",
-              }),
-              singleValue: (base) => ({ ...base, color: "#fff" }),
-              input: (base) => ({ ...base, color: "#fff" }),
-              placeholder: (base) => ({ ...base, color: "#bbb" }),
-              menu: (base) => ({ ...base, backgroundColor: "#000" }),
-              option: (base, { isFocused, isSelected }) => ({
-                ...base,
-                backgroundColor: isSelected ? "#222" : isFocused ? "#333" : "#000",
-                color: "#fff",
-              }),
-            }}
+                classNames={{
+                control: ({ isFocused }: any) =>
+                  `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                    isFocused ? "!border-primary-500" : "!border-gray-700"
+                  }`,
+              }}
+              styles={{
+                menu: (base) => ({ ...base, borderRadius: 4, backgroundColor: "#000" }),
+                option: (base, { isFocused, isSelected }) => ({
+                  ...base,
+                  backgroundColor: isSelected ? "var(--primary-600)" : isFocused ? "#222" : "#000",
+                  color: "#fff",
+                  cursor: "pointer",
+                }),
+                singleValue: (base) => ({ ...base, color: "#fff" }),
+                input: (base) => ({ ...base, color: "#fff" }),
+                placeholder: (base) => ({ ...base, color: "#aaa" }),
+              }}
           />
         </div>
 
@@ -398,24 +398,24 @@ const handleCreateLead = async(payload: any)=>{
             options={debtConsolidation}
             placeholder="Select Debt Consolidation Status"
             isClearable
-            styles={{
-              control: (base) => ({
-                ...base,
-                backgroundColor: "#000",
-                color: "#fff",
-                borderColor: "#444",
-                padding: "4px",
-              }),
-              singleValue: (base) => ({ ...base, color: "#fff" }),
-              input: (base) => ({ ...base, color: "#fff" }),
-              placeholder: (base) => ({ ...base, color: "#bbb" }),
-              menu: (base) => ({ ...base, backgroundColor: "#000" }),
-              option: (base, { isFocused, isSelected }) => ({
-                ...base,
-                backgroundColor: isSelected ? "#222" : isFocused ? "#333" : "#000",
-                color: "#fff",
-              }),
-            }}
+                classNames={{
+                control: ({ isFocused }: any) =>
+                  `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                    isFocused ? "!border-primary-500" : "!border-gray-700"
+                  }`,
+              }}
+              styles={{
+                menu: (base) => ({ ...base, borderRadius: 4, backgroundColor: "#000" }),
+                option: (base, { isFocused, isSelected }) => ({
+                  ...base,
+                  backgroundColor: isSelected ? "var(--primary-600)" : isFocused ? "#222" : "#000",
+                  color: "#fff",
+                  cursor: "pointer",
+                }),
+                singleValue: (base) => ({ ...base, color: "#fff" }),
+                input: (base) => ({ ...base, color: "#fff" }),
+                placeholder: (base) => ({ ...base, color: "#aaa" }),
+              }}
           />
         </div>
 
@@ -433,24 +433,24 @@ const handleCreateLead = async(payload: any)=>{
             options={consolidationData}
             placeholder="Select Consolidated Credit Status"
             isClearable
-            styles={{
-              control: (base) => ({
-                ...base,
-                backgroundColor: "#000",
-                color: "#fff",
-                borderColor: "#444",
-                padding: "4px",
-              }),
-              singleValue: (base) => ({ ...base, color: "#fff" }),
-              input: (base) => ({ ...base, color: "#fff" }),
-              placeholder: (base) => ({ ...base, color: "#bbb" }),
-              menu: (base) => ({ ...base, backgroundColor: "#000" }),
-              option: (base, { isFocused, isSelected }) => ({
-                ...base,
-                backgroundColor: isSelected ? "#222" : isFocused ? "#333" : "#000",
-                color: "#fff",
-              }),
-            }}
+                classNames={{
+                control: ({ isFocused }: any) =>
+                  `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                    isFocused ? "!border-primary-500" : "!border-gray-700"
+                  }`,
+              }}
+              styles={{
+                menu: (base) => ({ ...base, borderRadius: 4, backgroundColor: "#000" }),
+                option: (base, { isFocused, isSelected }) => ({
+                  ...base,
+                  backgroundColor: isSelected ? "var(--primary-600)" : isFocused ? "#222" : "#000",
+                  color: "#fff",
+                  cursor: "pointer",
+                }),
+                singleValue: (base) => ({ ...base, color: "#fff" }),
+                input: (base) => ({ ...base, color: "#fff" }),
+                placeholder: (base) => ({ ...base, color: "#aaa" }),
+              }}
           />
         </div>
       </div>

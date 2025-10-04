@@ -220,6 +220,7 @@ const filterApiCall = async (values: { uuId: string; module: string; type: strin
   }
 };
 useEffect(()=>{
+  
 const filterApiCall = async (values: { uuId: string; module: string; type: string }, filterPage: number) => {
   try {
     // Check if at least one field is filled
@@ -232,10 +233,13 @@ const filterApiCall = async (values: { uuId: string; module: string; type: strin
       `/user-activity/filter?page=${filterPage}`, // Use passed page value
       values
     );
-
+ 
     console.log("Response Data:", response.data.data.pagination);
+    console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",response)
     // Handle success data here
-    return response.data.data; // return the response data
+       setData(response.data.data.data);
+    return response.data.data.data; // return the response data
+  
 
   } catch (error) {
     console.error('Error while filtering:', error);
@@ -248,7 +252,7 @@ const filterApiCall = async (values: { uuId: string; module: string; type: strin
     return (
       <div className="h-screen flex flex-col gap-5 justify-center items-center">
         <Image
-          src="/images/orizonIcon.svg"
+          src="/images/crmlogo.jpg"
           alt="Table image"
           width={500}
           height={500}

@@ -125,7 +125,7 @@ export default function LoginHome() {
       </div> */}
       <div className="absolute top-0 bottom-0 left-0 right-0 mx-auto my-auto w-[90%] max-w-[500px] h-[587px] shadow-loginBoxShadow  px-6 sm:px-12 py-10 sm:py-16 rounded-lg mainContainerBg">
         <Image
-          src="/images/orizonIcon.svg"
+          src="/images/crmlogo.jpg"
           alt="OrizonIcon"
           width={82}
           height={52}
@@ -231,7 +231,7 @@ export default function LoginHome() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-primary-600 rounded-[4px] w-full h-[50px] text-center text-white text-lg font-medium leading-normal mb-3 hover:bg-primary-500 active:bg-primary-700 transition duration-100"
+                  className="bg-primary-600 rounded-[4px] w-full h-[50px] text-center text-white text-lg font-medium leading-normal mb-3 hover:bg-primary-700 active:bg-primary-700 transition duration-100"
                 >
                   {loading ? "Logging in..." : "Login"}
                 </button>

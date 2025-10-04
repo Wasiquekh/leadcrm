@@ -178,7 +178,7 @@ useEffect(() => {
     return (
       <div className="h-screen flex flex-col gap-5 justify-center items-center bg-white">
         <Image
-          src="/images/orizonIcon.svg"
+          src="/images/crmlogo.jpg"
           alt="Loading"
           width={150}
           height={150}
@@ -206,7 +206,7 @@ useEffect(() => {
           {userRole === "Agent" && (
             <div className=" flex justify-end items-center gap-4">
               <div
-                className=" flex justify-center gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 group"
+                className=" flex justify-center gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-700 active:bg-primary-800 group"
                 onClick={() => createLeads()}
               >
                 <FiPlusCircle className=" w-5 h-5 text-white group-hover:text-white" />
@@ -216,7 +216,7 @@ useEffect(() => {
               </div>
 
               <div
-                className=" flex justify-center  gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 group"
+                className=" flex justify-center  gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-700 active:bg-primary-800 group"
                 onClick={() => filterLeads()}
               >
                 <FaSearchPlus className=" w-5 h-5 text-white group-hover:text-white" />
@@ -231,8 +231,8 @@ useEffect(() => {
               {/* -------------SEARCHED TABLE---------------- */}
               {searcheddata?.length > 0 && !isError ? (
                 <>
-                <table className="w-full text-sm text-left text-white bg-black mt-6">
-                  <thead className="text-xs text-[#999999] bg-primary-500">
+                <table className="w-full text-sm text-left text-white  mt-6">
+                  <thead className="text-xs text-[#999999] talbleheaderBg">
                     <tr className="border border-tableBorder">
                       {/* Full Name */}
                       <th
@@ -305,14 +305,14 @@ useEffect(() => {
                     {searcheddata.map((item: any, index: number) => (
                       <tr
                         key={item?.id ?? index}
-                        className="border border-tableBorder bg-black hover:bg-primary-600"
+                        className="border border-tableBorder  hover:bg-primary-700 odd:bg-[#404040]"
                       >
                         {/* Full name */}
                         <td
                           onClick={() => test(item?.id)}
-                          className="px-1 py-2 md:px-3 md:py-2 border-tableBorder flex items-center gap-2 bg-primary-500 cursor-pointer"
+                          className="px-1 py-2 md:px-3 md:py-2 border-tableBorder flex items-center gap-2 text-primary-600 underline cursor-pointer"
                         >
-                          <p className="text-white text-sm sm:text-base font-medium leading-normal capitalize">
+                          <p className=" text-sm sm:text-base font-medium leading-normal capitalize">
                             {item?.full_name ?? "-"}
                           </p>
                         </td>
@@ -390,7 +390,7 @@ useEffect(() => {
               <div className="w-full mt-12">
                 <div className="grid grid-cols-3 gap-6">
                   {/* Tab 1 */}
-                  <div className="flex flex-col items-center justify-center p-6 rounded-lg bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-md">
+                  <div className="flex flex-col items-center justify-center p-6 rounded-lg bg-primary-600 text-white shadow-md">
                     <p className="text-sm font-medium opacity-80">
                       Task for Today
                     </p>
@@ -400,7 +400,7 @@ useEffect(() => {
                   </div>
 
                   {/* Tab 3 */}
-                  <div className="flex flex-col items-center justify-center p-6 rounded-lg bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-md">
+                  <div className="flex flex-col items-center justify-center p-6 rounded-lg bg-primary-600 text-white shadow-md">
                     <p className="text-sm font-medium opacity-80">
                       Overdue All
                     </p>
@@ -413,9 +413,9 @@ useEffect(() => {
 
               {/* TABLE TASK FOR TODAY */}
               <h1 className="mt-5">Table Task for Today</h1>
-              <div className="overflow-x-auto rounded-lg shadow bg-white mt-2">
+              <div className="overflow-x-auto rounded-lg shadow  mt-2">
                 <table className="min-w-full text-sm text-left">
-                  <thead className="bg-gray-100 text-gray-700 font-semibold">
+                  <thead className="talbleheaderBg font-semibold">
                     <tr>
                       <th className="p-3">Lead Name</th>
                       <th className="p-3">Subject</th>
@@ -425,15 +425,15 @@ useEffect(() => {
                       <th className="p-3">Start Date</th>
                     </tr>
                   </thead>
-                  <tbody className="text-black">
+                  <tbody className="">
                     {todayTasksListData.length > 0 ? (
                       todayTasksListData.map((task) => (
-                        <tr key={task.id} className="border-t hover:bg-gray-50">
+                        <tr key={task.id} className="border-t odd:bg-[#404040] hover:bg-primary-700">
                           <td
                             onClick={() => test(task.lead_id)}
-                            className="p-3 cursor-pointer bg-primary-500"
+                            className="p-3 cursor-pointer"
                           >
-                            <p className="text-white font-medium">
+                            <p className="text-primary-600 underline font-medium ">
                               {task.lead_name}
                             </p>
                           </td>
@@ -447,7 +447,7 @@ useEffect(() => {
                     ) : (
                       <tr>
                         <td
-                          className="p-3 text-center text-gray-500"
+                          className="p-3 text-center text-white"
                           colSpan={6}
                         >
                           No tasks for today
@@ -460,9 +460,9 @@ useEffect(() => {
 
               {/* TABLE FOR OVERDUE TASK */}
               <h1 className="mt-5">Table Overdue Task</h1>
-              <div className="overflow-x-auto rounded-lg shadow bg-white mt-6">
+              <div className="overflow-x-auto rounded-lg shadow  mt-6">
                 <table className="min-w-full text-sm text-left">
-                  <thead className="bg-gray-100 text-gray-700 font-semibold">
+                  <thead className="talbleheaderBg font-semibold">
                     <tr>
                       <th className="p-3">Lead Name</th>
                       <th className="p-3">Subject</th>
@@ -472,15 +472,15 @@ useEffect(() => {
                       <th className="p-3">Start Date</th>
                     </tr>
                   </thead>
-                  <tbody className="text-black">
+                  <tbody className="">
                     {overdueTaskData.length > 0 ? (
                       overdueTaskData.map((task) => (
-                        <tr key={task.id} className="border-t hover:bg-gray-50">
+                        <tr key={task.id} className="border-t hover:bg-primary-700 odd:bg-[#404040]">
                           <td
                             onClick={() => test(task.lead_id)}
-                            className="p-3 cursor-pointer bg-primary-500"
+                            className="p-3 cursor-pointer text-primary-600 underline"
                           >
-                            <p className="text-white font-medium">
+                            <p className="   font-medium">
                               {task.lead_name}
                             </p>
                           </td>
@@ -494,7 +494,7 @@ useEffect(() => {
                     ) : (
                       <tr>
                         <td
-                          className="p-3 text-center text-gray-500"
+                          className="p-3 text-center text-white"
                           colSpan={6}
                         >
                           No overdue tasks
@@ -536,7 +536,7 @@ useEffect(() => {
 
       <div className={`flyout ${isFlyoutOpen ? "open" : ""}`}>
         {isCreateLead && (
-          <div className="w-full min-h-auto p-4 bg-black text-white">
+          <div className="w-full min-h-auto p-4  text-white">
             {/* Flyout header */}
             <div className="flex justify-between mb-4">
               <p className="text-primary-500 text-2xl font-bold leading-9">
@@ -553,7 +553,7 @@ useEffect(() => {
           </div>
         )}
         {isSeachLead && (
-          <div className="w-full min-h-auto p-4 bg-black text-white">
+          <div className="w-full min-h-auto p-4  text-white">
             {/* Flyout header */}
             <div className="flex justify-between mb-4">
               <p className="text-primary-500 text-2xl font-bold leading-9">

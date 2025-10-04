@@ -830,7 +830,7 @@ handleUnassignFilter();
     return (
       <div className="h-screen flex flex-col gap-5 justify-center items-center">
         <Image
-          src="/images/orizonIcon.svg"
+          src="/images/crmlogo.jpg"
           alt="Table image"
           width={500}
           height={500}
@@ -1251,7 +1251,7 @@ handleUnassignFilter();
                 {selectedIds.length} selected
               </span> */}
              <div
-                  className=" flex justify-center gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 group"
+                  className=" flex justify-center gap-2 py-3 px-6 rounded-[12px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-700 active:bg-primary-800 group"
                  onClick={()=>assignCheckBulklead()}
                 >
                   <FiFilter className=" w-5 h-5 text-white group-hover:text-white" />
@@ -2536,7 +2536,7 @@ handleUnassignFilter();
     <p className="text-primary-500 text-2xl font-bold leading-9">Assign to Agent</p>
     <IoCloseOutline
       onClick={() => setFlyoutOpen(false)}
-      className="h-8 w-8 border border-gray-700 text-white rounded cursor-pointer"
+      className="h-8 w-8 border border-white text-white rounded cursor-pointer"
     />
   </div>
   <div className="w-full border-b border-gray-700 mb-4"></div>
@@ -2554,40 +2554,32 @@ handleUnassignFilter();
         getOptionValue={(opt: Agent) => String(opt.id)}
         placeholder="Select Agent"
         isClearable
-        classNames={{
-          control: ({ isFocused }: any) =>
-            `!w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !bg-black !text-white !shadow-sm ${
-              isFocused ? "!border-primary-500" : "!border-gray-700"
-            }`,
-        }}
-        styles={{
-          control: (base) => ({
-            ...base,
-            backgroundColor: "#000",
-            color: "#fff",
-            minHeight: "46px", // match your other input height
-            padding: "0 8px", // horizontal padding only
-          }),
-          input: (base) => ({ ...base, color: "#fff", margin: 0, padding: 0 }),
-          singleValue: (base) => ({ ...base, color: "#fff" }),
-          placeholder: (base) => ({ ...base, color: "#999" }),
-          menu: (base) => ({ ...base, backgroundColor: "#000", borderRadius: 4 }),
-          option: (base, { isSelected, isFocused }) => ({
-            ...base,
-            backgroundColor: isSelected ? "#FFD700" : isFocused ? "#333" : "#000",
-            color: isSelected ? "#000" : "#fff",
-            cursor: "pointer",
-            padding: "8px 12px",
-            "&:hover": { backgroundColor: isFocused ? "#555" : "#000", color: "#fff" },
-          }),
-        }}
+
+                classNames={{
+                control: ({ isFocused }: any) =>
+                  `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                    isFocused ? "!border-primary-500" : "!border-gray-700"
+                  }`,
+              }}
+              styles={{
+                menu: (base) => ({ ...base, borderRadius: 4, backgroundColor: "#000" }),
+                option: (base, { isFocused, isSelected }) => ({
+                  ...base,
+                  backgroundColor: isSelected ? "var(--primary-600)" : isFocused ? "#222" : "#000",
+                  color: "#fff",
+                  cursor: "pointer",
+                }),
+                singleValue: (base) => ({ ...base, color: "#fff" }),
+                input: (base) => ({ ...base, color: "#fff" }),
+                placeholder: (base) => ({ ...base, color: "#aaa" }),
+              }}
       />
     </div>
 
     {/* Submit Button */}
     <button
       type="submit"
-      className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
+      className="py-[13px] px-[26px] bg-primary-600 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
     >
       Assign to Agent
     </button>
@@ -2605,7 +2597,7 @@ handleUnassignFilter();
                 </p>
                 <IoCloseOutline
                   onClick={() => setFlyoutOpen(false)}
-                  className=" h-8 w-8 border border-[#E7E7E7] text-secondBlack rounded cursor-pointer"
+                  className=" h-8 w-8 border border-[#E7E7E7]  rounded cursor-pointer"
                 />
               </div>
               <div className=" w-full border-b border-[#E7E7E7] mb-4"></div>
@@ -2613,7 +2605,7 @@ handleUnassignFilter();
               <form onSubmit={handleBulkAction} className="w-full space-y-4">
                 {/* Agent Dropdown */}
                 <div className="w-full">
-                  <p className="text-secondBlack text-base leading-6 mb-2">
+                  <p className=" text-base leading-6 mb-2">
                     Assign to Agent
                   </p>
                   <Select
@@ -2624,32 +2616,25 @@ handleUnassignFilter();
                     getOptionValue={(opt: Agent) => String(opt.id)} // use id as value
                     placeholder="Select Agent"
                     isClearable
-                    classNames={{
-                      control: ({ isFocused }: any) =>
-                        `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-white !shadow-sm ${
-                          isFocused
-                            ? "!border-primary-500"
-                            : "!border-[#DFEAF2]"
-                        }`,
-                    }}
-                    styles={{
-                      menu: (base: any) => ({
-                        ...base,
-                        borderRadius: "4px",
-                        boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
-                        backgroundColor: "#fff",
-                      }),
-                      option: (base: any, { isFocused, isSelected }: any) => ({
-                        ...base,
-                        backgroundColor: isSelected
-                          ? "var(--primary-500)"
-                          : isFocused
-                          ? "var(--primary-100)"
-                          : "#fff",
-                        color: isSelected ? "#fff" : "#333",
-                        cursor: "pointer",
-                      }),
-                    }}
+  
+                classNames={{
+                control: ({ isFocused }: any) =>
+                  `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                    isFocused ? "!border-primary-500" : "!border-gray-700"
+                  }`,
+              }}
+              styles={{
+                menu: (base) => ({ ...base, borderRadius: 4, backgroundColor: "#000" }),
+                option: (base, { isFocused, isSelected }) => ({
+                  ...base,
+                  backgroundColor: isSelected ? "var(--primary-600)" : isFocused ? "#222" : "#000",
+                  color: "#fff",
+                  cursor: "pointer",
+                }),
+                singleValue: (base) => ({ ...base, color: "#fff" }),
+                input: (base) => ({ ...base, color: "#fff" }),
+                placeholder: (base) => ({ ...base, color: "#aaa" }),
+              }}
                   />
                 </div>
 
