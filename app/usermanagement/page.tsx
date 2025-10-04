@@ -235,7 +235,7 @@ setEditFormData({
     return (
       <div className="h-screen flex flex-col gap-5 justify-center items-center">
         <Image
-          src="/images/orizonIcon.svg"
+          src="/images/crmlogo.jpg"
           alt="Table image"
           width={500}
           height={500}
@@ -349,7 +349,7 @@ setEditFormData({
 
             {/* Role */}
             <td className="px-2 py-1     hidden md:table-cell">
-              <button className="py-[4px] px-3 bg-primary-500 hover:bg-primary-600 active:bg-primary-700 group flex gap-1 items-center rounded-xl text-xs md:text-sm">
+              <button className="py-[4px] px-3 bg-primary-600 hover:bg-primary-600 active:bg-primary-700 group flex gap-1 items-center rounded-xl text-xs md:text-sm">
                 {/* <MdRemoveRedEye className="text-white w-4 h-4" /> */}
                 <p className="text-white hidden md:block">{item?.role_name ?? "-"}</p>
               </button>
@@ -360,7 +360,7 @@ setEditFormData({
               <div className="flex gap-1 md:gap-2 justify-center md:justify-start">
                 <button
                   onClick={() => clickOnEditButton(item)}
-                  className="py-[4px] px-3 bg-primary-600 hover:bg-primary-700 active:bg-primary-800 flex gap-1 items-center rounded-xl text-xs md:text-sm"
+                  className="py-[4px] px-3 bg-black hover:bg-primary-700 active:bg-primary-800 flex gap-1 items-center rounded-xl text-xs md:text-sm"
                 >
                   <MdRemoveRedEye className="text-white w-4 h-4" />
                   <p className="text-white hidden md:block"></p>
@@ -368,7 +368,7 @@ setEditFormData({
 
                 <button
                   onClick={() => deleteUserData(item)}
-                  className="py-[4px] px-3 bg-primary-500 hover:bg-primary-600 active:bg-primary-700 flex gap-1 items-center rounded-full text-xs md:text-sm"
+                  className="py-[4px] px-3 bg-black hover:bg-primary-800 active:bg-primary-700 flex gap-1 items-center rounded-full text-xs md:text-sm"
                 >
                   <RiDeleteBin6Line className="text-white w-4 h-4" />
                   <p className="text-white hidden md:block"></p>
@@ -376,7 +376,7 @@ setEditFormData({
 
                 {item.role_name === "Admin" ? (
                   <button
-                    className="py-[4px] px-3 bg-primary-500 opacity-50 cursor-not-allowed flex gap-1 items-center rounded-full text-xs md:text-sm"
+                    className="py-[4px] px-3 bg-black opacity-50 cursor-not-allowed flex gap-1 items-center rounded-full text-xs md:text-sm"
                   >
                     <ImBlocked className="text-white w-4 h-4" />
                     <p className="text-white hidden md:block"></p>
@@ -384,7 +384,7 @@ setEditFormData({
                 ) : (
                   <button
                     onClick={() => blockUserData(item)}
-                    className="py-[4px] px-3 bg-primary-500 hover:bg-primary-600 active:bg-primary-700 flex gap-1 items-center rounded-full text-xs md:text-sm"
+                    className="py-[4px] px-3 bg-black hover:bg-primary-700 active:bg-primary-800 flex gap-1 items-center rounded-full text-xs md:text-sm"
                   >
                     <ImBlocked className="text-white w-4 h-4" />
                     <p className="text-white hidden md:block"></p>
@@ -406,7 +406,7 @@ setEditFormData({
   <button
     onClick={() => handlePageChange(page - 1)}
     disabled={page === 1}
-    className="px-2 py-2 mx-2 border rounded bg-primary-500 hover:bg-primary-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+    className="px-2 py-2 mx-2 border rounded bg-primary-600 hover:bg-primary-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
   >
     <HiChevronDoubleLeft className="w-6 h-auto" />
   </button>
@@ -418,7 +418,7 @@ setEditFormData({
   <button
     onClick={() => handlePageChange(page + 1)}
     disabled={page === totalPages}
-    className="px-2 py-2 mx-2 border rounded bg-primary-500 hover:bg-primary-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+    className="px-2 py-2 mx-2 border rounded bg-primary-600 hover:bg-primary-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
   >
     <HiChevronDoubleRight className="w-6 h-auto" />
   </button>
@@ -551,7 +551,7 @@ setEditFormData({
           <div className="col-span-2">
             <button
               type="submit"
-              className="bg-primary-500 hover:bg-primary-700 text-white px-6 py-2 rounded w-full"
+              className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded w-full"
             >
               Save Changes
             </button>
