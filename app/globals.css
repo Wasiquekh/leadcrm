@@ -367,43 +367,57 @@ text.recharts-text.recharts-cartesian-axis-tick-value {
 }
 
 /* REACT SELECT css */
-/* React-Select Global Styles for Dark Theme */
-/* Global styles for all react-select dropdowns */
-.react-select__control {
-  background-color: #000 !important; /* input bg */
-  color: #fff !important;            /* input text */
-  border-color: #444 !important;     /* input border */
-  min-height: 50px;                  /* match other input height */
-}
+/* Global styles for react-select dropdowns */
 
-.react-select__single-value {
-  color: #fff !important;
-}
-
-.react-select__placeholder {
-  color: #fff !important;
-}
-
-.react-select__menu {
-  background-color: #000 !important;  /* dropdown list bg */
+.select-control {
+  width: 100%;
+  border: 0.4px solid #444;
   border-radius: 4px;
-  z-index: 9999;
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.25rem; /* 20px */
+  font-weight: 500;
+  padding: 1.5px 1px;
+  background-color: #000;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-.react-select__option {
-  background-color: #000 !important;
-  color: #fff !important;
+.select-control-focused {
+  border-color: var(--primary-500);
+}
+
+.select-control-unfocused {
+  border-color: #444;
+}
+
+.select-single-value {
+  color: #fff;
+}
+
+.select-input {
+  color: #fff;
+}
+
+.select-placeholder {
+  color: #aaa;
+}
+
+.select-menu {
+  background-color: #000;
+  border-radius: 4px;
+}
+
+.select-option {
+  background-color: #000;
+  color: #fff;
   cursor: pointer;
 }
 
-.react-select__option--is-focused {
-  background-color: #fff441 !important;  /* hover bg */
-  color: #000 !important;                /* hover text */
+.select-option-focused {
+  background-color: #222;
 }
 
-.react-select__option--is-selected {
-  background-color: #ffd700 !important;  /* selected bg */
-  color: #000 !important;                /* selected text */
+.select-option-selected {
+  background-color: var(--primary-600);
 }
+/* Global styles for react-select dropdowns */
 
-/* END REACT SELECT CSS */
