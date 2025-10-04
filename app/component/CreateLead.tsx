@@ -458,7 +458,7 @@ const handleCreateLead = async(payload: any)=>{
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full py-3 bg-primary-500 rounded-[4px] text-white text-base font-medium hover:bg-primary-600"
+        className="w-full py-3 bg-primary-600 rounded-[4px] text-white text-base font-medium hover:bg-primary-700"
       >
         {isSubmitting ? "Creating..." : "Create Leads"}
       </button>

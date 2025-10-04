@@ -608,6 +608,7 @@ const INITIAL_VALUES = {
   };
   const openEditDocumentFlyOut = (d: LeadDocument)=>{
     setDocumentEditObjectData(d)
+     setDocumentName(d.notes);
      setFlyoutFilterOpen(true);
     setIsDocumentEdit(true);
   }
@@ -1081,7 +1082,7 @@ setIsActivityHistoryPaination(true)
     return (
       <div className="h-screen flex flex-col gap-5 justify-center items-center bg-white">
         <Image
-          src="/images/orizonIcon.svg"
+          src="/images/crmlogo.jpg"
           alt="Loading"
           width={150}
           height={150}
@@ -3460,7 +3461,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
       </p>
       <IoCloseOutline
         onClick={() => closeFlyOut()}
-        className="h-8 w-8 border border-[#E7E7E7] text-secondBlack rounded cursor-pointer"
+        className="h-8 w-8 border border-[#E7E7E7]  rounded cursor-pointer"
       />
     </div>
     <div className="w-full border-b border-[#E7E7E7] mb-4"></div>
@@ -3475,8 +3476,11 @@ const getIdFromName = (list: any[], name?: string | null) => {
             </p>
             <input
               type="text"
-              value={documentName || documentEditObjectData?.notes || ""}
-              onChange={(e) => setDocumentName(e.target.value)}
+value={documentName !== undefined ? documentName : documentEditObjectData?.notes || ""}  // Display documentName or fallback to documentEditObjectData?.notes
+onChange={(e) => setDocumentName(e.target.value)}  // Update documentName on user input
+
+
+
               placeholder="Enter document name"
               required
               className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 bg-black"

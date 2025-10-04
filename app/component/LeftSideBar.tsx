@@ -42,9 +42,9 @@ const LeftSideBar: React.FC = () => {
         <Link href="/dashboard">
           <div className="flex items-center gap-4 mb-12 px-3 py-2">
             {/* Fixed-size icon box to prevent shift */}
-            <div className="relative h-6 w-6 shrink-0  invisible">
+            <div className="relative h-6 w-6 shrink-0 ">
               <Image
-                src="/images/orizonIcon.svg"
+                src="/images/crmlogo.jpg"
                 alt="Orizon icon"
                 fill
                 className="object-contain"

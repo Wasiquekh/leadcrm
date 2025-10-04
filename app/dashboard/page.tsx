@@ -206,7 +206,7 @@ useEffect(() => {
           {userRole === "Agent" && (
             <div className=" flex justify-end items-center gap-4">
               <div
-                className=" flex justify-center gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-700 active:bg-primary-800 group"
+                className=" flex justify-center gap-2 py-3 px-6 rounded-[12px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-700 active:bg-primary-800 group"
                 onClick={() => createLeads()}
               >
                 <FiPlusCircle className=" w-5 h-5 text-white group-hover:text-white" />
@@ -216,7 +216,7 @@ useEffect(() => {
               </div>
 
               <div
-                className=" flex justify-center  gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-700 active:bg-primary-800 group"
+                className=" flex justify-center  gap-2 py-3 px-6 rounded-[12px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-700 active:bg-primary-800 group"
                 onClick={() => filterLeads()}
               >
                 <FaSearchPlus className=" w-5 h-5 text-white group-hover:text-white" />
@@ -352,7 +352,7 @@ useEffect(() => {
                 <button
                   onClick={() => handlePagination(page - 1)}
                   disabled={page === 1}
-                  className="px-2 py-2 mx-2 border rounded bg-primary-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-2 py-2 mx-2 border rounded bg-primary-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <HiChevronDoubleLeft className="w-6 h-auto" />
                 </button>
@@ -362,7 +362,7 @@ useEffect(() => {
                 <button
                   onClick={() => handlePagination(page + 1)}
                   disabled={page === totalPage}
-                  className="px-2 py-2 mx-2 border rounded bg-primary-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-2 py-2 mx-2 border rounded bg-primary-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <HiChevronDoubleRight className="w-6 h-auto" />
                 </button>
