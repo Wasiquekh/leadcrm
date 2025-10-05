@@ -167,7 +167,7 @@ type LeadSourceOption = { id: string | number; name: string };
       consolidated_credit_status_id: string;
     };
 export default function Home() {
-   const isChecking = useAuthRedirect();
+   const checking = useAuthRedirect();
   const [isFlyoutOpen, setFlyoutOpen] = useState<boolean>(false);
   const [notAssignData, setNotAssignData] = useState<Lead[]>([]);
  // console.log("NOT ASSIGN DATAAAAAAAAA",notAssignData)
@@ -603,19 +603,7 @@ const test = (id: string) => {
   window.open(`/leadsdetails?id=${id}`, "_blank"); // "_blank" = new tab
 };
 
-  // if (isChecking) {
-  //   return (
-  //     <div className="h-screen flex flex-col gap-5 justify-center items-center bg-white">
-  //       <Image
-  //         src="/images/orizonIcon.svg"
-  //         alt="Loading"
-  //         width={150}
-  //         height={150}
-  //         className="animate-pulse rounded"
-  //       />
-  //     </div>
-  //   );
-  // }
+ 
   // fetch agents
   const fetchAgent = async () => {
     try {
@@ -1224,6 +1212,19 @@ handleUnassignFilter();
       ),
     },
   ];
+   if (checking) {
+    return (
+      <div className="h-screen flex flex-col gap-5 justify-center items-center bg-white">
+        <Image
+          src="/images/orizonIcon.svg"
+          alt="Loading"
+          width={150}
+          height={150}
+          className="animate-pulse rounded"
+        />
+      </div>
+    );
+  }
   return (
     <>
       <LeftSideBar />

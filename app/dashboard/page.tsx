@@ -81,7 +81,7 @@ export interface OverdueTask {
 const storage = new StorageManager();
 const userRole = storage.getUserRole();
 export default function Home() {
-  const isChecking = useAuthRedirect();
+  const checking = useAuthRedirect()
 
   // -------------FOR AGENT-----------
   const [cards, setCards] = useState<CardsData | null>(null);
@@ -174,7 +174,13 @@ useEffect(() => {
 }, [page, lastFilters]);
 
 
-  if (isChecking) {
+
+  const handlePagination = (newPage: number) => {
+    if (newPage > 0 && newPage <= totalPage) {
+      setPage(newPage);
+    }
+  };
+    if (checking) {
     return (
       <div className="h-screen flex flex-col gap-5 justify-center items-center bg-white">
         <Image
@@ -187,11 +193,6 @@ useEffect(() => {
       </div>
     );
   }
-  const handlePagination = (newPage: number) => {
-    if (newPage > 0 && newPage <= totalPage) {
-      setPage(newPage);
-    }
-  };
   return (
     <>
       <div className=" text-white">

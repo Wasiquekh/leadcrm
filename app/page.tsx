@@ -13,6 +13,7 @@ import { FaRegEyeSlash } from "react-icons/fa";
 import { constrainedMemory } from "process";
 import Link from "next/link";
 import UserActivityLogger from "../provider/UserActivityLogger";
+import { isTokenExpired } from "./component/utils/authUtils";
 
 const storage = new StorageManager();
 
@@ -26,6 +27,9 @@ export default function LoginHome() {
 
   const router = useRouter();
   const storage = new StorageManager();
+  const aaaaa = storage.getAccessToken()
+
+
   const axiosProvider = new AxiosProvider();
   //const { setAccessToken } = useContext(AppContext);
 
@@ -69,13 +73,18 @@ export default function LoginHome() {
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
-  // useEffect(() => {
-  //   const token = storage.getAccessToken();
-  //   if (token && token !== "null") router.replace("/dashboard");
-  // }, []);
+
   // const value = localStorage.getItem("accessToken");
   // value === null ?
   // console.log("OOOOOOOOOOOOOOO", value);
+    useEffect(() => {
+    const token = storage.getAccessToken(); // Get token from localStorage via StorageManager
+
+    // If token exists and is not expired, redirect to dashboard
+    if (token && !isTokenExpired(token)) {
+      router.replace("/dashboard"); // Redirect to the Dashboard page
+    }
+  }, [router]);
 
   return (
     <>

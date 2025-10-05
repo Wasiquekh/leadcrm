@@ -8,6 +8,7 @@ import StorageManager from "../../provider/StorageManager";
 import { AppContext } from "../AppContext";
 import UserActivityLogger from "../../provider/UserActivityLogger";
 import OtpInput from "react-otp-input";
+import { isTokenExpired } from "../component/utils/authUtils";
 
 const axiosProvider = new AxiosProvider();
 //
@@ -71,6 +72,16 @@ export default function OtpHome() {
   //   const token = storage.getAccessToken();
   //   if (token && token !== "null") router.replace("/dashboard");
   // }, []);
+
+
+   useEffect(() => {
+    const token = storage.getAccessToken(); // Get token from localStorage via StorageManager
+
+    // If token exists and is not expired, redirect to dashboard
+    if (token && !isTokenExpired(token)) {
+      router.replace("/dashboard"); // Redirect to the Dashboard page
+    }
+  }, [router]);
   return (
     <>
       {/* <div className="bg-[#F5F5F5] hidden md:block">
