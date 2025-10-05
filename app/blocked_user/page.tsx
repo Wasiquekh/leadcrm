@@ -52,7 +52,7 @@ const storage = new StorageManager();
 const activityLogger = new UserActivityLogger();
 
 export default function Home() {
-   const isChecking = useAuthRedirect();
+   const checking = useAuthRedirect();
   const [data, setData] = useState<User[] | null>(null);
   const [page, setPage] = useState<number>(1);
   const [pageSize] = useState<number>(10);
@@ -183,19 +183,19 @@ const unBlockUserData = async(id: string)=>{
       setPage(newPage);
     }
   };
-  // if (isChecking) {
-  //   return (
-  //     <div className="h-screen flex flex-col gap-5 justify-center items-center bg-white">
-  //       <Image
-  //         src="/images/orizonIcon.svg"
-  //         alt="Loading"
-  //         width={150}
-  //         height={150}
-  //         className="animate-pulse rounded"
-  //       />
-  //     </div>
-  //   );
-  // }
+		    if (checking) {
+    return (
+      <div className="h-screen flex flex-col gap-5 justify-center items-center bg-white">
+        <Image
+          src="/images/crmlogo.jpg"
+          alt="Loading"
+          width={150}
+          height={150}
+          className="animate-pulse rounded"
+        />
+      </div>
+    );
+        }
   if (isLoading) {
     return (
       <div className="h-screen flex flex-col gap-5 justify-center items-center">

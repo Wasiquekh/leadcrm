@@ -91,7 +91,7 @@ const typeOptions: OptionType[] = [
 ];
 
 export default function Home() {
-  const isChecking = useAuthRedirect();
+  const checking = useAuthRedirect();
   const [isFlyoutOpen, setFlyoutOpen] = useState<boolean>(false);
   const [isFlyoutFilterOpen, setFlyoutFilterOpen] = useState<boolean>(false);
   const [data, setData] = useState<UserActivity[]>([]);
@@ -267,7 +267,19 @@ if (!values.uuId && !values.module && !values.type) {
     );
   }
 
-
+		    if (checking) {
+    return (
+      <div className="h-screen flex flex-col gap-5 justify-center items-center bg-white">
+        <Image
+          src="/images/crmlogo.jpg"
+          alt="Loading"
+          width={150}
+          height={150}
+          className="animate-pulse rounded"
+        />
+      </div>
+    );
+  }
 
   return (
     <>

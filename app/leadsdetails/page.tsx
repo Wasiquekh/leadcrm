@@ -265,7 +265,7 @@ const storage = new StorageManager();
 
 export default function Home() {
   const [isFlyoutFilterOpen, setFlyoutFilterOpen] = useState<boolean>(false);
-  const isChecking = useAuthRedirect();
+  const checking = useAuthRedirect();
 
 
   const [isCustomerViewDetailOpen, setIsCustomerViewDetailOpen] =
@@ -1078,7 +1078,7 @@ setIsActivityHistoryPaination(true)
       ),
     },
   ];
-  if (isChecking) {
+  if (checking) {
     return (
       <div className="h-screen flex flex-col gap-5 justify-center items-center bg-white">
         <Image
