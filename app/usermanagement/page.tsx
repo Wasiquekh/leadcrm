@@ -63,7 +63,7 @@ const storage = new StorageManager();
 const activityLogger = new UserActivityLogger();
 
 export default function Home() {
-    const isChecking = useAuthRedirect();
+    const checking = useAuthRedirect();
   const [data, setData] = useState<User[] | null>(null);
   const [page, setPage] = useState<number>(1);
   const [pageSize] = useState<number>(10);
@@ -190,19 +190,7 @@ const blockUserData = async (item: User) => {
       setPage(newPage);
     }
   };
-  // if (isChecking) {
-  //   return (
-  //     <div className="h-screen flex flex-col gap-5 justify-center items-center bg-white">
-  //       <Image
-  //         src="/images/orizonIcon.svg"
-  //         alt="Loading"
-  //         width={150}
-  //         height={150}
-  //         className="animate-pulse rounded"
-  //       />
-  //     </div>
-  //   );
-  // }
+
   const clickOnEditButton = (item: any)=>{
 setFlyoutOpen(true)
 setEditFormData({
@@ -235,7 +223,7 @@ setEditFormData({
     return (
       <div className="h-screen flex flex-col gap-5 justify-center items-center">
         <Image
-          src="/images/orizonIcon.svg"
+          src="/images/crmlogo.jpg"
           alt="Table image"
           width={500}
           height={500}
@@ -244,6 +232,19 @@ setEditFormData({
         />
       </div>
     ); 
+  }
+  		    if (checking) {
+    return (
+      <div className="h-screen flex flex-col gap-5 justify-center items-center bg-white">
+        <Image
+          src="/images/crmlogo.jpg"
+          alt="Loading"
+          width={150}
+          height={150}
+          className="animate-pulse rounded"
+        />
+      </div>
+    );
   }
   return (
     <>
@@ -260,7 +261,7 @@ setEditFormData({
             <div className="w-full gap-4 flex justify-end items-center mt-0 mb-8 flex-wrap sm:flex-nowrap">
                             <div className=" sm:w-auto">
                 <Link href="/blocked_user">
-                  <button className="flex items-center gap-[10px]  h-12 px-3 py-[6px] rounded-[4px] shadow-borderShadow w-full sm:w-auto bg-primary-600 group hover:bg-primary-7  00">
+                  <button className="flex items-center gap-[10px]  h-12 px-3 py-[6px] rounded-[12px] shadow-borderShadow w-full sm:w-auto bg-primary-600 group hover:bg-primary-7  00">
                     <TbLockOpenOff className="h-[20px] w-[20px] text-white group-hover:text-white" />
                     <p className="text-white text-base leading-normal group-hover:text-white">
                       Blocked user
@@ -270,7 +271,7 @@ setEditFormData({
               </div>
               <div className=" sm:w-auto">
                 <Link href="/useradd">
-                  <button className="flex items-center gap-[10px]  h-12 px-3 py-[6px] rounded-[4px] shadow-borderShadow w-full sm:w-auto bg-primary-600 group hover:bg-primary-7  00">
+                  <button className="flex items-center gap-[10px]  h-12 px-3 py-[6px] rounded-[12px] shadow-borderShadow w-full sm:w-auto bg-primary-600 group hover:bg-primary-7  00">
                     <FaRegAddressCard className="h-[20px] w-[20px] text-white group-hover:text-white" />
                     <p className="text-white text-base leading-normal group-hover:text-white">
                       Create User
@@ -283,8 +284,8 @@ setEditFormData({
 <div className="relative overflow-x-auto sm:rounded-lg">
   <table className="w-full text-sm text-left text-white  whitespace-nowrap">
     <thead className="text-xs talbleheaderBg text-white">
-      <tr className="border border-tableBorder">
-        <th className="px-1 py-3 md:p-3 border border-tableBorder">
+      <tr className="   ">
+        <th className="px-1 py-3 md:p-3    ">
           <div className="flex items-center gap-2">
             <RxAvatar className="w-5 h-5" />
             <div className="font-semibold text-white text-base leading-normal">
@@ -292,25 +293,25 @@ setEditFormData({
             </div>
           </div>
         </th>
-        <th className="px-2 py-1 border border-tableBorder hidden md:table-cell">
+        <th className="px-2 py-1     hidden md:table-cell">
           <div className="flex items-center gap-2">
             <IoMailOpenOutline className="w-5 h-5" />
             <div className="font-semibold text-white text-base leading-normal">Email</div>
           </div>
         </th>
-        <th className="px-2 py-1 border border-tableBorder hidden md:table-cell">
+        <th className="px-2 py-1     hidden md:table-cell">
           <div className="flex items-center gap-2">
             <MdOutlineCall className="w-5 h-5" />
             <div className="font-semibold text-white text-base leading-normal">Phone</div>
           </div>
         </th>
-        <th className="px-2 py-1 border border-tableBorder hidden md:table-cell">
+        <th className="px-2 py-1     hidden md:table-cell">
           <div className="flex items-center gap-2">
             <LiaArrowCircleDownSolid className="w-5 h-5" />
             <div className="font-semibold text-white text-base leading-normal">Role</div>
           </div>
         </th>
-        <th className="px-2 py-1 border border-tableBorder">
+        <th className="px-2 py-1    ">
           <div className="flex items-center gap-2">
             <LiaArrowCircleDownSolid className="w-5 h-5" />
             <div className="font-semibold text-white text-base leading-normal">Action</div>
@@ -330,7 +331,7 @@ setEditFormData({
         data.map((item: any, index: number) => (
           <tr
             key={item?.id ?? index}
-            className="border border-tableBorder  hover:bg-primary-600"
+            className="     hover:bg-primary-600 border-b border-[#E7E7E7] odd:bg-[#404040]"
           >
             {/* Name */}
             <td className="px-1 md:p-3 py-2 flex md:flex-row gap-2 ">
@@ -338,29 +339,29 @@ setEditFormData({
             </td>
 
             {/* Email */}
-            <td className="px-2 py-1 border border-tableBorder hidden md:table-cell">
+            <td className="px-2 py-1     hidden md:table-cell">
               <p className="text-white text-sm sm:text-base leading-normal truncate">{item?.email ?? "-"}</p>
             </td>
 
             {/* Phone */}
-            <td className="px-2 py-1 border border-tableBorder hidden md:table-cell">
+            <td className="px-2 py-1     hidden md:table-cell">
               <p className="text-white text-sm sm:text-base leading-normal capitalize truncate">{item?.mobile_number ?? "-"}</p>
             </td>
 
             {/* Role */}
-            <td className="px-2 py-1 border border-tableBorder hidden md:table-cell">
-              <button className="py-[4px] px-3 bg-primary-500 hover:bg-primary-600 active:bg-primary-700 group flex gap-1 items-center rounded-xl text-xs md:text-sm">
+            <td className="px-2 py-1     hidden md:table-cell">
+              <button className="py-[4px] px-3 bg-primary-600 hover:bg-primary-600 active:bg-primary-700 group flex gap-1 items-center rounded-xl text-xs md:text-sm">
                 {/* <MdRemoveRedEye className="text-white w-4 h-4" /> */}
                 <p className="text-white hidden md:block">{item?.role_name ?? "-"}</p>
               </button>
             </td>
 
             {/* Action Buttons */}
-            <td className="px-2 py-1 border border-tableBorder">
+            <td className="px-2 py-1    ">
               <div className="flex gap-1 md:gap-2 justify-center md:justify-start">
                 <button
                   onClick={() => clickOnEditButton(item)}
-                  className="py-[4px] px-3 bg-primary-600 hover:bg-primary-700 active:bg-primary-800 flex gap-1 items-center rounded-xl text-xs md:text-sm"
+                  className="py-[4px] px-3 bg-black hover:bg-primary-700 active:bg-primary-800 flex gap-1 items-center rounded-xl text-xs md:text-sm"
                 >
                   <MdRemoveRedEye className="text-white w-4 h-4" />
                   <p className="text-white hidden md:block"></p>
@@ -368,7 +369,7 @@ setEditFormData({
 
                 <button
                   onClick={() => deleteUserData(item)}
-                  className="py-[4px] px-3 bg-primary-500 hover:bg-primary-600 active:bg-primary-700 flex gap-1 items-center rounded-full text-xs md:text-sm"
+                  className="py-[4px] px-3 bg-black hover:bg-primary-800 active:bg-primary-700 flex gap-1 items-center rounded-full text-xs md:text-sm"
                 >
                   <RiDeleteBin6Line className="text-white w-4 h-4" />
                   <p className="text-white hidden md:block"></p>
@@ -376,7 +377,7 @@ setEditFormData({
 
                 {item.role_name === "Admin" ? (
                   <button
-                    className="py-[4px] px-3 bg-primary-500 opacity-50 cursor-not-allowed flex gap-1 items-center rounded-full text-xs md:text-sm"
+                    className="py-[4px] px-3 bg-black opacity-50 cursor-not-allowed flex gap-1 items-center rounded-full text-xs md:text-sm"
                   >
                     <ImBlocked className="text-white w-4 h-4" />
                     <p className="text-white hidden md:block"></p>
@@ -384,7 +385,7 @@ setEditFormData({
                 ) : (
                   <button
                     onClick={() => blockUserData(item)}
-                    className="py-[4px] px-3 bg-primary-500 hover:bg-primary-600 active:bg-primary-700 flex gap-1 items-center rounded-full text-xs md:text-sm"
+                    className="py-[4px] px-3 bg-black hover:bg-primary-700 active:bg-primary-800 flex gap-1 items-center rounded-full text-xs md:text-sm"
                   >
                     <ImBlocked className="text-white w-4 h-4" />
                     <p className="text-white hidden md:block"></p>
@@ -406,7 +407,7 @@ setEditFormData({
   <button
     onClick={() => handlePageChange(page - 1)}
     disabled={page === 1}
-    className="px-2 py-2 mx-2 border rounded bg-primary-500 hover:bg-primary-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+    className="px-2 py-2 mx-2 border rounded bg-primary-600 hover:bg-primary-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
   >
     <HiChevronDoubleLeft className="w-6 h-auto" />
   </button>
@@ -418,7 +419,7 @@ setEditFormData({
   <button
     onClick={() => handlePageChange(page + 1)}
     disabled={page === totalPages}
-    className="px-2 py-2 mx-2 border rounded bg-primary-500 hover:bg-primary-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+    className="px-2 py-2 mx-2 border rounded bg-primary-600 hover:bg-primary-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
   >
     <HiChevronDoubleRight className="w-6 h-auto" />
   </button>
@@ -551,7 +552,7 @@ setEditFormData({
           <div className="col-span-2">
             <button
               type="submit"
-              className="bg-primary-500 hover:bg-primary-700 text-white px-6 py-2 rounded w-full"
+              className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded w-full"
             >
               Save Changes
             </button>

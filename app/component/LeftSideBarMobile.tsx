@@ -33,7 +33,7 @@ const LeftSideBarMobile: React.FC = () => {
       {/* Logo */}
       <Link href="/dashboard" className="flex gap-2 mb-8 px-3 py-2">
         <Image
-          src="/images/orizonIcon.svg"
+          src="/images/crmlogo.jpg"
           alt="Orizon Logo"
           width={0}
           height={0}

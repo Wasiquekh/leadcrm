@@ -265,7 +265,7 @@ const storage = new StorageManager();
 
 export default function Home() {
   const [isFlyoutFilterOpen, setFlyoutFilterOpen] = useState<boolean>(false);
-  const isChecking = useAuthRedirect();
+  const checking = useAuthRedirect();
 
 
   const [isCustomerViewDetailOpen, setIsCustomerViewDetailOpen] =
@@ -608,6 +608,7 @@ const INITIAL_VALUES = {
   };
   const openEditDocumentFlyOut = (d: LeadDocument)=>{
     setDocumentEditObjectData(d)
+     setDocumentName(d.notes);
      setFlyoutFilterOpen(true);
     setIsDocumentEdit(true);
   }
@@ -900,7 +901,7 @@ setIsActivityHistoryPaination(true)
         return (
           <div
             key={activity.id}
-            className="w-full flex justify-between gap-4 hover:bg-primary-800 py-2 px-2 rounded transition-colors"
+            className="w-full flex justify-between gap-4 hover:bg-primary-800 py-2 px-2 rounded transition-colors border-b border-[#E7E7E7] odd:bg-[#404040]"
           >
             {/* Left: icon + occurred date/time */}
             <div className="flex gap-2 shrink-0">
@@ -1077,11 +1078,11 @@ setIsActivityHistoryPaination(true)
       ),
     },
   ];
-  if (isChecking) {
+  if (checking) {
     return (
       <div className="h-screen flex flex-col gap-5 justify-center items-center bg-white">
         <Image
-          src="/images/orizonIcon.svg"
+          src="/images/crmlogo.jpg"
           alt="Loading"
           width={150}
           height={150}
@@ -1667,7 +1668,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
                <div className="w-full border border-white rounded overflow-hidden">
   <table className="w-full text-sm text-left text-white">
     <thead className="text-xs ">
-      <tr className="border border-gray-700">
+      <tr className="border talbleheaderBg">
         <th
           scope="col"
           colSpan={2}
@@ -1703,7 +1704,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
       ].map((row, idx) => (
         <tr
           key={idx}
-          className="border border-gray-700   transition-colors"
+          className="border    transition-colors border-b border-[#E7E7E7] odd:bg-[#404040]"
         >
           <td className="text-sm text-gray-400 py-4 px-4">{row.label}</td>
           <td className="text-sm font-medium text-white py-4 px-4">
@@ -3460,7 +3461,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
       </p>
       <IoCloseOutline
         onClick={() => closeFlyOut()}
-        className="h-8 w-8 border border-[#E7E7E7] text-secondBlack rounded cursor-pointer"
+        className="h-8 w-8 border border-[#E7E7E7]  rounded cursor-pointer"
       />
     </div>
     <div className="w-full border-b border-[#E7E7E7] mb-4"></div>
@@ -3470,29 +3471,32 @@ const getIdFromName = (list: any[], name?: string | null) => {
         <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 md:justify-between mb-4 sm:mb-6">
           {/* Document name */}
           <div className="w-full">
-            <p className="text-secondBlack font-medium text-base leading-6 mb-2">
+            <p className=" font-medium text-base leading-6 mb-2">
               Document name
             </p>
             <input
               type="text"
-              value={documentName || documentEditObjectData?.notes || ""}
-              onChange={(e) => setDocumentName(e.target.value)}
+value={documentName !== undefined ? documentName : documentEditObjectData?.notes || ""}  // Display documentName or fallback to documentEditObjectData?.notes
+onChange={(e) => setDocumentName(e.target.value)}  // Update documentName on user input
+
+
+
               placeholder="Enter document name"
               required
-              className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+              className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 bg-black"
             />
           </div>
 
           {/* Replace file */}
           <div className="w-full">
-            <p className="text-secondBlack font-medium text-base leading-6 mb-2">
+            <p className=" font-medium text-base leading-6 mb-2">
               Replace file (optional)
             </p>
             <input
               type="file"
               name="file"
               accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.pdf,.doc,.docx"
-              className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack bg-white"
+              className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4  bg-black"
             />
             {documentEditObjectData && (
               <p className="text-xs text-gray-500 mt-2">
@@ -3513,7 +3517,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
         <div className="mt-10 w-full flex flex-col gap-y-4 md:flex-row justify-between items-center">
           <button
             type="submit"
-            className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
+            className="py-[13px] px-[26px] bg-primary-600 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
           >
             Update Document
           </button>
@@ -3532,7 +3536,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
       </p>
       <IoCloseOutline
         onClick={() => closeFlyOut()}
-        className="h-8 w-8 border border-[#E7E7E7] text-secondBlack rounded cursor-pointer"
+        className="h-8 w-8 border border-[#E7E7E7]  rounded cursor-pointer"
       />
     </div>
     <div className="w-full border-b border-[#E7E7E7] mb-4"></div>
@@ -3688,7 +3692,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
 
           {/* Location (required) */}
           <div className="w-full relative md:col-span-2">
-            <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-2">
+            <p className=" font-medium text-base leading-6 mb-2">
               Location
             </p>
             <input
@@ -3698,7 +3702,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
               onChange={handleChange}
               onBlur={() => setFieldTouched("location", true)}
               placeholder="Enter location"
-              className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack"
+              className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4  bg-black"
             />
             {touched.location && (errors as any).location ? (
               <p className="text-red-500 mt-1 text-xs">
@@ -3709,14 +3713,14 @@ const getIdFromName = (list: any[], name?: string | null) => {
 
 {/* ===== Schedule (From / To) ===== */}
 <div className="w-full md:col-span-2">
-  <p className="text-[#0A0A0A] font-medium text-base leading-6 mb-3">
+  <p className=" font-medium text-base leading-6 mb-3">
     Schedule
   </p>
 
   {/* From */}
   <div className="w-full relative mb-4">
     <div className="w-full relative mb-4">
-      <p className="text-[#0A0A0A] font-medium text-sm leading-6 mb-2">
+      <p className=" font-medium text-sm leading-6 mb-2">
         From
       </p>
       <DatePicker
@@ -3736,7 +3740,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
         timeIntervals={15}                 // 15-min steps
         dateFormat="MM-dd-yyyy h:mma"
         placeholderText="MM-dd-yyyy hh:mmam/pm"
-        className="hover:shadow-hoverInputShadow focus-border-primary !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 bg-white shadow-sm"
+        className="hover:shadow-hoverInputShadow focus-border-primary !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 font-medium placeholder-[#717171] py-4 px-4 bg-black shadow-s"
         popperClassName="custom-datepicker"
 
         dayClassName={(date) => {
@@ -3801,7 +3805,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
 
   {/* To (read-only) */}
   <div className="w-full relative">
-    <p className="text-[#0A0A0A] font-medium text-sm leading-6 mb-2">
+    <p className=" font-medium text-sm leading-6 mb-2">
       To
     </p>
     <DatePicker
@@ -3818,7 +3822,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
       disabled
       className="hover:shadow-hoverInputShadow focus-border-primary 
         !w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-4 
-        font-medium placeholder-[#717171] py-4 px-4 bg-gray-50 text-firstBlack cursor-not-allowed"
+        font-medium placeholder-[#717171] py-4 px-4 bg-black cursor-not-allowed"
       popperClassName="custom-datepicker"
       dayClassName={() => "pointer-events-none"}
     />
@@ -3832,7 +3836,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
 
           {/* Description */}
           <div className="w-full relative md:col-span-2">
-            <p className="text-secondBlack font-medium text-base leading-6 mb-2">
+            <p className=" font-medium text-base leading-6 mb-2">
               Description (optional)
             </p>
             <textarea
@@ -3842,7 +3846,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
               onBlur={() => setFieldTouched("description", true)}
               placeholder="Add description (optional)"
               rows={4}
-              className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-5 font-medium placeholder-[#717171] py-4 px-4 text-firstBlack resize-y"
+              className="hover:shadow-hoverInputShadow focus-border-primary w-full border border-[#DFEAF2] rounded-[4px] text-sm leading-5 font-medium placeholder-[#717171] py-4 px-4 bg-black resize-y"
             />
           </div>
         </div>
@@ -3852,7 +3856,7 @@ const getIdFromName = (list: any[], name?: string | null) => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
+            className="py-[13px] px-[26px] bg-primary-600 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
           >
             {taskEditObject ? "Save Changes" : "Create Task Activity"}
           </button>

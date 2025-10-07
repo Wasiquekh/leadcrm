@@ -18,12 +18,12 @@ import Link from "next/link";
 import { useAuthRedirect } from "../component/hooks/useAuthRedirect";
 
 export default function Home() {
-  const isChecking = useAuthRedirect();
-  if (isChecking) {
+  const checking = useAuthRedirect();
+  if (checking) {
     return (
       <div className="h-screen flex flex-col gap-5 justify-center items-center bg-white">
         <Image
-          src="/images/orizonIcon.svg"
+          src="/images/crmlogo.jpg"
           alt="Loading"
           width={150}
           height={150}

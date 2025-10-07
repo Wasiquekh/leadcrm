@@ -80,25 +80,7 @@ interface SearchLeadProps {
   onApplyFilters: (payload: Record<string, any>) => void;
 }
 
-/** ====== UI (react-select) styles ====== */
-const selectStyles = {
-  control: (base: any) => ({
-    ...base,
-    backgroundColor: "#000",
-    color: "#fff",
-    borderColor: "#444",
-    padding: "4px",
-  }),
-  singleValue: (base: any) => ({ ...base, color: "#fff" }),
-  input: (base: any) => ({ ...base, color: "#fff" }),
-  placeholder: (base: any) => ({ ...base, color: "#bbb" }),
-  menu: (base: any) => ({ ...base, backgroundColor: "#000" }),
-  option: (base: any, { isFocused, isSelected }: any) => ({
-    ...base,
-    backgroundColor: isSelected ? "#222" : isFocused ? "#333" : "#000",
-    color: "#fff",
-  }),
-};
+
 
 /** ====== Static province list ====== */
 const provinceOptions = [
@@ -306,7 +288,24 @@ const SearchLead: React.FC<SearchLeadProps> = ({
                 options={provinceOptions}
                 placeholder="Select Province"
                 isClearable
-                styles={selectStyles}
+                classNames={{
+                control: ({ isFocused }: any) =>
+                  `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                    isFocused ? "!border-primary-500" : "!border-gray-700"
+                  }`,
+              }}
+              styles={{
+                menu: (base) => ({ ...base, borderRadius: 4, backgroundColor: "#000" }),
+                option: (base, { isFocused, isSelected }) => ({
+                  ...base,
+                  backgroundColor: isSelected ? "var(--primary-600)" : isFocused ? "#222" : "#000",
+                  color: "#fff",
+                  cursor: "pointer",
+                }),
+                singleValue: (base) => ({ ...base, color: "#fff" }),
+                input: (base) => ({ ...base, color: "#fff" }),
+                placeholder: (base) => ({ ...base, color: "#aaa" }),
+              }}
               />
             </div>
 
@@ -324,7 +323,25 @@ const SearchLead: React.FC<SearchLeadProps> = ({
                 options={leadSourceData}
                 placeholder="Select Lead Source"
                 isClearable
-                styles={selectStyles}
+                                classNames={{
+                control: ({ isFocused }: any) =>
+                  `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                    isFocused ? "!border-primary-500" : "!border-gray-700"
+                  }`,
+              }}
+              styles={{
+                menu: (base) => ({ ...base, borderRadius: 4, backgroundColor: "#000" }),
+                option: (base, { isFocused, isSelected }) => ({
+                  ...base,
+                  backgroundColor: isSelected ? "var(--primary-600)" : isFocused ? "#222" : "#000",
+                  color: "#fff",
+                  cursor: "pointer",
+                }),
+                singleValue: (base) => ({ ...base, color: "#fff" }),
+                input: (base) => ({ ...base, color: "#fff" }),
+                placeholder: (base) => ({ ...base, color: "#aaa" }),
+              }}
+              
               />
             </div>
 
@@ -343,7 +360,25 @@ const SearchLead: React.FC<SearchLeadProps> = ({
                 getOptionValue={(opt: any) => opt.id}
                 options={agentList}
                 placeholder="Select one or more agents"
-                styles={selectStyles}
+                                classNames={{
+                control: ({ isFocused }: any) =>
+                  `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                    isFocused ? "!border-primary-500" : "!border-gray-700"
+                  }`,
+              }}
+              styles={{
+                menu: (base) => ({ ...base, borderRadius: 4, backgroundColor: "#000" }),
+                option: (base, { isFocused, isSelected }) => ({
+                  ...base,
+                  backgroundColor: isSelected ? "var(--primary-600)" : isFocused ? "#222" : "#000",
+                  color: "#fff",
+                  cursor: "pointer",
+                }),
+                singleValue: (base) => ({ ...base, color: "#fff" }),
+                input: (base) => ({ ...base, color: "#fff" }),
+                placeholder: (base) => ({ ...base, color: "#aaa" }),
+              }}
+              
               />
             </div>
 
@@ -365,7 +400,25 @@ const SearchLead: React.FC<SearchLeadProps> = ({
                 options={debtConsolidation}
                 placeholder="Select Debt Consolidation Status"
                 isClearable
-                styles={selectStyles}
+                                classNames={{
+                control: ({ isFocused }: any) =>
+                  `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                    isFocused ? "!border-primary-500" : "!border-gray-700"
+                  }`,
+              }}
+              styles={{
+                menu: (base) => ({ ...base, borderRadius: 4, backgroundColor: "#000" }),
+                option: (base, { isFocused, isSelected }) => ({
+                  ...base,
+                  backgroundColor: isSelected ? "var(--primary-600)" : isFocused ? "#222" : "#000",
+                  color: "#fff",
+                  cursor: "pointer",
+                }),
+                singleValue: (base) => ({ ...base, color: "#fff" }),
+                input: (base) => ({ ...base, color: "#fff" }),
+                placeholder: (base) => ({ ...base, color: "#aaa" }),
+              }}
+               
               />
             </div>
 
@@ -392,23 +445,40 @@ const SearchLead: React.FC<SearchLeadProps> = ({
                 options={consolidationData}
                 placeholder="Select Consolidated Credit Status"
                 isClearable
-                styles={selectStyles}
+                                classNames={{
+                control: ({ isFocused }: any) =>
+                  `onHoverBoxShadow !w-full !border-[0.4px] !rounded-[4px] !text-sm !leading-4 !font-medium !py-1.5 !px-1 !bg-black !shadow-sm ${
+                    isFocused ? "!border-primary-500" : "!border-gray-700"
+                  }`,
+              }}
+              styles={{
+                menu: (base) => ({ ...base, borderRadius: 4, backgroundColor: "#000" }),
+                option: (base, { isFocused, isSelected }) => ({
+                  ...base,
+                  backgroundColor: isSelected ? "var(--primary-600)" : isFocused ? "#222" : "#000",
+                  color: "#fff",
+                  cursor: "pointer",
+                }),
+                singleValue: (base) => ({ ...base, color: "#fff" }),
+                input: (base) => ({ ...base, color: "#fff" }),
+                placeholder: (base) => ({ ...base, color: "#aaa" }),
+              }}
               />
             </div>
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex gap-4">
             <button
               type="submit"
               disabled={isSubmitting || loading}
-              className="px-5 py-3 bg-primary-500 rounded-[4px] text-white text-base font-medium hover:bg-primary-600 disabled:opacity-50"
+              className="px-5 py-3 bg-primary-600 rounded-[4px] text-white text-base font-medium hover:bg-primary-700 disabled:opacity-50 w-full"
             >
               {(isSubmitting || loading) ? "Searching..." : "Search"}
             </button>
 
             <button
               type="reset"
-              className="px-5 py-3 bg-gray-800 border border-gray-700 rounded-[4px] text-white text-base font-medium hover:bg-gray-700"
+              className="px-5 py-3 bg-gray-800 border border-gray-700 rounded-[4px] text-white text-base font-medium hover:bg-gray-700 w-full"
               onClick={() => {
                 // nothing special; parent will clear if needed
               }}
