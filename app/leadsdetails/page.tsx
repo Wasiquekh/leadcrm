@@ -2331,7 +2331,7 @@ setIsActivityHistoryPaination(true)
                     {/* Agent */}
                     <div className="w-full relative">
                       <p className="text-white font-medium text-base leading-6 mb-2">
-                        Agent {userRole === "Admin" ? "(admin)" : "(agent)"}
+                        Agent
                       </p>
                       <Select
                         value={
