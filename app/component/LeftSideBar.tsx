@@ -10,6 +10,7 @@ import { FaUserEdit } from "react-icons/fa";
 import { MdOutlineDashboard, MdOutlinePeopleOutline } from "react-icons/md";
 import { storage } from "firebase-admin";
 import StorageManager from "../../provider/StorageManager";
+import { HiTemplate } from "react-icons/hi";
 
 const axiosProvider = new AxiosProvider();
 
@@ -76,28 +77,24 @@ const LeftSideBar: React.FC = () => {
             )}
           </div>
         </Link>
-{userRole === "Admin" && 
-(
-     <Link href="/leads">
-          <div
-            className={`mb-4 flex items-center gap-4 group px-3 py-2 rounded-[4px] relative cursor-pointer text-base leading-normal font-medium text-white hover:bg-sideBarHoverbg active:bg-sideBarHoverbgPressed   ${
-              pathname === "/leads" || pathname === "/leadsdetails"
-                ? "bg-primary-600 text-white  hover:!text-white"
-                : ""
-            }`}
-          >
-            <div className="h-6 w-6 shrink-0 grid place-items-center">
-              <RiFileAddLine className="h-5 w-5" />
+        {userRole === "Admin" && (
+          <Link href="/leads">
+            <div
+              className={`mb-4 flex items-center gap-4 group px-3 py-2 rounded-[4px] relative cursor-pointer text-base leading-normal font-medium text-white hover:bg-sideBarHoverbg active:bg-sideBarHoverbgPressed   ${
+                pathname === "/leads" || pathname === "/leadsdetails"
+                  ? "bg-primary-600 text-white  hover:!text-white"
+                  : ""
+              }`}
+            >
+              <div className="h-6 w-6 shrink-0 grid place-items-center">
+                <RiFileAddLine className="h-5 w-5" />
+              </div>
+              {isExpanded && (
+                <p className="whitespace-nowrap leading-none">Leads</p>
+              )}
             </div>
-            {isExpanded && (
-              <p className="whitespace-nowrap leading-none">Leads</p>
-            )}
-          </div>
-        </Link>
-)
-
-}
-     
+          </Link>
+        )}
 
         {userRole === "Admin" && (
           <Link href="/usermanagement">
@@ -114,6 +111,26 @@ const LeftSideBar: React.FC = () => {
               {isExpanded && (
                 <p className="whitespace-nowrap leading-none">
                   User Management
+                </p>
+              )}
+            </div>
+          </Link>
+        )}
+        {userRole === "Admin" && (
+          <Link href="/template">
+            <div
+              className={`mb-4 flex items-center gap-4 group px-3 py-2 rounded-[4px] relative cursor-pointer text-base leading-normal font-medium text-white hover:bg-sideBarHoverbg active:bg-sideBarHoverbgPressed   ${
+                pathname === "/template"
+                  ? "bg-primary-600 text-white  hover:!text-white"
+                  : ""
+              }`}
+            >
+              <div className="h-6 w-6 shrink-0 grid place-items-center">
+                <HiTemplate className="h-5 w-5" />
+              </div>
+              {isExpanded && (
+                <p className="whitespace-nowrap leading-none">
+                  Template Management
                 </p>
               )}
             </div>
@@ -170,9 +187,7 @@ const LeftSideBar: React.FC = () => {
             fill
             className="object-contain"
           /> */}
-         <IoMdLogOut
-          className=""
-         />
+          <IoMdLogOut className="" />
         </div>
         {isExpanded && (
           <span className="text-base font-semibold leading-none text-white whitespace-nowrap">
