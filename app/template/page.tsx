@@ -144,6 +144,53 @@ export default function Home() {
     });
   };
 
+  // -------- HELPERS TO UPLOAD MULTIPLE FILES -------------
+  // helpers you can keep in the same file
+  const MAX_FILE_MB = 95; // keep under proxy/CDN cap (adjust if needed)
+  const BYTES = (mb: number) => mb * 1024 * 1024;
+
+  function validateFileClientSide(file: File) {
+    const okTypes = [
+      "image/jpeg",
+      "image/png",
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ];
+    if (!okTypes.includes(file.type)) throw new Error("Unsupported file type");
+    if (file.size > BYTES(MAX_FILE_MB))
+      throw new Error(`File > ${MAX_FILE_MB} MB. Please compress/split.`);
+  }
+
+  async function uploadOneFile(
+    file: File,
+    meta: { title: string; subject: string; body: string },
+    onProgress?: (pct: number) => void
+  ) {
+    // per-file validation (frontend only)
+    validateFileClientSide(file);
+
+    const fd = new FormData();
+    fd.append("title", meta.title);
+    fd.append("subject", meta.subject);
+    fd.append("body", meta.body);
+    fd.append("files", file); // if backend expects files[] use "files[]"
+
+    const res = await AxiosProvider.post("/createtemplate", fd, {
+      headers: { "Content-Type": "multipart/form-data" },
+      onUploadProgress: (e) => {
+        if (onProgress && e.total)
+          onProgress(Math.round((e.loaded / e.total) * 100));
+      },
+      maxBodyLength: Infinity,
+      maxContentLength: Infinity,
+      timeout: 10 * 60 * 1000,
+    });
+    return res.data;
+  }
+
+  // -------- END HELPERS TO UPLOAD MULTIPLE FILES -------------
+
   if (isLoading) {
     return (
       <div className="h-screen flex flex-col gap-5 justify-center items-center">
@@ -201,35 +248,6 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-              {/* Show Applied Filters */}
-              {/* <div className="w-[99%] mx-auto mb-3">
-                {appliedFilters.length > 0 && (
-                  <div className="flex flex-wrap gap-x-3 gap-y-2 items-center">
-                    <ul className="flex flex-wrap items-center gap-x-3 gap-y-2">
-                      {appliedFilters.map((filter, index) => (
-                        <li
-                          key={index}
-                          className="flex items-center text-black bg-primary-100 px-3 py-2 rounded-md text-xs"
-                        >
-                          <RiAccountCircleLine className="text-black mr-1" />
-                          {filter}
-                          <RxCross2
-                            onClick={() => removeFilter(filter)}
-                            className="text-black cursor-pointer ml-2"
-                          />
-                        </li>
-                      ))}
-                      <li
-                        //  onClick={clearAllFilteredData}
-                        className="flex items-center text-black bg-primary-100 px-3 py-2 rounded-md text-xs cursor-pointer"
-                      >
-                        Clear All
-                        <RxCross2 className="text-black ml-2" />
-                      </li>
-                    </ul>
-                  </div>
-                )}
-              </div> */}
 
               <div className="relative overflow-x-auto sm:rounded">
                 {/* import { MdEdit } from "react-icons/md"; // add this at the top */}
@@ -341,57 +359,57 @@ export default function Home() {
                 title: "",
                 subject: "",
                 body: "",
-                file: null as File | null,
+                files: [] as File[], // multiple files
               }}
-              validationSchema={Yup.object({
-                title: Yup.string().required("Title is required"),
-                subject: Yup.string().required("Subject is required"),
-                body: Yup.string().required("Body is required"),
-                file: Yup.mixed<File>()
-                  .required("File is required")
-                  .test("is-file", "File is required", (v) => v instanceof File)
-                  .test(
-                    "file-size",
-                    "File must be ≤ 10 MB",
-                    (v) => !v || v.size <= 10 * 1024 * 1024
-                  )
-                  .test(
-                    "file-type",
-                    "Only JPG, PNG, PDF, DOC, DOCX allowed",
-                    (v) =>
-                      !v ||
-                      [
-                        "image/jpeg",
-                        "image/png",
-                        "application/pdf",
-                        "application/msword",
-                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                      ].includes(v.type)
-                  ),
-              })}
+              validate={(v) => {
+                const e: any = {};
+                if (!v.title) e.title = "Title is required";
+                if (!v.subject) e.subject = "Subject is required";
+                if (!v.body) e.body = "Body is required";
+                if (!v.files?.length)
+                  e.files = "Please select at least one file";
+                // simple size check to avoid proxy errors
+                const tooBig = (f: File) => f.size > MAX_FILE_MB * 1024 * 1024;
+                if (v.files?.some(tooBig))
+                  e.files = `Each file must be ≤ ${MAX_FILE_MB}MB`;
+                return e;
+              }}
               onSubmit={async (values, { resetForm, setSubmitting }) => {
-                console.log("✅ Form values:", values);
-
-                const fd = new FormData();
-                fd.append("title", values.title);
-                fd.append("subject", values.subject);
-                fd.append("body", values.body);
-                if (values.file) fd.append("file", values.file);
-
                 try {
-                  const res = await AxiosProvider.post("/createtemplate", fd, {
-                    headers: { "Content-Type": "multipart/form-data" },
-                  });
-                  toast.success("Form submitted successfully!");
-                  console.log("✅ API response:", res.data);
+                  // IMPORTANT: send ONE file per request to avoid 413
+                  for (const file of values.files) {
+                    const fd = new FormData();
+                    fd.append("title", values.title);
+                    fd.append("subject", values.subject);
+                    fd.append("body", values.body);
+                    fd.append("files", file); // same field name your backend expects
+
+                    await AxiosProvider.post("/createtemplate", fd, {
+                      // don't set Content-Type; browser sets proper boundary
+                      maxBodyLength: Infinity,
+                      maxContentLength: Infinity,
+                      timeout: 30 * 60 * 1000, // 30 min (big files)
+                    });
+                  }
+
+                  toast.success("Uploaded successfully!");
                   closeFlyout();
                   setHitApi(!hitApi);
                   resetForm();
-                } catch (error: any) {
-                  console.error("❌ Submit error:", error);
-                  toast.error("Failed to submit the form.");
+                } catch (err: any) {
+                  if (err?.response?.status === 413) {
+                    toast.error(
+                      `File too large for server limit. Try a smaller file.`
+                    );
+                  } else if (err?.code === "ERR_NETWORK") {
+                    toast.error(
+                      `Network/proxy blocked the upload (likely size limit).`
+                    );
+                  } else {
+                    toast.error("Upload failed.");
+                  }
                 } finally {
-                  setSubmitting(false); // <-- keeps the button disabled until API completes
+                  setSubmitting(false);
                 }
               }}
             >
@@ -466,25 +484,39 @@ export default function Home() {
                       )}
                     </div>
 
-                    {/* File */}
+                    {/* Files (multiple) */}
                     <div className="w-full">
                       <p className="text-white font-medium text-base leading-6 mb-2">
-                        File (Image, PDF, DOC, etc.)
+                        Files (you can select multiple)
                       </p>
                       <input
                         type="file"
-                        name="file"
+                        name="files"
+                        multiple
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                          const f = e.currentTarget.files?.[0] || null;
-                          setFieldValue("file", f);
+                          const list = Array.from(e.currentTarget.files || []);
+                          setFieldValue("files", list);
                         }}
-                        accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
+                        accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.zip,.rar,.txt,.xlsx,.pptx"
                         className="hover:shadow-hoverInputShadow focus:border-primary-600 w-full h-[50px] border border-gray-700 rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black file:mr-4 file:py-2 file:px-4 file:rounded-[4px] file:border-0 file:text-sm file:font-semibold file:bg-primary-700 file:text-white hover:file:bg-primary-800 pt-[6px]"
                       />
-                      {touched.file && typeof errors.file === "string" && (
+                      {touched.files && typeof errors.files === "string" && (
                         <div className="text-red-500 text-sm text-center mt-1">
-                          {errors.file}
+                          {errors.files}
                         </div>
+                      )}
+
+                      {values.files?.length > 0 && (
+                        <ul className="text-xs text-gray-300 space-y-1 mt-2">
+                          {values.files.map((f, i) => (
+                            <li key={i} className="flex justify-between">
+                              <span className="truncate">{f.name}</span>
+                              <span>
+                                ({(f.size / (1024 * 1024)).toFixed(2)} MB)
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
                       )}
                     </div>
 
@@ -492,15 +524,15 @@ export default function Home() {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className={`py-[13px] px-[26px] w-full  rounded-[4px] text-base font-medium leading-6 text-white text-center
-    ${
-      isSubmitting
-        ? "bg-primary-700 opacity-60 cursor-not-allowed"
-        : "bg-primary-700 hover:bg-primary-800"
-    }`}
+                      className={`py-[13px] px-[26px] w-full rounded-[4px] text-base font-medium leading-6 text-white text-center
+            ${
+              isSubmitting
+                ? "bg-primary-700 opacity-60 cursor-not-allowed"
+                : "bg-primary-700 hover:bg-primary-800"
+            }`}
                       aria-busy={isSubmitting}
                     >
-                      {isSubmitting ? "Submitting..." : "Submit"}
+                      {isSubmitting ? "Uploading..." : "Submit"}
                     </button>
                   </div>
                 </Form>
@@ -522,7 +554,6 @@ export default function Home() {
             </div>
 
             <div className="w-full border-b border-gray-700 mb-4 sm:mb-6"></div>
-
             <Formik
               enableReinitialize
               initialValues={{
@@ -530,59 +561,94 @@ export default function Home() {
                 title: editObjectData?.title ?? "",
                 subject: editObjectData?.subject ?? "",
                 body: editObjectData?.body ?? "",
-                file: null as File | null,
+                files: [] as File[], // ⬅️ multiple (optional)
               }}
               validationSchema={Yup.object({
                 id: Yup.string().required("Template ID is required"),
                 title: Yup.string().required("Title is required"),
                 subject: Yup.string().required("Subject is required"),
                 body: Yup.string().required("Body is required"),
-                // file is OPTIONAL on update; validate only if provided
-                file: Yup.mixed<File | null>()
-                  .nullable()
-                  .test(
-                    "file-size",
-                    "File must be ≤ 10 MB",
-                    (v) => !v || v.size <= 10 * 1024 * 1024
+                files: Yup.array()
+                  .of(
+                    Yup.mixed<File>()
+                      .test(
+                        "file-size",
+                        `Each file must be ≤ ${MAX_FILE_MB} MB`,
+                        (v) => !v || v.size <= MAX_FILE_MB * 1024 * 1024
+                      )
+                      .test(
+                        "file-type",
+                        "Only JPG, PNG, PDF, DOC, DOCX allowed",
+                        (v) =>
+                          !v ||
+                          [
+                            "image/jpeg",
+                            "image/png",
+                            "application/pdf",
+                            "application/msword",
+                            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                          ].includes(v.type)
+                      )
                   )
-                  .test(
-                    "file-type",
-                    "Only JPG, PNG, PDF, DOC, DOCX allowed",
-                    (v) =>
-                      !v ||
-                      [
-                        "image/jpeg",
-                        "image/png",
-                        "application/pdf",
-                        "application/msword",
-                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                      ].includes(v.type)
-                  ),
+                  .notRequired(), // optional on update
               })}
               onSubmit={async (values, { setSubmitting, resetForm }) => {
-                const fd = new FormData();
-                // required id
-                fd.append("id", values.id);
-                fd.append("title", values.title);
-                fd.append("subject", values.subject);
-                fd.append("body", values.body);
-                // append file ONLY if user picked one
-                if (values.file) fd.append("file", values.file);
-
                 try {
-                  // Use your update endpoint; keeping POST + multipart since file may be present.
-                  // If your API expects PUT /templates/:id, you can switch to that.
-                  const res = await AxiosProvider.post("/updatetemplate", fd, {
-                    headers: { "Content-Type": "multipart/form-data" },
-                  });
+                  // If no new files selected: send metadata-only update once
+                  if (!values.files || values.files.length === 0) {
+                    const fd = new FormData();
+                    fd.append("id", values.id);
+                    fd.append("title", values.title);
+                    fd.append("subject", values.subject);
+                    fd.append("body", values.body);
+
+                    await AxiosProvider.post("/updatetemplate", fd, {
+                      // don't set Content-Type manually; browser adds boundary
+                      maxBodyLength: Infinity,
+                      maxContentLength: Infinity,
+                      timeout: 30 * 60 * 1000,
+                    });
+                  } else {
+                    // New files selected: send ONE request per file (avoids 413)
+                    for (const file of values.files) {
+                      const fd = new FormData();
+                      fd.append("id", values.id);
+                      fd.append("title", values.title);
+                      fd.append("subject", values.subject);
+                      fd.append("body", values.body);
+                      fd.append("files", file); // ⬅️ use "file" if your backend expects singular
+
+                      await AxiosProvider.post("/updatetemplate", fd, {
+                        maxBodyLength: Infinity,
+                        maxContentLength: Infinity,
+                        timeout: 30 * 60 * 1000,
+                        onUploadProgress: (e) => {
+                          if (e.total) {
+                            const pct = Math.round((e.loaded / e.total) * 100);
+                            console.log(`Uploading ${file.name}: ${pct}%`);
+                          }
+                        },
+                      });
+                    }
+                  }
+
                   toast.success("Template updated successfully!");
-                  console.log("✅ Update response:", res.data);
                   closeFlyout();
                   setHitApi(!hitApi);
                   resetForm();
-                } catch (err) {
+                } catch (err: any) {
                   console.error("❌ Update error:", err);
-                  toast.error("Failed to update the template.");
+                  if (err?.response?.status === 413) {
+                    toast.error(
+                      `File too large for server limit. Try a smaller file.`
+                    );
+                  } else if (err?.code === "ERR_NETWORK") {
+                    toast.error(
+                      `Network/proxy blocked the upload (likely size limit).`
+                    );
+                  } else {
+                    toast.error("Failed to update the template.");
+                  }
                 } finally {
                   setSubmitting(false);
                 }
@@ -599,7 +665,7 @@ export default function Home() {
               }) => (
                 <Form onSubmit={handleSubmit}>
                   <div className="w-full space-y-5">
-                    {/* (Hidden) ID field to keep Formik state obvious (can also be read-only text) */}
+                    {/* Hidden ID */}
                     <input type="hidden" name="id" value={values.id} readOnly />
 
                     {/* Title */}
@@ -662,37 +728,62 @@ export default function Home() {
                       )}
                     </div>
 
-                    {/* Optional: show existing attachment (if you have it on the object) */}
+                    {/* Optional: show current attachment name if present */}
                     {editObjectData?.attachment_name && (
                       <div className="text-sm text-gray-300">
                         Current file:{" "}
                         <span className="font-medium">
                           {editObjectData.attachment_name}
                         </span>
-                        {/* If you have a proper absolute URL, you can render a link */}
-                        {/* <a href={editObjectData.attachment_url} target="_blank" className="text-primary-400 underline ml-2">View</a> */}
                       </div>
                     )}
 
-                    {/* File (optional on update) */}
+                    {/* Files (optional, multiple) */}
                     <div className="w-full">
                       <p className="text-white font-medium text-base leading-6 mb-2">
-                        Replace File (optional)
+                        Replace / Add Files (optional)
                       </p>
                       <input
                         type="file"
-                        name="file"
+                        name="files"
+                        multiple
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                          const f = e.currentTarget.files?.[0] || null;
-                          setFieldValue("file", f);
+                          const list = e.currentTarget.files
+                            ? Array.from(e.currentTarget.files)
+                            : [];
+                          setFieldValue("files", list);
                         }}
                         accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
                         className="hover:shadow-hoverInputShadow focus:border-primary-600 w-full h-[50px] border border-gray-700 rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black file:mr-4 file:py-2 file:px-4 file:rounded-[4px] file:border-0 file:text-sm file:font-semibold file:bg-primary-700 file:text-white hover:file:bg-primary-800 pt-[6px]"
                       />
-                      {touched.file && typeof errors.file === "string" && (
+
+                      {/* Show per-field errors */}
+                      {touched.files && typeof errors.files === "string" && (
                         <div className="text-red-500 text-sm text-center mt-1">
-                          {errors.file}
+                          {errors.files}
                         </div>
+                      )}
+                      {/* Show per-file errors if any */}
+                      {Array.isArray(errors.files) && (
+                        <div className="text-red-500 text-sm mt-1">
+                          {errors.files.filter(Boolean).map((err, idx) => (
+                            <div key={idx}>{String(err)}</div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Selected file list */}
+                      {values.files?.length > 0 && (
+                        <ul className="text-xs text-gray-300 space-y-1 mt-2">
+                          {values.files.map((f, i) => (
+                            <li key={i} className="flex justify-between">
+                              <span className="truncate">{f.name}</span>
+                              <span>
+                                ({(f.size / (1024 * 1024)).toFixed(2)} MB)
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
                       )}
                     </div>
 
@@ -701,11 +792,11 @@ export default function Home() {
                       type="submit"
                       disabled={isSubmitting}
                       className={`py-[13px] px-[26px] w-full rounded-[4px] text-base font-medium leading-6 text-white text-center
-                ${
-                  isSubmitting
-                    ? "bg-primary-700 opacity-60 cursor-not-allowed"
-                    : "bg-primary-700 hover:bg-primary-800"
-                }`}
+            ${
+              isSubmitting
+                ? "bg-primary-700 opacity-60 cursor-not-allowed"
+                : "bg-primary-700 hover:bg-primary-800"
+            }`}
                       aria-busy={isSubmitting}
                     >
                       {isSubmitting ? "Updating..." : "Update Template"}
