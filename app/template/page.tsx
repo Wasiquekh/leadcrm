@@ -126,8 +126,8 @@ export default function Home() {
       showCancelButton: true,
       confirmButtonText: "Yes",
       cancelButtonText: "No",
-      confirmButtonColor: "#FFCCD0",
-      cancelButtonColor: "#A3000E",
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
@@ -145,46 +145,54 @@ export default function Home() {
   };
 
   // -------- HELPERS TO UPLOAD MULTIPLE FILES -------------
-  // helpers you can keep in the same file
+  // --- helpers.tsx (or inline at top of your component) ---
   const MAX_FILE_MB = 95; // keep under proxy/CDN cap (adjust if needed)
   const BYTES = (mb: number) => mb * 1024 * 1024;
 
+  // Keep this list in sync with the <input accept="...">
+  const OK_TYPES = [
+    "image/jpeg",
+    "image/png",
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/zip",
+    "application/x-zip-compressed",
+    "application/x-rar-compressed",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "text/plain",
+  ];
+
   function validateFileClientSide(file: File) {
-    const okTypes = [
-      "image/jpeg",
-      "image/png",
-      "application/pdf",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    ];
-    if (!okTypes.includes(file.type)) throw new Error("Unsupported file type");
+    if (!OK_TYPES.includes(file.type)) throw new Error("Unsupported file type");
     if (file.size > BYTES(MAX_FILE_MB))
       throw new Error(`File > ${MAX_FILE_MB} MB. Please compress/split.`);
   }
 
-  async function uploadOneFile(
-    file: File,
-    meta: { title: string; subject: string; body: string },
-    onProgress?: (pct: number) => void
-  ) {
+  // Send ALL files in ONE request
+  async function uploadMultipleFiles(payload: {
+    title: string;
+    subject: string;
+    body: string;
+    files: File[];
+  }) {
     // per-file validation (frontend only)
-    validateFileClientSide(file);
+    payload.files.forEach(validateFileClientSide);
 
     const fd = new FormData();
-    fd.append("title", meta.title);
-    fd.append("subject", meta.subject);
-    fd.append("body", meta.body);
-    fd.append("files", file); // if backend expects files[] use "files[]"
+    fd.append("title", payload.title);
+    fd.append("subject", payload.subject);
+    fd.append("body", payload.body);
+
+    // If backend expects "files[]" then change the key below to "files[]"
+    for (const file of payload.files) fd.append("files", file);
 
     const res = await AxiosProvider.post("/createtemplate", fd, {
-      headers: { "Content-Type": "multipart/form-data" },
-      onUploadProgress: (e) => {
-        if (onProgress && e.total)
-          onProgress(Math.round((e.loaded / e.total) * 100));
-      },
+      // Let browser set Content-Type + boundary automatically
       maxBodyLength: Infinity,
       maxContentLength: Infinity,
-      timeout: 10 * 60 * 1000,
+      timeout: 30 * 60 * 1000,
     });
     return res.data;
   }
@@ -351,7 +359,6 @@ export default function Home() {
                 className="h-7 sm:h-8 w-7 sm:w-8 border border-gray-700 text-white rounded cursor-pointer"
               />
             </div>
-
             <div className="w-full border-b border-gray-700 mb-4 sm:mb-6"></div>
 
             <Formik
@@ -362,35 +369,36 @@ export default function Home() {
                 files: [] as File[], // multiple files
               }}
               validate={(v) => {
-                const e: any = {};
+                const e: Record<string, string> = {};
                 if (!v.title) e.title = "Title is required";
                 if (!v.subject) e.subject = "Subject is required";
                 if (!v.body) e.body = "Body is required";
                 if (!v.files?.length)
                   e.files = "Please select at least one file";
-                // simple size check to avoid proxy errors
-                const tooBig = (f: File) => f.size > MAX_FILE_MB * 1024 * 1024;
-                if (v.files?.some(tooBig))
-                  e.files = `Each file must be ≤ ${MAX_FILE_MB}MB`;
+
+                // Per-file checks (size + type) to prevent proxy errors
+                if (v.files?.length) {
+                  const tooBig = v.files.find(
+                    (f) => f.size > BYTES(MAX_FILE_MB)
+                  );
+                  if (tooBig) e.files = `Each file must be ≤ ${MAX_FILE_MB}MB`;
+
+                  const badType = v.files.find(
+                    (f) => !OK_TYPES.includes(f.type)
+                  );
+                  if (!e.files && badType)
+                    e.files = "One or more files have an unsupported type";
+                }
                 return e;
               }}
               onSubmit={async (values, { resetForm, setSubmitting }) => {
                 try {
-                  // IMPORTANT: send ONE file per request to avoid 413
-                  for (const file of values.files) {
-                    const fd = new FormData();
-                    fd.append("title", values.title);
-                    fd.append("subject", values.subject);
-                    fd.append("body", values.body);
-                    fd.append("files", file); // same field name your backend expects
-
-                    await AxiosProvider.post("/createtemplate", fd, {
-                      // don't set Content-Type; browser sets proper boundary
-                      maxBodyLength: Infinity,
-                      maxContentLength: Infinity,
-                      timeout: 30 * 60 * 1000, // 30 min (big files)
-                    });
-                  }
+                  await uploadMultipleFiles({
+                    title: values.title,
+                    subject: values.subject,
+                    body: values.body,
+                    files: values.files,
+                  });
 
                   toast.success("Uploaded successfully!");
                   closeFlyout();
@@ -405,6 +413,11 @@ export default function Home() {
                     toast.error(
                       `Network/proxy blocked the upload (likely size limit).`
                     );
+                  } else if (
+                    typeof err?.message === "string" &&
+                    /Unsupported file type|File >/i.test(err.message)
+                  ) {
+                    toast.error(err.message);
                   } else {
                     toast.error("Upload failed.");
                   }
@@ -498,7 +511,7 @@ export default function Home() {
                           setFieldValue("files", list);
                         }}
                         accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.zip,.rar,.txt,.xlsx,.pptx"
-                        className="hover:shadow-hoverInputShadow focus:border-primary-600 w-full h-[50px] border border-gray-700 rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black file:mr-4 file:py-2 file:px-4 file:rounded-[4px] file:border-0 file:text-sm file:font-semibold file:bg-primary-700 file:text-white hover:file:bg-primary-800 pt-[6px]"
+                        className="hover:shadow-hoverInputShadow focus:border-primary-600 w/full h-[50px] border border-gray-700 rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black file:mr-4 file:py-2 file:px-4 file:rounded-[4px] file:border-0 file:text-sm file:font-semibold file:bg-primary-700 file:text-white hover:file:bg-primary-800 pt-[6px]"
                       />
                       {touched.files && typeof errors.files === "string" && (
                         <div className="text-red-500 text-sm text-center mt-1">
@@ -594,43 +607,34 @@ export default function Home() {
               })}
               onSubmit={async (values, { setSubmitting, resetForm }) => {
                 try {
-                  // If no new files selected: send metadata-only update once
-                  if (!values.files || values.files.length === 0) {
-                    const fd = new FormData();
-                    fd.append("id", values.id);
-                    fd.append("title", values.title);
-                    fd.append("subject", values.subject);
-                    fd.append("body", values.body);
+                  const fd = new FormData();
+                  fd.append("id", values.id);
+                  fd.append("title", values.title);
+                  fd.append("subject", values.subject);
+                  fd.append("body", values.body);
 
-                    await AxiosProvider.post("/updatetemplate", fd, {
-                      // don't set Content-Type manually; browser adds boundary
-                      maxBodyLength: Infinity,
-                      maxContentLength: Infinity,
-                      timeout: 30 * 60 * 1000,
-                    });
-                  } else {
-                    // New files selected: send ONE request per file (avoids 413)
+                  // If no new files picked, this is a metadata-only update (still single call)
+                  // If files picked, append ALL in the SAME request
+                  if (values.files && values.files.length > 0) {
                     for (const file of values.files) {
-                      const fd = new FormData();
-                      fd.append("id", values.id);
-                      fd.append("title", values.title);
-                      fd.append("subject", values.subject);
-                      fd.append("body", values.body);
-                      fd.append("files", file); // ⬅️ use "file" if your backend expects singular
-
-                      await AxiosProvider.post("/updatetemplate", fd, {
-                        maxBodyLength: Infinity,
-                        maxContentLength: Infinity,
-                        timeout: 30 * 60 * 1000,
-                        onUploadProgress: (e) => {
-                          if (e.total) {
-                            const pct = Math.round((e.loaded / e.total) * 100);
-                            console.log(`Uploading ${file.name}: ${pct}%`);
-                          }
-                        },
-                      });
+                      // Change "files" to "files[]" if your backend expects that
+                      fd.append("files", file);
                     }
                   }
+
+                  await AxiosProvider.post("/updatetemplate", fd, {
+                    // Let browser set the Content-Type + boundary automatically
+                    maxBodyLength: Infinity,
+                    maxContentLength: Infinity,
+                    timeout: 30 * 60 * 1000,
+                    onUploadProgress: (e) => {
+                      if (e.total) {
+                        const pct = Math.round((e.loaded / e.total) * 100);
+                        // optional: keep or remove this log
+                        console.log(`Uploading: ${pct}%`);
+                      }
+                    },
+                  });
 
                   toast.success("Template updated successfully!");
                   closeFlyout();
@@ -728,7 +732,7 @@ export default function Home() {
                       )}
                     </div>
 
-                    {/* Optional: show current attachment name if present */}
+                    {/* Optional: current file name */}
                     {editObjectData?.attachment_name && (
                       <div className="text-sm text-gray-300">
                         Current file:{" "}
@@ -763,6 +767,7 @@ export default function Home() {
                           {errors.files}
                         </div>
                       )}
+
                       {/* Show per-file errors if any */}
                       {Array.isArray(errors.files) && (
                         <div className="text-red-500 text-sm mt-1">

@@ -80,8 +80,8 @@ export default function Home() {
       showCancelButton: true,
       confirmButtonText: "Yes",
       cancelButtonText: "No",
-      confirmButtonColor: "#FFCCD0",
-      cancelButtonColor: "#A3000E",
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
@@ -89,7 +89,7 @@ export default function Home() {
 
           toast.success("Successfully Deleted");
           setShouldRefetch((prev) => !prev);
-        //  await activityLogger.userDelete(userID);
+          //  await activityLogger.userDelete(userID);
         } catch (error) {
           console.error("Error deleting user:", error);
           toast.error("Failed to delete user");
@@ -97,45 +97,45 @@ export default function Home() {
       }
     });
   };
-const blockUserData = async (item: User) => {
-  const userID = item.id;
+  const blockUserData = async (item: User) => {
+    const userID = item.id;
 
-  Swal.fire({
-    title: "Block User",
-    input: "textarea",
-    inputPlaceholder: "Enter reason...",
-    inputAttributes: {
-      "aria-label": "Reason for blocking user",
-    },
-    showCancelButton: true,
-    confirmButtonText: "Block",
-    cancelButtonText: "Cancel",
-    confirmButtonColor: "#FFCCD0",
-    cancelButtonColor: "#A3000E",
-    preConfirm: (reason) => {
-      if (!reason) {
-        Swal.showValidationMessage("Reason is required");
-      }
-      return reason;
-    },
-  }).then(async (result) => {
-    if (result.isConfirmed && result.value) {
-      try {
-        await AxiosProvider.post("/blockuser", {
-          user_id: userID,
-          reason: result.value,
-        });
+    Swal.fire({
+      title: "Block User",
+      input: "textarea",
+      inputPlaceholder: "Enter reason...",
+      inputAttributes: {
+        "aria-label": "Reason for blocking user",
+      },
+      showCancelButton: true,
+      confirmButtonText: "Block",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "##3085d6",
+      cancelButtonColor: "#d33",
+      preConfirm: (reason) => {
+        if (!reason) {
+          Swal.showValidationMessage("Reason is required");
+        }
+        return reason;
+      },
+    }).then(async (result) => {
+      if (result.isConfirmed && result.value) {
+        try {
+          await AxiosProvider.post("/blockuser", {
+            user_id: userID,
+            reason: result.value,
+          });
 
-        toast.success("User blocked successfully");
-        setShouldRefetch((prev) => !prev);
-        //await activityLogger.userDelete(userID);
-      } catch (error) {
-        console.error("Error blocking user:", error);
-        toast.error("Failed to block user");
+          toast.success("User blocked successfully");
+          setShouldRefetch((prev) => !prev);
+          //await activityLogger.userDelete(userID);
+        } catch (error) {
+          console.error("Error blocking user:", error);
+          toast.error("Failed to block user");
+        }
       }
-    }
-  });
-};
+    });
+  };
 const unBlockUserData = async(id: string)=>{
         try {
           await AxiosProvider.post("/unblockuser", { user_id: id });

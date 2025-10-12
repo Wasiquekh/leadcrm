@@ -658,8 +658,8 @@ const deleteUserLead = async (leadId: string) => {
     showCancelButton: true,
     confirmButtonText: "Yes",
     cancelButtonText: "No",
-    confirmButtonColor: "#FFCCD0",
-    cancelButtonColor: "#A3000E",
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33",
   }).then(async (result) => {
     if (result.isConfirmed) {
       try {
