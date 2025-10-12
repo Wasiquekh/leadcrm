@@ -24,6 +24,7 @@ import { ImUserTie } from "react-icons/im";
 import { RxAvatar } from "react-icons/rx";
 import { HiChevronDoubleLeft, HiChevronDoubleRight } from "react-icons/hi";
 import { toast } from "react-toastify";
+import MiniBell from "../component/MiniBell";
 
 export interface AgentStats {
   agent_id: string; // Unique identifier for the agent (UUID)
@@ -81,7 +82,7 @@ export interface OverdueTask {
 const storage = new StorageManager();
 const userRole = storage.getUserRole();
 export default function Home() {
-  const checking = useAuthRedirect()
+  const checking = useAuthRedirect();
 
   // -------------FOR AGENT-----------
   const [cards, setCards] = useState<CardsData | null>(null);
@@ -139,48 +140,49 @@ export default function Home() {
     setIsCreateLead(false);
     setIsSearchLead(false);
   };
-// Add a 3rd param to control toasting on demand
-const fetchSearchedLeads = async (
-  filters: Record<string, any>,
-  pageNo: number,
-  opts: { showToast?: boolean } = {}
-) => {
-  const { showToast = false } = opts;
+  // Add a 3rd param to control toasting on demand
+  const fetchSearchedLeads = async (
+    filters: Record<string, any>,
+    pageNo: number,
+    opts: { showToast?: boolean } = {}
+  ) => {
+    const { showToast = false } = opts;
 
-  try {
-    const res = await AxiosProvider.post(`/leads/filter?page=${pageNo}`, filters);
-    const list = res.data?.data?.data ?? [];
-    const totalPages = res?.data?.data?.pagination?.totalPages ?? 1;
+    try {
+      const res = await AxiosProvider.post(
+        `/leads/filter?page=${pageNo}`,
+        filters
+      );
+      const list = res.data?.data?.data ?? [];
+      const totalPages = res?.data?.data?.pagination?.totalPages ?? 1;
 
-    if (list.length === 0) {
-      if (showToast) toast.info("No data found");
-      setIsSearchData([]);        // keep state consistent
-      setTotalPage(totalPages);   // still set total pages (usually 1)
-      return;                     // stop here
+      if (list.length === 0) {
+        if (showToast) toast.info("No data found");
+        setIsSearchData([]); // keep state consistent
+        setTotalPage(totalPages); // still set total pages (usually 1)
+        return; // stop here
+      }
+
+      setIsSearchData(list);
+      setTotalPage(totalPages);
+    } catch (e) {
+      console.error("Search fetch failed:", e);
     }
+  };
 
-    setIsSearchData(list);
-    setTotalPage(totalPages);
-  } catch (e) {
-    console.error("Search fetch failed:", e);
-  }
-};
-
-useEffect(() => {
-  if (lastFilters) {
-    // Don't show toast when just changing pages
-    fetchSearchedLeads(lastFilters, page, { showToast: false });
-  }
-}, [page, lastFilters]);
-
-
+  useEffect(() => {
+    if (lastFilters) {
+      // Don't show toast when just changing pages
+      fetchSearchedLeads(lastFilters, page, { showToast: false });
+    }
+  }, [page, lastFilters]);
 
   const handlePagination = (newPage: number) => {
     if (newPage > 0 && newPage <= totalPage) {
       setPage(newPage);
     }
   };
-    if (checking) {
+  if (checking) {
     return (
       <div className="h-screen flex flex-col gap-5 justify-center items-center bg-white">
         <Image
@@ -201,7 +203,6 @@ useEffect(() => {
 
         {/* Main content right section */}
         <div className="ml-[97px] w-full md:w-[90%] m-auto p-4 mt-0">
-          
           {/* Right section top row */}
           <DesktopHeader />
           {userRole === "Agent" && (
@@ -228,128 +229,128 @@ useEffect(() => {
             </div>
           )}
 
-                        {/* SEARED DATA */}
-              {/* -------------SEARCHED TABLE---------------- */}
-              {searcheddata?.length > 0 && !isError ? (
-                <>
-                <table className="w-full text-sm text-left text-white  mt-6">
-                  <thead className="text-xs text-[#999999] talbleheaderBg">
-                    <tr className="border border-tableBorder">
-                      {/* Full Name */}
-                      <th
-                        scope="col"
-                        className="px-3 py-3 md:p-3 border border-tableBorder"
+          {/* SEARED DATA */}
+          {/* -------------SEARCHED TABLE---------------- */}
+          {searcheddata?.length > 0 && !isError ? (
+            <>
+              <table className="w-full text-sm text-left text-white  mt-6">
+                <thead className="text-xs text-[#999999] talbleheaderBg">
+                  <tr className="border border-tableBorder">
+                    {/* Full Name */}
+                    <th
+                      scope="col"
+                      className="px-3 py-3 md:p-3 border border-tableBorder"
+                    >
+                      <div className="flex items-center gap-2">
+                        <RxAvatar className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                        <span className="font-semibold text-white text-lg sm:text-base">
+                          Full Name
+                        </span>
+                      </div>
+                    </th>
+
+                    {/* Email */}
+                    <th
+                      scope="col"
+                      className="px-3 py-2 border border-tableBorder hidden md:table-cell"
+                    >
+                      <div className="flex items-center gap-2">
+                        <IoMailOpenOutline className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                        <span className="font-semibold text-white text-lg sm:text-base">
+                          Email
+                        </span>
+                      </div>
+                    </th>
+
+                    {/* Phone */}
+                    <th
+                      scope="col"
+                      className="px-3 py-2 border border-tableBorder hidden md:table-cell"
+                    >
+                      <div className="flex items-center gap-2">
+                        <MdOutlinePhone className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                        <span className="font-semibold text-white text-lg sm:text-base">
+                          Phone
+                        </span>
+                      </div>
+                    </th>
+
+                    {/* Address */}
+                    <th
+                      scope="col"
+                      className="px-3 py-2 border border-tableBorder hidden md:table-cell"
+                    >
+                      <div className="flex items-center gap-2">
+                        <MdOutlineLocationCity className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                        <span className="font-semibold text-white text-lg sm:text-base">
+                          Address
+                        </span>
+                      </div>
+                    </th>
+
+                    {/* Agent */}
+                    <th
+                      scope="col"
+                      className="px-3 py-2 border border-tableBorder hidden md:table-cell"
+                    >
+                      <div className="flex items-center gap-2">
+                        <ImUserTie className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                        <span className="font-semibold text-white text-lg sm:text-base">
+                          Agent
+                        </span>
+                      </div>
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {searcheddata.map((item: any, index: number) => (
+                    <tr
+                      key={item?.id ?? index}
+                      className="border border-tableBorder  hover:bg-primary-700 odd:bg-[#404040]"
+                    >
+                      {/* Full name */}
+                      <td
+                        onClick={() => test(item?.id)}
+                        className="px-1 py-2 md:px-3 md:py-2 border-tableBorder flex items-center gap-2 text-primary-600 underline cursor-pointer"
                       >
-                        <div className="flex items-center gap-2">
-                          <RxAvatar className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                          <span className="font-semibold text-white text-lg sm:text-base">
-                            Full Name
-                          </span>
-                        </div>
-                      </th>
+                        <p className=" text-sm sm:text-base font-medium leading-normal capitalize">
+                          {item?.full_name ?? "-"}
+                        </p>
+                      </td>
 
                       {/* Email */}
-                      <th
-                        scope="col"
-                        className="px-3 py-2 border border-tableBorder hidden md:table-cell"
-                      >
-                        <div className="flex items-center gap-2">
-                          <IoMailOpenOutline className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                          <span className="font-semibold text-white text-lg sm:text-base">
-                            Email
-                          </span>
-                        </div>
-                      </th>
+                      <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+                        <span className="text-white text-sm sm:text-base">
+                          {item?.email ?? "-"}
+                        </span>
+                      </td>
 
                       {/* Phone */}
-                      <th
-                        scope="col"
-                        className="px-3 py-2 border border-tableBorder hidden md:table-cell"
-                      >
-                        <div className="flex items-center gap-2">
-                          <MdOutlinePhone className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                          <span className="font-semibold text-white text-lg sm:text-base">
-                            Phone
-                          </span>
-                        </div>
-                      </th>
+                      <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+                        <span className="text-white text-sm sm:text-base">
+                          {item?.phone ?? "-"}
+                        </span>
+                      </td>
 
-                      {/* Address */}
-                      <th
-                        scope="col"
-                        className="px-3 py-2 border border-tableBorder hidden md:table-cell"
-                      >
-                        <div className="flex items-center gap-2">
-                          <MdOutlineLocationCity className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                          <span className="font-semibold text-white text-lg sm:text-base">
-                            Address
-                          </span>
-                        </div>
-                      </th>
+                      {/* Address (country) */}
+                      <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+                        <span className="text-white text-sm sm:text-base capitalize">
+                          {item?.address?.country ?? "-"}
+                        </span>
+                      </td>
 
                       {/* Agent */}
-                      <th
-                        scope="col"
-                        className="px-3 py-2 border border-tableBorder hidden md:table-cell"
-                      >
-                        <div className="flex items-center gap-2">
-                          <ImUserTie className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                          <span className="font-semibold text-white text-lg sm:text-base">
-                            Agent
-                          </span>
-                        </div>
-                      </th>
+                      <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
+                        <span className="text-white text-sm sm:text-base capitalize">
+                          {item?.agent?.name ?? "-"}
+                        </span>
+                      </td>
                     </tr>
-                  </thead>
-
-                  <tbody>
-                    {searcheddata.map((item: any, index: number) => (
-                      <tr
-                        key={item?.id ?? index}
-                        className="border border-tableBorder  hover:bg-primary-700 odd:bg-[#404040]"
-                      >
-                        {/* Full name */}
-                        <td
-                          onClick={() => test(item?.id)}
-                          className="px-1 py-2 md:px-3 md:py-2 border-tableBorder flex items-center gap-2 text-primary-600 underline cursor-pointer"
-                        >
-                          <p className=" text-sm sm:text-base font-medium leading-normal capitalize">
-                            {item?.full_name ?? "-"}
-                          </p>
-                        </td>
-
-                        {/* Email */}
-                        <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                          <span className="text-white text-sm sm:text-base">
-                            {item?.email ?? "-"}
-                          </span>
-                        </td>
-
-                        {/* Phone */}
-                        <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                          <span className="text-white text-sm sm:text-base">
-                            {item?.phone ?? "-"}
-                          </span>
-                        </td>
-
-                        {/* Address (country) */}
-                        <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                          <span className="text-white text-sm sm:text-base capitalize">
-                            {item?.address?.country ?? "-"}
-                          </span>
-                        </td>
-
-                        {/* Agent */}
-                        <td className="px-3 py-2 border border-tableBorder hidden md:table-cell">
-                          <span className="text-white text-sm sm:text-base capitalize">
-                            {item?.agent?.name ?? "-"}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                   <div className="flex justify-center items-center my-10 relative">
+                  ))}
+                </tbody>
+              </table>
+              <div className="flex justify-center items-center my-10 relative">
                 <button
                   onClick={() => handlePagination(page - 1)}
                   disabled={page === 1}
@@ -368,23 +369,13 @@ useEffect(() => {
                   <HiChevronDoubleRight className="w-6 h-auto" />
                 </button>
               </div>
-                            
-           </>
-         
-              ) : (
-                
-  <div className="text-center text-xl mt-5 text-white">
+            </>
+          ) : (
+            <div className="text-center text-xl mt-5 text-white"></div>
+          )}
 
-  </div>
-                
-              
-              )
+          {/* -------------END SEARCHED TABLE---------------- */}
 
-              }
-
-
-              {/* -------------END SEARCHED TABLE---------------- */}
-              
           {/* DASHBOARD CONTENT */}
           {userRole === "Agent" && (
             <>
@@ -429,7 +420,10 @@ useEffect(() => {
                   <tbody className="">
                     {todayTasksListData.length > 0 ? (
                       todayTasksListData.map((task) => (
-                        <tr key={task.id} className="border-t odd:bg-[#404040] hover:bg-primary-700">
+                        <tr
+                          key={task.id}
+                          className="border-t odd:bg-[#404040] hover:bg-primary-700"
+                        >
                           <td
                             onClick={() => test(task.lead_id)}
                             className="p-3 cursor-pointer"
@@ -447,10 +441,7 @@ useEffect(() => {
                       ))
                     ) : (
                       <tr>
-                        <td
-                          className="p-3 text-center text-white"
-                          colSpan={6}
-                        >
+                        <td className="p-3 text-center text-white" colSpan={6}>
                           No tasks for today
                         </td>
                       </tr>
@@ -476,14 +467,15 @@ useEffect(() => {
                   <tbody className="">
                     {overdueTaskData.length > 0 ? (
                       overdueTaskData.map((task) => (
-                        <tr key={task.id} className="border-t hover:bg-primary-700 odd:bg-[#404040]">
+                        <tr
+                          key={task.id}
+                          className="border-t hover:bg-primary-700 odd:bg-[#404040]"
+                        >
                           <td
                             onClick={() => test(task.lead_id)}
                             className="p-3 cursor-pointer text-primary-600 underline"
                           >
-                            <p className="   font-medium">
-                              {task.lead_name}
-                            </p>
+                            <p className="   font-medium">{task.lead_name}</p>
                           </td>
                           <td className="p-3">{task.subject}</td>
                           <td className="p-3 capitalize">{task.type}</td>
@@ -494,10 +486,7 @@ useEffect(() => {
                       ))
                     ) : (
                       <tr>
-                        <td
-                          className="p-3 text-center text-white"
-                          colSpan={6}
-                        >
+                        <td className="p-3 text-center text-white" colSpan={6}>
                           No overdue tasks
                         </td>
                       </tr>
@@ -505,10 +494,11 @@ useEffect(() => {
                   </tbody>
                 </table>
               </div>
-
-
             </>
           )}
+          <div className="w-full flex justify-end p-4">
+            <MiniBell />
+          </div>
 
           {/* ADMIN CODE */}
           {userRole === "Admin" && <AdminDashboard />}
@@ -567,19 +557,18 @@ useEffect(() => {
             </div>
             <div className="w-full border-b border-gray-700 mb-4"></div>
 
-<SearchLead
-  setSearchedData={setIsSearchData}
-  closeFlyOut={closeFlyOut}
-  setPage={setPage}
-  setTotalPage={setTotalPage}
-  page={page}
-  onApplyFilters={(payload) => {
-    setLastFilters(payload);                  // remember filters
-    setPage(1);                               // start from first page
-    fetchSearchedLeads(payload, 1, { showToast: true }); // 👈 toast if empty
-  }}
-/>
-
+            <SearchLead
+              setSearchedData={setIsSearchData}
+              closeFlyOut={closeFlyOut}
+              setPage={setPage}
+              setTotalPage={setTotalPage}
+              page={page}
+              onApplyFilters={(payload) => {
+                setLastFilters(payload); // remember filters
+                setPage(1); // start from first page
+                fetchSearchedLeads(payload, 1, { showToast: true }); // 👈 toast if empty
+              }}
+            />
           </div>
         )}
       </div>

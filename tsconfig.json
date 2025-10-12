@@ -12,11 +12,15 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ]
+    "plugins": [{ "name": "next" }],
+
+    // 👉 add these two:
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["*"],
+      "@/provider/*": ["provider/*"],
+      "@/component/*": ["app/component/*"]
+    }
   },
   "include": [
     "next-env.d.ts",
