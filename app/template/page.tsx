@@ -294,7 +294,7 @@ export default function Home() {
                         >
                           {/* Title */}
                           <td className="px-1 md:p-3 py-2">
-                            <p className="text-white text-sm sm:text-base leading-normal truncate">
+                            <p className="text-white text-sm sm:text-base leading-normal truncate capitalize">
                               {item?.title ?? "-"}
                             </p>
                           </td>
