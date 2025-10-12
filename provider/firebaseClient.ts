@@ -1,13 +1,11 @@
-// provider/firebaseClient.ts
 "use client";
-
 import { initializeApp, getApps } from "firebase/app";
 import {
   getMessaging,
+  isSupported,
   getToken,
   onMessage,
-  isSupported,
-  type Messaging,
+  Messaging,
 } from "firebase/messaging";
 
 const firebaseConfig = {
@@ -18,37 +16,34 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
 };
 
-let messaging: Messaging | null = null;
+const app = getApps().length ? getApps()[0]! : initializeApp(firebaseConfig);
 
-/** Initialize Firebase + Messaging (safe to call multiple times) */
-export async function setupFirebase(): Promise<Messaging | null> {
-  const supported = await isSupported().catch(() => false);
-  if (!supported) return null;
-
-  const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
-  messaging = getMessaging(app);
-  return messaging;
+export async function getMessagingIfSupported(): Promise<Messaging | null> {
+  if (typeof window === "undefined") return null;
+  return (await isSupported()) ? getMessaging(app) : null;
 }
 
-/** Request browser permission and return (or cache) an FCM token */
-export async function getFcmTokenOnce(): Promise<string | null> {
-  const m = messaging ?? (await setupFirebase());
-  if (!m) return null;
+export async function ensureSwRegistered() {
+  if ("serviceWorker" in navigator) {
+    return await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+  }
+  return null;
+}
 
-  const permission = await Notification.requestPermission();
-  if (permission !== "granted") return null;
-
-  const token = await getToken(m, {
+export async function fetchFcmToken(): Promise<string | null> {
+  const msg = await getMessagingIfSupported();
+  if (!msg) return null;
+  const reg = await ensureSwRegistered();
+  const perm = await Notification.requestPermission();
+  if (perm !== "granted") return null;
+  return await getToken(msg, {
     vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY!,
-  }).catch(() => null);
-
-  return token ?? null;
+    serviceWorkerRegistration: reg!,
+  });
 }
 
-/** When a foreground message arrives, emit a window event your UI can listen for */
-export function bindForegroundListener() {
-  if (!messaging) return;
-  onMessage(messaging, (payload) => {
-    window.dispatchEvent(new CustomEvent("fcm-message", { detail: payload }));
+export function onForegroundMessage(cb: (payload: any) => void) {
+  getMessagingIfSupported().then((msg) => {
+    if (msg) onMessage(msg, (payload) => cb(payload));
   });
 }

@@ -1,33 +1,41 @@
-/* eslint-disable no-undef */
+importScripts("https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js");
+importScripts("https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js");
 
-// Load Firebase libraries
-importScripts(
-  "https://www.gstatic.com/firebasejs/10.12.1/firebase-app-compat.js"
-);
-importScripts(
-  "https://www.gstatic.com/firebasejs/10.12.1/firebase-messaging-compat.js"
-);
-
-// 🔧 Initialize Firebase (same keys as in your .env)
 firebase.initializeApp({
-  apiKey: "YOUR_FIREBASE_API_KEY",
-  authDomain: "YOUR_FIREBASE_AUTH_DOMAIN",
-  projectId: "YOUR_FIREBASE_PROJECT_ID",
-  messagingSenderId: "YOUR_FIREBASE_MESSAGING_SENDER_ID",
-  appId: "YOUR_FIREBASE_APP_ID",
+  apiKey: "YOUR_KEY",
+  authDomain: "YOUR_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID",
 });
 
-// 🔔 Set up background notification handler
 const messaging = firebase.messaging();
 
-messaging.onBackgroundMessage(function (payload) {
-  console.log("📨 Received background message: ", payload);
+messaging.onBackgroundMessage((payload) => {
+  if (payload.notification) return; // avoid duplicate
 
-  const notificationTitle = payload.notification.title;
-  const notificationOptions = {
-    body: payload.notification.body,
-    icon: "/icon.png", // optional: put any 96×96 px icon in /public
-  };
+  const d = payload.data || {};
+  const title = d.title || "Lead Update";
+  const body = d.body || "";
+  const url = d.url || "/";
 
-  self.registration.showNotification(notificationTitle, notificationOptions);
+  self.registration.showNotification(title, {
+    body,
+    data: { url },
+    tag: d.tag || "lead",
+    icon: "/icon-192x192.png",
+  });
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = event.notification.data?.url || "/";
+  event.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((tabs) => {
+      for (const tab of tabs) {
+        if (tab.url.includes(url)) return tab.focus();
+      }
+      return clients.openWindow(url);
+    })
+  );
 });

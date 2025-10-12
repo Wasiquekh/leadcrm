@@ -7,6 +7,8 @@ import { ReactNode } from "react";
 import "react-toastify/dist/ReactToastify.css";
 import { usePathname } from "next/navigation";
 import WebPushBootstrapper from "./component/WebPushBootstrapper";
+import PushInitializer from "./PushInitializer";
+
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -45,8 +47,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
             <div className="min-h-dvh flex">
               {/* Sidebar column */}
 
-              {/* registers SW, requests permission, registers token */}
-              <WebPushBootstrapper />
+              <PushInitializer />
               {/* Main content column */}
               <main className="flex-1 min-w-0">{children}</main>
             </div>
