@@ -347,7 +347,7 @@ export default function Home() {
                 title: Yup.string().required("Title is required"),
                 subject: Yup.string().required("Subject is required"),
                 body: Yup.string().required("Body is required"),
-                files: Yup.mixed<File>()
+                file: Yup.mixed<File>()
                   .required("File is required")
                   .test("is-file", "File is required", (v) => v instanceof File)
                   .test(
