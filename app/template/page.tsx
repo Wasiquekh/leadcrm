@@ -392,7 +392,7 @@ return (
 
               // Append each file to FormData
               values.files.forEach((file) => {
-                console.log("Appending file:", file.name); // Log the file being appended
+                console.log("Appending file:", file); // Log the file being appended
                 fd.append("files", file); // Append files correctly (use 'files' as key, not 'files[]')
               });
 
@@ -408,6 +408,9 @@ return (
                   maxBodyLength: Infinity,
                   maxContentLength: Infinity,
                   timeout: 30 * 60 * 1000,
+                  headers: {
+                    "Content-Type": "multipart/form-data",
+                  },
                 });
 
                 console.log("Upload response:", res);
