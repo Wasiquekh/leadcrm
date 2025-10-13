@@ -35,6 +35,7 @@ import { FaRegIdCard, FaUserEdit, FaUserTag } from "react-icons/fa";
 import { MdDateRange, MdEdit, MdViewModule } from "react-icons/md";
 import Swal from "sweetalert2";
 
+
 const axiosProvider = new AxiosProvider();
 
 type TemplateForEdit = {
@@ -97,7 +98,7 @@ export default function Home() {
         const response = await AxiosProvider.post("/gettemplate");
 
         // const result = response.data.data.data;
-        //   console.log("888888888888888888", response.data.data);
+        console.log("888888888888888888", response.data.data);
         setData(response.data.data);
         // console.log(
         //   "888888888888888888",
@@ -145,14 +146,14 @@ export default function Home() {
   };
 
   // -------- HELPERS TO UPLOAD MULTIPLE FILES -------------
-  // --- helpers.tsx (or inline at top of your component) ---
-  const MAX_FILE_MB = 95; // keep under proxy/CDN cap (adjust if needed)
+  const MAX_FILE_MB = 95;
   const BYTES = (mb: number) => mb * 1024 * 1024;
 
-  // Keep this list in sync with the <input accept="...">
+  // Acceptable file types (including WebP)
   const OK_TYPES = [
     "image/jpeg",
     "image/png",
+    "image/webp",
     "application/pdf",
     "application/msword",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -164,39 +165,12 @@ export default function Home() {
     "text/plain",
   ];
 
+  // File validation function
   function validateFileClientSide(file: File) {
     if (!OK_TYPES.includes(file.type)) throw new Error("Unsupported file type");
     if (file.size > BYTES(MAX_FILE_MB))
       throw new Error(`File > ${MAX_FILE_MB} MB. Please compress/split.`);
   }
-
-  // Send ALL files in ONE request
-  async function uploadMultipleFiles(payload: {
-    title: string;
-    subject: string;
-    body: string;
-    files: File[];
-  }) {
-    // per-file validation (frontend only)
-    payload.files.forEach(validateFileClientSide);
-
-    const fd = new FormData();
-    fd.append("title", payload.title);
-    fd.append("subject", payload.subject);
-    fd.append("body", payload.body);
-
-    // If backend expects "files[]" then change the key below to "files[]"
-    for (const file of payload.files) fd.append("files", file);
-
-    const res = await AxiosProvider.post("/createtemplate", fd, {
-      // Let browser set Content-Type + boundary automatically
-      maxBodyLength: Infinity,
-      maxContentLength: Infinity,
-      timeout: 30 * 60 * 1000,
-    });
-    return res.data;
-  }
-
   // -------- END HELPERS TO UPLOAD MULTIPLE FILES -------------
 
   if (isLoading) {
@@ -366,53 +340,71 @@ export default function Home() {
                 title: "",
                 subject: "",
                 body: "",
-                files: [] as File[], // multiple files
+                files: [] as File[], // Store multiple files
               }}
-              validate={(v) => {
-                const e: Record<string, string> = {};
-                if (!v.title) e.title = "Title is required";
-                if (!v.subject) e.subject = "Subject is required";
-                if (!v.body) e.body = "Body is required";
-                if (!v.files?.length)
-                  e.files = "Please select at least one file";
+              validate={(values) => {
+                const errors: Record<string, string | string[]> = {};
+                if (!values.title) errors.title = "Title is required";
+                if (!values.subject) errors.subject = "Subject is required";
+                if (!values.body) errors.body = "Body is required";
+                if (!values.files?.length)
+                  errors.files = "Please select at least one file";
 
-                // Per-file checks (size + type) to prevent proxy errors
-                if (v.files?.length) {
-                  const tooBig = v.files.find(
+                // Validate each file (size + type)
+                if (values.files?.length) {
+                  const tooBig = values.files.find(
                     (f) => f.size > BYTES(MAX_FILE_MB)
                   );
-                  if (tooBig) e.files = `Each file must be ≤ ${MAX_FILE_MB}MB`;
+                  if (tooBig)
+                    errors.files = `Each file must be ≤ ${MAX_FILE_MB}MB`;
 
-                  const badType = v.files.find(
+                  const badType = values.files.find(
                     (f) => !OK_TYPES.includes(f.type)
                   );
-                  if (!e.files && badType)
-                    e.files = "One or more files have an unsupported type";
+                  if (!errors.files && badType)
+                    errors.files = "One or more files have an unsupported type";
                 }
-                return e;
+                return errors;
               }}
               onSubmit={async (values, { resetForm, setSubmitting }) => {
                 try {
-                  await uploadMultipleFiles({
-                    title: values.title,
-                    subject: values.subject,
-                    body: values.body,
-                    files: values.files,
+                  console.log("Form values before API call:", values); // Log Formik values before submitting
+
+                  // Create a FormData object
+                  const fd = new FormData();
+                  fd.append("title", values.title);
+                  fd.append("subject", values.subject);
+                  fd.append("body", values.body);
+
+                  // Append each file to FormData
+                  values.files.forEach((file) => {
+                    if (file) {
+                      console.log("Appending file:", file.name); // Log to check files before submission
+                      fd.append("files[]", file); // Use 'files[]' to match backend expectations
+                    }
                   });
 
+                  // Debugging: log FormData
+                  console.log("FormData before submitting:", fd);
+
+                  // Make the API request
+                  const res = await AxiosProvider.post("/createtemplate", fd, {
+                    maxBodyLength: Infinity,
+                    maxContentLength: Infinity,
+                    timeout: 30 * 60 * 1000,
+                  });
+
+                  console.log("Upload response:", res);
                   toast.success("Uploaded successfully!");
-                  closeFlyout();
-                  setHitApi(!hitApi);
-                  resetForm();
+                  resetForm(); // Reset the form after successful submission
                 } catch (err: any) {
+                  console.error("Upload failed:", err);
                   if (err?.response?.status === 413) {
                     toast.error(
                       `File too large for server limit. Try a smaller file.`
                     );
                   } else if (err?.code === "ERR_NETWORK") {
-                    toast.error(
-                      `Network/proxy blocked the upload (likely size limit).`
-                    );
+                    toast.error(`Network/proxy blocked the upload.`);
                   } else if (
                     typeof err?.message === "string" &&
                     /Unsupported file type|File >/i.test(err.message)
@@ -437,7 +429,7 @@ export default function Home() {
               }) => (
                 <Form onSubmit={handleSubmit}>
                   <div className="w-full space-y-5">
-                    {/* Title */}
+                    {/* Title Field */}
                     <div className="w-full">
                       <p className="text-white font-medium text-base leading-6 mb-2">
                         Title
@@ -448,7 +440,7 @@ export default function Home() {
                         value={values.title}
                         onChange={handleChange}
                         placeholder="Enter title"
-                        className="hover:shadow-hoverInputShadow focus:border-primary-600 w-full h-[50px] border border-gray-700 rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black"
+                        className="w-full h-[50px] border rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black"
                       />
                       {touched.title && errors.title && (
                         <div className="text-red-500 text-sm">
@@ -457,7 +449,7 @@ export default function Home() {
                       )}
                     </div>
 
-                    {/* Subject */}
+                    {/* Subject Field */}
                     <div className="w-full">
                       <p className="text-white font-medium text-base leading-6 mb-2">
                         Subject
@@ -468,7 +460,7 @@ export default function Home() {
                         value={values.subject}
                         onChange={handleChange}
                         placeholder="Enter subject"
-                        className="hover:shadow-hoverInputShadow focus:border-primary-600 w-full h-[50px] border border-gray-700 rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black"
+                        className="w-full h-[50px] border rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black"
                       />
                       {touched.subject && errors.subject && (
                         <div className="text-red-500 text-sm">
@@ -477,7 +469,7 @@ export default function Home() {
                       )}
                     </div>
 
-                    {/* Body */}
+                    {/* Body Field */}
                     <div className="w-full">
                       <p className="text-white font-medium text-base leading-6 mb-2">
                         Body
@@ -488,7 +480,7 @@ export default function Home() {
                         value={values.body}
                         onChange={handleChange}
                         placeholder="Enter body"
-                        className="hover:shadow-hoverInputShadow focus:border-primary-600 w-full h-[50px] border border-gray-700 rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black"
+                        className="w-full h-[50px] border rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black"
                       />
                       {touched.body && errors.body && (
                         <div className="text-red-500 text-sm">
@@ -497,28 +489,35 @@ export default function Home() {
                       )}
                     </div>
 
-                    {/* Files (multiple) */}
+                    {/* File Upload Field */}
                     <div className="w-full">
                       <p className="text-white font-medium text-base leading-6 mb-2">
-                        Files (you can select multiple)
+                        Files (You can select multiple)
                       </p>
                       <input
                         type="file"
                         name="files"
                         multiple
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                          const list = Array.from(e.currentTarget.files || []);
-                          setFieldValue("files", list);
+                          const list = Array.from(e.target.files || []);
+                          setFieldValue("files", list); // Update Formik with selected files
                         }}
-                        accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.zip,.rar,.txt,.xlsx,.pptx"
-                        className="hover:shadow-hoverInputShadow focus:border-primary-600 w/full h-[50px] border border-gray-700 rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black file:mr-4 file:py-2 file:px-4 file:rounded-[4px] file:border-0 file:text-sm file:font-semibold file:bg-primary-700 file:text-white hover:file:bg-primary-800 pt-[6px]"
+                        accept=".jpg,.jpeg,.png,.webp,.pdf,.doc,.docx,.zip,.rar,.txt,.xlsx,.pptx"
+                        className="w-full h-[50px] border rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black file:mr-4 file:py-2 file:px-4 file:rounded-[4px] file:border-0 file:text-sm file:font-semibold file:bg-primary-700 file:text-white hover:file:bg-primary-800 pt-[6px]"
                       />
-                      {touched.files && typeof errors.files === "string" && (
+                      {touched.files && errors.files && (
                         <div className="text-red-500 text-sm text-center mt-1">
-                          {errors.files}
+                          {
+                            Array.isArray(errors.files)
+                              ? errors.files.map((error, index) => (
+                                  <div key={index}>{error}</div>
+                                )) // Handle multiple errors
+                              : errors.files // Handle single error
+                          }
                         </div>
                       )}
 
+                      {/* Display Selected Files */}
                       {values.files?.length > 0 && (
                         <ul className="text-xs text-gray-300 space-y-1 mt-2">
                           {values.files.map((f, i) => (
@@ -533,17 +532,15 @@ export default function Home() {
                       )}
                     </div>
 
-                    {/* Submit */}
+                    {/* Submit Button */}
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className={`py-[13px] px-[26px] w-full rounded-[4px] text-base font-medium leading-6 text-white text-center
-            ${
-              isSubmitting
-                ? "bg-primary-700 opacity-60 cursor-not-allowed"
-                : "bg-primary-700 hover:bg-primary-800"
-            }`}
-                      aria-busy={isSubmitting}
+                      className={`py-[13px] px-[26px] w-full rounded-[4px] text-white text-center ${
+                        isSubmitting
+                          ? "bg-primary-700 opacity-60 cursor-not-allowed"
+                          : "bg-primary-700 hover:bg-primary-800"
+                      }`}
                     >
                       {isSubmitting ? "Uploading..." : "Submit"}
                     </button>
