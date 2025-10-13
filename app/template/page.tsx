@@ -146,480 +146,495 @@ export default function Home() {
   };
 
   // -------- HELPERS TO UPLOAD MULTIPLE FILES -------------
-  const MAX_FILE_MB = 95;
-  const BYTES = (mb: number) => mb * 1024 * 1024;
+const MAX_FILE_MB = 95;
+const BYTES = (mb: number) => mb * 1024 * 1024;
 
-  // Acceptable file types (including WebP)
-  const OK_TYPES = [
-    "image/jpeg",
-    "image/png",
-    "image/webp",
-    "application/pdf",
-    "application/msword",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    "application/zip",
-    "application/x-zip-compressed",
-    "application/x-rar-compressed",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-    "text/plain",
-  ];
+// Acceptable file types (including WebP)
+const OK_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/zip",
+  "application/x-zip-compressed",
+  "application/x-rar-compressed",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  "text/plain",
+];
 
-  // File validation function
-  function validateFileClientSide(file: File) {
-    if (!OK_TYPES.includes(file.type)) throw new Error("Unsupported file type");
-    if (file.size > BYTES(MAX_FILE_MB))
-      throw new Error(`File > ${MAX_FILE_MB} MB. Please compress/split.`);
-  }
-  // -------- END HELPERS TO UPLOAD MULTIPLE FILES -------------
+// File validation function
+function validateFileClientSide(file: File) {
+  if (!OK_TYPES.includes(file.type)) throw new Error("Unsupported file type");
+  if (file.size > BYTES(MAX_FILE_MB))
+    throw new Error(`File > ${MAX_FILE_MB} MB. Please compress/split.`);
+}
 
-  if (isLoading) {
-    return (
-      <div className="h-screen flex flex-col gap-5 justify-center items-center">
-        <Image
-          src="/images/crmlogo.jpg"
-          alt="Table image"
-          width={500}
-          height={500}
-          style={{ width: "150px", height: "auto" }}
-          className="animate-pulse rounded"
-        />
-      </div>
-    );
-  }
+// -------- END HELPERS TO UPLOAD MULTIPLE FILES -------------
 
-  if (checking) {
-    return (
-      <div className="h-screen flex flex-col gap-5 justify-center items-center bg-white">
-        <Image
-          src="/images/crmlogo.jpg"
-          alt="Loading"
-          width={150}
-          height={150}
-          className="animate-pulse rounded"
-        />
-      </div>
-    );
-  }
-
+if (isLoading) {
   return (
-    <>
-      <div className=" flex justify-end  min-h-screen">
-        {/* Main content right section */}
-        <LeftSideBar />
-        <div className="ml-[97px] w-full md:w-[90%] m-auto  min-h-[500px]  rounded p-4 mt-0 ">
-          {/* left section top row */}
-          <DesktopHeader />
-          {/* right section top row */}
+    <div className="h-screen flex flex-col gap-5 justify-center items-center">
+      <Image
+        src="/images/crmlogo.jpg"
+        alt="Table image"
+        width={500}
+        height={500}
+        style={{ width: "150px", height: "auto" }}
+        className="animate-pulse rounded"
+      />
+    </div>
+  );
+}
 
-          {/* Main content middle section */}
-          <div className="rounded-3xl   px-1 py-6 md:p-6 relative mainContainerBg">
-            {/* ----------------Table----------------------- */}
-            <div className="relative overflow-x-auto  sm:rounded-lg">
-              {/* Search and filter table row */}
-              <div className=" flex justify-end items-center mb-6  w-full mx-auto">
-                <div className=" flex justify-center items-center gap-4">
-                  <div
-                    className=" flex items-center gap-2 py-3 px-6 rounded-[12px] border border-[#E7E7E7] cursor-pointer bg-primary-600 group hover:bg-primary-700"
-                    onClick={() => addFormFunction()}
-                  >
-                    <HiOutlineTemplate className=" w-4 h-4 text-white group-hover:text-white" />
-                    <p className=" text-white  text-base font-medium group-hover:text-white">
-                      Create Template
-                    </p>
-                  </div>
+if (checking) {
+  return (
+    <div className="h-screen flex flex-col gap-5 justify-center items-center bg-white">
+      <Image
+        src="/images/crmlogo.jpg"
+        alt="Loading"
+        width={150}
+        height={150}
+        className="animate-pulse rounded"
+      />
+    </div>
+  );
+}
+
+return (
+  <>
+    <div className=" flex justify-end  min-h-screen">
+      {/* Main content right section */}
+      <LeftSideBar />
+      <div className="ml-[97px] w-full md:w-[90%] m-auto  min-h-[500px]  rounded p-4 mt-0 ">
+        {/* left section top row */}
+        <DesktopHeader />
+        {/* right section top row */}
+
+        {/* Main content middle section */}
+        <div className="rounded-3xl   px-1 py-6 md:p-6 relative mainContainerBg">
+          {/* ----------------Table----------------------- */}
+          <div className="relative overflow-x-auto  sm:rounded-lg">
+            {/* Search and filter table row */}
+            <div className=" flex justify-end items-center mb-6  w-full mx-auto">
+              <div className=" flex justify-center items-center gap-4">
+                <div
+                  className=" flex items-center gap-2 py-3 px-6 rounded-[12px] border border-[#E7E7E7] cursor-pointer bg-primary-600 group hover:bg-primary-700"
+                  onClick={() => addFormFunction()}
+                >
+                  <HiOutlineTemplate className=" w-4 h-4 text-white group-hover:text-white" />
+                  <p className=" text-white  text-base font-medium group-hover:text-white">
+                    Create Template
+                  </p>
                 </div>
               </div>
+            </div>
 
-              <div className="relative overflow-x-auto sm:rounded">
-                {/* import { MdEdit } from "react-icons/md"; // add this at the top */}
-                <table className="w-full text-sm text-left text-white whitespace-nowrap">
-                  <thead className="text-xs talbleheaderBg text-white">
+            <div className="relative overflow-x-auto sm:rounded">
+              {/* import { MdEdit } from "react-icons/md"; // add this at the top */}
+              <table className="w-full text-sm text-left text-white whitespace-nowrap">
+                <thead className="text-xs talbleheaderBg text-white">
+                  <tr>
+                    <th className="px-1 py-3 md:p-3">
+                      <div className="flex items-center gap-2">
+                        <div className="font-semibold text-white text-base leading-normal">
+                          Title
+                        </div>
+                      </div>
+                    </th>
+                    <th className="px-2 py-1">
+                      <div className="flex items-center gap-2">
+                        <div className="font-semibold text-white text-base leading-normal">
+                          Action
+                        </div>
+                      </div>
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {!data || data.length === 0 || isError ? (
                     <tr>
-                      <th className="px-1 py-3 md:p-3">
-                        <div className="flex items-center gap-2">
-                          <div className="font-semibold text-white text-base leading-normal">
-                            Title
-                          </div>
-                        </div>
-                      </th>
-                      <th className="px-2 py-1">
-                        <div className="flex items-center gap-2">
-                          <div className="font-semibold text-white text-base leading-normal">
-                            Action
-                          </div>
-                        </div>
-                      </th>
+                      <td colSpan={2} className="text-center py-6 text-white">
+                        Data not found
+                      </td>
                     </tr>
-                  </thead>
+                  ) : (
+                    data.map((item: any, index: number) => (
+                      <tr
+                        key={item?.id ?? index}
+                        className="hover:bg-primary-600 border-b border-[#E7E7E7] odd:bg-[#404040]"
+                      >
+                        {/* Title */}
+                        <td className="px-1 md:p-3 py-2">
+                          <p className="text-white text-sm sm:text-base leading-normal truncate capitalize">
+                            {item?.title ?? "-"}
+                          </p>
+                        </td>
 
-                  <tbody>
-                    {!data || data.length === 0 || isError ? (
-                      <tr>
-                        <td colSpan={2} className="text-center py-6 text-white">
-                          Data not found
+                        {/* Action (Edit + Delete) */}
+                        <td className="px-2 py-1">
+                          <div className="flex gap-1 md:gap-2 justify-center md:justify-start">
+                            <button
+                              onClick={() => editFormFunction(item)}
+                              className="py-[4px] px-3 bg-black hover:bg-primary-700 active:bg-primary-800 flex gap-1 items-center rounded-xl text-xs md:text-sm"
+                              aria-label="Edit"
+                              title="Edit"
+                            >
+                              <MdEdit className="text-white w-4 h-4" />
+                            </button>
+
+                            <button
+                              onClick={() => deleteUserData(item.id)}
+                              className="py-[4px] px-3 bg-black hover:bg-primary-800 active:bg-primary-700 flex gap-1 items-center rounded-full text-xs md:text-sm"
+                              aria-label="Delete"
+                              title="Delete"
+                            >
+                              <RiDeleteBin6Line className="text-white w-4 h-4" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
-                    ) : (
-                      data.map((item: any, index: number) => (
-                        <tr
-                          key={item?.id ?? index}
-                          className="hover:bg-primary-600 border-b border-[#E7E7E7] odd:bg-[#404040]"
-                        >
-                          {/* Title */}
-                          <td className="px-1 md:p-3 py-2">
-                            <p className="text-white text-sm sm:text-base leading-normal truncate capitalize">
-                              {item?.title ?? "-"}
-                            </p>
-                          </td>
-
-                          {/* Action (Edit + Delete) */}
-                          <td className="px-2 py-1">
-                            <div className="flex gap-1 md:gap-2 justify-center md:justify-start">
-                              <button
-                                onClick={() => editFormFunction(item)}
-                                className="py-[4px] px-3 bg-black hover:bg-primary-700 active:bg-primary-800 flex gap-1 items-center rounded-xl text-xs md:text-sm"
-                                aria-label="Edit"
-                                title="Edit"
-                              >
-                                <MdEdit className="text-white w-4 h-4" />
-                              </button>
-
-                              <button
-                                onClick={() => deleteUserData(item.id)}
-                                className="py-[4px] px-3 bg-black hover:bg-primary-800 active:bg-primary-700 flex gap-1 items-center rounded-full text-xs md:text-sm"
-                                aria-label="Delete"
-                                title="Delete"
-                              >
-                                <RiDeleteBin6Line className="text-white w-4 h-4" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
-          {/* ----------------End table--------------------------- */}
-
-          {/* ------------------- */}
         </div>
+        {/* ----------------End table--------------------------- */}
+
+        {/* ------------------- */}
       </div>
+    </div>
 
-      {/* DARK BG SCREEN */}
+    {/* DARK BG SCREEN */}
 
-      {/* FITLER FLYOUT */}
-      {isFlyoutFilterOpen && (
-        <div
-          className="min-h-screen w-full bg-[#1f1d1d80] fixed top-0 left-0 right-0 z-[999]"
-          onClick={() => closeFlyout()}
-        ></div>
-      )}
+    {/* FITLER FLYOUT */}
+    {isFlyoutFilterOpen && (
+      <div
+        className="min-h-screen w-full bg-[#1f1d1d80] fixed top-0 left-0 right-0 z-[999]"
+        onClick={() => closeFlyout()}
+      ></div>
+    )}
 
-      {/* NOW MY FLYOUT */}
-      <div className={`filterflyout ${isFlyoutFilterOpen ? "filteropen" : ""}`}>
-        {addFrom && (
-          <div className="w-full min-h-auto  p-4 text-white">
-            {/* Header */}
-            <div className="flex justify-between mb-4 sm:mb-6 md:mb-8">
-              <p className="text-primary-600 text-[22px] sm:text-[24px] md:text-[26px] font-bold leading-8 sm:leading-9">
-                Create Template
-              </p>
-              <IoCloseOutline
-                onClick={() => closeFlyout()}
-                className="h-7 sm:h-8 w-7 sm:w-8 border border-gray-700 text-white rounded cursor-pointer"
-              />
-            </div>
-            <div className="w-full border-b border-gray-700 mb-4 sm:mb-6"></div>
-
-            <Formik
-              initialValues={{
-                title: "",
-                subject: "",
-                body: "",
-                files: [] as File[], // Store multiple files
-              }}
-              validate={(values) => {
-                const errors: Record<string, string | string[]> = {};
-                if (!values.title) errors.title = "Title is required";
-                if (!values.subject) errors.subject = "Subject is required";
-                if (!values.body) errors.body = "Body is required";
-                if (!values.files?.length)
-                  errors.files = "Please select at least one file";
-
-                // Validate each file (size + type)
-                if (values.files?.length) {
-                  const tooBig = values.files.find(
-                    (f) => f.size > BYTES(MAX_FILE_MB)
-                  );
-                  if (tooBig)
-                    errors.files = `Each file must be ≤ ${MAX_FILE_MB}MB`;
-
-                  const badType = values.files.find(
-                    (f) => !OK_TYPES.includes(f.type)
-                  );
-                  if (!errors.files && badType)
-                    errors.files = "One or more files have an unsupported type";
-                }
-                return errors;
-              }}
-              onSubmit={async (values, { resetForm, setSubmitting }) => {
-                try {
-                  console.log("Form values before API call:", values); // Log Formik values before submitting
-
-                  // Create a FormData object
-                  const fd = new FormData();
-                  fd.append("title", values.title);
-                  fd.append("subject", values.subject);
-                  fd.append("body", values.body);
-
-                  // Append each file to FormData
-                  values.files.forEach((file) => {
-                    if (file) {
-                      console.log("Appending file:", file.name); // Log to check files before submission
-                      fd.append("files[]", file); // Use 'files[]' to match backend expectations
-                    }
-                  });
-
-                  // Debugging: log FormData
-                  console.log("FormData before submitting:", fd);
-
-                  // Make the API request
-                  const res = await AxiosProvider.post("/createtemplate", fd, {
-                    maxBodyLength: Infinity,
-                    maxContentLength: Infinity,
-                    timeout: 30 * 60 * 1000,
-                  });
-
-                  console.log("Upload response:", res);
-                  toast.success("Uploaded successfully!");
-                  resetForm(); // Reset the form after successful submission
-                } catch (err: any) {
-                  console.error("Upload failed:", err);
-                  if (err?.response?.status === 413) {
-                    toast.error(
-                      `File too large for server limit. Try a smaller file.`
-                    );
-                  } else if (err?.code === "ERR_NETWORK") {
-                    toast.error(`Network/proxy blocked the upload.`);
-                  } else if (
-                    typeof err?.message === "string" &&
-                    /Unsupported file type|File >/i.test(err.message)
-                  ) {
-                    toast.error(err.message);
-                  } else {
-                    toast.error("Upload failed.");
-                  }
-                } finally {
-                  setSubmitting(false);
-                }
-              }}
-            >
-              {({
-                values,
-                errors,
-                touched,
-                handleChange,
-                setFieldValue,
-                handleSubmit,
-                isSubmitting,
-              }) => (
-                <Form onSubmit={handleSubmit}>
-                  <div className="w-full space-y-5">
-                    {/* Title Field */}
-                    <div className="w-full">
-                      <p className="text-white font-medium text-base leading-6 mb-2">
-                        Title
-                      </p>
-                      <input
-                        type="text"
-                        name="title"
-                        value={values.title}
-                        onChange={handleChange}
-                        placeholder="Enter title"
-                        className="w-full h-[50px] border rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black"
-                      />
-                      {touched.title && errors.title && (
-                        <div className="text-red-500 text-sm">
-                          {errors.title}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Subject Field */}
-                    <div className="w-full">
-                      <p className="text-white font-medium text-base leading-6 mb-2">
-                        Subject
-                      </p>
-                      <input
-                        type="text"
-                        name="subject"
-                        value={values.subject}
-                        onChange={handleChange}
-                        placeholder="Enter subject"
-                        className="w-full h-[50px] border rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black"
-                      />
-                      {touched.subject && errors.subject && (
-                        <div className="text-red-500 text-sm">
-                          {errors.subject}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Body Field */}
-                    <div className="w-full">
-                      <p className="text-white font-medium text-base leading-6 mb-2">
-                        Body
-                      </p>
-                      <input
-                        type="text"
-                        name="body"
-                        value={values.body}
-                        onChange={handleChange}
-                        placeholder="Enter body"
-                        className="w-full h-[50px] border rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black"
-                      />
-                      {touched.body && errors.body && (
-                        <div className="text-red-500 text-sm">
-                          {errors.body}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* File Upload Field */}
-                    <div className="w-full">
-                      <p className="text-white font-medium text-base leading-6 mb-2">
-                        Files (You can select multiple)
-                      </p>
-                      <input
-                        type="file"
-                        name="files"
-                        multiple
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                          const list = Array.from(e.target.files || []);
-                          setFieldValue("files", list); // Update Formik with selected files
-                        }}
-                        accept=".jpg,.jpeg,.png,.webp,.pdf,.doc,.docx,.zip,.rar,.txt,.xlsx,.pptx"
-                        className="w-full h-[50px] border rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black file:mr-4 file:py-2 file:px-4 file:rounded-[4px] file:border-0 file:text-sm file:font-semibold file:bg-primary-700 file:text-white hover:file:bg-primary-800 pt-[6px]"
-                      />
-                      {touched.files && errors.files && (
-                        <div className="text-red-500 text-sm text-center mt-1">
-                          {
-                            Array.isArray(errors.files)
-                              ? errors.files.map((error, index) => (
-                                  <div key={index}>{error}</div>
-                                )) // Handle multiple errors
-                              : errors.files // Handle single error
-                          }
-                        </div>
-                      )}
-
-                      {/* Display Selected Files */}
-                      {values.files?.length > 0 && (
-                        <ul className="text-xs text-gray-300 space-y-1 mt-2">
-                          {values.files.map((f, i) => (
-                            <li key={i} className="flex justify-between">
-                              <span className="truncate">{f.name}</span>
-                              <span>
-                                ({(f.size / (1024 * 1024)).toFixed(2)} MB)
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-
-                    {/* Submit Button */}
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className={`py-[13px] px-[26px] w-full rounded-[4px] text-white text-center ${
-                        isSubmitting
-                          ? "bg-primary-700 opacity-60 cursor-not-allowed"
-                          : "bg-primary-700 hover:bg-primary-800"
-                      }`}
-                    >
-                      {isSubmitting ? "Uploading..." : "Submit"}
-                    </button>
-                  </div>
-                </Form>
-              )}
-            </Formik>
+    {/* NOW MY FLYOUT */}
+    <div className={`filterflyout ${isFlyoutFilterOpen ? "filteropen" : ""}`}>
+      {addFrom && (
+        <div className="w-full min-h-auto  p-4 text-white">
+          {/* Header */}
+          <div className="flex justify-between mb-4 sm:mb-6 md:mb-8">
+            <p className="text-primary-600 text-[22px] sm:text-[24px] md:text-[26px] font-bold leading-8 sm:leading-9">
+              Create Template
+            </p>
+            <IoCloseOutline
+              onClick={() => closeFlyout()}
+              className="h-7 sm:h-8 w-7 sm:w-8 border border-gray-700 text-white rounded cursor-pointer"
+            />
           </div>
-        )}
-        {editForm && (
-          <div className="w-full min-h-auto  p-4 text-white">
-            {/* Header */}
-            <div className="flex justify-between mb-4 sm:mb-6 md:mb-8">
-              <p className="text-primary-600 text-[22px] sm:text-[24px] md:text-[26px] font-bold leading-8 sm:leading-9">
-                Edit Template
-              </p>
-              <IoCloseOutline
-                onClick={() => closeFlyout()}
-                className="h-7 sm:h-8 w-7 sm:w-8 border border-gray-700 text-white rounded cursor-pointer"
-              />
-            </div>
+          <div className="w-full border-b border-gray-700 mb-4 sm:mb-6"></div>
+          <Formik
+            initialValues={{
+              title: "",
+              subject: "",
+              body: "",
+              files: [] as File[], // Store multiple files
+            }}
+            validate={(values) => {
+              const errors: Record<string, string | string[]> = {};
+              if (!values.title) errors.title = "Title is required";
+              if (!values.subject) errors.subject = "Subject is required";
+              if (!values.body) errors.body = "Body is required";
 
-            <div className="w-full border-b border-gray-700 mb-4 sm:mb-6"></div>
-            <Formik
-              enableReinitialize
-              initialValues={{
-                id: editObjectData?.id ?? "",
-                title: editObjectData?.title ?? "",
-                subject: editObjectData?.subject ?? "",
-                body: editObjectData?.body ?? "",
-                files: [] as File[], // ⬅️ multiple (optional)
-              }}
-              validationSchema={Yup.object({
-                id: Yup.string().required("Template ID is required"),
-                title: Yup.string().required("Title is required"),
-                subject: Yup.string().required("Subject is required"),
-                body: Yup.string().required("Body is required"),
-                files: Yup.array()
-                  .of(
-                    Yup.mixed<File>()
-                      .test(
-                        "file-size",
-                        `Each file must be ≤ ${MAX_FILE_MB} MB`,
-                        (v) => !v || v.size <= MAX_FILE_MB * 1024 * 1024
-                      )
-                      .test(
-                        "file-type",
-                        "Only JPG, PNG, PDF, DOC, DOCX allowed",
-                        (v) =>
-                          !v ||
-                          [
-                            "image/jpeg",
-                            "image/png",
-                            "application/pdf",
-                            "application/msword",
-                            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                          ].includes(v.type)
-                      )
-                  )
-                  .notRequired(), // optional on update
-              })}
-              onSubmit={async (values, { setSubmitting, resetForm }) => {
-                try {
-                  const fd = new FormData();
-                  fd.append("id", values.id);
-                  fd.append("title", values.title);
-                  fd.append("subject", values.subject);
-                  fd.append("body", values.body);
+              const fileErrors: string[] = [];
 
-                  // If no new files picked, this is a metadata-only update (still single call)
-                  // If files picked, append ALL in the SAME request
-                  if (values.files && values.files.length > 0) {
-                    for (const file of values.files) {
-                      // Change "files" to "files[]" if your backend expects that
-                      fd.append("files", file);
-                    }
+              // Validate each file (size + type)
+              if (values.files?.length) {
+                values.files.forEach((file) => {
+                  try {
+                    // Use the helper function here for detailed validation
+                    validateFileClientSide(file);
+                  } catch (e: any) {
+                    // Add the specific error message to the list
+                    fileErrors.push(`${file.name}: ${e.message}`);
                   }
+                });
 
-                  await AxiosProvider.post("/updatetemplate", fd, {
+                // If there are any file-specific errors, report them
+                if (fileErrors.length > 0) {
+                  errors.files = fileErrors;
+                }
+              } else {
+                // Only set this error if there are no files *and* no file-specific errors from a previous selection
+                errors.files = "Please select at least one file";
+              }
+
+              return errors;
+            }}
+            onSubmit={async (values, { resetForm, setSubmitting }) => {
+              console.log("Form values before API call:", values); // Log Formik values before submitting
+
+              // Check if files are correctly selected
+              console.log("Files selected:", values.files); // Log selected files
+
+              if (!values.files || values.files.length === 0) {
+                toast.error("No files selected");
+                return;
+              }
+
+              // Create a FormData object
+              const fd = new FormData();
+              fd.append("title", values.title);
+              fd.append("subject", values.subject);
+              fd.append("body", values.body);
+
+              // Append each file to FormData
+              values.files.forEach((file) => {
+                console.log("Appending file:", file.name); // Log the file being appended
+                fd.append("files", file); // Append files correctly (use 'files' as key, not 'files[]')
+              });
+
+              // Debugging: log FormData contents before submitting
+              console.log("FormData before submitting:");
+              for (let [key, value] of fd.entries()) {
+                console.log(`${key}:`, value); // Log each key-value pair from FormData
+              }
+
+              try {
+                // Make the API request
+                const res = await AxiosProvider.post("/createtemplate", fd, {
+                  maxBodyLength: Infinity,
+                  maxContentLength: Infinity,
+                  timeout: 30 * 60 * 1000,
+                });
+
+                console.log("Upload response:", res);
+                toast.success("Uploaded successfully!");
+                resetForm(); // Reset the form after successful submission
+              } catch (err: any) {
+                console.error("Upload failed:", err);
+                if (err?.response?.status === 413) {
+                  toast.error(
+                    `File too large for server limit. Try a smaller file.`
+                  );
+                } else if (err?.code === "ERR_NETWORK") {
+                  toast.error(`Network/proxy blocked the upload.`);
+                } else if (
+                  typeof err?.message === "string" &&
+                  /Unsupported file type|File >/i.test(err.message)
+                ) {
+                  toast.error(err.message);
+                } else {
+                  toast.error("Upload failed.");
+                }
+              } finally {
+                setSubmitting(false);
+              }
+            }}
+          >
+            {({
+              values,
+              errors,
+              touched,
+              handleChange,
+              setFieldValue,
+              handleSubmit,
+              isSubmitting,
+            }) => (
+              <Form onSubmit={handleSubmit}>
+                <div className="w-full space-y-5">
+                  {/* Title Field */}
+                  <div className="w-full">
+                    <p className="text-white font-medium text-base leading-6 mb-2">
+                      Title
+                    </p>
+                    <input
+                      type="text"
+                      name="title"
+                      value={values.title}
+                      onChange={handleChange}
+                      placeholder="Enter title"
+                      className="w-full h-[50px] border rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black"
+                    />
+                    {touched.title && errors.title && (
+                      <div className="text-red-500 text-sm">{errors.title}</div>
+                    )}
+                  </div>
+
+                  {/* Subject Field */}
+                  <div className="w-full">
+                    <p className="text-white font-medium text-base leading-6 mb-2">
+                      Subject
+                    </p>
+                    <input
+                      type="text"
+                      name="subject"
+                      value={values.subject}
+                      onChange={handleChange}
+                      placeholder="Enter subject"
+                      className="w-full h-[50px] border rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black"
+                    />
+                    {touched.subject && errors.subject && (
+                      <div className="text-red-500 text-sm">
+                        {errors.subject}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Body Field */}
+                  <div className="w-full">
+                    <p className="text-white font-medium text-base leading-6 mb-2">
+                      Body
+                    </p>
+                    <input
+                      type="text"
+                      name="body"
+                      value={values.body}
+                      onChange={handleChange}
+                      placeholder="Enter body"
+                      className="w-full h-[50px] border rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black"
+                    />
+                    {touched.body && errors.body && (
+                      <div className="text-red-500 text-sm">{errors.body}</div>
+                    )}
+                  </div>
+
+                  {/* File Upload Field */}
+                  <div className="w-full">
+                    <p className="text-white font-medium text-base leading-6 mb-2">
+                      Files (You can select multiple)
+                    </p>
+                    <input
+                      type="file"
+                      multiple
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        const list = Array.from(e.target.files || []);
+                        setFieldValue("files", list); // Update Formik with selected files
+                        console.log("Files selected:", list); // Log selected files to verify they're being captured by Formik
+                      }}
+                      accept=".jpg,.jpeg,.png,.webp,.pdf,.doc,.docx,.zip,.rar,.txt,.xlsx,.pptx"
+                      className="w-full h-[50px] border rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black file:mr-4 file:py-2 file:px-4 file:rounded-[4px] file:border-0 file:text-sm file:font-semibold file:bg-primary-700 file:text-white hover:file:bg-primary-800 pt-[6px]"
+                    />
+                    {touched.files && errors.files && (
+                      <div className="text-red-500 text-sm text-center mt-1">
+                        {Array.isArray(errors.files)
+                          ? errors.files.map((error, index) => (
+                              <div key={index} className="text-left">
+                                {error}
+                              </div>
+                            ))
+                          : errors.files}
+                      </div>
+                    )}
+
+                    {/* Display Selected Files */}
+                    {values.files?.length > 0 && (
+                      <ul className="text-xs text-gray-300 space-y-1 mt-2">
+                        {values.files.map((f, i) => (
+                          <li key={i} className="flex justify-between">
+                            <span className="truncate">{f.name}</span>
+                            <span>
+                              ({(f.size / (1024 * 1024)).toFixed(2)} MB)
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+
+                  {/* Submit Button */}
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className={`py-[13px] px-[26px] w-full rounded-[4px] text-white text-center ${
+                      isSubmitting
+                        ? "bg-primary-700 opacity-60 cursor-not-allowed"
+                        : "bg-primary-700 hover:bg-primary-800"
+                    }`}
+                  >
+                    {isSubmitting ? "Uploading..." : "Submit"}
+                  </button>
+                </div>
+              </Form>
+            )}
+          </Formik>
+        </div>
+      )}
+      {editForm && (
+        <div className="w-full min-h-auto  p-4 text-white">
+          {/* Header */}
+          <div className="flex justify-between mb-4 sm:mb-6 md:mb-8">
+            <p className="text-primary-600 text-[22px] sm:text-[24px] md:text-[26px] font-bold leading-8 sm:leading-9">
+              Edit Template
+            </p>
+            <IoCloseOutline
+              onClick={() => closeFlyout()}
+              className="h-7 sm:h-8 w-7 sm:w-8 border border-gray-700 text-white rounded cursor-pointer"
+            />
+          </div>
+
+          <div className="w-full border-b border-gray-700 mb-4 sm:mb-6"></div>
+          <Formik
+            enableReinitialize
+            initialValues={{
+              id: editObjectData?.id ?? "",
+              title: editObjectData?.title ?? "",
+              subject: editObjectData?.subject ?? "",
+              body: editObjectData?.body ?? "",
+              files: [] as File[], // ⬅️ multiple (optional)
+            }}
+            validationSchema={Yup.object({
+              id: Yup.string().required("Template ID is required"),
+              title: Yup.string().required("Title is required"),
+              subject: Yup.string().required("Subject is required"),
+              body: Yup.string().required("Body is required"),
+              files: Yup.array()
+                .of(
+                  Yup.mixed<File>()
+                    .test(
+                      "file-size",
+                      `Each file must be ≤ ${MAX_FILE_MB} MB`,
+                      (v) => !v || v.size <= MAX_FILE_MB * 1024 * 1024
+                    )
+                    .test(
+                      "file-type",
+                      "Only JPG, PNG, PDF, DOC, DOCX allowed",
+                      (v) =>
+                        !v ||
+                        [
+                          "image/jpeg",
+                          "image/png",
+                          "application/pdf",
+                          "application/msword",
+                          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                        ].includes(v.type)
+                    )
+                )
+                .notRequired(), // optional on update
+            })}
+            onSubmit={async (values, { setSubmitting, resetForm }) => {
+              try {
+                const fd = new FormData();
+                fd.append("id", values.id);
+                fd.append("title", values.title);
+                fd.append("subject", values.subject);
+                fd.append("body", values.body);
+
+                // If no new files picked, this is a metadata-only update (still single call)
+                // If files picked, append ALL in the SAME request
+                if (values.files && values.files.length > 0) {
+                  for (const file of values.files) {
+                    // Change "files" to "files[]" if your backend expects that
+                    fd.append("files", file);
+                  }
+                }
+
+                const response = await AxiosProvider.post(
+                  "/updatetemplate",
+                  fd,
+                  {
                     // Let browser set the Content-Type + boundary automatically
                     maxBodyLength: Infinity,
                     maxContentLength: Infinity,
@@ -631,187 +646,184 @@ export default function Home() {
                         console.log(`Uploading: ${pct}%`);
                       }
                     },
-                  });
-
-                  toast.success("Template updated successfully!");
-                  closeFlyout();
-                  setHitApi(!hitApi);
-                  resetForm();
-                } catch (err: any) {
-                  console.error("❌ Update error:", err);
-                  if (err?.response?.status === 413) {
-                    toast.error(
-                      `File too large for server limit. Try a smaller file.`
-                    );
-                  } else if (err?.code === "ERR_NETWORK") {
-                    toast.error(
-                      `Network/proxy blocked the upload (likely size limit).`
-                    );
-                  } else {
-                    toast.error("Failed to update the template.");
                   }
-                } finally {
-                  setSubmitting(false);
+                );
+                // console.log("UUUUUUUUUUUUUUUUUUUUUUUUUUU", response);
+                toast.success("Template updated successfully!");
+                closeFlyout();
+                setHitApi(!hitApi);
+                resetForm();
+              } catch (err: any) {
+                console.error("❌ Update error:", err);
+                if (err?.response?.status === 413) {
+                  toast.error(
+                    `File too large for server limit. Try a smaller file.`
+                  );
+                } else if (err?.code === "ERR_NETWORK") {
+                  toast.error(
+                    `Network/proxy blocked the upload (likely size limit).`
+                  );
+                } else {
+                  toast.error("Failed to update the template.");
                 }
-              }}
-            >
-              {({
-                values,
-                errors,
-                touched,
-                handleChange,
-                setFieldValue,
-                handleSubmit,
-                isSubmitting,
-              }) => (
-                <Form onSubmit={handleSubmit}>
-                  <div className="w-full space-y-5">
-                    {/* Hidden ID */}
-                    <input type="hidden" name="id" value={values.id} readOnly />
+              } finally {
+                setSubmitting(false);
+              }
+            }}
+          >
+            {({
+              values,
+              errors,
+              touched,
+              handleChange,
+              setFieldValue,
+              handleSubmit,
+              isSubmitting,
+            }) => (
+              <Form onSubmit={handleSubmit}>
+                <div className="w-full space-y-5">
+                  {/* Hidden ID */}
+                  <input type="hidden" name="id" value={values.id} readOnly />
 
-                    {/* Title */}
-                    <div className="w-full">
-                      <p className="text-white font-medium text-base leading-6 mb-2">
-                        Title
-                      </p>
-                      <input
-                        type="text"
-                        name="title"
-                        value={values.title}
-                        onChange={handleChange}
-                        placeholder="Enter title"
-                        className="hover:shadow-hoverInputShadow focus:border-primary-600 w-full h-[50px] border border-gray-700 rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black"
-                      />
-                      {touched.title && errors.title && (
-                        <div className="text-red-500 text-sm">
-                          {errors.title}
-                        </div>
-                      )}
+                  {/* Title */}
+                  <div className="w-full">
+                    <p className="text-white font-medium text-base leading-6 mb-2">
+                      Title
+                    </p>
+                    <input
+                      type="text"
+                      name="title"
+                      value={values.title}
+                      onChange={handleChange}
+                      placeholder="Enter title"
+                      className="hover:shadow-hoverInputShadow focus:border-primary-600 w-full h-[50px] border border-gray-700 rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black"
+                    />
+                    {touched.title && errors.title && (
+                      <div className="text-red-500 text-sm">{errors.title}</div>
+                    )}
+                  </div>
+
+                  {/* Subject */}
+                  <div className="w-full">
+                    <p className="text-white font-medium text-base leading-6 mb-2">
+                      Subject
+                    </p>
+                    <input
+                      type="text"
+                      name="subject"
+                      value={values.subject}
+                      onChange={handleChange}
+                      placeholder="Enter subject"
+                      className="hover:shadow-hoverInputShadow focus:border-primary-600 w-full h-[50px] border border-gray-700 rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black"
+                    />
+                    {touched.subject && errors.subject && (
+                      <div className="text-red-500 text-sm">
+                        {errors.subject}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Body */}
+                  <div className="w-full">
+                    <p className="text-white font-medium text-base leading-6 mb-2">
+                      Body
+                    </p>
+                    <input
+                      type="text"
+                      name="body"
+                      value={values.body}
+                      onChange={handleChange}
+                      placeholder="Enter body"
+                      className="hover:shadow-hoverInputShadow focus:border-primary-600 w-full h-[50px] border border-gray-700 rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black"
+                    />
+                    {touched.body && errors.body && (
+                      <div className="text-red-500 text-sm">{errors.body}</div>
+                    )}
+                  </div>
+
+                  {/* Optional: current file name */}
+                  {editObjectData?.attachment_name && (
+                    <div className="text-sm text-gray-300">
+                      Current file:{" "}
+                      <span className="font-medium">
+                        {editObjectData.attachment_name}
+                      </span>
                     </div>
+                  )}
 
-                    {/* Subject */}
-                    <div className="w-full">
-                      <p className="text-white font-medium text-base leading-6 mb-2">
-                        Subject
-                      </p>
-                      <input
-                        type="text"
-                        name="subject"
-                        value={values.subject}
-                        onChange={handleChange}
-                        placeholder="Enter subject"
-                        className="hover:shadow-hoverInputShadow focus:border-primary-600 w-full h-[50px] border border-gray-700 rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black"
-                      />
-                      {touched.subject && errors.subject && (
-                        <div className="text-red-500 text-sm">
-                          {errors.subject}
-                        </div>
-                      )}
-                    </div>
+                  {/* Files (optional, multiple) */}
+                  <div className="w-full">
+                    <p className="text-white font-medium text-base leading-6 mb-2">
+                      Replace / Add Files (optional)
+                    </p>
+                    <input
+                      type="file"
+                      name="files"
+                      multiple
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        const list = e.currentTarget.files
+                          ? Array.from(e.currentTarget.files)
+                          : [];
+                        setFieldValue("files", list);
+                      }}
+                      accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
+                      className="hover:shadow-hoverInputShadow focus:border-primary-600 w-full h-[50px] border border-gray-700 rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black file:mr-4 file:py-2 file:px-4 file:rounded-[4px] file:border-0 file:text-sm file:font-semibold file:bg-primary-700 file:text-white hover:file:bg-primary-800 pt-[6px]"
+                    />
 
-                    {/* Body */}
-                    <div className="w-full">
-                      <p className="text-white font-medium text-base leading-6 mb-2">
-                        Body
-                      </p>
-                      <input
-                        type="text"
-                        name="body"
-                        value={values.body}
-                        onChange={handleChange}
-                        placeholder="Enter body"
-                        className="hover:shadow-hoverInputShadow focus:border-primary-600 w-full h-[50px] border border-gray-700 rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black"
-                      />
-                      {touched.body && errors.body && (
-                        <div className="text-red-500 text-sm">
-                          {errors.body}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Optional: current file name */}
-                    {editObjectData?.attachment_name && (
-                      <div className="text-sm text-gray-300">
-                        Current file:{" "}
-                        <span className="font-medium">
-                          {editObjectData.attachment_name}
-                        </span>
+                    {/* Show per-field errors */}
+                    {touched.files && typeof errors.files === "string" && (
+                      <div className="text-red-500 text-sm text-center mt-1">
+                        {errors.files}
                       </div>
                     )}
 
-                    {/* Files (optional, multiple) */}
-                    <div className="w-full">
-                      <p className="text-white font-medium text-base leading-6 mb-2">
-                        Replace / Add Files (optional)
-                      </p>
-                      <input
-                        type="file"
-                        name="files"
-                        multiple
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                          const list = e.currentTarget.files
-                            ? Array.from(e.currentTarget.files)
-                            : [];
-                          setFieldValue("files", list);
-                        }}
-                        accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
-                        className="hover:shadow-hoverInputShadow focus:border-primary-600 w-full h-[50px] border border-gray-700 rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black file:mr-4 file:py-2 file:px-4 file:rounded-[4px] file:border-0 file:text-sm file:font-semibold file:bg-primary-700 file:text-white hover:file:bg-primary-800 pt-[6px]"
-                      />
+                    {/* Show per-file errors if any */}
+                    {Array.isArray(errors.files) && (
+                      <div className="text-red-500 text-sm mt-1">
+                        {errors.files.filter(Boolean).map((err, idx) => (
+                          <div key={idx}>{String(err)}</div>
+                        ))}
+                      </div>
+                    )}
 
-                      {/* Show per-field errors */}
-                      {touched.files && typeof errors.files === "string" && (
-                        <div className="text-red-500 text-sm text-center mt-1">
-                          {errors.files}
-                        </div>
-                      )}
+                    {/* Selected file list */}
+                    {values.files?.length > 0 && (
+                      <ul className="text-xs text-gray-300 space-y-1 mt-2">
+                        {values.files.map((f, i) => (
+                          <li key={i} className="flex justify-between">
+                            <span className="truncate">{f.name}</span>
+                            <span>
+                              ({(f.size / (1024 * 1024)).toFixed(2)} MB)
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
 
-                      {/* Show per-file errors if any */}
-                      {Array.isArray(errors.files) && (
-                        <div className="text-red-500 text-sm mt-1">
-                          {errors.files.filter(Boolean).map((err, idx) => (
-                            <div key={idx}>{String(err)}</div>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Selected file list */}
-                      {values.files?.length > 0 && (
-                        <ul className="text-xs text-gray-300 space-y-1 mt-2">
-                          {values.files.map((f, i) => (
-                            <li key={i} className="flex justify-between">
-                              <span className="truncate">{f.name}</span>
-                              <span>
-                                ({(f.size / (1024 * 1024)).toFixed(2)} MB)
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-
-                    {/* Submit */}
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className={`py-[13px] px-[26px] w-full rounded-[4px] text-base font-medium leading-6 text-white text-center
+                  {/* Submit */}
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className={`py-[13px] px-[26px] w-full rounded-[4px] text-base font-medium leading-6 text-white text-center
             ${
               isSubmitting
                 ? "bg-primary-700 opacity-60 cursor-not-allowed"
                 : "bg-primary-700 hover:bg-primary-800"
             }`}
-                      aria-busy={isSubmitting}
-                    >
-                      {isSubmitting ? "Updating..." : "Update Template"}
-                    </button>
-                  </div>
-                </Form>
-              )}
-            </Formik>
-          </div>
-        )}
-      </div>
+                    aria-busy={isSubmitting}
+                  >
+                    {isSubmitting ? "Updating..." : "Update Template"}
+                  </button>
+                </div>
+              </Form>
+            )}
+          </Formik>
+        </div>
+      )}
+    </div>
 
-      {/* FITLER FLYOUT END */}
-    </>
-  );
+    {/* FITLER FLYOUT END */}
+  </>
+);
 }
