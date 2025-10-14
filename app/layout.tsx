@@ -7,7 +7,7 @@ import dynamic from "next/dynamic";
 import { ReactNode, useEffect } from "react";
 import "react-toastify/dist/ReactToastify.css";
 import { usePathname } from "next/navigation";
-import WebPushBootstrapper from "./component/WebPushBootstrapper";
+//import WebPushBootstrapper from "./component/WebPushBootstrapper";
 import NotificationListener from "./NotificationListener";
 
 const inter = Inter({ subsets: ["latin"] });
