@@ -4,7 +4,7 @@ import Tabs from "../component/Tabs";
 import { CiSettings } from "react-icons/ci";
 import { IoIosNotificationsOutline } from "react-icons/io";
 import { useEffect, useState } from "react";
-import { appCheck } from "../firebase-config";
+//import { appCheck } from "../firebase-config";
 import { getToken } from "firebase/app-check";
 import {
   Formik,
