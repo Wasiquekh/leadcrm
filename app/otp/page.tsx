@@ -9,15 +9,16 @@ import { AppContext } from "../AppContext";
 import UserActivityLogger from "../../provider/UserActivityLogger";
 import OtpInput from "react-otp-input";
 import { isTokenExpired } from "../component/utils/authUtils";
+import { messaging } from "../firebase-config";
+import { getToken } from "firebase/messaging";
+import { getFcmTokenOnce } from "../lib/firebaseClient";
 
 const axiosProvider = new AxiosProvider();
-//
 
 export default function OtpHome() {
   const storage = new StorageManager();
   const router = useRouter();
   const userEmail = storage.getUserEmail();
-
 
   const [loading, setLoading] = useState<boolean>(false);
   const [qrCode, setQrCode] = useState<string | undefined>();
@@ -26,6 +27,7 @@ export default function OtpHome() {
   );
   const [userId, setuserId] = useState<string | undefined>(storage.getUserId());
   const [otp, setOtp] = useState<string>("");
+  const [isLogged, setIsLogged] = useState<boolean>(false);
   const firstInputRef = useRef<HTMLInputElement>(null);
   const { setAccessToken } = useContext(AppContext);
 
@@ -55,8 +57,9 @@ export default function OtpHome() {
       await storage.saveUserId(res.data.data.system_user_id);
       toast.success("Login Successful");
       router.push("/dashboard");
+      setIsLogged(true);
       const activityLogger = new UserActivityLogger();
-     // await activityLogger.userLogin();
+      // await activityLogger.userLogin();
     } catch (error) {
       console.error("Network error:", error);
       toast.error("Invalid Code. Please try again.");
@@ -67,14 +70,12 @@ export default function OtpHome() {
     }
   };
 
-
   //   useEffect(() => {
   //   const token = storage.getAccessToken();
   //   if (token && token !== "null") router.replace("/dashboard");
   // }, []);
 
-
-   useEffect(() => {
+  useEffect(() => {
     const token = storage.getAccessToken(); // Get token from localStorage via StorageManager
 
     // If token exists and is not expired, redirect to dashboard
@@ -82,53 +83,40 @@ export default function OtpHome() {
       router.replace("/dashboard"); // Redirect to the Dashboard page
     }
   }, [router]);
+
+  useEffect(() => {
+    const registerFCMToken = async () => {
+      if (isLogged) {
+        try {
+          // Get FCM Token for the logged-in user
+          const currentToken = await getToken(messaging, {
+            vapidKey:
+              "BPGmALJgnU2asXN4pqtYf85enB-Y3KbCkCwmSmxtSE3nWT69ghqbFAvIYxRsqntM6oR4jJTCpnpngmXIlJ7ik_k", // Replace with your actual VAPID Key
+          });
+
+          if (currentToken) {
+            // Successfully got FCM token, send it to the backend using AxiosProvider
+            const response = await AxiosProvider.post("/register-fcm", {
+              fcmtoken: currentToken,
+            });
+            console.log("FCM Token registered", response.data);
+          } else {
+            console.log("No registration token available");
+          }
+        } catch (err) {
+          console.error(
+            "Error fetching FCM token or registering FCM token",
+            err
+          );
+        }
+      }
+    };
+
+    registerFCMToken(); // Call the async function
+  }, [isLogged]); // Only trigger this effect if the user is logged in
+
   return (
     <>
-      {/* <div className="bg-[#F5F5F5] hidden md:block">
-        <Image
-          src="/images/orizon-login-bg.svg"
-          alt="Orizon iconLogo bg"
-          width={100}
-          height={100}
-          className="w-full h-[100vh]"
-        />
-        <Image
-          src="/images/orizonIcon.svg"
-          alt="OrizonIcon"
-          width={82}
-          height={52}
-          className=" absolute top-20 left-28"
-        />
-        <Image
-          src="/images/orizonIcon.svg"
-          alt="OrizonIcon"
-          width={82}
-          height={52}
-          className=" absolute top-32 right-28"
-        />
-        <Image
-          src="/images/orizonIcon.svg"
-          alt="OrizonIcon"
-          width={82}
-          height={52}
-          className=" absolute  top-1/2 left-[25%]"
-        />
-        <Image
-          src="/images/orizonIcon.svg"
-          alt="OrizonIcon"
-          width={82}
-          height={52}
-          className=" absolute  top-[60%] right-[25%]"
-        />
-        <Image
-          src="/images/orizonIcon.svg"
-          alt="OrizonIcon"
-          width={82}
-          height={52}
-          className=" absolute  top-[90%] right-0 left-0 mx-auto"
-        />
-      </div> */}
-
       <div className="absolute top-0 bottom-0 left-0 right-0 mx-auto my-auto w-[90%] max-w-[500px] h-[587px] shadow-loginBoxShadow  px-6 sm:px-12 py-10 sm:py-16 rounded-lg mainContainerBg">
         <Image
           src="/images/crmlogo.jpg"
@@ -140,6 +128,7 @@ export default function OtpHome() {
         <p className="font-bold text-lg sm:text-base leading-normal text-center  mb-2">
           Verify your email
         </p>
+        {/* <button onClick={() => setIsLogged(true)}>FCM</button> */}
         {qrCode && (
           <Image
             src={qrCode}
@@ -150,7 +139,8 @@ export default function OtpHome() {
           />
         )}
         <p className=" text-base leading-[26px] text-center mb-10 sm:mb-14">
-          We&apos;ve sent you a one-time password (OTP). Please enter it below to confirm your account.
+          We&apos;ve sent you a one-time password (OTP). Please enter it below
+          to confirm your account.
         </p>
         <form onSubmit={handleSubmit} className="w-full">
           <div>

@@ -8,7 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { usePathname } from "next/navigation";
 import WebPushBootstrapper from "./component/WebPushBootstrapper";
 import PushInitializer from "./PushInitializer";
-
+import NotificationListener from "./NotificationListener";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -51,7 +51,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
               {/* Main content column */}
               <main className="flex-1 min-w-0">{children}</main>
             </div>
-
+            <NotificationListener />
             {/* Toasts */}
             <ToastContainer
               position="top-right"
