@@ -1,3 +1,4 @@
+"use client";
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
@@ -21,7 +22,6 @@ const messaging = getMessaging(app);
 
 export { messaging };
 
-
 // Initialize App Check
 // export const appCheck = (() => {
 //   if (typeof window !== "undefined") {
@@ -40,4 +40,4 @@ export const analytics = (() => {
   }
   return null;
 })();
-export { app, };
+export { app };

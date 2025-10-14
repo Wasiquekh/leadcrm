@@ -7,11 +7,11 @@ const APP_BASE_URL = "http://localhost:3000"; // Or use process.env.APP_BASE_URL
 
 const NotificationListener = () => {
   useEffect(() => {
+    // Handle foreground messages
     onMessage(messaging, (payload) => {
-      console.log("📩 Notification received:", payload);
+      console.log("📩 Notification received (foreground):", payload);
 
       const { notification, data } = payload;
-
       const title = notification?.title || "No Title";
       const body = notification?.body || "No Body";
 
