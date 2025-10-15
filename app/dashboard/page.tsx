@@ -24,7 +24,6 @@ import { ImUserTie } from "react-icons/im";
 import { RxAvatar } from "react-icons/rx";
 import { HiChevronDoubleLeft, HiChevronDoubleRight } from "react-icons/hi";
 import { toast } from "react-toastify";
-import MiniBell from "../component/MiniBell";
 
 export interface AgentStats {
   agent_id: string; // Unique identifier for the agent (UUID)

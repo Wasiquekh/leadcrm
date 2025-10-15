@@ -16,28 +16,33 @@ export const firebaseConfig = {
   measurementId: "G-J71349ZJQ0", // Replace with your Measurement ID
 };
 
-// Initialize Firebase
+// Initialize Firebase App
 const app = initializeApp(firebaseConfig);
-const messaging = getMessaging(app);
+
+// Initialize Messaging - Client-Side Only
+let messaging;
+if (typeof window !== "undefined") {
+  messaging = getMessaging(app);
+}
 
 export { messaging };
 
-// Initialize App Check
+// Initialize Analytics - Client-Side Only
+let analytics;
+if (typeof window !== "undefined") {
+  analytics = getAnalytics(app);
+}
+
+export { analytics, app };
+
+// Initialize App Check (Optional) - Client-Side Only
+// Uncomment and use if needed
 // export const appCheck = (() => {
 //   if (typeof window !== "undefined") {
 //     return initializeAppCheck(app, {
-//       provider: new ReCaptchaV3Provider("6LeNlSAqAAAAAGbgvmjfMsR2zwWpGCFL4RqDg9uE"),
+//       provider: new ReCaptchaV3Provider("YOUR_RECAPTCHA_KEY"),
 //       isTokenAutoRefreshEnabled: true,
 //     });
 //   }
 //   return null;
 // })();
-
-// Initialize Analytics
-export const analytics = (() => {
-  if (typeof window !== "undefined") {
-    return getAnalytics(app);
-  }
-  return null;
-})();
-export { app };

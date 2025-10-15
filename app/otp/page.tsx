@@ -11,7 +11,6 @@ import OtpInput from "react-otp-input";
 import { isTokenExpired } from "../component/utils/authUtils";
 import { messaging } from "../firebase-config";
 import { getToken } from "firebase/messaging";
-import { getFcmTokenOnce } from "../lib/firebaseClient";
 
 const axiosProvider = new AxiosProvider();
 
@@ -85,35 +84,34 @@ export default function OtpHome() {
   }, [router]);
 
   useEffect(() => {
-    const registerFCMToken = async () => {
-      if (isLogged) {
-        try {
-          // Get FCM Token for the logged-in user
-          const currentToken = await getToken(messaging, {
-            vapidKey:
-              "BPGmALJgnU2asXN4pqtYf85enB-Y3KbCkCwmSmxtSE3nWT69ghqbFAvIYxRsqntM6oR4jJTCpnpngmXIlJ7ik_k", // Replace with your actual VAPID Key
-          });
-
-          if (currentToken) {
-            // Successfully got FCM token, send it to the backend using AxiosProvider
-            const response = await AxiosProvider.post("/register-fcm", {
-              fcmtoken: currentToken,
+    if (typeof window !== "undefined") {
+      const registerFCMToken = async () => {
+        if (isLogged) {
+          try {
+            const currentToken = await getToken(messaging, {
+              vapidKey: "YOUR_VAPID_KEY", // Replace with your actual VAPID Key
             });
-            console.log("FCM Token registered", response.data);
-          } else {
-            console.log("No registration token available");
-          }
-        } catch (err) {
-          console.error(
-            "Error fetching FCM token or registering FCM token",
-            err
-          );
-        }
-      }
-    };
 
-    registerFCMToken(); // Call the async function
-  }, [isLogged]); // Only trigger this effect if the user is logged in
+            if (currentToken) {
+              const response = await AxiosProvider.post("/register-fcm", {
+                fcmtoken: currentToken,
+              });
+              console.log("FCM Token registered", response.data);
+            } else {
+              console.log("No registration token available");
+            }
+          } catch (err) {
+            console.error(
+              "Error fetching FCM token or registering FCM token",
+              err
+            );
+          }
+        }
+      };
+
+      registerFCMToken();
+    }
+  }, [isLogged]);
 
   return (
     <>

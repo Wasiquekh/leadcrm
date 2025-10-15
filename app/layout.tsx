@@ -9,6 +9,10 @@ import "react-toastify/dist/ReactToastify.css";
 import { usePathname } from "next/navigation";
 //import WebPushBootstrapper from "./component/WebPushBootstrapper";
 import NotificationListener from "./NotificationListener";
+const WebPushInitializer = dynamic(
+  () => import("./component/WebPushInitializer"),
+  { ssr: false }
+);
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -38,22 +42,6 @@ type RootLayoutProps = {
 };
 
 export default function RootLayout({ children }: RootLayoutProps) {
-  // useEffect(() => {
-  //   // Register service worker
-  //   if ("serviceWorker" in navigator) {
-  //     navigator.serviceWorker
-  //       .register("/firebase-messaging-sw.js")
-  //       .then((registration) => {
-  //         console.log(
-  //           "Service Worker registered with scope:",
-  //           registration.scope
-  //         );
-  //       })
-  //       .catch((error) => {
-  //         console.log("Service Worker registration failed:", error);
-  //       });
-  //   }
-  // }, []);
   return (
     <html lang="en">
       <body className={inter.className}>
@@ -81,6 +69,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
               theme="light"
             />
           </AppProvider>
+          <WebPushInitializer></WebPushInitializer>
         </ErrorBoundary>
       </body>
     </html>

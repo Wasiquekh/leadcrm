@@ -25,24 +25,45 @@ messaging.onBackgroundMessage((payload) => {
   console.log("📩 Background notification received:", payload);
 
   const { notification, data } = payload;
-  const title = notification?.title || "No Title";
-  const body = notification?.body || "No Body";
+  const title = notification?.title || "Notification";
+  const body = notification?.body || "You have a new message.";
 
-  // Show notification using the Notification API
+  const leadId = data?.lead_id || data?.sample_lead_id || null;
+
+  // Display a custom notification with the payload data
   self.registration.showNotification(title, {
     body,
-    icon: "/path/to/icon.png", // Optional icon
+    icon: "/path/to/icon.png", // Specify the path to your icon
+    data: {
+      url: leadId ? `/leadsdetails?id=${encodeURIComponent(leadId)}` : "/",
+    },
   });
+});
 
-  // Handle the notification click event
-  self.addEventListener("notificationclick", (event) => {
-    const notificationUrl = data?.lead_id
-      ? `https://localhost:3000/leadsdetails?id=${encodeURIComponent(
-          data?.lead_id
-        )}`
-      : "/";
+// Handle the notification click event
+self.addEventListener("notificationclick", (event) => {
+  console.log("Notification click received:", event);
 
-    event.notification.close(); // Close the notification
-    event.waitUntil(clients.openWindow(notificationUrl)); // Open the link in a new window
-  });
+  // Close the notification
+  event.notification.close();
+
+  // Retrieve the URL from the notification's data payload
+  const notificationUrl = event.notification.data?.url || "/";
+
+  // This prevents the browser from closing the service worker before the window is opened
+  event.waitUntil(
+    clients.matchAll({ type: "window" }).then((clientList) => {
+      // Check if a client (window) with the URL is already open
+      for (const client of clientList) {
+        if (client.url.includes(notificationUrl) && "focus" in client) {
+          return client.focus();
+        }
+      }
+
+      // If no existing client is found, open a new one
+      if (clients.openWindow) {
+        return clients.openWindow(notificationUrl);
+      }
+    })
+  );
 });
