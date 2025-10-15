@@ -38,15 +38,6 @@ import browserImageCompression from "browser-image-compression";
 
 const axiosProvider = new AxiosProvider();
 
-type TemplateForEdit = {
-  id: string;
-  title: string;
-  subject: string;
-  body: string;
-  // Optional existing file meta if you want to show it
-  attachment_name?: string;
-  attachment_url?: string;
-};
 
 // -------- HELPERS TO UPLOAD MULTIPLE FILES -------------
 const MAX_FILE_MB = 95;
@@ -104,11 +95,36 @@ const compressImage = async (file: File) => {
 
 // -------- END HELPERS TO UPLOAD MULTIPLE FILES -------------
 
+type TemplateForAdd = {
+  id: string;
+  title: string;
+  subject: string;
+  body: string;
+  // Optional existing file meta if you want to show it
+  attachment_name?: string;
+  attachment_url?: string;
+};
+
+interface Attachment {
+  name: string;
+  path: string;
+  type: string;
+  url: string;
+}
+
+interface TemplateForEdit {
+  id: string;
+  title: string;
+  subject: string;
+  body: string;
+  attachments?: Attachment[]; // Optional field to hold multiple attachments
+}
+
 export default function Home() {
   const checking = useAuthRedirect();
   const [isFlyoutOpen, setFlyoutOpen] = useState<boolean>(false);
   const [isFlyoutFilterOpen, setFlyoutFilterOpen] = useState<boolean>(false);
-  const [data, setData] = useState<TemplateForEdit[]>([]);
+  const [data, setData] = useState<TemplateForAdd[]>([]);
   console.log("user activity dara", data);
   const [pageSize] = useState<number>(10);
   const [page, setPage] = useState<number>(1);
@@ -627,263 +643,263 @@ export default function Home() {
             </div>
 
             <div className="w-full border-b border-gray-700 mb-4 sm:mb-6"></div>
-            <Formik
-              enableReinitialize
-              initialValues={{
-                id: editObjectData?.id ?? "",
-                title: editObjectData?.title ?? "",
-                subject: editObjectData?.subject ?? "",
-                body: editObjectData?.body ?? "",
-                files: [] as File[], // Store multiple files
-              }}
-              validationSchema={Yup.object({
-                id: Yup.string().required("Template ID is required"),
-                title: Yup.string().required("Title is required"),
-                subject: Yup.string().required("Subject is required"),
-                body: Yup.string().required("Body is required"),
-                files: Yup.array()
-                  .of(
-                    Yup.mixed<File>()
-                      .test(
-                        "file-size",
-                        `Each file must be ≤ ${MAX_FILE_MB} MB`,
-                        (v) => !v || v.size <= MAX_FILE_MB * 1024 * 1024
-                      )
-                      .test(
-                        "file-type",
-                        "Only JPG, PNG, WEBP, PDF, DOC, DOCX allowed",
-                        (v) =>
-                          !v ||
-                          [
-                            "image/jpeg",
-                            "image/png",
-                            "image/webp", // Added support for .webp files
-                            "application/pdf",
-                            "application/msword",
-                            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                          ].includes(v.type)
-                      )
-                  )
-                  .notRequired(), // Optional on update
-              })}
-              onSubmit={async (values, { setSubmitting, resetForm }) => {
-                try {
-                  const fd = new FormData();
-                  fd.append("id", values.id);
-                  fd.append("title", values.title);
-                  fd.append("subject", values.subject);
-                  fd.append("body", values.body);
+   <Formik
+  enableReinitialize
+  initialValues={{
+    id: editObjectData?.id ?? "",
+    title: editObjectData?.title ?? "",
+    subject: editObjectData?.subject ?? "",
+    body: editObjectData?.body ?? "",
+    files: [] as File[], // Store multiple files (new ones)
+  }}
+  validationSchema={Yup.object({
+    id: Yup.string().required("Template ID is required"),
+    title: Yup.string().required("Title is required"),
+    subject: Yup.string().required("Subject is required"),
+    body: Yup.string().required("Body is required"),
+    files: Yup.array()
+      .of(
+        Yup.mixed<File>()
+          .test(
+            "file-size",
+            `Each file must be ≤ ${MAX_FILE_MB} MB`,
+            (v) => !v || v.size <= MAX_FILE_MB * 1024 * 1024
+          )
+          .test(
+            "file-type",
+            "Only JPG, PNG, WEBP, PDF, DOC, DOCX allowed",
+            (v) =>
+              !v ||
+              [
+                "image/jpeg",
+                "image/png",
+                "image/webp", // Added support for .webp files
+                "application/pdf",
+                "application/msword",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+              ].includes(v.type)
+          )
+      )
+      .notRequired(), // Optional on update
+  })}
+  onSubmit={async (values, { setSubmitting, resetForm }) => {
+    try {
+      const fd = new FormData();
+      fd.append("id", values.id);
+      fd.append("title", values.title);
+      fd.append("subject", values.subject);
+      fd.append("body", values.body);
 
-                  // Compress files before appending to FormData (if any files are selected)
-                  if (values.files && values.files.length > 0) {
-                    const compressedFiles = await Promise.all(
-                      values.files.map(async (file) => {
-                        if (file.type.startsWith("image/")) {
-                          // Call your compress function here
-                          return await compressImage(file); // Compress image files
-                        }
-                        return file; // Return non-image files without compression
-                      })
-                    );
+      // If no new files picked, this is a metadata-only update (still single call)
+      // If files picked, append ALL in the SAME request
+      if (values.files && values.files.length > 0) {
+        for (const file of values.files) {
+          // Change "files" to "files[]" if your backend expects that
+          fd.append("files", file);
+        }
+      }
 
-                    // Append compressed files to FormData
-                    compressedFiles.forEach((file) => {
-                      fd.append("files", file); // Make sure the backend expects "files" (not "files[]")
-                    });
-                  }
+      const response = await AxiosProvider.post("/updatetemplate", fd, {
+        maxBodyLength: Infinity,
+        maxContentLength: Infinity,
+        timeout: 30 * 60 * 1000,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        onUploadProgress: (e) => {
+          if (e.total) {
+            const pct = Math.round((e.loaded / e.total) * 100);
+            console.log(`Uploading: ${pct}%`);
+          }
+        },
+      });
 
-                  // Make the API request to update the template
-                  const response = await AxiosProvider.post(
-                    "/updatetemplate",
-                    fd,
-                    {
-                      maxBodyLength: Infinity,
-                      maxContentLength: Infinity,
-                      timeout: 30 * 60 * 1000,
-                      headers: {
-                        "Content-Type": "multipart/form-data",
-                      },
-                      onUploadProgress: (e) => {
-                        if (e.total) {
-                          const pct = Math.round((e.loaded / e.total) * 100);
-                          console.log(`Uploading: ${pct}%`);
-                        }
-                      },
-                    }
-                  );
+      toast.success("Template updated successfully!");
+      closeFlyout();
+      setHitApi(!hitApi);
+      resetForm();
+    } catch (err: any) {
+      console.error("❌ Update error:", err);
+      if (err?.response?.status === 413) {
+        toast.error(`File too large for server limit. Try a smaller file.`);
+      } else if (err?.code === "ERR_NETWORK") {
+        toast.error(`Network/proxy blocked the upload (likely size limit).`);
+      } else {
+        toast.error("Failed to update the template.");
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  }}
+>
+  {({
+    values,
+    errors,
+    touched,
+    handleChange,
+    setFieldValue,
+    handleSubmit,
+    isSubmitting,
+  }) => (
+    <Form onSubmit={handleSubmit}>
+      <div className="w-full space-y-5">
+        {/* Hidden ID */}
+        <input type="hidden" name="id" value={values.id} readOnly />
 
-                  toast.success("Template updated successfully!");
-                  closeFlyout();
-                  setHitApi(!hitApi);
-                  resetForm();
-                } catch (err: any) {
-                  console.error("❌ Update error:", err);
-                  if (err?.response?.status === 413) {
-                    toast.error(
-                      `File too large for server limit. Try a smaller file.`
-                    );
-                  } else if (err?.code === "ERR_NETWORK") {
-                    toast.error(
-                      `Network/proxy blocked the upload (likely size limit).`
-                    );
-                  } else {
-                    toast.error("Failed to update the template.");
-                  }
-                } finally {
-                  setSubmitting(false);
-                }
-              }}
-            >
-              {({
-                values,
-                errors,
-                touched,
-                handleChange,
-                setFieldValue,
-                handleSubmit,
-                isSubmitting,
-              }) => (
-                <Form onSubmit={handleSubmit}>
-                  <div className="w-full space-y-5">
-                    {/* Hidden ID */}
-                    <input type="hidden" name="id" value={values.id} readOnly />
+        {/* Title */}
+        <div className="w-full">
+          <p className="text-white font-medium text-base leading-6 mb-2">
+            Title
+          </p>
+          <input
+            type="text"
+            name="title"
+            value={values.title}
+            onChange={handleChange}
+            placeholder="Enter title"
+            className="hover:shadow-hoverInputShadow focus:border-primary-600 w-full h-[50px] border border-gray-700 rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black"
+          />
+          {touched.title && errors.title && (
+            <div className="text-red-500 text-sm">{errors.title}</div>
+          )}
+        </div>
 
-                    {/* Title */}
-                    <div className="w-full">
-                      <p className="text-white font-medium text-base leading-6 mb-2">
-                        Title
-                      </p>
-                      <input
-                        type="text"
-                        name="title"
-                        value={values.title}
-                        onChange={handleChange}
-                        placeholder="Enter title"
-                        className="hover:shadow-hoverInputShadow focus:border-primary-600 w-full h-[50px] border border-gray-700 rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black"
-                      />
-                      {touched.title && errors.title && (
-                        <div className="text-red-500 text-sm">
-                          {errors.title}
-                        </div>
-                      )}
-                    </div>
+        {/* Subject */}
+        <div className="w-full">
+          <p className="text-white font-medium text-base leading-6 mb-2">
+            Subject
+          </p>
+          <input
+            type="text"
+            name="subject"
+            value={values.subject}
+            onChange={handleChange}
+            placeholder="Enter subject"
+            className="hover:shadow-hoverInputShadow focus:border-primary-600 w-full h-[50px] border border-gray-700 rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black"
+          />
+          {touched.subject && errors.subject && (
+            <div className="text-red-500 text-sm">{errors.subject}</div>
+          )}
+        </div>
 
-                    {/* Subject */}
-                    <div className="w-full">
-                      <p className="text-white font-medium text-base leading-6 mb-2">
-                        Subject
-                      </p>
-                      <input
-                        type="text"
-                        name="subject"
-                        value={values.subject}
-                        onChange={handleChange}
-                        placeholder="Enter subject"
-                        className="hover:shadow-hoverInputShadow focus:border-primary-600 w-full h-[50px] border border-gray-700 rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black"
-                      />
-                      {touched.subject && errors.subject && (
-                        <div className="text-red-500 text-sm">
-                          {errors.subject}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Optional: current file name */}
-                    {editObjectData?.attachment_name && (
-                      <div className="text-sm text-gray-300">
-                        Current file:{" "}
-                        <span className="font-medium">
-                          {editObjectData.attachment_name}
-                        </span>
-                      </div>
-                    )}
-
-                    {/* Files (optional, multiple) */}
-                    <div className="w-full">
-                      <p className="text-white font-medium text-base leading-6 mb-2">
-                        Replace / Add Files (optional)
-                      </p>
-                      <input
-                        type="file"
-                        name="files"
-                        multiple
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                          const list = e.currentTarget.files
-                            ? Array.from(e.currentTarget.files)
-                            : [];
-                          setFieldValue("files", list);
-                        }}
-                        accept=".jpg,.jpeg,.png,.webp,.pdf,.doc,.docx"
-                        className="hover:shadow-hoverInputShadow focus:border-primary-600 w-full h-[50px] border border-gray-700 rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black file:mr-4 file:py-2 file:px-4 file:rounded-[4px] file:border-0 file:text-sm file:font-semibold file:bg-primary-700 file:text-white hover:file:bg-primary-800 pt-[6px]"
-                      />
-
-                      {/* Show per-field errors */}
-                      {touched.files && typeof errors.files === "string" && (
-                        <div className="text-red-500 text-sm text-center mt-1">
-                          {errors.files}
-                        </div>
-                      )}
-
-                      {/* Show per-file errors if any */}
-                      {Array.isArray(errors.files) && (
-                        <div className="text-red-500 text-sm mt-1">
-                          {errors.files.filter(Boolean).map((err, idx) => (
-                            <div key={idx}>{String(err)}</div>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Selected file list */}
-                      {values.files?.length > 0 && (
-                        <ul className="text-xs text-gray-300 space-y-1 mt-2">
-                          {values.files.map((f, i) => (
-                            <li key={i} className="flex justify-between">
-                              <span className="truncate">{f.name}</span>
-                              <span>
-                                ({(f.size / (1024 * 1024)).toFixed(2)} MB)
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-
-                    {/* Body */}
-                    <div className="w-full">
-                      <p className="text-white font-medium text-base leading-6 mb-2">
-                        Body
-                      </p>
-                      <textarea
-                        name="body"
-                        value={values.body}
-                        onChange={handleChange}
-                        placeholder="Enter body"
-                        rows={4} // Adjust row count for a taller textarea if needed
-                        className="hover:shadow-hoverInputShadow focus:border-primary-600 w-full border border-gray-700 rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black pt-2"
-                      />
-                      {touched.body && errors.body && (
-                        <div className="text-red-500 text-sm">
-                          {errors.body}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Submit Button */}
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className={`py-[13px] px-[26px] w-full rounded-[4px] text-white text-center ${
-                        isSubmitting
-                          ? "bg-primary-700 opacity-60 cursor-not-allowed"
-                          : "bg-primary-700 hover:bg-primary-800"
-                      }`}
+        {/* Optional: current file name(s) */}
+        {editObjectData?.attachments && editObjectData.attachments.length > 0 && (
+          <div className="text-sm text-gray-300">
+            <p>Current files:</p>
+            <div className="flex space-x-4 overflow-auto">
+              {editObjectData.attachments.map((attachment, index) => (
+                <div key={index} className="flex items-center space-x-2">
+                  {/* Image preview if it's an image */}
+                  {attachment.type.startsWith("image/") && (
+                    <img
+                      src={attachment.url}
+                      alt={attachment.name}
+                      className="w-24 h-24 object-cover rounded-md"
+                    />
+                  )}
+                  {/* For non-image files, just display the filename */}
+                  {!attachment.type.startsWith("image/") && (
+                    <a
+                      href={attachment.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500"
                     >
-                      {isSubmitting ? "Updating..." : "Update Template"}
-                    </button>
-                  </div>
-                </Form>
-              )}
-            </Formik>
+                      {attachment.name}
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Files (optional, multiple) */}
+        <div className="w-full">
+          <p className="text-white font-medium text-base leading-6 mb-2">
+            Replace / Add Files (optional)
+          </p>
+          <input
+            type="file"
+            name="files"
+            multiple
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              const list = e.currentTarget.files
+                ? Array.from(e.currentTarget.files)
+                : [];
+              setFieldValue("files", list);
+            }}
+            accept=".jpg,.jpeg,.png,.webp,.pdf,.doc,.docx"
+            className="hover:shadow-hoverInputShadow focus:border-primary-600 w-full h-[50px] border border-gray-700 rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black file:mr-4 file:py-2 file:px-4 file:rounded-[4px] file:border-0 file:text-sm file:font-semibold file:bg-primary-700 file:text-white hover:file:bg-primary-800 pt-[6px]"
+          />
+
+          {/* Show per-field errors */}
+          {touched.files && typeof errors.files === "string" && (
+            <div className="text-red-500 text-sm text-center mt-1">
+              {errors.files}
+            </div>
+          )}
+
+          {/* Show per-file errors if any */}
+          {Array.isArray(errors.files) && (
+            <div className="text-red-500 text-sm mt-1">
+              {errors.files.filter(Boolean).map((err, idx) => (
+                <div key={idx}>{String(err)}</div>
+              ))}
+            </div>
+          )}
+
+          {/* Selected file list */}
+          {values.files?.length > 0 && (
+            <ul className="text-xs text-gray-300 space-y-1 mt-2">
+              {values.files.map((f, i) => (
+                <li key={i} className="flex justify-between">
+                  <span className="truncate">{f.name}</span>
+                  <span>
+                    ({(f.size / (1024 * 1024)).toFixed(2)} MB)
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* Body */}
+        <div className="w-full">
+          <p className="text-white font-medium text-base leading-6 mb-2">
+            Body
+          </p>
+          <textarea
+            name="body"
+            value={values.body}
+            onChange={handleChange}
+            placeholder="Enter body"
+            rows={4} // Adjust row count for a taller textarea if needed
+            className="hover:shadow-hoverInputShadow focus:border-primary-600 w-full border border-gray-700 rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black pt-2"
+          />
+          {touched.body && errors.body && (
+            <div className="text-red-500 text-sm">{errors.body}</div>
+          )}
+        </div>
+
+        {/* Submit Button */}
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className={`py-[13px] px-[26px] w-full rounded-[4px] text-white text-center ${
+            isSubmitting
+              ? "bg-primary-700 opacity-60 cursor-not-allowed"
+              : "bg-primary-700 hover:bg-primary-800"
+          }`}
+        >
+          {isSubmitting ? "Updating..." : "Update Template"}
+        </button>
+      </div>
+    </Form>
+  )}
+</Formik>
+
+
           </div>
         )}
       </div>
