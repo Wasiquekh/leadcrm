@@ -415,6 +415,8 @@ return (
 
                 console.log("Upload response:", res);
                 toast.success("Uploaded successfully!");
+                setHitApi(!hitApi);
+                closeFlyout();
                 resetForm(); // Reset the form after successful submission
               } catch (err: any) {
                 console.error("Upload failed:", err);
@@ -486,24 +488,6 @@ return (
                     )}
                   </div>
 
-                  {/* Body Field */}
-                  <div className="w-full">
-                    <p className="text-white font-medium text-base leading-6 mb-2">
-                      Body
-                    </p>
-                    <input
-                      type="text"
-                      name="body"
-                      value={values.body}
-                      onChange={handleChange}
-                      placeholder="Enter body"
-                      className="w-full h-[50px] border rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black"
-                    />
-                    {touched.body && errors.body && (
-                      <div className="text-red-500 text-sm">{errors.body}</div>
-                    )}
-                  </div>
-
                   {/* File Upload Field */}
                   <div className="w-full">
                     <p className="text-white font-medium text-base leading-6 mb-2">
@@ -547,6 +531,24 @@ return (
                     )}
                   </div>
 
+                  {/* Body Field (Text Area) */}
+                  <div className="w-full">
+                    <p className="text-white font-medium text-base leading-6 mb-2">
+                      Body
+                    </p>
+                    <textarea
+                      name="body"
+                      value={values.body}
+                      onChange={handleChange}
+                      placeholder="Enter body"
+                      rows={4} // You can adjust the row count
+                      className="w-full border rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black pt-2"
+                    />
+                    {touched.body && errors.body && (
+                      <div className="text-red-500 text-sm">{errors.body}</div>
+                    )}
+                  </div>
+
                   {/* Submit Button */}
                   <button
                     type="submit"
@@ -586,7 +588,7 @@ return (
               title: editObjectData?.title ?? "",
               subject: editObjectData?.subject ?? "",
               body: editObjectData?.body ?? "",
-              files: [] as File[], // ⬅️ multiple (optional)
+              files: [] as File[], // Store multiple files
             }}
             validationSchema={Yup.object({
               id: Yup.string().required("Template ID is required"),
@@ -603,19 +605,20 @@ return (
                     )
                     .test(
                       "file-type",
-                      "Only JPG, PNG, PDF, DOC, DOCX allowed",
+                      "Only JPG, PNG, WEBP, PDF, DOC, DOCX allowed",
                       (v) =>
                         !v ||
                         [
                           "image/jpeg",
                           "image/png",
+                          "image/webp", // Added support for .webp files
                           "application/pdf",
                           "application/msword",
                           "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                         ].includes(v.type)
                     )
                 )
-                .notRequired(), // optional on update
+                .notRequired(), // Optional on update
             })}
             onSubmit={async (values, { setSubmitting, resetForm }) => {
               try {
@@ -642,16 +645,20 @@ return (
                     maxBodyLength: Infinity,
                     maxContentLength: Infinity,
                     timeout: 30 * 60 * 1000,
+                    headers: {
+                      // Explicitly setting multipart/form-data
+                      "Content-Type": "multipart/form-data",
+                      // You can add other headers if needed, like Authorization
+                      // "Authorization": `Bearer ${yourAuthToken}`,
+                    },
                     onUploadProgress: (e) => {
                       if (e.total) {
                         const pct = Math.round((e.loaded / e.total) * 100);
-                        // optional: keep or remove this log
                         console.log(`Uploading: ${pct}%`);
                       }
                     },
                   }
                 );
-                // console.log("UUUUUUUUUUUUUUUUUUUUUUUUUUU", response);
                 toast.success("Template updated successfully!");
                 closeFlyout();
                 setHitApi(!hitApi);
@@ -726,24 +733,6 @@ return (
                     )}
                   </div>
 
-                  {/* Body */}
-                  <div className="w-full">
-                    <p className="text-white font-medium text-base leading-6 mb-2">
-                      Body
-                    </p>
-                    <input
-                      type="text"
-                      name="body"
-                      value={values.body}
-                      onChange={handleChange}
-                      placeholder="Enter body"
-                      className="hover:shadow-hoverInputShadow focus:border-primary-600 w-full h-[50px] border border-gray-700 rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black"
-                    />
-                    {touched.body && errors.body && (
-                      <div className="text-red-500 text-sm">{errors.body}</div>
-                    )}
-                  </div>
-
                   {/* Optional: current file name */}
                   {editObjectData?.attachment_name && (
                     <div className="text-sm text-gray-300">
@@ -769,7 +758,7 @@ return (
                           : [];
                         setFieldValue("files", list);
                       }}
-                      accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
+                      accept=".jpg,.jpeg,.png,.webp,.pdf,.doc,.docx"
                       className="hover:shadow-hoverInputShadow focus:border-primary-600 w-full h-[50px] border border-gray-700 rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black file:mr-4 file:py-2 file:px-4 file:rounded-[4px] file:border-0 file:text-sm file:font-semibold file:bg-primary-700 file:text-white hover:file:bg-primary-800 pt-[6px]"
                     />
 
@@ -804,17 +793,33 @@ return (
                     )}
                   </div>
 
-                  {/* Submit */}
+                  {/* Body */}
+                  <div className="w-full">
+                    <p className="text-white font-medium text-base leading-6 mb-2">
+                      Body
+                    </p>
+                    <textarea
+                      name="body"
+                      value={values.body}
+                      onChange={handleChange}
+                      placeholder="Enter body"
+                      rows={4} // Adjust row count for a taller textarea if needed
+                      className="hover:shadow-hoverInputShadow focus:border-primary-600 w-full border border-gray-700 rounded-[4px] text-white placeholder-gray-400 pl-4 mb-2 bg-black pt-2"
+                    />
+                    {touched.body && errors.body && (
+                      <div className="text-red-500 text-sm">{errors.body}</div>
+                    )}
+                  </div>
+
+                  {/* Submit Button */}
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className={`py-[13px] px-[26px] w-full rounded-[4px] text-base font-medium leading-6 text-white text-center
-            ${
-              isSubmitting
-                ? "bg-primary-700 opacity-60 cursor-not-allowed"
-                : "bg-primary-700 hover:bg-primary-800"
-            }`}
-                    aria-busy={isSubmitting}
+                    className={`py-[13px] px-[26px] w-full rounded-[4px] text-white text-center ${
+                      isSubmitting
+                        ? "bg-primary-700 opacity-60 cursor-not-allowed"
+                        : "bg-primary-700 hover:bg-primary-800"
+                    }`}
                   >
                     {isSubmitting ? "Updating..." : "Update Template"}
                   </button>
