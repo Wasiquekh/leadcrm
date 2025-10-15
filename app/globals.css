@@ -141,16 +141,16 @@ body:hover::-webkit-scrollbar-thumb,
 }
 .leftSideBar {
   position: fixed;
-  left: 0;
+  right: 0;
   top: 0;
-  width: 90%;
+  width: 550px;
   height: 100vh;
   overflow-y: auto;
-  background-color: white;
+  background-color: #232323;
   padding-top: 43px;
   padding-bottom: 43px;
-  padding-left: 8px;
-  padding-right: 8px;
+  padding-left: 24px;
+  padding-right: 24px;
   z-index: 1000;
   transition: transform 0.3s ease-in-out;
   transform: translateX(100%);

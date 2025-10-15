@@ -496,9 +496,6 @@ export default function Home() {
               </div>
             </>
           )}
-          <div className="w-full flex justify-end p-4">
-            <MiniBell />
-          </div>
 
           {/* ADMIN CODE */}
           {userRole === "Admin" && <AdminDashboard />}
