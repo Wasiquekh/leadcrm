@@ -1279,18 +1279,18 @@ setIsActivityHistoryPaination(true)
                 <div className="flex justify-end items-center mb-6 w-full gap-2">
                   <div className="flex justify-center items-center gap-4 ">
                     <div
-                      className="flex gap-2 py-3 px-0 justify-center rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 group min-w-40"
+                      className="flex gap-2 py-3 px-0 justify-center rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-700 active:bg-primary-800 group min-w-40"
                       onClick={() => openSendTemplateFlyout()}
                     >
                       <LuSquareActivity className="w-5 h-5 text-white group-hover:text-white" />
                       <p className="text-white text-base font-medium group-hover:text-white">
-                        Send Template
+                        Send Email
                       </p>
                     </div>
                   </div>
                   <div className="flex justify-center items-center gap-4 ">
                     <div
-                      className="flex gap-2 py-3 px-0 justify-center rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 group min-w-32"
+                      className="flex gap-2 py-3 px-0 justify-center rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-700 active:bg-primary-800 group min-w-32"
                       onClick={() => openActivityFlyout()}
                     >
                       <LuSquareActivity className="w-5 h-5 text-white group-hover:text-white" />
@@ -1304,7 +1304,7 @@ setIsActivityHistoryPaination(true)
                     <div className="relative group">
                       {/* Main Button */}
                       <div
-                        className="flex gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 min-w-32"
+                        className="flex gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-700 active:bg-primary-800 min-w-32"
                         // onClick={() => openTaskFlyout()}
                         onClick={() => handleSelect("meeting")}
                       >
@@ -1332,7 +1332,7 @@ setIsActivityHistoryPaination(true)
                   {/* END TASK */}
                   <div className="flex justify-center items-center gap-4">
                     <div
-                      className="flex gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-500 active:bg-primary-700 group min-w-32"
+                      className="flex gap-2 py-3 px-6 rounded-[4px] border border-[#E7E7E7] cursor-pointer bg-primary-600 items-center hover:bg-primary-700 active:bg-primary-800 group min-w-32"
                       onClick={() => openDocumentFlyout()}
                     >
                       <FaTasks className="w-5 h-5 text-white group-hover:text-white" />
@@ -2276,7 +2276,7 @@ setIsActivityHistoryPaination(true)
           <div className="w-full min-h-auto  text-white p-4">
             {/* Flyout Header */}
             <div className="flex justify-between mb-4">
-              <p className="text-primary-500 text-[26px] font-bold leading-9">
+              <p className="text-primary-600 text-[26px] font-bold leading-9">
                 Create Lead Activity
               </p>
               <IoCloseOutline
@@ -2467,7 +2467,7 @@ setIsActivityHistoryPaination(true)
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
+                      className="py-[13px] px-[26px] bg-primary-600 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
                     >
                       Create Lead Activity
                     </button>
@@ -2738,7 +2738,7 @@ setIsActivityHistoryPaination(true)
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
+                      className="py-[13px] px-[26px] bg-primary-600 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
                     >
                       Create Task Activity
                     </button>
@@ -2751,7 +2751,7 @@ setIsActivityHistoryPaination(true)
         {document && (
           <div className="w-full min-h-auto  text-white p-4">
             <div className="flex justify-between mb-4">
-              <p className="text-primary-500 text-[26px] font-bold leading-9">
+              <p className="text-primary-600 text-[26px] font-bold leading-9">
                 Create Document
               </p>
               <IoCloseOutline
@@ -2797,7 +2797,7 @@ setIsActivityHistoryPaination(true)
                 <div className="mt-10 w-full flex flex-col gap-y-4 md:flex-row justify-between items-center">
                   <button
                     type="submit"
-                    className="py-[13px] px-[26px] bg-primary-500 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
+                    className="py-[13px] px-[26px] bg-primary-600 rounded-[4px] text-base font-medium leading-6 text-white hover:text-dark cursor-pointer w-full text-center hover:bg-primary-700 hover:text-white"
                   >
                     Submit Document
                   </button>
