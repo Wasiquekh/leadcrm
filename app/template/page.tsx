@@ -674,28 +674,34 @@ export default function Home() {
                   fd.append("subject", values.subject);
                   fd.append("body", values.body);
 
-                  // If no new files picked, this is a metadata-only update (still single call)
-                  // If files picked, append ALL in the SAME request
+                  // Compress files before appending to FormData (if any files are selected)
                   if (values.files && values.files.length > 0) {
-                    for (const file of values.files) {
-                      // Change "files" to "files[]" if your backend expects that
-                      fd.append("files", file);
-                    }
+                    const compressedFiles = await Promise.all(
+                      values.files.map(async (file) => {
+                        if (file.type.startsWith("image/")) {
+                          // Call your compress function here
+                          return await compressImage(file); // Compress image files
+                        }
+                        return file; // Return non-image files without compression
+                      })
+                    );
+
+                    // Append compressed files to FormData
+                    compressedFiles.forEach((file) => {
+                      fd.append("files", file); // Make sure the backend expects "files" (not "files[]")
+                    });
                   }
 
+                  // Make the API request to update the template
                   const response = await AxiosProvider.post(
                     "/updatetemplate",
                     fd,
                     {
-                      // Let browser set the Content-Type + boundary automatically
                       maxBodyLength: Infinity,
                       maxContentLength: Infinity,
                       timeout: 30 * 60 * 1000,
                       headers: {
-                        // Explicitly setting multipart/form-data
                         "Content-Type": "multipart/form-data",
-                        // You can add other headers if needed, like Authorization
-                        // "Authorization": `Bearer ${yourAuthToken}`,
                       },
                       onUploadProgress: (e) => {
                         if (e.total) {
@@ -705,6 +711,7 @@ export default function Home() {
                       },
                     }
                   );
+
                   toast.success("Template updated successfully!");
                   closeFlyout();
                   setHitApi(!hitApi);
