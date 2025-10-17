@@ -1,5 +1,6 @@
 // app/layout.tsx
 "use client";
+import Document, { Html, Head, Main, NextScript } from 'next/document';
 
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -71,6 +72,25 @@ export default function RootLayout({ children }: RootLayoutProps) {
           </AppProvider>
           <WebPushInitializer></WebPushInitializer>
         </ErrorBoundary>
+                  <NextScript />
+         {process.env.NODE_ENV === "production" && (
+  <script
+    dangerouslySetInnerHTML={{
+      __html: `
+        // Disable right-click
+        document.addEventListener('contextmenu', function (e) {
+          e.preventDefault();
+        });
+
+        // Disable copy
+        document.addEventListener('copy', function (e) {
+          e.preventDefault();
+        });
+      `,
+    }}
+  />
+)}
+
       </body>
     </html>
   );
