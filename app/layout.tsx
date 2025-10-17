@@ -1,26 +1,14 @@
 // app/layout.tsx
 "use client";
-import Document, { Html, Head, Main, NextScript } from 'next/document';
 
 import { Inter } from "next/font/google";
 import "./globals.css";
 import dynamic from "next/dynamic";
-import { ReactNode, useEffect } from "react";
+import { ReactNode } from "react";
 import "react-toastify/dist/ReactToastify.css";
-import { usePathname } from "next/navigation";
-//import WebPushBootstrapper from "./component/WebPushBootstrapper";
+import Script from "next/script";
+
 import NotificationListener from "./NotificationListener";
-const WebPushInitializer = dynamic(
-  () => import("./component/WebPushInitializer"),
-  { ssr: false }
-);
-
-const inter = Inter({ subsets: ["latin"] });
-
-// export const metadata = {
-//   title: "Lead CRM",
-//   description: "",
-// };
 
 // Client-only chunks
 const ErrorBoundary = dynamic(() => import("./ErrorBoundary"), { ssr: false });
@@ -38,9 +26,22 @@ const LeftSideBar = dynamic(() => import("./component/LeftSideBar"), {
   ssr: false,
 });
 
+const WebPushInitializer = dynamic(
+  () => import("./component/WebPushInitializer"),
+  { ssr: false }
+);
+
+const inter = Inter({ subsets: ["latin"] });
+
 type RootLayoutProps = {
   children: ReactNode;
 };
+
+// Optional: export metadata if you want
+// export const metadata = {
+//   title: "Lead CRM",
+//   description: "",
+// };
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
@@ -51,11 +52,14 @@ export default function RootLayout({ children }: RootLayoutProps) {
             {/* Page shell: sidebar + main content */}
             <div className="min-h-dvh flex">
               {/* Sidebar column */}
+              <LeftSideBar />
 
               {/* Main content column */}
               <main className="flex-1 min-w-0">{children}</main>
             </div>
+
             <NotificationListener />
+
             {/* Toasts */}
             <ToastContainer
               position="top-right"
@@ -70,27 +74,23 @@ export default function RootLayout({ children }: RootLayoutProps) {
               theme="light"
             />
           </AppProvider>
-          <WebPushInitializer></WebPushInitializer>
+
+          <WebPushInitializer />
         </ErrorBoundary>
-                  <NextScript />
-         {process.env.NODE_ENV === "production" && (
-  <script
-    dangerouslySetInnerHTML={{
-      __html: `
-        // Disable right-click
-        document.addEventListener('contextmenu', function (e) {
-          e.preventDefault();
-        });
 
-        // Disable copy
-        document.addEventListener('copy', function (e) {
-          e.preventDefault();
-        });
-      `,
-    }}
-  />
-)}
-
+        {/* Production-only script to disable right-click & copy */}
+        {process.env.NODE_ENV === "production" && (
+          <Script id="disable-copy-rightclick" strategy="afterInteractive">
+            {`
+              document.addEventListener('contextmenu', function (e) {
+                e.preventDefault();
+              });
+              document.addEventListener('copy', function (e) {
+                e.preventDefault();
+              });
+            `}
+          </Script>
+        )}
       </body>
     </html>
   );
